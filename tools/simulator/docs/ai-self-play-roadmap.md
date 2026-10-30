@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1`
-更新日時: 2026-10-30 22:15 JST
+作業ID: `BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R1`
+更新日時: 2026-10-30 22:50 JST
 
 ---
 
@@ -36,7 +36,7 @@
 | **Decision Feature Schema v2** | **SUPERSEDED** | `featureSchemaVersion: 2` | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeaturePrivacyV2.test.ts` | 固定次元・順序保証（Context 100次元, Pattern 60次元, 合計 6060次元） |
 | **Decision Feature Schema v3** | **SUPERSEDED BY FEATURE SCHEMA v4** | `featureSchemaVersion: 3` | `decisionFeatureRealActionEvidence.test.ts`, `decisionFeatureRequestTarget.test.ts` | Request Context 163, Pattern 111 (計 18204 weights) |
 | **Decision Feature Schema v4** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 4`) | `decisionFeatureCandidateAction.test.ts`, `decisionFeatureGenericOption.test.ts`, `decisionFeatureRealActionEvidence.test.ts`, `decisionFeatureStageSemantics.test.ts` | Request Context 163次元, Pattern 143次元, 合計 23,452 weights (Candidate Action Identity + Generic Option Identity) |
-| **Decision Feature Schema v6 Design** | **READY FOR INDEPENDENT REVIEW** | `tools/simulator/docs/ai-v92-feature-schema-v6-design-v1.md`, `tools/simulator/docs/ai-v92-feature-schema-v6-registry-v1.json` | - | 第9.2版コアフロー focusPlayer 導入対応、Context 165次元(+2次元: self_is_focus_player, opponent_is_focus_player)、Pattern 143次元、全308特徴量有界スケーリング、相互作用 23,595 weights、DNA 総重み 23,738 weights、DNA Format v1移行ゼロ初期化不変契約、pof2/drsf2/gpif2 改定設計 |
+| **Decision Feature Schema v6 Design (R1)** | **READY FOR INDEPENDENT REVIEW** | `tools/simulator/docs/ai-v92-feature-schema-v6-design-v1.md`, `tools/simulator/docs/ai-v92-feature-schema-v6-registry-v1.json` | - | R1改訂: DNA Migration実フィールド準拠、DecisionDNALegacyValidator分離、決定論的移行（動的タイムスタンプ排除）、GenomeScorer準拠スコア式とスコア不変性証明、focusPlayerId Fail-Closed検証、2特徴量正当化再定義、pof2/drsf2/gpif2改定 |
 | **Generic Feature Encoder v4** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/DecisionFeatureEncoder.ts`, `src/engine/decision/ObservationFactory.ts` | `decisionFeatureStageSemantics.test.ts`, `decisionFeatureRealActionEvidence.test.ts` | Stage Semantics Preservation (`stageRequests` = true Stage only, Stage外Source = `effectSourceRequest`), Candidate Action 16 buckets, Option 16 buckets, Source Speed/Timing 伝搬, Assignment 方向修正, Coverage Ratio セマンティクス修正 |
 | **Viewer-relative Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
 | **Secret-safe Feature Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder`, `ObservationFactory` | `src/tests/ai/decisionFeaturePrivacyV2.test.ts`, `decisionFeatureRequestTarget.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断、相手伏せユニット対象時の秘密漏洩防止 |
@@ -541,9 +541,18 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
       - `targetRequest` からの絶対 sequence / bookkeeping 除外と semantic actionId / target 感度。
       - `selections` / `sourceEvent.payload` 等の汎用意味論ディクショナリ内キー名（`sequence`, `decisionId`, `actionName` 等）の保持。
       - 実ランタイム効果中断再開（`STAGE_RESOLUTION_INTERRUPTED`）フィクスチャによる検証完了。
-12. **Decision Feature Schema v6 & Semantic Fingerprint v2 Design (BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1)**:
+12. **Decision Feature Schema v6 & Semantic Fingerprint v2 Design (BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R1)**:
     - **設計ステータス**: **READY FOR INDEPENDENT REVIEW** (`tools/simulator/docs/ai-v92-feature-schema-v6-design-v1.md`, `tools/simulator/docs/ai-v92-feature-schema-v6-registry-v1.json`)
     - **目的**: 第9.2版コアフローの `focusPlayer` 導入に伴う Feature Schema v5 および Semantic Fingerprint（`pof1`/`drsf1`/`gpif1`）の感度欠落（Compatibility Gap）の解消。
+    - **R1 改訂内容**:
+      - `DecisionDNATypes.ts` 正本準拠の型定義修正（非実在フィールド `formatVersion`, `schemaVersion`, `genomeId`, `cloneMetadata` の完全排除）。
+      - 旧 v5 DNA 検証の分離（`DecisionDNALegacyValidator.validateV5`）とランタイムでの Fail-Closed 拒絶契約維持。
+      - 完全決定論的移行（`new Date()`, `Math.random()`, 実行時タイムスタンプの DNA 内部混入完全排除）。
+      - `GenomeScorer.ts` 準拠のスコア計算式と 3 階層（実数同値性・JavaScript IEEE 754 bit-exact・Argmax/タイブレーク）スコア不変性証明。
+      - フォーカス検証の Fail-Closed 化（`opponentPlayerId` 明示検証による不正 ID 誤認防止）。
+      - 2 特徴量正当化の再定義（線形代数的等価性の明記、鏡像対称性・中立状態表現・遺伝変異等方性の 3 根拠確立）。
+      - Semantic Fingerprint バージョニング補完（型、プレフィックス、`SemanticDiagnosticResult` バージョン 2、受動的パリティ、過去 Evidence との比較不可契約）。
+      - 20 項目の受入テスト仕様の確定。
     - **特徴量拡張**: Context 特徴量に `self_is_focus_player` (Index 163) および `opponent_is_focus_player` (Index 164) の 2 つのバイナリ特徴量を追加（Context 165次元, Pattern 143次元, 全308特徴量）。
     - **有界スケーリング**: 全308特徴量の Canonical Registry を策定（`docs/ai-v92-feature-schema-v6-registry-v1.json`）。新規2特徴量は `BOOLEAN` / `identity` スケーリングを採用し、不変条件 $c_i \in [-1, 1], p_j \in [-1, 1], |c_i \cdot p_j| \le 1.0$ を完全維持。
     - **Decision DNA 移行契約**: Format Version 1 維持、Schema Version 6。相互作用行列 $165 \times 143 = 23,595$ 次元、総重み 23,738 次元。新規2行のゼロ初期化による数学的スコア不変性（$\Delta \text{Score} = 0.0$）を証明。未移行 v5 DNA の Fail-Closed 拒絶を義務付け。

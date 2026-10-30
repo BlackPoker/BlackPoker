@@ -1,8 +1,8 @@
 {
   "schemaVersion": 6,
-  "registryVersion": "1.0.0",
-  "generatedAt": "2026-10-30T13:13:26.986Z",
-  "workId": "BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1",
+  "registryVersion": "1.0.0-r1",
+  "generatedAt": "2026-10-30T00:00:00.000Z",
+  "workId": "BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R1",
   "summary": {
     "totalFeatures": 308,
     "contextFeatures": 165,
@@ -125,7 +125,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary boolean flag natively bounded in {0, 1}; identity function preserves exact discrete semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -143,7 +143,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary boolean flag natively bounded in {0, 1}; identity function preserves exact discrete semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -161,7 +161,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary boolean flag natively bounded in {0, 1}; identity function preserves exact discrete semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -179,7 +179,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary boolean flag natively bounded in {0, 1}; identity function preserves exact discrete semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -197,7 +197,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary boolean flag natively bounded in {0, 1}; identity function preserves exact discrete semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -215,7 +215,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary boolean flag natively bounded in {0, 1}; identity function preserves exact discrete semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -235,7 +235,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Matches typically span 5-20 turns; rational saturation x/(x+10) maps turn 10 to 0.50 and prevents score divergence in prolonged matches.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -255,7 +255,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Stage depth is typically 0-3 requests; rational saturation x/(x+4) maps depth 4 to 0.50 without hard truncation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -275,7 +275,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Legal pattern counts reached 126-137 in R2; rational saturation x/(x+50) normalizes 137 to 0.733, eliminating the 137x amplifier while preserving order.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -295,7 +295,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Legal pattern counts reached 126-137 in R2; rational saturation x/(x+50) normalizes 137 to 0.733, eliminating the 137x amplifier while preserving order.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -315,7 +315,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "PASS is binary in practice (0 or 1); rational saturation x/(x+4) smoothly maps 1 to 0.20, keeping it comparable with small action counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -335,7 +335,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Legal pattern counts reached 126-137 in R2; rational saturation x/(x+50) normalizes 137 to 0.733, eliminating the 137x amplifier while preserving order.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -355,7 +355,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Legal pattern counts reached 126-137 in R2; rational saturation x/(x+50) normalizes 137 to 0.733, eliminating the 137x amplifier while preserving order.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -375,7 +375,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Legal pattern counts reached 126-137 in R2; rational saturation x/(x+50) normalizes 137 to 0.733, eliminating the 137x amplifier while preserving order.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -395,7 +395,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Legal pattern counts reached 126-137 in R2; rational saturation x/(x+50) normalizes 137 to 0.733, eliminating the 137x amplifier while preserving order.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -415,7 +415,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Legal pattern counts reached 126-137 in R2; rational saturation x/(x+50) normalizes 137 to 0.733, eliminating the 137x amplifier while preserving order.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -435,7 +435,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Legal pattern counts reached 126-137 in R2; rational saturation x/(x+50) normalizes 137 to 0.733, eliminating the 137x amplifier while preserving order.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -455,7 +455,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Block and damage judge action counts are bounded by defender units (typically 0-10); scale=10 maps 10 to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -475,7 +475,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Block and damage judge action counts are bounded by defender units (typically 0-10); scale=10 maps 10 to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -495,7 +495,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -515,7 +515,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -535,7 +535,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -555,7 +555,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -575,7 +575,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -595,7 +595,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -615,7 +615,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -635,7 +635,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -655,7 +655,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -675,7 +675,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -695,7 +695,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -715,7 +715,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -735,7 +735,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -755,7 +755,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Observed max hand value sum reached 82 in R2; x/(x+30) maps 30 to 0.50 and 82 to 0.732, eliminating runaway sum amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -775,7 +775,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 13,
       "rationale": "Playing card ranks have exact theoretical bound 13; linear division x/13 preserves rank interval uniformity (each rank step = 1/13).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -795,7 +795,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 13,
       "rationale": "Playing card ranks have exact theoretical bound 13; linear division x/13 preserves rank interval uniformity (each rank step = 1/13).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -815,7 +815,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -835,7 +835,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -855,7 +855,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -875,7 +875,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -895,7 +895,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -915,7 +915,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -935,7 +935,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -955,7 +955,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Observed max hand value sum reached 82 in R2; x/(x+30) maps 30 to 0.50 and 82 to 0.732, eliminating runaway sum amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -975,7 +975,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes typically range 1-13; scale=10 maps size 10 to 0.50 while cleanly accommodating pumped units.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -995,7 +995,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1015,7 +1015,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1035,7 +1035,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1055,7 +1055,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1075,7 +1075,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1095,7 +1095,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1115,7 +1115,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1135,7 +1135,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Observed max hand value sum reached 82 in R2; x/(x+30) maps 30 to 0.50 and 82 to 0.732, eliminating runaway sum amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1155,7 +1155,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1173,7 +1173,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1193,7 +1193,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 13,
       "rationale": "Playing card ranks have exact theoretical bound 13; linear division x/13 preserves rank interval uniformity (each rank step = 1/13).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1211,7 +1211,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1231,7 +1231,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1249,7 +1249,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1267,7 +1267,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1287,7 +1287,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1307,7 +1307,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Observed max hand value sum reached 82 in R2; x/(x+30) maps 30 to 0.50 and 82 to 0.732, eliminating runaway sum amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1327,7 +1327,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1345,7 +1345,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1365,7 +1365,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1383,7 +1383,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1403,7 +1403,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1421,7 +1421,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1441,7 +1441,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1461,7 +1461,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1481,7 +1481,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1501,7 +1501,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1521,7 +1521,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1541,7 +1541,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1561,7 +1561,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Observed max hand value sum reached 82 in R2; x/(x+30) maps 30 to 0.50 and 82 to 0.732, eliminating runaway sum amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1581,7 +1581,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes typically range 1-13; scale=10 maps size 10 to 0.50 while cleanly accommodating pumped units.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1601,7 +1601,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1621,7 +1621,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1641,7 +1641,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1661,7 +1661,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1681,7 +1681,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1701,7 +1701,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1721,7 +1721,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1741,7 +1741,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Observed max hand value sum reached 82 in R2; x/(x+30) maps 30 to 0.50 and 82 to 0.732, eliminating runaway sum amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1761,7 +1761,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1779,7 +1779,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1799,7 +1799,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 13,
       "rationale": "Playing card ranks have exact theoretical bound 13; linear division x/13 preserves rank interval uniformity (each rank step = 1/13).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1817,7 +1817,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1837,7 +1837,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1855,7 +1855,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1875,7 +1875,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=5 maps typical zone capacity (5) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1895,7 +1895,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Signed count difference; x/(|x|+10) provides exact odd symmetry, zero preservation, and bounds large lead/deficit into (-1, 1).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1915,7 +1915,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Signed count difference; x/(|x|+10) provides exact odd symmetry, zero preservation, and bounds large lead/deficit into (-1, 1).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1935,7 +1935,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Signed relative sum difference; x/(|x|+30) provides exact antisymmetry f(-x) = -f(x), sign preservation, and bounds output to (-1, 1).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1955,7 +1955,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Signed count difference; x/(|x|+10) provides exact odd symmetry, zero preservation, and bounds large lead/deficit into (-1, 1).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1975,7 +1975,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Signed count difference; x/(|x|+10) provides exact odd symmetry, zero preservation, and bounds large lead/deficit into (-1, 1).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -1995,7 +1995,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Signed count difference; x/(|x|+10) provides exact odd symmetry, zero preservation, and bounds large lead/deficit into (-1, 1).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2015,7 +2015,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Signed count difference; x/(|x|+10) provides exact odd symmetry, zero preservation, and bounds large lead/deficit into (-1, 1).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2035,7 +2035,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Signed count difference; x/(|x|+10) provides exact odd symmetry, zero preservation, and bounds large lead/deficit into (-1, 1).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2053,7 +2053,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2073,7 +2073,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Signed count difference; x/(|x|+10) provides exact odd symmetry, zero preservation, and bounds large lead/deficit into (-1, 1).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2091,7 +2091,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2111,7 +2111,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2131,7 +2131,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2151,7 +2151,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2171,7 +2171,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2191,7 +2191,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium count feature; scale=10 maps typical zone capacity (10) to 0.50, smoothly bounding multi-card holdings.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2209,7 +2209,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2227,7 +2227,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2245,7 +2245,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2263,7 +2263,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2281,7 +2281,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2299,7 +2299,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2317,7 +2317,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2335,7 +2335,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2353,7 +2353,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2371,7 +2371,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2389,7 +2389,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2407,7 +2407,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2425,7 +2425,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2443,7 +2443,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2461,7 +2461,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2479,7 +2479,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2497,7 +2497,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2515,7 +2515,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2533,7 +2533,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2551,7 +2551,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2569,7 +2569,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2587,7 +2587,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2605,7 +2605,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2623,7 +2623,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2641,7 +2641,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2659,7 +2659,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2677,7 +2677,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2695,7 +2695,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2713,7 +2713,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2731,7 +2731,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2749,7 +2749,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2767,7 +2767,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Stable identity multi-hash produces discrete binary bits; identity function preserves uniform unbiased representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2785,7 +2785,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical action attribute one-hot; identity function preserves exact discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2803,7 +2803,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical action attribute one-hot; identity function preserves exact discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2821,7 +2821,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical action attribute one-hot; identity function preserves exact discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2839,7 +2839,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical action attribute one-hot; identity function preserves exact discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2857,7 +2857,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical action attribute one-hot; identity function preserves exact discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2875,7 +2875,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical action attribute one-hot; identity function preserves exact discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2893,7 +2893,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical action attribute one-hot; identity function preserves exact discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2911,7 +2911,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical action attribute one-hot; identity function preserves exact discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2931,7 +2931,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2951,7 +2951,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-4); scale=4 provides high linear sensitivity near 1-2 while bounding clustered counts.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2971,7 +2971,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Observed max hand value sum reached 82 in R2; x/(x+30) maps 30 to 0.50 and 82 to 0.732, eliminating runaway sum amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -2991,7 +2991,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 13,
       "rationale": "Playing card ranks have exact theoretical bound 13; linear division x/13 preserves rank interval uniformity (each rank step = 1/13).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3011,7 +3011,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 13,
       "rationale": "Playing card ranks have exact theoretical bound 13; linear division x/13 preserves rank interval uniformity (each rank step = 1/13).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3029,7 +3029,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary boolean flag natively bounded in {0, 1}; identity function preserves exact discrete semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3047,7 +3047,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3065,7 +3065,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3083,7 +3083,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3101,7 +3101,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3119,7 +3119,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3137,7 +3137,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3157,7 +3157,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes typically range 1-13; scale=10 maps size 10 to 0.50 while cleanly accommodating pumped units.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3175,7 +3175,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3193,7 +3193,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3211,7 +3211,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3229,7 +3229,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary observation flag; identity function maintains native {0, 1} domain without transformation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "CONTEXT",
@@ -3239,7 +3239,7 @@
       "rawFormulaSummary": "observation.focusPlayerId === viewerPlayerId ? 1 : 0",
       "rawDomain": "{0, 1}",
       "canBeNegative": false,
-      "zeroSemantic": "Condition self_is_focus_player is false (focus is held by opponent or unassigned)",
+      "zeroSemantic": "Condition self_is_focus_player is false (focus is held by opponent, unassigned, or invalid)",
       "scalingClass": "BOOLEAN",
       "scalingFunction": "identity",
       "parameter": {},
@@ -3247,17 +3247,17 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary boolean flag natively bounded in {0, 1}; identity function preserves exact discrete semantics of viewer having active focus in v9.2 Core Flow.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 6; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Introduced in FEATURE_SCHEMA_VERSION = 6 for v9.2 Core Flow focusPlayer integration; identity scaling preserves discrete {0, 1} semantics."
     },
     {
       "domain": "CONTEXT",
       "index": 164,
       "name": "opponent_is_focus_player",
       "rawSemanticType": "BOOLEAN_FLAG",
-      "rawFormulaSummary": "observation.focusPlayerId !== undefined && observation.focusPlayerId !== viewerPlayerId ? 1 : 0",
+      "rawFormulaSummary": "observation.focusPlayerId === opponentPlayerId ? 1 : 0",
       "rawDomain": "{0, 1}",
       "canBeNegative": false,
-      "zeroSemantic": "Condition opponent_is_focus_player is false (focus is held by self or unassigned)",
+      "zeroSemantic": "Condition opponent_is_focus_player is false (focus is held by self, unassigned, or invalid)",
       "scalingClass": "BOOLEAN",
       "scalingFunction": "identity",
       "parameter": {},
@@ -3265,7 +3265,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary boolean flag natively bounded in {0, 1}; identity function preserves exact discrete semantics of opponent having active focus in v9.2 Core Flow.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 6; raw integer scale normalized to bounded range to prevent mutation amplification."
+      "schemaCompatibilityImpact": "Introduced in FEATURE_SCHEMA_VERSION = 6 for v9.2 Core Flow focusPlayer integration; identity scaling preserves discrete {0, 1} semantics."
     }
   ],
   "patternFeatures": [
@@ -3285,7 +3285,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Mutually exclusive pattern kind indicator; identity preserves pure one-hot selection semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3303,7 +3303,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Mutually exclusive pattern kind indicator; identity preserves pure one-hot selection semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3321,7 +3321,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Mutually exclusive pattern kind indicator; identity preserves pure one-hot selection semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3339,7 +3339,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Mutually exclusive pattern kind indicator; identity preserves pure one-hot selection semantics.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3357,7 +3357,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3375,7 +3375,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3393,7 +3393,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3411,7 +3411,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3429,7 +3429,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3447,7 +3447,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3465,7 +3465,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3483,7 +3483,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3501,7 +3501,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3519,7 +3519,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3537,7 +3537,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3555,7 +3555,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3573,7 +3573,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3591,7 +3591,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3609,7 +3609,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3627,7 +3627,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3645,7 +3645,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3663,7 +3663,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3681,7 +3681,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3699,7 +3699,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3717,7 +3717,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3735,7 +3735,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3753,7 +3753,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3771,7 +3771,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3789,7 +3789,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3807,7 +3807,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3827,7 +3827,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3847,7 +3847,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3867,7 +3867,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3887,7 +3887,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3907,7 +3907,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Cost item totals typically range 0-4; scale=5 maps 5 items to 0.50, ensuring cost penalty weights scale reasonably.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3925,7 +3925,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3945,7 +3945,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3965,7 +3965,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -3985,7 +3985,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Selected items typically sum between 5-30; scale=20 normalizes selected sums while preventing large value amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4005,7 +4005,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 13,
       "rationale": "Playing card ranks have exact theoretical bound 13; linear division x/13 preserves rank interval uniformity.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4025,7 +4025,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 13,
       "rationale": "Playing card ranks have exact theoretical bound 13; linear division x/13 preserves rank interval uniformity.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4045,7 +4045,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4065,7 +4065,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4085,7 +4085,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4105,7 +4105,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4125,7 +4125,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4143,7 +4143,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4163,7 +4163,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4183,7 +4183,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Selected items typically sum between 5-30; scale=20 normalizes selected sums while preventing large value amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4203,7 +4203,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes are typically 1-13; scale=10 maps size 10 to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4223,7 +4223,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4243,7 +4243,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4263,7 +4263,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4283,7 +4283,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4301,7 +4301,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4319,7 +4319,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4337,7 +4337,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4355,7 +4355,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4373,7 +4373,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4391,7 +4391,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4409,7 +4409,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4427,7 +4427,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4447,7 +4447,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes are typically 1-13; scale=10 maps size 10 to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4465,7 +4465,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4483,7 +4483,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4501,7 +4501,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4519,7 +4519,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4537,7 +4537,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4555,7 +4555,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4573,7 +4573,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4591,7 +4591,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Categorical pattern attribute one-hot; identity function preserves discrete matching.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4611,7 +4611,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4631,7 +4631,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4651,7 +4651,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4671,7 +4671,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4691,7 +4691,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4711,7 +4711,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4731,7 +4731,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4751,7 +4751,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4771,7 +4771,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4791,7 +4791,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4811,7 +4811,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Selected items typically sum between 5-30; scale=20 normalizes selected sums while preventing large value amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4831,7 +4831,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes are typically 1-13; scale=10 maps size 10 to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4851,7 +4851,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes are typically 1-13; scale=10 maps size 10 to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4871,7 +4871,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4891,7 +4891,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4911,7 +4911,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4931,7 +4931,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4951,7 +4951,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4971,7 +4971,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -4991,7 +4991,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5011,7 +5011,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5031,7 +5031,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5051,7 +5051,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5071,7 +5071,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5091,7 +5091,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5111,7 +5111,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5131,7 +5131,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5151,7 +5151,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Selected items typically sum between 5-30; scale=20 normalizes selected sums while preventing large value amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5171,7 +5171,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 13,
       "rationale": "Playing card ranks have exact theoretical bound 13; linear division x/13 preserves rank interval uniformity.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5191,7 +5191,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 13,
       "rationale": "Playing card ranks have exact theoretical bound 13; linear division x/13 preserves rank interval uniformity.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5211,7 +5211,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5231,7 +5231,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5249,7 +5249,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5267,7 +5267,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5285,7 +5285,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5303,7 +5303,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5321,7 +5321,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5339,7 +5339,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5357,7 +5357,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5375,7 +5375,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5393,7 +5393,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5411,7 +5411,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5429,7 +5429,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5447,7 +5447,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5465,7 +5465,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5483,7 +5483,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5501,7 +5501,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5519,7 +5519,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Multi-hash bit representation; identity function preserves unbiased collision-resistant hash representation.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5539,7 +5539,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5557,7 +5557,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5575,7 +5575,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5595,7 +5595,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5613,7 +5613,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5631,7 +5631,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5651,7 +5651,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5671,7 +5671,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5691,7 +5691,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Selected items typically sum between 5-30; scale=20 normalizes selected sums while preventing large value amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5711,7 +5711,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes are typically 1-13; scale=10 maps size 10 to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5731,7 +5731,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes are typically 1-13; scale=10 maps size 10 to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5751,7 +5751,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Selected items typically sum between 5-30; scale=20 normalizes selected sums while preventing large value amplification.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5771,7 +5771,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes are typically 1-13; scale=10 maps size 10 to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5791,7 +5791,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Soldier unit sizes are typically 1-13; scale=10 maps size 10 to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5811,7 +5811,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Signed assignment delta; x/(|x|+20) provides odd symmetry, sign preservation, and bounds output into (-1, 1).",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5831,7 +5831,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5851,7 +5851,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5871,7 +5871,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5891,7 +5891,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Small count feature (typically 0-3 items selected); scale=4 provides high sensitivity for small numbers while bounding larger selections.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5911,7 +5911,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=10 maps typical selection size (10) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5931,7 +5931,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=10 maps typical selection size (10) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5949,7 +5949,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Natively normalized proportion in [0, 1]; identity preserves exact coverage fraction without distortion.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5967,7 +5967,7 @@
       "theoreticalBoundKnown": true,
       "theoreticalBound": 1,
       "rationale": "Binary pattern condition flag; identity function maintains native {0, 1} domain.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     },
     {
       "domain": "PATTERN",
@@ -5987,7 +5987,7 @@
       "theoreticalBoundKnown": false,
       "theoreticalBound": null,
       "rationale": "Medium pattern selection count; scale=5 maps typical selection size (5) to 0.50.",
-      "schemaCompatibilityImpact": "Requires FEATURE_SCHEMA_VERSION = 5; pattern weight interactions bounded |c_i * p_j| <= 1."
+      "schemaCompatibilityImpact": "Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."
     }
   ]
 }
