@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R1`
-更新日時: 2026-10-30 22:50 JST
+作業ID: `BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R2`
+更新日時: 2026-10-30 23:05 JST
 
 ---
 
@@ -36,7 +36,7 @@
 | **Decision Feature Schema v2** | **SUPERSEDED** | `featureSchemaVersion: 2` | `src/tests/ai/decisionFeatureEncoder.test.ts`, `decisionFeaturePrivacyV2.test.ts` | 固定次元・順序保証（Context 100次元, Pattern 60次元, 合計 6060次元） |
 | **Decision Feature Schema v3** | **SUPERSEDED BY FEATURE SCHEMA v4** | `featureSchemaVersion: 3` | `decisionFeatureRealActionEvidence.test.ts`, `decisionFeatureRequestTarget.test.ts` | Request Context 163, Pattern 111 (計 18204 weights) |
 | **Decision Feature Schema v4** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/DecisionFeatureTypes.ts` (`featureSchemaVersion: 4`) | `decisionFeatureCandidateAction.test.ts`, `decisionFeatureGenericOption.test.ts`, `decisionFeatureRealActionEvidence.test.ts`, `decisionFeatureStageSemantics.test.ts` | Request Context 163次元, Pattern 143次元, 合計 23,452 weights (Candidate Action Identity + Generic Option Identity) |
-| **Decision Feature Schema v6 Design (R1)** | **READY FOR INDEPENDENT REVIEW** | `tools/simulator/docs/ai-v92-feature-schema-v6-design-v1.md`, `tools/simulator/docs/ai-v92-feature-schema-v6-registry-v1.json` | - | R1改訂: DNA Migration実フィールド準拠、DecisionDNALegacyValidator分離、決定論的移行（動的タイムスタンプ排除）、GenomeScorer準拠スコア式とスコア不変性証明、focusPlayerId Fail-Closed検証、2特徴量正当化再定義、pof2/drsf2/gpif2改定 |
+| **Decision Feature Schema v6 Design (R2)** | **READY FOR INDEPENDENT REVIEW** | `tools/simulator/docs/ai-v92-feature-schema-v6-design-v1.md`, `tools/simulator/docs/ai-v92-feature-schema-v6-registry-v1.json` | - | R2改訂: GenomePolicy.choose() Tie-Break契約是正(first-encountered採用、patternRef最小値撤回)、Fingerprint Field Registry非実在パス排除、Accepted R8履歴凍結とv2新規Registry管理方針の確立 |
 | **Generic Feature Encoder v4** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/engine/ai/DecisionFeatureEncoder.ts`, `src/engine/decision/ObservationFactory.ts` | `decisionFeatureStageSemantics.test.ts`, `decisionFeatureRealActionEvidence.test.ts` | Stage Semantics Preservation (`stageRequests` = true Stage only, Stage外Source = `effectSourceRequest`), Candidate Action 16 buckets, Option 16 buckets, Source Speed/Timing 伝搬, Assignment 方向修正, Coverage Ratio セマンティクス修正 |
 | **Viewer-relative Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder` (`self` vs `opponent`) | `src/tests/ai/decisionFeatureEncoder.test.ts` | 座席非依存・鏡像対称性保証 |
 | **Secret-safe Feature Encoding** | **IMPLEMENTED** | `DecisionFeatureEncoder`, `ObservationFactory` | `src/tests/ai/decisionFeaturePrivacyV2.test.ts`, `decisionFeatureRequestTarget.test.ts` | 秘密情報・表示文字列・実行時ID完全遮断、相手伏せユニット対象時の秘密漏洩防止 |
@@ -541,10 +541,13 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
       - `targetRequest` からの絶対 sequence / bookkeeping 除外と semantic actionId / target 感度。
       - `selections` / `sourceEvent.payload` 等の汎用意味論ディクショナリ内キー名（`sequence`, `decisionId`, `actionName` 等）の保持。
       - 実ランタイム効果中断再開（`STAGE_RESOLUTION_INTERRUPTED`）フィクスチャによる検証完了。
-12. **Decision Feature Schema v6 & Semantic Fingerprint v2 Design (BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R1)**:
+12. **Decision Feature Schema v6 & Semantic Fingerprint v2 Design (BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R2)**:
     - **設計ステータス**: **READY FOR INDEPENDENT REVIEW** (`tools/simulator/docs/ai-v92-feature-schema-v6-design-v1.md`, `tools/simulator/docs/ai-v92-feature-schema-v6-registry-v1.json`)
     - **目的**: 第9.2版コアフローの `focusPlayer` 導入に伴う Feature Schema v5 および Semantic Fingerprint（`pof1`/`drsf1`/`gpif1`）の感度欠落（Compatibility Gap）の解消。
-    - **R1 改訂内容**:
+    - **R2 改訂内容**:
+      - **Tie-Break 契約是正**: `GenomePolicy.choose()` の実コード（`if (p.score > bestScore)` による更新・同点時不更新）を正本とし、**「最初に出現した最高スコア手（first-encountered maximum-score pattern）」** に定義を是正（`patternRef` 最小値優先の誤記を撤回）。受入テストに候補 `patternRef = [7, 2]`、両スコア `0` で `selectedPatternRef === 7` の検証を追加。
+      - **Fingerprint Field Registry 管理方針**: 非実在パス `src/engine/ai/SemanticFingerprintFieldRegistry.ts` を排除。Accepted R8 (`docs/ai-semantic-fingerprint-field-registry-v1-r8.json`) は履歴として完全凍結し、v2 用レジストリが必要な場合は新規 `docs/ai-semantic-fingerprint-field-registry-v2-r1.json` として独立定義する方針を確立。実装対象を「実在パス改修」と「新規作成パス」に明確に分離。
+    - **R1 改訂内容 (維持)**:
       - `DecisionDNATypes.ts` 正本準拠の型定義修正（非実在フィールド `formatVersion`, `schemaVersion`, `genomeId`, `cloneMetadata` の完全排除）。
       - 旧 v5 DNA 検証の分離（`DecisionDNALegacyValidator.validateV5`）とランタイムでの Fail-Closed 拒絶契約維持。
       - 完全決定論的移行（`new Date()`, `Math.random()`, 実行時タイムスタンプの DNA 内部混入完全排除）。

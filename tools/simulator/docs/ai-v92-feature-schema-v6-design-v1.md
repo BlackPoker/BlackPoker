@@ -1,8 +1,8 @@
-# BlackPoker Simulator - AI Feature Schema v6 設計仕様書 V1-R1
+# BlackPoker Simulator - AI Feature Schema v6 設計仕様書 V1-R2
 
-**作業ID**: `BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R1`
+**作業ID**: `BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R2`
 **設計ステータス**: DESIGNED / READY FOR INDEPENDENT REVIEW
-**先行作業**: `BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1` (Commit: `aebfab517e3e2ed00c35bc51ec581d0f9afe6798`)
+**先行作業**: `BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R1` (Commit: `5ce8f7e8e0e9bf657f4c0ff47af34c9a8f125d3e`)
 **コアベースライン**: 第9.2版コアフロー (Commit: `92a7fc50674c20026118cf20460c6ee423451a71`)
 **対象ブランチ**: `BlackPoker/issue551-core-flow`
 **Canonical Registry**: `docs/ai-v92-feature-schema-v6-registry-v1.json`
@@ -14,7 +14,7 @@
 
 ### 1.1 目的 (Purpose)
 
-本仕様書は、Feature Schema v6 Design V1 の独立レビューで発見された契約不整合（DNA型定義、移行決定論性、スコア計算式、レジストリ記述、フォーカス検証、フィンガープリント改定、受入テスト設計）を厳格に修正し、第9.2版コアフローにおける `focusPlayer` を AI の意思決定モデル（Decision Feature Schema）へ正式統合するための Canonical Design Artifact（改訂第1版: R1）です。
+本仕様書は、Feature Schema v6 Design R1 の独立レビューで発見された 2 件の契約不整合（Blocker A: `GenomePolicy.choose()` の Tie-Break 契約、Blocker B: Fingerprint Registry の非実在パス参照）を厳格に修正し、第9.2版コアフローにおける `focusPlayer` を AI の意思決定モデル（Decision Feature Schema）へ正式統合するための Canonical Design Artifact（改訂第2版: R2）です。
 
 ### 1.2 設計限定原則 (Design Only Boundary)
 
@@ -28,25 +28,19 @@
 
 ### 1.3 前提ベースライン (Formal Baseline)
 
-- **Start SHA**: `aebfab517e3e2ed00c35bc51ec581d0f9afe6798`
+- **Start SHA**: `5ce8f7e8e0e9bf657f4c0ff47af34c9a8f125d3e`
 - **Core Flow**: 第9.2版コアフロー（フォーカス方式、全員パス時 chancePlayer="system" 移行、Commit: `92a7fc50674c20026118cf20460c6ee423451a71`）
 - **AI Controlled Evidence**: `BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R2`（FORMAL ACCEPTED）
 
 ---
 
-## 2. 独立レビュー指摘事項と R1 改訂内容 (Review Audit & R1 Corrections)
+## 2. 独立レビュー指摘事項と R2 改訂内容 (Review Audit & R2 Corrections)
 
-| 指摘項目 | V1 での問題点 | R1 での是正内容 |
+| 指摘項目 (Blocker) | R1 での問題点 | R2 での厳格是正内容 |
 |---|---|---|
-| **DNA Migration 型定義** | `formatVersion`, `schemaVersion`, `genomeId` などの非実在フィールドや、存在しない `DecisionDNACodec.cloneMetadata` を参照していた | `DecisionDNATypes.ts` を正本とし、`dnaFormatVersion`, `featureSchemaVersion`, `scoringModel`, `contextDimension`, `patternDimension`, `patternWeights`, `contextPatternWeights`, `metadata?` を用いた型検査可能なコードへ修正 |
-| **v5 Source Validation** | v6 Codec で旧 DNA を validate すると `featureSchemaVersion` 不一致で即座に拒絶されるため、移行前の検証が成立しなかった | 移行専用の独立した旧形式検証器（`DecisionDNALegacyValidator.validateV5`）を定義し、通常ロード経路での Fail-Closed 拒絶契約を維持 |
-| **Migration の決定論性** | `migratedAt: new Date().toISOString()` を含んでおり、同一 DNA に対する移行結果の JSON ハッシュが非決定論的であった | `new Date()`, `Math.random()`, 実行時タイムスタンプを DNA 内部から完全排除。静的メタデータのみを付与し、完全同一のビット完全移行を保証 |
-| **スコア計算式と記法** | $\text{Score}(p) = W_p + \sum c_i M_{i, p}$ と表記し、候補手参照 $p$ と特徴量インデックス $j$ を混同、Pattern 内積総和が欠落していた | `GenomeScorer.ts` 実装に準拠し、候補手の Pattern 特徴量 $p_{\text{pat}, j}$ との積和 $\sum_j (w_j p_{\text{pat}, j}) + \sum_i \sum_j (M_{i, j} c_i p_{\text{pat}, j})$ へ数式を厳密化 |
-| **実数同値性と実演算の区別** | 数学的な実数同値性のみを主張し、浮動小数点演算やタイブレークの議論が曖昧であった | 数学的な同値性 ($\Delta \text{score} = 0$)、実 JavaScript (IEEE 754) での数値完全一致、および Argmax/タイブレーク決定論的一致を峻別して証明・受入基準化 |
-| **Registry 互換性契約** | 既存 306 項目が `Requires FEATURE_SCHEMA_VERSION = 5` のままで、v6 での妥当性が未表現、生成手順が非決定論的であった | 全既存項目の互換性記述を `Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6)` へ更新、決定論的生成日時を確定 |
-| **Focus 検証と Fail-Closed** | `obs.focusPlayerId !== viewerPlayerId` を無条件に相手フォーカスと判定し、不正 ID や未定義を誤認するリスクがあった | `focusPlayerId === opponentPlayerId` を明示検証し、未定義・不正 ID 時は両フラグを安全に `0` とする Fail-Closed 仕様へ是正 |
-| **2特徴量の数学的正当化** | 「2特徴量でなければ独立学習できない」という数学的に不正確な過剰主張を行っていた | $c_{\text{opp}} = 1 - c_{\text{self}}$ の下での線形代数的等価性を明記した上で、鏡像対称性・中立状態の表現力・遺伝的変異対称性の3点から正当化を再定義 |
-| **Fingerprint バージョニング** | `pof2`, `drsf2`, `gpif2` の改定仕様が断片的で、診断結果型や過去 Evidence との比較可否が曖昧であった | 型定義、プレフィックス、`SemanticDiagnosticResult` バージョン、受動的診断不変性、過去 Evidence との比較不可契約を網羅 |
+| **Blocker A: Tie-Break 契約修正** | スコア同点時のタイブレークについて「`patternRef` 数値の最小値を選択」と記述していた | `GenomePolicy.choose()` の実コード（`if (p.score > bestScore)` による更新・同点時不更新）を正本とし、**「最初に出現した最高スコア手（first encountered maximum-score pattern）」** に説明を是正。受入テストに候補 `patternRef = [7, 2]`、両スコア `0` で `selectedPatternRef === 7` の検証を追加 |
+| **Blocker B: Fingerprint Registry 参照修正** | 影響分析に存在しない `src/engine/ai/SemanticFingerprintFieldRegistry.ts` が記載されていた | 非実在パスを完全排除。現行正本 `docs/ai-semantic-fingerprint-field-registry-v1-r8.json` (Accepted R8) を履歴として凍結し、v2 レジストリが必要な場合は別 Version（`docs/ai-semantic-fingerprint-field-registry-v2-r1.json`）を新規定義する方針を確立。実装対象を「実在パス改修」と「新規作成パス」に明確に分離 |
+| **R1 是正事項の維持 (Regression Guard)** | (R1 成果) | DNA 実フィールド準拠、Legacy v5 Validator 分離、完全決定論的移行、Row-Major マッピング、286 重みゼロ初期化、GenomeScorer スコア計算式、Focus Validation (Fail-Closed)、2 特徴量正当化、Registry 308 項目、Fingerprint バージョニング (pof2/drsf2/gpif2)、OFF/ON パリティはすべて維持 |
 
 ---
 
@@ -100,7 +94,7 @@ Context 特徴量の末尾（Index 163, 164）に以下の 2 特徴量を追加�
 5. **旧テストフィクスチャ互換性**:
    - `focusPlayerId` が設定されていない旧テスト用モックデータ（Observation fixture）が入力された場合でも、クラッシュや例外を起こさず `(0, 0)` として決定論的に処理されます。
 
-### 4.3 2特徴量採用の技術的根拠と過剰主張の是正 (Feature Count Justification)
+### 4.3 2特徴量採用の技術的根拠 (Feature Count Justification)
 
 #### 数学的関係の整理
 正規ランタイムにおいて `focusPlayerId` が常に `p1` または `p2` に割り当てられる場合、観測者にとって $c_{\text{opp}} = 1 - c_{\text{self}}$（相互に完全な補数）となります。
@@ -108,7 +102,6 @@ Context 特徴量の末尾（Index 163, 164）に以下の 2 特徴量を追加�
 $$M_{\text{self}, j} \cdot c_{\text{self}} \cdot p_j + M_{\text{opp}, j} \cdot c_{\text{opp}} \cdot p_j = M_{\text{self}, j} \cdot c_{\text{self}} \cdot p_j + M_{\text{opp}, j} \cdot (1 - c_{\text{self}}) \cdot p_j = M_{\text{opp}, j} \cdot p_j + (M_{\text{self}, j} - M_{\text{opp}, j}) \cdot c_{\text{self}} \cdot p_j$$
 となります。
 したがって、線形重み $w_j' = w_j + M_{\text{opp}, j}$、相互作用重み $M_j' = M_{\text{self}, j} - M_{\text{opp}, j}$ と再定義すれば、数学的には単一のブール特徴量 $c_{\text{self}}$ のみであらゆる線形＋バイリニア関数を完全に同値表現可能です。
-「2特徴量でなければ独立学習できない」という主張は数学的に誤りであり、本改訂において撤回・訂正します。
 
 #### 2特徴量を維持する 3 つの正当な技術的根拠
 単一特徴量化せず、2特徴量（`self_is_focus_player`, `opponent_is_focus_player`）を維持する理由は以下の3点です：
@@ -145,8 +138,8 @@ $$M_{\text{self}, j} \cdot c_{\text{self}} \cdot p_j + M_{\text{opp}, j} \cdot c
 
 `tools/simulator/docs/ai-v92-feature-schema-v6-registry-v1.json` の仕様：
 - `schemaVersion`: 6
-- `registryVersion`: `"1.0.0-r1"`
-- `workId`: `"BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R1"`
+- `registryVersion`: `"1.0.0-r2"`
+- `workId`: `"BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R2"`
 - `generatedAt`: `"2026-10-30T00:00:00.000Z"`（決定論的静的日時）
 - **既存 306 特徴量の `schemaCompatibilityImpact`**:
   `"Valid for FEATURE_SCHEMA_VERSION >= 5 (including Schema v6); raw integer scale normalized to bounded range to prevent mutation amplification."`
@@ -175,10 +168,6 @@ export interface DecisionDNA {
   readonly metadata?: DecisionDNAMetadata;
 }
 ```
-
-> [!WARNING]
-> `formatVersion`, `schemaVersion`, `genomeId` などの非実在フィールドを `DecisionDNA` のルート直下に記述してはなりません（`genomeId` や `generation` は `metadata` 内のプロパティです）。
-> また、存在しない `DecisionDNACodec.cloneMetadata` は呼び出しません。
 
 ### 6.2 旧形式検証器 (Legacy v5 Source Validator)
 
@@ -284,7 +273,6 @@ export class DecisionDNAMigration {
     }
 
     // 4. メタデータの決定論的複製と移行 Provenance
-    // ※ new Date() などの非決定論的タイムスタンプは含めない
     let metadata: DecisionDNAMetadata | undefined = undefined;
     if (dnaV5.metadata !== undefined) {
       metadata = {
@@ -363,8 +351,24 @@ for (let i = 0; i < cDim; i++) {
 したがって、JavaScript 実行時において：
 $$\text{score}_{v6} === \text{score}_{v5} \quad (\text{bit-exact match})$$
 
-#### 3. 選択一致 (Argmax / Tie-Break Parity)
-各合法手候補のスコアが bit-exact に一致するため、最高スコア手（Argmax）および同点時の `patternRef` 最小手タイブレークの挙動は **100% 完全に一致** します。
+#### 3. 選択一致とタイブレーク契約 (Argmax / First-Encountered Tie-Break Parity)
+`GenomePolicy.choose()` の実コードにおける最高スコア手の走査は以下の通りです：
+
+```typescript
+let bestScore = -Infinity;
+let bestPatternRef = scoredPatterns[0].patternRef;
+
+for (let i = 0; i < scoredPatterns.length; i++) {
+  const p = scoredPatterns[i];
+  if (p.score > bestScore) {
+    bestScore = p.score;
+    bestPatternRef = p.patternRef;
+  }
+}
+```
+
+更新条件が厳密な大なり（`>`）であるため、スコア同点時には値が更新されず、**「最初に出現した最高スコア手（first-encountered maximum-score pattern）」** が決定論的に保持されます（`patternRef` の数値最小値が選択されるわけではありません）。
+v5 DNA と移行後 v6 DNA において全候補手のスコアが bit-exact に完全一致（`===`）し、走査順序も不変であるため、選択される意思決定結果（`selectedPatternRef`）は **100% 完全に一致** します。
 
 ---
 
@@ -403,6 +407,15 @@ $$\text{score}_{v6} === \text{score}_{v5} \quad (\text{bit-exact match})$$
 3. **Evidence 異種バージョン比較禁止契約**:
    - v1 Evidence（`pof1-...`）と v2 Evidence（`pof2-...`）は射影空間が異なるため、同一意味のハッシュとして比較・同一視することを禁止します。
 
+### 8.4 Fingerprint Field Registry 管理方針 (Registry Management Policy)
+
+1. **Accepted R8 レジストリの履歴凍結**:
+   - 現行正本である `docs/ai-semantic-fingerprint-field-registry-v1-r8.json` (Formal Accepted) は、Feature Schema v5 / Diagnostic v1 の監査履歴として**完全に凍結**し、既存ファイルを無断上書き・変更しません。
+2. **Diagnostic v2 独立レジストリの策定方針**:
+   - Feature Schema v6 / Semantic Diagnostic v2 において、`pof2` (`observation.focusPlayerId`), `drsf2` (更新された Observation 射影), `gpif2` (165次元 Context / 308次元入力を反映した `GenomePolicyScoringInputProjection`) に対する完全なフィールド監査が必要となる場合は、新規設計成果物として `docs/ai-semantic-fingerprint-field-registry-v2-r1.json` を新設・独立定義します。
+3. **実在ファイル境界の厳格な維持**:
+   - `src/engine/ai/SemanticFingerprintFieldRegistry.ts` という TypeScript ファイルは現行リポジトリに存在しません。架空のパスを実装変更対象に含めず、レジストリは JSON 成果物として管理します。
+
 ---
 
 ## 9. 受入テスト設計仕様 (Required Acceptance Test Suite)
@@ -417,7 +430,7 @@ $$\text{score}_{v6} === \text{score}_{v5} \quad (\text{bit-exact match})$$
 6. **Row-Major Mapping**: 行 $i$ の重みがオフセット $i \times 143$ に正しく配置されていること。
 7. **Zero Initialized Rows**: 行 163 および 164 の全 286 重みが厳密に `0.0` であること。
 8. **All-Pattern Scoring Parity**: 実戦 DecisionRequest の全候補手に対し、v5 DNA と移行後 v6 DNA のスコアが実 JavaScript 浮動小数点演算で完全一致（`===`）すること。
-9. **Argmax / Tie-Break Parity**: `GenomePolicy.choose` による選択手（`patternRef`）が 100% 一致すること。
+9. **Argmax / First-Encountered Tie-Break Parity**: `GenomePolicy.choose` による選択手（`selectedPatternRef`）が 100% 一致すること。特に、同点候補手（例: 候補 `patternRef = [7, 2]`、両スコア `0.0`）が与えられた場合に、先に出現した `patternRef = 7` が決定論的に選択されること（`selectedPatternRef === 7`）を検証すること。
 10. **Focus Self / Opponent / System Activation**:
     - `obs.focusPlayerId === viewerId` で `values[163] === 1`, `values[164] === 0`。
     - `obs.focusPlayerId === opponentId` で `values[163] === 0`, `values[164] === 1`。
@@ -439,19 +452,26 @@ $$\text{score}_{v6} === \text{score}_{v5} \quad (\text{bit-exact match})$$
 
 ## 10. 影響分析と実装作業分解 (Impact Analysis)
 
+### 10.1 実装対象ファイルの内訳 (Implementation Target Breakdown)
+
+#### 実在パス改修 (Existing Source Files to Modify)
 | ファイルパス | 責務と変更内容 | 規模 |
 |---|---|:---:|
-| `src/domain/ai/DecisionFeatureTypes.ts` | `FEATURE_SCHEMA_VERSION = 6`, 特徴量名配列更新, 次元定数更新 | 小 |
+| `src/domain/ai/DecisionFeatureTypes.ts` | `FEATURE_SCHEMA_VERSION = 6`, `CONTEXT_FEATURE_NAMES` に 2 件追加, 次元定数更新 | 小 |
 | `src/engine/ai/DecisionFeatureEncoder.ts` | `encodeContext` にて `focusPlayerId` 検証と 2 特徴量抽出を追加 | 小 |
-| `src/domain/ai/DecisionFeatureScalingRegistry.ts` | 308 特徴量の TypeScript 定義へ更新 | 中 |
-| `src/domain/ai/DecisionDNATypes.ts` | `DecisionDNA` 型定義および定数更新 | 小 |
+| `src/domain/ai/DecisionFeatureScalingRegistry.ts` | 308 特徴量の TypeScript 定義へ更新 (v6 Registry 準拠) | 中 |
+| `src/domain/ai/DecisionDNATypes.ts` | `DecisionDNA` 型定義および次元定数更新 | 小 |
 | `src/engine/ai/DecisionDNACodec.ts` | v6 次元数定数更新、v5 DNA 拒絶検証 | 小 |
-| `src/engine/ai/DecisionDNALegacyValidator.ts` (新規) | `validateV5` 旧形式検証器の実装 | 小 |
-| `src/engine/ai/DecisionDNAMigration.ts` (新規) | `migrateV5toV6` 決定論的移行関数の実装 | 中 |
 | `src/domain/ai/SemanticDiagnosticTypes.ts` | `pof2`, `drsf2`, `gpif2`, `semanticDiagnosticVersion = 2` | 小 |
-| `src/engine/ai/SemanticFingerprintCalculator.ts` | `extractObservationProjection` への `focusPlayerId` 射影追加 | 小 |
-| `src/engine/ai/SemanticFingerprintFieldRegistry.ts` | R9 レジストリ追従 | 小 |
+| `src/engine/ai/SemanticFingerprintCalculator.ts` | `extractObservationProjection` への `focusPlayerId` 射影追加, gpif2 更新 | 小 |
 | `src/tests/ai/*.test.ts` | 受入テスト 20 項目の実装と既存テストの v6 追従 | 中 |
+
+#### 新規作成パス (New Source / Documentation Files to Create)
+| ファイルパス | 責務と作成内容 | 規模 |
+|---|---|:---:|
+| `src/engine/ai/DecisionDNALegacyValidator.ts` | `validateV5` 旧形式検証器の実装 | 小 |
+| `src/engine/ai/DecisionDNAMigration.ts` | `migrateV5toV6` 決定論的移行関数の実装 | 中 |
+| `docs/ai-semantic-fingerprint-field-registry-v2-r1.json` | Semantic Diagnostic v2 専用の新規フィールド監査レジストリ（必要に応じて導入） | 中 |
 
 ---
 
@@ -459,6 +479,6 @@ $$\text{score}_{v6} === \text{score}_{v5} \quad (\text{bit-exact match})$$
 
 - **メモリ影響**: 浮動小数点配列の増加は約 2.3KB であり、実行時性能への影響は皆無です。
 - **後方互換性**: 決定論的移行とスコア不変性証明により、既存の g0/g1 進化母集団 DNA 資産をノーリスクで v6 へ昇格可能です。
-- **結論**: 本 R1 設計により、独立レビューで指摘された型契約・決定論性・数式・検証ロジックの不整合はすべて完全に解消されました。
+- **結論**: 本 R2 設計により、独立レビューで指摘された Tie-Break 契約（first-encountered）および Fingerprint Field Registry の非実在パス参照・管理方針の不整合はすべて完全に解消されました。
 
 **Final Status**: **READY FOR INDEPENDENT REVIEW**

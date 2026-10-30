@@ -1,8 +1,8 @@
 {
   "schemaVersion": 6,
-  "registryVersion": "1.0.0-r1",
+  "registryVersion": "1.0.0-r2",
   "generatedAt": "2026-10-30T00:00:00.000Z",
-  "workId": "BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R1",
+  "workId": "BP-SIM-AI-V92-FEATURE-SCHEMA-V6-DESIGN-V1-R2",
   "summary": {
     "totalFeatures": 308,
     "contextFeatures": 165,
