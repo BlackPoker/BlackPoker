@@ -46,7 +46,17 @@ describe("PlaytestPolicyFactory Tests", () => {
       expect(policy.descriptor.name).toBe("Evolution g1 Best (Experimental)");
     });
 
-    it("Evolution g1 Best を未対応レギュレーションで生成しようとすると例外を投げること", () => {
+    it("Evolution g1 Best で regulationId 未指定 (undefined) の場合は拒絶されること (Fail-Closed)", () => {
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("evolution-g1-best", undefined, "p2")
+      ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です/);
+    });
+
+    it("Evolution g1 Best で Core Battle や Standard+Pack 等の未対応環境は拒絶されること", () => {
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("evolution-g1-best", undefined, "p2", "core-battle")
+      ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です/);
+
       expect(() =>
         PlaytestPolicyFactory.createPolicy("evolution-g1-best", undefined, "p2", "standard-pack")
       ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です/);

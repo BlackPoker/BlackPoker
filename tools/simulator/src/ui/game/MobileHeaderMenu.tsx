@@ -1,5 +1,5 @@
 import React from "react";
-import { EnvironmentOption } from "../../engine/playtest/PlaytestEnvironmentController";
+import { EnvironmentOption, extractRegulationId } from "../../engine/playtest/PlaytestEnvironmentController";
 import {
   PlaytestMatchMode,
   PlaytestPolicyId,
@@ -205,15 +205,27 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
                 onChange={(e) => onSelectPolicyId(e.target.value as PlaytestPolicyId)}
                 className="w-full text-xs font-bold py-1.5 px-2 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px]"
               >
-                {PLAYTEST_POLICY_OPTIONS.map((opt) => (
-                  <option
-                    key={opt.id}
-                    value={opt.id}
-                    disabled={opt.requiresSeed && !isOfficialEnvironment}
-                  >
-                    {opt.label}{opt.requiresSeed && !isOfficialEnvironment ? " (Official専用)" : ""}
-                  </option>
-                ))}
+                {PLAYTEST_POLICY_OPTIONS.map((opt) => {
+                  const currentRegId = extractRegulationId(selectedEnvironmentId);
+                  const isSupported =
+                    !opt.supportedRegulationIds ||
+                    (currentRegId !== null && opt.supportedRegulationIds.includes(currentRegId));
+                  const isDisabled =
+                    (opt.requiresSeed && !isOfficialEnvironment) || !isSupported;
+
+                  let suffix = "";
+                  if (opt.requiresSeed && !isOfficialEnvironment) {
+                    suffix = " (Official専用)";
+                  } else if (!isSupported && opt.supportedRegulationIds) {
+                    suffix = ` (${opt.supportedRegulationIds.join(", ")}専用)`;
+                  }
+
+                  return (
+                    <option key={opt.id} value={opt.id} disabled={isDisabled}>
+                      {opt.label}{suffix}
+                    </option>
+                  );
+                })}
               </select>
             </div>
           </>

@@ -64,9 +64,9 @@ export class PlaytestPolicyFactory {
       }
 
       case "evolution-g1-best": {
-        if (regulationId !== undefined && regulationId !== EVOLUTION_G1_BEST_SUPPORTED_REGULATION_ID) {
+        if (regulationId !== EVOLUTION_G1_BEST_SUPPORTED_REGULATION_ID) {
           throw new Error(
-            `Evolution g1 Best AI は公式レギュレーション ${EVOLUTION_G1_BEST_SUPPORTED_REGULATION_ID} 専用です (現在の環境: ${regulationId})`
+            `Evolution g1 Best AI は公式レギュレーション ${EVOLUTION_G1_BEST_SUPPORTED_REGULATION_ID} 専用です (現在の環境: ${regulationId ?? "undefined"})`
           );
         }
         return createEvolutionG1BestPolicy();

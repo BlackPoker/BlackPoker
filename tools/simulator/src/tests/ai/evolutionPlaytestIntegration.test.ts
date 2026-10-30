@@ -179,8 +179,13 @@ describe("Evolution Playtest Integration Tests (BP-SIM-AI-EVOLUTION-PLAYTEST-V1)
       expect(res1.selectedPatternRef).toBeLessThan(req.patterns.length);
     });
 
-    it("PlaytestPolicyFactory 経由で生成され、未対応レギュレーションでは例外を投げること", () => {
-      // light-entry16 では正常生成
+    it("PlaytestPolicyFactory 経由で生成され、未対応レギュレーションでは例外を投げること (Fail-Closed)", () => {
+      // 1. regulationId 未指定 (undefined) の場合は拒絶
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("evolution-g1-best", undefined, "p2")
+      ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です \(現在の環境: undefined\)/);
+
+      // 2. light-entry16 では正常生成
       const policy = PlaytestPolicyFactory.createPolicy(
         "evolution-g1-best",
         undefined,
@@ -190,14 +195,71 @@ describe("Evolution Playtest Integration Tests (BP-SIM-AI-EVOLUTION-PLAYTEST-V1)
       expect(policy).toBeDefined();
       expect(policy.descriptor.kind).toBe("genome");
 
-      // 未対応レギュレーション (standard-pack) では例外
+      // 3. Core Battle や Standard+Pack 等の未対応環境では拒絶
       expect(() =>
         PlaytestPolicyFactory.createPolicy("evolution-g1-best", undefined, "p2", "standard-pack")
-      ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です/);
+      ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です \(現在の環境: standard-pack\)/);
 
-      // Core Battle (undefined regulationId) でも明示的に拒絶されること
       expect(() =>
         PlaytestPolicyFactory.createPolicy("evolution-g1-best", undefined, "p2", "core-battle")
+      ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です \(現在の環境: core-battle\)/);
+    });
+
+    it("メイン設定画面とPC簡易選択欄で各ポリシーの選択可否判定が100%一致すること", () => {
+      const environmentsToTest = [
+        "core-battle",
+        "official:light-entry16",
+        "official:standard-pack",
+        "official:pro-strategy",
+      ];
+
+      for (const envId of environmentsToTest) {
+        const isOfficial = envId.startsWith(OFFICIAL_ENV_PREFIX);
+        const regId = envId.startsWith(OFFICIAL_ENV_PREFIX)
+          ? envId.slice(OFFICIAL_ENV_PREFIX.length)
+          : null;
+
+        for (const opt of PLAYTEST_POLICY_OPTIONS) {
+          // メイン画面側の判定式
+          const mainIsSupported =
+            !opt.supportedRegulationIds ||
+            (regId !== null && opt.supportedRegulationIds.includes(regId));
+          const mainIsDisabled = (opt.requiresSeed && !isOfficial) || !mainIsSupported;
+
+          // PC簡易選択欄側の判定式
+          const pcIsSupported =
+            !opt.supportedRegulationIds ||
+            (regId !== null && opt.supportedRegulationIds.includes(regId));
+          const pcIsDisabled =
+            (opt.requiresSeed && !isOfficial) || !pcIsSupported;
+
+          expect(pcIsDisabled).toBe(mainIsDisabled);
+
+          // evolution-g1-best の環境別期待値の検証
+          if (opt.id === "evolution-g1-best") {
+            if (envId === "official:light-entry16") {
+              expect(mainIsDisabled).toBe(false);
+              expect(pcIsDisabled).toBe(false);
+            } else {
+              expect(mainIsDisabled).toBe(true);
+              expect(pcIsDisabled).toBe(true);
+            }
+          }
+        }
+      }
+    });
+
+    it("非対応環境 (Core Battle / Standard+Pack) では Evolution AI で対戦開始できないこと (Fail-Closed)", () => {
+      const seatControllers = createSeatControllers("humanVsAi", "p1", "evolution-g1-best");
+
+      // Core Battle (regulationId === undefined)
+      expect(() =>
+        PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, undefined, undefined)
+      ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です/);
+
+      // Standard+Pack (regulationId === "standard-pack")
+      expect(() =>
+        PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, 42, "standard-pack")
       ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です/);
     });
   });

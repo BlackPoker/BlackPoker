@@ -610,6 +610,26 @@ export const CoreBattlePlaytest: React.FC = () => {
       const humanSeat: "p1" | "p2" = normalizeHumanSeatForMode(mode, overrideHumanSeat ?? pendingHumanSeat);
       const policyId = overridePolicyId ?? pendingPolicyId;
 
+      // 0. Policy と環境の整合性チェック (Fail-Closed: 環境切り替え後の非対応AIでの対戦開始を遮断)
+      if (mode === "humanVsAi") {
+        const selectedPolicyOpt = PLAYTEST_POLICY_OPTIONS.find((p) => p.id === policyId);
+        const regId = extractRegulationId(env);
+        if (selectedPolicyOpt?.supportedRegulationIds) {
+          if (!regId || !selectedPolicyOpt.supportedRegulationIds.includes(regId)) {
+            setSetupNotice({
+              type: "VALIDATION_ERROR",
+              title: "AI Policy 環境非対応エラー",
+              message: `AIポリシー "${selectedPolicyOpt.label}" は現在の対戦環境 (${env}) に対応していません (${selectedPolicyOpt.supportedRegulationIds.join(", ")}専用)。`,
+            });
+            addLog(
+              `[SETUP_ERROR] AIポリシー "${selectedPolicyOpt.label}" は環境 "${env}" に非対応のため対戦を開始できません。`,
+              "system"
+            );
+            return;
+          }
+        }
+      }
+
       // 1. Prepare: マッチ生成試行 (失敗時は既存アクティブ対戦を破壊しない)
       const outcome = startMatchAttempt({
         environmentId: env,
@@ -1875,15 +1895,27 @@ export const CoreBattlePlaytest: React.FC = () => {
                   onChange={(e) => setPendingPolicyId(e.target.value as PlaytestPolicyId)}
                   className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
                 >
-                  {PLAYTEST_POLICY_OPTIONS.map((opt) => (
-                    <option
-                      key={opt.id}
-                      value={opt.id}
-                      disabled={opt.requiresSeed && !isOfficialEnvironment(selectedEnvironmentId)}
-                    >
-                      {opt.label}{opt.requiresSeed && !isOfficialEnvironment(selectedEnvironmentId) ? " (Official専用)" : ""}
-                    </option>
-                  ))}
+                  {PLAYTEST_POLICY_OPTIONS.map((opt) => {
+                    const currentRegId = extractRegulationId(selectedEnvironmentId);
+                    const isSupported =
+                      !opt.supportedRegulationIds ||
+                      (currentRegId !== null && opt.supportedRegulationIds.includes(currentRegId));
+                    const isDisabled =
+                      (opt.requiresSeed && !isOfficialEnvironment(selectedEnvironmentId)) || !isSupported;
+
+                    let suffix = "";
+                    if (opt.requiresSeed && !isOfficialEnvironment(selectedEnvironmentId)) {
+                      suffix = " (Official専用)";
+                    } else if (!isSupported && opt.supportedRegulationIds) {
+                      suffix = ` (${opt.supportedRegulationIds.join(", ")}専用)`;
+                    }
+
+                    return (
+                      <option key={opt.id} value={opt.id} disabled={isDisabled}>
+                        {opt.label}{suffix}
+                      </option>
+                    );
+                  })}
                 </select>
               </>
             )}
