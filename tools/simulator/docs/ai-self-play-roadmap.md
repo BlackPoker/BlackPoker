@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1`
-更新日時: 2026-10-30 09:30 JST
+作業ID: `BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R2`
+更新日時: 2026-10-30 11:15 JST
 
 ---
 
@@ -500,7 +500,7 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`tools/simulator/src/engine/ai/EvolutionLoop.ts`, `tools/simulator/src/domain/ai/EvolutionLoopTypes.ts`, `tools/simulator/src/tests/ai/evolutionLoop.test.ts`, 48 Canonical Tests)
    - **Controlled Multi-Generation Evidence**: **BLOCKED / NOT ACCEPTED** (BP-SIM-AI-EVOLUTION-LOOP-EVIDENCE-V1, `tools/simulator/src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md`, Official `light-entry16`, N=6, R=1, g=0 30試合完走・世代交代成功, g=1 28/30試合未完了による有効個体不足)
    - **Evolution g1 Incomplete Analysis V1**: **ANALYZED / PENDING INDEPENDENT REVIEW** (BP-SIM-AI-EVOLUTION-INCOMPLETE-ANALYSIS-V1, `tools/simulator/src/cli/evolutionIncompleteAnalysis.ts`, `docs/ai-evolution-incomplete-analysis-v1.md`, Generation 1 28/30未完了試合の決定論的分析, PROGRESSING_LONG_MATCH / Turn 1 PASS過剰選好の特定)
-   - **v9.2 Core Flow Baseline Re-Evaluation Evidence**: **COMPLETED / PENDING INDEPENDENT REVIEW** (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1, `tools/simulator/src/cli/v92BaselineEvidenceRunner.ts`, `tools/simulator/src/tests/ai/v92CoreBaselineEvidence.test.ts`, `reports/ai/v92-core-baseline-evidence-v1.json`, 第9.2版コアフローでの再基準測定。Official `light-entry16`, N=6, R=1, g0 30/30試合完走・100% COMPLETED, g1 30/30試合完走・100% COMPLETED, Run A/B 独立再構築決定論的一致100%, Decision Trace Logical Digest, Fitness 保存則, Feature Schema v5 / Semantic Fingerprint の focusPlayerId 不感 Compatibility Gap 監査完了)
+   - **v9.2 Core Flow Baseline Re-Evaluation Evidence**: **COMPLETED / PENDING INDEPENDENT REVIEW** (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R2, `tools/simulator/src/cli/v92BaselineEvidenceRunner.ts`, `tools/simulator/src/tests/ai/v92CoreBaselineEvidence.test.ts`, `reports/ai/v92-core-baseline-evidence-v1.json`, 第9.2版コアフローでの再基準測定。Official `light-entry16`, N=6, R=1, g0 30/30試合完走・100% COMPLETED, g1 30/30試合完走・100% COMPLETED, Run A/B 独立再構築決定論的一致100%, Decision Trace Logical Digest, Fitness 保存則, Feature Schema v5 / Semantic Fingerprint の focusPlayerId 不感 Compatibility Gap 監査完了)
    - **Parallel Evaluation**: **NOT IMPLEMENTED**
    - **Hall of Fame**: **NOT IMPLEMENTED**
    - **責務境界**: `GenerationRunner`（1世代プリミティブ）を直接順次呼び出し、世代ごとの `generationSeed` 直接導出、世代間チェーン整合性検証、`REEVALUATION_REQUIRED` での即時論理停止、および中間母集団 DNA 複製を排除した決定論的履歴集計を統括する上位オーケストレーション境界。Caller による母集団サイズ契約（`runnerConfig.builderConfig.populationSize`）を尊重し、暗黙のサイズ一定仮定や自動改変を行わない。また、`GenerationRunner` 内部実装のオブジェクト参照同一性（Reference Equality）への依存を排除し、Public Logical Contract に準拠する。

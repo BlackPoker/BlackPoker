@@ -6,6 +6,8 @@ import { RegulationValidator } from "../../engine/regulation/RegulationValidator
 import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { OfficialRegulationMatchFactory } from "../../engine/regulation/OfficialRegulationMatchFactory";
+import { deriveSeed } from "../../engine/random/DeterministicShuffle";
+import { canonicalGenerationStreamKey } from "../../domain/ai/EvolutionLoopTypes";
 import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec";
 import { DecisionFeatureEncoder } from "../../engine/ai/DecisionFeatureEncoder";
 import { SemanticFingerprintCalculator } from "../../engine/ai/SemanticFingerprintCalculator";
@@ -17,7 +19,7 @@ import { LegalPattern } from "../../domain/decision/LegalPattern";
 import { DecisionCatalog } from "../../domain/decision/DecisionCatalog";
 import { PlayerObservation, PlayerObservationView } from "../../domain/decision/PlayerObservation";
 
-describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1)", () => {
+describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R2)", () => {
   let catalog: any;
   let fullRulePackage: any;
   let lightRulePackage: any;
@@ -231,8 +233,8 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
       expect(fs.existsSync(evidencePath)).toBe(true);
 
       const data = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
-      expect(data.workId).toBe("BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1");
-      expect(data.startSha).toBe("b0949612dbd7c84ef293e4dfdbefc8dc14dff09d");
+      expect(data.workId).toBe("BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R2");
+      expect(data.startSha).toBe("7858513c410aa1b5141ab0f6723a3b08e6e921dd");
       expect(data.baselineB.g0.totalScheduledMatches).toBe(30);
       expect(data.baselineB.g0.completedMatches).toBe(30);
       expect(data.baselineB.g1.totalScheduledMatches).toBe(30);
@@ -243,7 +245,7 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
     });
   });
 
-  describe("Group 4: Hardened Evidence Verification (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1)", () => {
+  describe("Group 4: Hardened Evidence Verification (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R2)", () => {
     let data: any;
 
     beforeAll(() => {
@@ -260,6 +262,8 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
       expect(data.baselineB.g0.status).toBe("ADVANCED");
       expect(data.baselineB.g0.decisionStats.min).toBe(36);
       expect(data.baselineB.g0.decisionStats.max).toBe(88);
+      expect(data.baselineB.g0.decisionStats.avg).toBe(77.73);
+      expect(data.baselineB.g0.decisionStats.median).toBe(85);
 
       // g1 accounting
       expect(data.baselineB.g1.totalScheduledMatches).toBe(30);
@@ -269,6 +273,8 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
       expect(data.baselineB.g1.status).toBe("ADVANCED");
       expect(data.baselineB.g1.decisionStats.min).toBe(4);
       expect(data.baselineB.g1.decisionStats.max).toBe(84);
+      expect(data.baselineB.g1.decisionStats.avg).toBe(41.73);
+      expect(data.baselineB.g1.decisionStats.median).toBe(42);
     });
 
     it("4.2 g0 / g1 Run A vs Run B strict determinism & trace digest equality", () => {
@@ -280,8 +286,6 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
       expect(data.baselineB.g0.determinism.overall).toBe(true);
 
       // g1 Run A vs Run B
-      expect(data.baselineB.g1.determinism.populationEntriesEqual).toBe(true);
-      expect(data.baselineB.g1.determinism.dnaDigestsEqual).toBe(true);
       expect(data.baselineB.g1.determinism.scheduleEqual).toBe(true);
       expect(data.baselineB.g1.determinism.matchesEqual).toBe(true);
       expect(data.baselineB.g1.determinism.fitnessEqual).toBe(true);
@@ -397,6 +401,113 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
       expect(bA.indirectCoreFlowRegressionContracts.systemChanceSingleResolution).toBeDefined();
       expect(bA.indirectCoreFlowRegressionContracts.effectSelectionWorkflow).toBeDefined();
       expect(bA.indirectCoreFlowRegressionContracts.endChargeDrawCycle).toBeDefined();
+    });
+
+    it("4.9 Canonical generationSeed derivation check (Requirement A)", () => {
+      const expectedG0Seed = deriveSeed(42, canonicalGenerationStreamKey(0));
+      const expectedG1Seed = deriveSeed(42, canonicalGenerationStreamKey(1));
+
+      expect(data.baselineB.g0.generationSeed).toBe(expectedG0Seed);
+      expect(data.baselineB.g0.generationSeed).toBe(4143575905);
+
+      expect(data.baselineB.g1.generationSeed).toBe(expectedG1Seed);
+      expect(data.baselineB.g1.generationSeed).toBe(4126798286);
+    });
+
+    it("4.10 g1 Genome IDs population assembly consistency (Requirement B)", () => {
+      const expectedG1Ids = [
+        "genome-001",
+        "gen-000001-offspring-000000",
+        "gen-000001-offspring-000001",
+        "gen-000001-offspring-000002",
+        "gen-000001-offspring-000003",
+        "gen-000001-offspring-000004",
+      ];
+
+      // DNA digests IDs (contains all 6 expected IDs)
+      const g1DnaIds = data.baselineB.g1.dnaDigests.map((d: any) => d.genomeId);
+      expect([...g1DnaIds].sort()).toEqual([...expectedG1Ids].sort());
+
+      // Fitness entries IDs (contains all 6 expected IDs)
+      const g1FitnessIds = data.baselineB.g1.fitnessEntries.map((e: any) => e.genomeId);
+      expect([...g1FitnessIds].sort()).toEqual([...expectedG1Ids].sort());
+
+      // Schedule participant IDs (contains all 6 expected IDs)
+      const scheduleIds = new Set<string>();
+      for (const m of data.baselineB.g1.matchDetails) {
+        scheduleIds.add(m.p1GenomeId);
+        scheduleIds.add(m.p2GenomeId);
+      }
+      expect(Array.from(scheduleIds).sort()).toEqual([...expectedG1Ids].sort());
+    });
+
+    it("4.11 decisionStats exact consistency with matchDetails (Requirement C)", () => {
+      // g0 re-calculation
+      const g0Decisions: number[] = data.baselineB.g0.matchDetails.map((m: any) => m.totalDecisions);
+      const g0Sorted = [...g0Decisions].sort((a, b) => a - b);
+      const g0Min = g0Sorted[0];
+      const g0Max = g0Sorted[g0Sorted.length - 1];
+      const g0Sum = g0Sorted.reduce((acc, v) => acc + v, 0);
+      const g0Avg = Math.round((g0Sum / g0Sorted.length) * 100) / 100;
+      const g0Median = (g0Sorted[14] + g0Sorted[15]) / 2;
+
+      expect(data.baselineB.g0.decisionStats.min).toBe(g0Min);
+      expect(data.baselineB.g0.decisionStats.max).toBe(g0Max);
+      expect(data.baselineB.g0.decisionStats.avg).toBe(g0Avg);
+      expect(data.baselineB.g0.decisionStats.median).toBe(g0Median);
+
+      // g1 re-calculation
+      const g1Decisions: number[] = data.baselineB.g1.matchDetails.map((m: any) => m.totalDecisions);
+      const g1Sorted = [...g1Decisions].sort((a, b) => a - b);
+      const g1Min = g1Sorted[0];
+      const g1Max = g1Sorted[g1Sorted.length - 1];
+      const g1Sum = g1Sorted.reduce((acc, v) => acc + v, 0);
+      const g1Avg = Math.round((g1Sum / g1Sorted.length) * 100) / 100;
+      const g1Median = (g1Sorted[14] + g1Sorted[15]) / 2;
+
+      expect(data.baselineB.g1.decisionStats.min).toBe(g1Min);
+      expect(data.baselineB.g1.decisionStats.max).toBe(g1Max);
+      expect(data.baselineB.g1.decisionStats.avg).toBe(g1Avg);
+      expect(data.baselineB.g1.decisionStats.median).toBe(g1Median);
+    });
+
+    it("4.12 JSON and Markdown single source of truth consistency (Requirement D)", () => {
+      const mdPath = path.resolve(__dirname, "../../../docs/ai-v92-core-baseline-evidence-v1.md");
+      expect(fs.existsSync(mdPath)).toBe(true);
+
+      const mdContent = fs.readFileSync(mdPath, "utf8");
+
+      // Verify exact values are present in Markdown
+      expect(mdContent).toContain("4143575905");
+      expect(mdContent).toContain("4126798286");
+      expect(mdContent).toContain("min 36, max 88, avg 77.73, median 85");
+      expect(mdContent).toContain("min 4, max 84, avg 41.73, median 42");
+      expect(mdContent).toContain("genome-001");
+      expect(mdContent).toContain("gen-000001-offspring-000000");
+
+      // Verify erroneous legacy numbers are NOT present
+      expect(mdContent).not.toContain("2298647712");
+      expect(mdContent).not.toContain("49.33");
+    });
+
+    it("4.13 DNA Run A/B full weight arrays exact equality (Requirement E)", () => {
+      // g0 DNA full equality
+      const g0DnaEq = data.baselineB.g0.determinism.dnaFullEquality;
+      expect(g0DnaEq.overall).toBe(true);
+      expect(g0DnaEq.genomeIdsEqual).toBe(true);
+      expect(g0DnaEq.metadataFieldsEqual).toBe(true);
+      expect(g0DnaEq.patternWeightsExactEqual).toBe(true);
+      expect(g0DnaEq.contextPatternWeightsExactEqual).toBe(true);
+      expect(g0DnaEq.digestsEqual).toBe(true);
+
+      // g1 DNA full equality
+      const g1DnaEq = data.baselineB.g1.determinism.dnaFullEquality;
+      expect(g1DnaEq.overall).toBe(true);
+      expect(g1DnaEq.genomeIdsEqual).toBe(true);
+      expect(g1DnaEq.metadataFieldsEqual).toBe(true);
+      expect(g1DnaEq.patternWeightsExactEqual).toBe(true);
+      expect(g1DnaEq.contextPatternWeightsExactEqual).toBe(true);
+      expect(g1DnaEq.digestsEqual).toBe(true);
     });
   });
 });

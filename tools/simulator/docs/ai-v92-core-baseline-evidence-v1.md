@@ -1,10 +1,10 @@
-# BlackPoker Simulator 第9.2版コアフロー再基準測定エビデンス報告書 (R1)
+# BlackPoker Simulator 第9.2版コアフロー再基準測定エビデンス報告書 (R2)
 
-**Work ID**: `BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1`<br>
+**Work ID**: `BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R2`<br>
 **日付**: 2026-10-30<br>
 **対象リポジトリ**: `BlackPoker/BlackPoker`<br>
 **対象ブランチ**: `BlackPoker/issue551-core-flow`<br>
-**Start SHA**: `b0949612dbd7c84ef293e4dfdbefc8dc14dff09d`<br>
+**Start SHA**: `7858513c410aa1b5141ab0f6723a3b08e6e921dd`<br>
 **ステータス**: **READY FOR INDEPENDENT REVIEW**
 
 ---
@@ -69,62 +69,72 @@ Evidence Runner が直接検証した契約と、既存回帰テストスイー�
 - **反復回数**: $R = 1$ (Double Round Robin, 30試合/世代)
 - **Campaign Seed**: 42
 - **maxDecisions**: 500
-- **初期世代 (g0)**: 6 Zero Decision DNA
+- **初期世代 (g0) Seed**: 4143575905
+- **次世代 (g1) Seed**: 4126798286
 
-### 4.2 試合結果および観測された関連（Observed Association）
+### 4.2 母集団個体構成
+- **g0 個体構成 (6 Zero DNA)**:
+  - `genome-000, genome-001, genome-002, genome-003, genome-004, genome-005`
+- **g1 個体構成 (エリート1個体 + オフスプリング5個体)**:
+  - `genome-001, gen-000001-offspring-000000, gen-000001-offspring-000001, gen-000001-offspring-000002, gen-000001-offspring-000003, gen-000001-offspring-000004`
+  - ※ g1 は g0 で最高適応度を獲得したエリート個体 `genome-001` と、トーナメント選択・交叉変異により生成された5個体のオフスプリングから構成されます。
+
+### 4.3 試合結果および観測された関連（Observed Association）
 旧コアフロー環境では **2 COMPLETED / 28 INCOMPLETE** で世代交代が停止（`REEVALUATION_REQUIRED`）していたが、第9.2版コアフロー環境下での測定結果は以下の通りである：
 
-| 世代 | 総試合数 | COMPLETED | INCOMPLETE | FAILED | DRAW | decisions 範囲 | Runner Status |
-|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
-| **g0** | 30 | **30 (100%)** | **0 (0%)** | 0 | 0 | min 36, max 88, avg 77.73, median 85 | **ADVANCED** |
-| **g1** | 30 | **30 (100%)** | **0 (0%)** | 0 | 0 | min 4, max 84, avg 49.33, median 52 | **ADVANCED** |
+| 世代 | generationSeed | 予定 | COMPLETED | INCOMPLETE | FAILED | DRAW | decisions 実測値 (min / max / avg / median) | Runner Status |
+|---|:---:|:---:|:---:|:---:|:---:|:---:|:---:|:---:|
+| **g0** | 4143575905 | 30 | **30 (100%)** | **0 (0%)** | 0 | 0 | **min 36, max 88, avg 77.73, median 85** | **`ADVANCED`** |
+| **g1** | 4126798286 | 30 | **30 (100%)** | **0 (0%)** | 0 | 0 | **min 4, max 84, avg 41.73, median 42** | **`ADVANCED`** |
 
 - **決着理由**: 全試合「相手のライフが0になりました」（ライフ枯渇による正常決着、DRAW 0件）。
 - **観測された関連（Observed Association）**: 第9.2版コアフローの適用（空ステージでのPASS禁止、フォーカスおよびルールシステムによるステージ1件ずつの解決フロー）と同時に、`light-entry16` において30試合すべてが上限（500）に達することなく決着し、完了率100%および世代交代（`ADVANCED`）への進行が観測された。
 - *※注意: 本結果は `light-entry16` における観測事実であり、空Stage PASS禁止のみが完了率改善の単一原因であると断定するものではなく、また全レギュレーションでの無限ループ完全解消や強いDNAの完成を保証するものではない。*
 
-### 4.3 g0 -> g1 Run A vs Run B 独立再構築・決定論的検証
+### 4.4 g0 -> g1 Run A vs Run B 独立再構築・決定論的検証
 既存Production経路を用いて、同一条件（Campaign Seed 42）から Run A と Run B を完全に独立して再構築・実行し、全項目の一致を検証した：
 
 1. **Genome IDs**: g0, g1 ともに全6個体の ID 系列が完全一致。
-2. **DNA 全重み & DNA Digest**:
-   - g0: 6個体すべて 23,452 weights, `fullDnaDigest` が完全一致。
-   - g1: 6個体すべて 23,452 weights, `fullDnaDigest` が完全一致。
-3. **対戦スケジュール**: matchIndex, pairIndex, repetitionIndex, legIndex, p1GenomeId, p2GenomeId, matchSeed が 30 試合すべて完全一致。
-4. **試合 Outcome**: completed, winner, reason, totalDecisions, turnCount, finalStateHash が 30 試合すべて完全一致。
-5. **Decision Trace Logical Projection & Digest**:
+2. **DNA Full Weight Array Exact Equality (実配列厳密一致)**:
+   - g0: 全6個体の `patternWeights` (143要素) および `contextPatternWeights` (23,309要素) の全要素が Run A == Run B で厳密一致 (`===`)。
+   - g1: 全6個体の `patternWeights` (143要素) および `contextPatternWeights` (23,309要素) の全要素が Run A == Run B で厳密一致 (`===`)。
+   - 仕様パラメータ（`dnaFormatVersion: 1`, `featureSchemaVersion: 5`, `scoringModel`, `contextDimension: 163`, `patternDimension: 143`）の完全一致。
+3. **DNA Digests (SHA-256)**:
+   - g0: 6個体すべて 23,452 weights, `fullDnaDigest` が Run A == Run B で完全一致。
+   - g1: 6個体すべて 23,452 weights, `fullDnaDigest` が Run A == Run B で完全一致。
+4. **対戦スケジュール**: matchIndex, pairIndex, repetitionIndex, legIndex, p1GenomeId, p2GenomeId, matchSeed が 30 試合すべて完全一致。
+5. **試合 Outcome**: completed, winner, reason, totalDecisions, turnCount, finalStateHash が 30 試合すべて完全一致。
+6. **Decision Trace Logical Projection & Digest**:
    - `runtimeDecisionId` や timestamp などの実行時動的情報を除外し、決定論的フィールド（`stepCount`, `logicalDecisionId`, `playerId`, `stateVersion`, `stateHash`, `selectedPatternRef`, `selectedLogicalPatternKey`, `selectedPatternKind`, `actionId`, `legalPatterns`）からなる logical projection を構築。
    - per-match SHA-256 digest を算出して比較した結果、**30 試合すべて Run A == Run B で 100% 一致**。
-6. **Fitness Snapshot**: 全個体の status, fitnessScore, completedMatches, completionRate, scheduledMatches, wins, losses, draws が完全一致。
-7. **論理マニフェスト**: generationSeed, evaluationScheduleId, seedScheduleIdentity が完全一致。
-8. **Generation Status**: g0 `ADVANCED`, g1 `ADVANCED` が完全一致。
+7. **Fitness Snapshot**: 全個体の status, fitnessScore, completedMatches, completionRate, scheduledMatches, wins, losses, draws が完全一致。
+8. **論理マニフェスト**: generationSeed, evaluationScheduleId, seedScheduleIdentity が完全一致。
+9. **Generation Status**: g0 `ADVANCED`, g1 `ADVANCED` が完全一致。
 
-### 4.4 Fitness 保存則（Fitness Conservation Laws）の検証
+### 4.5 Fitness 保存則（Fitness Conservation Laws）の検証結果
 全30試合の Outcome と、母集団全個体の適応度集計値との数学的整合性を検証：
 
 - $\sum \text{wins} = 30$（決着試合数 30 と完全一致）
 - $\sum \text{losses} = 30$（決着試合数 30 と完全一致）
 - $\sum \text{draws} = 0$（引き分け試合数 0 と完全一致）
 - $\sum \text{completedMatches} = 60$（$2 \times 30$ 試合と完全一致）
-- 各個体の $\text{wins} + \text{losses} + \text{draws} = \text{completedMatches}$（全個体で成立）
+- 各個体の $\text{wins} + \text{losses} + \text{draws} = \text{completedMatches} = 10$（全個体で成立）
 - 各個体の $\text{scheduledMatches} = 10$（全個体で成立）
-- `INCOMPLETE != DRAW` の厳密な区別が維持されていることを確認。
+- `INCOMPLETE != DRAW` の厳密な区別が維持されていることを確認（`valid: true`）。
 
 ---
 
 ## 5. Standard + Pack Smoke Test 結果（分類の厳密化）
 
 - **Regulation**: `official:standard-pack`
-- **対戦数**: 4試合 (Seeds: 101, 202, 303, 404)
-- **AI Policy**: Zero Decision DNA vs Zero Decision DNA
-- **maxDecisions**: 200
+- **対戦数**: 4試合 (Seeds: 101, 202, 303, 404) / `maxDecisions: 200`
 - **結果分類**:
   - `completedMatchesCount`: **0**
   - `incompleteMatchesCount`: **4**
   - `exceptionMatchesCount`: **0**
   - `allRunsWithoutException`: **true**
 - **詳細分析と注記**:
-  - 全4試合において未捕捉例外・実行時エラーは 0 件であり、シミュレータ基盤は安全に稼働した。
+  - 全4試合において未捕捉例外・実行時エラーは 0 件であり、シミュレータ基盤は安全に稼働した（`allRunsWithoutException === true`）。
   - 全4試合が 200 decisions に到達し、`reason: "最大判断回数 (200) に到達しました。"` により `completed: false`（INCOMPLETE）として安全停止した。
   - **注記**: Standard + Pack はデッキ規模（32枚＋パックカード）が大きく、防壁や手札の選択肢が豊富なため、初期の Zero DNA ポリシーでは 200 decisions 以内にライフ枯渇に至らなかった。この結果は**決定回数上限による時間切れであり、無限ループやバグ、あるいはポリシーの強さ不足を証明するものではない**。
 
@@ -147,12 +157,12 @@ Evidence Runner が直接検証した契約と、既存回帰テストスイー�
 
 1. **Feature Schema v5 のフォーカス不感性**: 現行の Schema v5 では AI がフォーカス状態をベクトルとして知覚できない（Feature Schema v6 での対処が必要）。
 2. **Observation Fingerprint のフォーカス不感性**: `pof1`, `drsf1`, `gpif1` はフォーカス変更でハッシュが変化しない。
-3. **Standard + Pack での判断上限到達**: 200 decisions では決着に至らず INCOMPLETE となるため、より大きな決定回数上限または学習済み DNA による検証が必要。
+3. **Standard + Pack での判断上限到達**: 200 decisions では決着に至らず INCOMPLETE となるため、今後の研究フェーズで適切な探索・決定回数設定が必要。
 
 ---
 
 ## 8. 結論
 
-第9.2版コアフローのもとで、`light-entry16` における N=6 制御進化（g0 $\rightarrow$ g1）の100%完了および世代前進が観測され、Run A / Run B の独立再構築による決定論的同一性が厳密に実証された。また、現行の Feature Schema v5 および Fingerprint における Compatibility Gap が正確に同定された。
+第9.2版コアフローのもとで、`light-entry16` における N=6 制御進化（g0 $\rightarrow$ g1）の100%完了および世代前進が観測され、Run A / Run B の独立再構築による決定論的同一性（DNA全重み配列一致・Trace Digest一致・Outcome一致）が厳密に実証された。また、現行の Feature Schema v5 および Fingerprint における Compatibility Gap が正確に同定された。
 
 本エビデンスをもって、独立レビュー準備完了（**READY FOR INDEPENDENT REVIEW**）とする。

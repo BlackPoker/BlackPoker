@@ -1,7 +1,7 @@
 {
-  "workId": "BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1",
-  "timestamp": "2026-10-30T00:28:03.507Z",
-  "startSha": "b0949612dbd7c84ef293e4dfdbefc8dc14dff09d",
+  "workId": "BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R2",
+  "timestamp": "2026-10-30T02:11:53.248Z",
+  "startSha": "7858513c410aa1b5141ab0f6723a3b08e6e921dd",
   "featureCompatibilityAudit": {
     "featureSchemaVersion": 5,
     "contextDimension": 163,
@@ -75,6 +75,14 @@
         "completedEqualsDoubleMatches": true
       },
       "determinism": {
+        "dnaFullEquality": {
+          "genomeIdsEqual": true,
+          "metadataFieldsEqual": true,
+          "patternWeightsExactEqual": true,
+          "contextPatternWeightsExactEqual": true,
+          "digestsEqual": true,
+          "overall": true
+        },
         "matchesEqual": true,
         "fitnessEqual": true,
         "manifestEqual": true,
@@ -744,8 +752,14 @@
         "completedEqualsDoubleMatches": true
       },
       "determinism": {
-        "populationEntriesEqual": true,
-        "dnaDigestsEqual": true,
+        "dnaFullEquality": {
+          "genomeIdsEqual": true,
+          "metadataFieldsEqual": true,
+          "patternWeightsExactEqual": true,
+          "contextPatternWeightsExactEqual": true,
+          "digestsEqual": true,
+          "overall": true
+        },
         "scheduleEqual": true,
         "matchesEqual": true,
         "fitnessEqual": true,
