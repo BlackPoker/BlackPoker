@@ -1,0 +1,34 @@
+{
+  "genomeId": "gen-000001-offspring-000003",
+  "generation": 1,
+  "sourceWorkId": "BP-SIM-AI-V92-V6-EVOLUTION-BASELINE-V1-R1",
+  "sourceCommitSha": "f55697183ce66170d2a661adcece153d03ea29b1",
+  "featureSchemaVersion": 6,
+  "dnaFormatVersion": 1,
+  "scoringModel": "linear-bilinear-v1",
+  "fullDnaDigest": "e5f69e36c3dac0f4700d6013d92a5471009f1b185078ebf168e082193c14502b",
+  "patternWeightsDigest": "7299c74dfe2518640dbdc271c21a1a687bcc21c915430cf82217e476594cd5c8",
+  "contextPatternWeightsDigest": "e7dac493883cfecc0bd777d04bb54e353f8112e244db77557a0267351f29b950",
+  "patternDimension": 143,
+  "contextDimension": 165,
+  "totalWeights": 23738,
+  "baselineRecord": {
+    "wins": 9,
+    "losses": 1,
+    "draws": 0,
+    "completedMatches": 10,
+    "scheduledMatches": 10,
+    "fitnessScore": 0.9,
+    "completionRate": 1
+  },
+  "generationParameters": {
+    "campaignSeed": 42,
+    "g0GenerationSeed": 4143575905,
+    "g1GenerationSeed": 4126798286,
+    "populationSize": 6,
+    "pairRepetitions": 1,
+    "maxDecisionsPerMatch": 500,
+    "regulation": "light-entry16"
+  },
+  "dnaArtifactFile": "evolution-g1-best-v6.json"
+}

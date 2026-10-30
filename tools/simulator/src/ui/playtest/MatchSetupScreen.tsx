@@ -3,6 +3,7 @@ import {
   EnvironmentOption,
   SetupNotice,
   isOfficialEnvironment,
+  extractRegulationId,
 } from "../../engine/playtest/PlaytestEnvironmentController";
 import {
   PlaytestMatchMode,
@@ -126,6 +127,7 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
   onCopyShareUrl,
 }) => {
   const isOfficial = isOfficialEnvironment(selectedEnvironmentId);
+  const currentRegulationId = extractRegulationId(selectedEnvironmentId);
   const selectedEnvOpt = environmentOptions.find((opt) => opt.id === selectedEnvironmentId);
   const selectedPolicyOpt = PLAYTEST_POLICY_OPTIONS.find((opt) => opt.id === policyId);
 
@@ -147,7 +149,12 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
     (confirmedRareCardSelections?.p2?.length ?? 0) === rareCardCount;
   const isRareReady = isP1RareReady && isP2RareReady;
 
-  const canStartMatch = isScenarioReady && isRareReady;
+  const isPolicySupported =
+    matchMode !== "humanVsAi" ||
+    !selectedPolicyOpt?.supportedRegulationIds ||
+    (currentRegulationId !== null && selectedPolicyOpt.supportedRegulationIds.includes(currentRegulationId));
+
+  const canStartMatch = isScenarioReady && isRareReady && isPolicySupported;
 
   return (
     <div className="w-full max-w-2xl mx-auto p-4 sm:p-6 my-2 bg-white rounded-xl border border-zinc-200 shadow-md font-sans">
@@ -310,25 +317,66 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
                 onChange={(e) => onSelectPolicyId(e.target.value as PlaytestPolicyId)}
                 className="w-full text-xs font-bold py-2 px-3 rounded-lg border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 min-h-[44px] cursor-pointer"
               >
-                {PLAYTEST_POLICY_OPTIONS.map((opt) => (
-                  <option
-                    key={opt.id}
-                    value={opt.id}
-                    disabled={opt.requiresSeed && !isOfficial}
-                  >
-                    {opt.label}
-                    {opt.requiresSeed && !isOfficial ? " (Official環境専用)" : ""}
-                  </option>
-                ))}
+                {PLAYTEST_POLICY_OPTIONS.map((opt) => {
+                  const isSupported =
+                    !opt.supportedRegulationIds ||
+                    (currentRegulationId !== null && opt.supportedRegulationIds.includes(currentRegulationId));
+                  const isDisabled = (opt.requiresSeed && !isOfficial) || !isSupported;
+
+                  let suffix = "";
+                  if (opt.requiresSeed && !isOfficial) {
+                    suffix = " (Official環境専用)";
+                  } else if (!isSupported && opt.supportedRegulationIds) {
+                    suffix = ` (${opt.supportedRegulationIds.join(", ")}専用)`;
+                  }
+
+                  return (
+                    <option key={opt.id} value={opt.id} disabled={isDisabled}>
+                      {opt.label}
+                      {suffix}
+                    </option>
+                  );
+                })}
               </select>
 
               {/* Policy 役割説明ボックス */}
               {selectedPolicyOpt && (
-                <div className="mt-1 p-2 bg-white rounded border border-zinc-200 text-[11px] font-mono text-zinc-700">
+                <div className="mt-1 p-2.5 bg-white rounded-lg border border-zinc-200 text-[11px] font-mono text-zinc-700">
                   <div className="font-bold text-zinc-900 mb-0.5">
                     {selectedPolicyOpt.label}
                   </div>
-                  <div>{selectedPolicyOpt.description}</div>
+                  <div className="leading-relaxed">{selectedPolicyOpt.description}</div>
+                  {/* Detailed metadata display for Evolution AI */}
+                  {selectedPolicyOpt.evolutionDetails && (
+                    <div className="mt-2 pt-2 border-t border-zinc-200 text-zinc-800 flex flex-col gap-1">
+                      <div className="grid grid-cols-2 gap-x-2 gap-y-1 text-[11px]">
+                        <div>
+                          <span className="text-zinc-500">世代:</span>{" "}
+                          <span className="font-bold">{selectedPolicyOpt.evolutionDetails.generation}</span>
+                        </div>
+                        <div>
+                          <span className="text-zinc-500">Baseline内戦績:</span>{" "}
+                          <span className="font-bold">{selectedPolicyOpt.evolutionDetails.baselineRecord}</span>
+                        </div>
+                        <div>
+                          <span className="text-zinc-500">DNA Schema:</span>{" "}
+                          <span className="font-bold">{selectedPolicyOpt.evolutionDetails.dnaSchema}</span>
+                        </div>
+                        <div>
+                          <span className="text-zinc-500">対人性能:</span>{" "}
+                          <span className="font-bold">{selectedPolicyOpt.evolutionDetails.humanPerformance}</span>
+                        </div>
+                      </div>
+                      <p className="text-[10px] text-zinc-500 mt-1 leading-normal">
+                        {selectedPolicyOpt.evolutionDetails.disclaimer}
+                      </p>
+                    </div>
+                  )}
+                  {!isPolicySupported && selectedPolicyOpt.supportedRegulationIds && (
+                    <div className="mt-2 p-1.5 rounded bg-amber-50 border border-amber-300 text-amber-900 text-[11px] font-bold">
+                      ⚠️ 現在の対戦環境は未対応です。公式レギュレーション ({selectedPolicyOpt.supportedRegulationIds.join(", ")}) を選択してください。
+                    </div>
+                  )}
                 </div>
               )}
             </div>
@@ -509,7 +557,9 @@ export const MatchSetupScreen: React.FC<MatchSetupScreenProps> = ({
           >
             {!isScenarioReady
               ? "※シナリオ手札の選択を完了してください"
-              : "※レアカードの選択を完了してください"}
+              : !isRareReady
+              ? "※レアカードの選択を完了してください"
+              : "※選択されたAIポリシーはこの対戦環境に対応していません"}
           </span>
         )}
         {onOpenScenarioBuilder && (

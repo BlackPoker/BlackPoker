@@ -5,6 +5,11 @@ import {
   PlaytestPolicyId,
   PlaytestSeatControllers,
 } from "../../engine/playtest/PlaytestSeatController";
+import {
+  EVOLUTION_G1_BEST_GENOME_ID,
+  EVOLUTION_G1_BEST_FEATURE_SCHEMA_VERSION,
+  EVOLUTION_G1_BEST_FULL_DIGEST,
+} from "../../engine/ai/EvolutionDNALoader";
 import { GameSessionStep } from "../../engine/session/GameSession";
 import type { PlaytestDecisionTranscriptEntryV1 } from "./PlaytestDecisionTranscript";
 import type { CardOccurrenceSelection } from "../../engine/regulation/SimulatorDeckProfileResolver";
@@ -60,6 +65,11 @@ export interface PlaytestDiagnosticBundleV1 {
     readonly matchMode: "humanVsHuman" | "humanVsAi";
     readonly humanSeat?: "p1" | "p2";
     readonly policyId?: string;
+    readonly policyMetadata?: {
+      readonly genomeId?: string;
+      readonly schemaVersion?: number;
+      readonly fullDnaDigest?: string;
+    };
 
     readonly rareCardSelections?: {
       readonly p1?: readonly CardOccurrenceSelection[];
@@ -258,6 +268,14 @@ export function buildPlaytestDiagnosticBundleV1(
       matchMode: params.activePlaytestSettings?.matchMode,
       humanSeat: params.activePlaytestSettings?.humanSeat,
       policyId: params.activePlaytestSettings?.policyId,
+      policyMetadata:
+        params.activePlaytestSettings?.policyId === "evolution-g1-best"
+          ? {
+              genomeId: EVOLUTION_G1_BEST_GENOME_ID,
+              schemaVersion: EVOLUTION_G1_BEST_FEATURE_SCHEMA_VERSION,
+              fullDnaDigest: EVOLUTION_G1_BEST_FULL_DIGEST,
+            }
+          : undefined,
 
       rareCardSelections: params.activePlaytestSettings?.rareCardSelections ?? params.activeMatch?.rareCardSelections,
       scenarioHandSelections: params.activePlaytestSettings?.scenarioHandSelections ?? params.activeMatch?.scenarioHandSelections,

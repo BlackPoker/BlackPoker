@@ -4,6 +4,7 @@ import { SeededRandom } from "../random/RandomSource";
 import { GenomePolicy } from "../ai/GenomePolicy";
 import { DecisionDNACodec } from "../ai/DecisionDNACodec";
 import { createManualGenericGenomeDNA } from "../ai/BaselinePolicies";
+import { createEvolutionG1BestPolicy, EVOLUTION_G1_BEST_SUPPORTED_REGULATION_ID } from "../ai/EvolutionDNALoader";
 import { BatchSimulationRunner } from "../simulation/BatchSimulationRunner";
 import { PlaytestPolicyId, PlaytestSeatControllers } from "./PlaytestSeatController";
 
@@ -29,7 +30,8 @@ export class PlaytestPolicyFactory {
   public static createPolicy(
     policyId: PlaytestPolicyId,
     matchSeed: number | undefined,
-    seat: string
+    seat: string,
+    regulationId?: string
   ): DecisionPolicy {
     switch (policyId) {
       case "playtestConservative":
@@ -61,6 +63,15 @@ export class PlaytestPolicyFactory {
         return new GenomePolicy(zeroDNA, "ZeroGenome");
       }
 
+      case "evolution-g1-best": {
+        if (regulationId !== undefined && regulationId !== EVOLUTION_G1_BEST_SUPPORTED_REGULATION_ID) {
+          throw new Error(
+            `Evolution g1 Best AI は公式レギュレーション ${EVOLUTION_G1_BEST_SUPPORTED_REGULATION_ID} 専用です (現在の環境: ${regulationId})`
+          );
+        }
+        return createEvolutionG1BestPolicy();
+      }
+
       default: {
         const exhaustiveCheck: never = policyId;
         throw new Error(`Unknown PlaytestPolicyId: ${exhaustiveCheck}`);
@@ -73,16 +84,17 @@ export class PlaytestPolicyFactory {
    */
   public static createPoliciesForMatch(
     seatControllers: PlaytestSeatControllers,
-    matchSeed?: number
+    matchSeed?: number,
+    regulationId?: string
   ): Record<string, DecisionPolicy> {
     const policies: Record<string, DecisionPolicy> = {};
 
     if (seatControllers.p1.kind === "POLICY") {
-      policies.p1 = this.createPolicy(seatControllers.p1.policyId, matchSeed, "p1");
+      policies.p1 = this.createPolicy(seatControllers.p1.policyId, matchSeed, "p1", regulationId);
     }
 
     if (seatControllers.p2.kind === "POLICY") {
-      policies.p2 = this.createPolicy(seatControllers.p2.policyId, matchSeed, "p2");
+      policies.p2 = this.createPolicy(seatControllers.p2.policyId, matchSeed, "p2", regulationId);
     }
 
     return policies;

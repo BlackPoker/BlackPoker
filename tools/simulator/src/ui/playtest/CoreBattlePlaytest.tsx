@@ -636,7 +636,11 @@ export const CoreBattlePlaytest: React.FC = () => {
       const seatControllers = createSeatControllers(mode, humanSeat, policyId);
       let policies: Record<string, DecisionPolicy>;
       try {
-        policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, outcome.activeMatch.seed);
+        policies = PlaytestPolicyFactory.createPoliciesForMatch(
+          seatControllers,
+          outcome.activeMatch.seed,
+          outcome.activeMatch.regulationId
+        );
       } catch (err: any) {
         setRuntimeNotice({
           type: "TECHNICAL_ERROR",
@@ -1331,7 +1335,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       try {
         const freshPolicies = PlaytestPolicyFactory.createPoliciesForMatch(
           activeSeatControllers,
-          activeMatch.seed
+          activeMatch.seed,
+          activeMatch.regulationId
         );
 
         for (const item of recon.replayedDecisions) {

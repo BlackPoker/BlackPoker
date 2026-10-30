@@ -39,6 +39,19 @@ describe("PlaytestPolicyFactory Tests", () => {
       expect(policy.descriptor.name).toBe("ZeroGenome");
     });
 
+    it("Evolution g1 Best が正常に生成されること (light-entry16)", () => {
+      const policy = PlaytestPolicyFactory.createPolicy("evolution-g1-best", undefined, "p2", "light-entry16");
+      expect(policy).toBeDefined();
+      expect(policy.descriptor.kind).toBe("genome");
+      expect(policy.descriptor.name).toBe("Evolution g1 Best (Experimental)");
+    });
+
+    it("Evolution g1 Best を未対応レギュレーションで生成しようとすると例外を投げること", () => {
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("evolution-g1-best", undefined, "p2", "standard-pack")
+      ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です/);
+    });
+
     it("未知の policyId の場合は fail-fast すること", () => {
       expect(() => PlaytestPolicyFactory.createPolicy("unknown" as any, 12345, "p2")).toThrow(
         /Unknown PlaytestPolicyId/

@@ -332,7 +332,12 @@ export function parsePlaytestShareUrl(
       if (rawPolicy) {
         const matched = PLAYTEST_POLICY_OPTIONS.find((p) => p.id === rawPolicy);
         if (matched) {
-          policyId = matched.id;
+          if (matched.supportedRegulationIds) {
+            warnings.push(`シナリオ環境では "${matched.label}" を使用できないため、デフォルト (FirstLegal) を設定しました。`);
+            policyId = "firstLegal";
+          } else {
+            policyId = matched.id;
+          }
         } else {
           warnings.push(`無効なAIポリシーです: "${rawPolicy}"。デフォルト (FirstLegal) を設定しました。`);
         }
@@ -424,13 +429,23 @@ export function parsePlaytestShareUrl(
       }
     }
 
-    // Policy / Environment の整合性チェック（非公式環境での SeededRandom など）
+    // Policy / Environment の整合性チェック（非公式環境での SeededRandom、特定レギュレーション専用AIなど）
     const selectedPolicyOpt = PLAYTEST_POLICY_OPTIONS.find((p) => p.id === policyId);
     if (selectedPolicyOpt?.requiresSeed && !isOfficialEnvironment(environmentId)) {
       warnings.push(
         `選択された環境 (${environmentId}) では "${selectedPolicyOpt.label}" を使用できないため、FirstLegal に変更しました。`
       );
       policyId = "firstLegal";
+    }
+
+    if (selectedPolicyOpt?.supportedRegulationIds) {
+      const regId = extractRegulationId(environmentId);
+      if (!regId || !selectedPolicyOpt.supportedRegulationIds.includes(regId)) {
+        warnings.push(
+          `選択された環境 (${environmentId}) では "${selectedPolicyOpt.label}" を使用できないため、FirstLegal に変更しました。`
+        );
+        policyId = "firstLegal";
+      }
     }
   } else {
     // mode === "humanVsHuman"

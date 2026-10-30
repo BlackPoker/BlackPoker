@@ -15,7 +15,8 @@ export type PlaytestPolicyId =
   | "firstLegal"
   | "seededRandom"
   | "manualGenericGenome"
-  | "zeroGenome";
+  | "zeroGenome"
+  | "evolution-g1-best";
 
 /**
  * UI表示用メタデータ
@@ -26,6 +27,16 @@ export interface PlaytestPolicyOption {
   readonly description: string;
   /** 公式レギュレーションなど、決定論的 Seed が定義されている環境でのみ有効 */
   readonly requiresSeed?: boolean;
+  /** 対応レギュレーションID一覧 (未指定の場合は全環境対応) */
+  readonly supportedRegulationIds?: readonly string[];
+  /** 進化AI詳細メタデータ (UI表示用) */
+  readonly evolutionDetails?: {
+    readonly generation: string;
+    readonly baselineRecord: string;
+    readonly dnaSchema: string;
+    readonly humanPerformance: string;
+    readonly disclaimer: string;
+  };
 }
 
 export const PLAYTEST_POLICY_OPTIONS: readonly PlaytestPolicyOption[] = [
@@ -54,6 +65,19 @@ export const PLAYTEST_POLICY_OPTIONS: readonly PlaytestPolicyOption[] = [
     id: "zeroGenome",
     label: "ZeroGenome (Debug)",
     description: "全特徴量重み0の基準値（DNA重みなしのデバッグ用）",
+  },
+  {
+    id: "evolution-g1-best",
+    label: "Evolution g1 Best (Experimental)",
+    description: "進化学習で生成されたGenome AI。Baseline内で9勝1敗。対人戦の強さは未検証です。",
+    supportedRegulationIds: ["light-entry16"],
+    evolutionDetails: {
+      generation: "g1",
+      baselineRecord: "9勝1敗",
+      dnaSchema: "v6",
+      humanPerformance: "未評価",
+      disclaimer: "※「9勝1敗」は同一世代母集団内での実験戦績であり、対人戦での一般的な強さを保証するものではありません。",
+    },
   },
 ];
 
