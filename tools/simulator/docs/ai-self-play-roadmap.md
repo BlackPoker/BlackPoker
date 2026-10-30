@@ -562,3 +562,6 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
     - **有界スケーリング**: 全308特徴量の Canonical Registry を策定（`docs/ai-v92-feature-schema-v6-registry-v1.json`）。新規2特徴量は `BOOLEAN` / `identity` スケーリングを採用し、不変条件 $c_i \in [-1, 1], p_j \in [-1, 1], |c_i \cdot p_j| \le 1.0$ を完全維持。
     - **Decision DNA 移行契約**: Format Version 1 維持、Schema Version 6。相互作用行列 $165 \times 143 = 23,595$ 次元、総重み 23,738 次元。新規2行のゼロ初期化による数学的スコア不変性（$\Delta \text{Score} = 0.0$）を証明。未移行 v5 DNA の Fail-Closed 拒絶を義務付け。
     - **指紋改定**: `pof1` $\to$ `pof2`, `drsf1` $\to$ `drsf2`, `gpif1` $\to$ `gpif2`。盤面構造指紋（`sgf1`, `sgf1-ti`）は不変。受動的診断不変性（シミュレーション結果への非干渉）を完全維持。
+13. **Feature Schema v6 Evolution Baseline (BP-SIM-AI-V92-V6-EVOLUTION-BASELINE-V1)**:
+    - **測定ステータス**: **IMPLEMENTED / READY FOR INDEPENDENT REVIEW** (`reports/ai/v92-v6-evolution-baseline-v1.json`, `docs/ai-v92-v6-evolution-baseline-v1.md`, `src/cli/v92V6EvolutionBaseline.ts`, `src/tests/ai/v92V6EvolutionBaseline.test.ts`)
+    - **検証エビデンス**: light-entry16 (N=6, R=1, maxDecisions=500) g0 30/30 COMPLETED, g1 30/30 COMPLETED, Run A/B 決定論性 100% 一致, Fitness 保存則 100% 成立, Diagnostic v2 (pof2/drsf2/gpif2) OFF/ON 完全論理パリティ成立, Standard+Pack smoke (cap=200 で 4/4 INCOMPLETE, cap=500 で 4/4 COMPLETED)。全15受入テスト PASS。
