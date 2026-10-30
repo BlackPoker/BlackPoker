@@ -182,13 +182,13 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
       expect(fps.structuralTurnInvariant.startsWith("sgf1-ti-")).toBe(true);
       expect(fps.structuralTurnInvariant).toHaveLength(72);
 
-      expect(fps.observation.startsWith("pof1-")).toBe(true);
+      expect(fps.observation.startsWith("pof2-")).toBe(true);
       expect(fps.observation).toHaveLength(69);
 
-      expect(fps.decisionRequest.startsWith("drsf1-")).toBe(true);
+      expect(fps.decisionRequest.startsWith("drsf2-")).toBe(true);
       expect(fps.decisionRequest).toHaveLength(70);
 
-      expect(fps.policyInput.startsWith("gpif1-")).toBe(true);
+      expect(fps.policyInput.startsWith("gpif2-")).toBe(true);
       expect(fps.policyInput).toHaveLength(70);
 
       // Re-computation on identical state produces byte-identical hashes
@@ -1050,9 +1050,9 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
         expect(record.boundary).toBe("PRE_DECISION");
         expect(record.fingerprints.structural.startsWith("sgf1-")).toBe(true);
         expect(record.fingerprints.structuralTurnInvariant.startsWith("sgf1-ti-")).toBe(true);
-        expect(record.fingerprints.observation.startsWith("pof1-")).toBe(true);
-        expect(record.fingerprints.decisionRequest.startsWith("drsf1-")).toBe(true);
-        expect(record.fingerprints.policyInput.startsWith("gpif1-")).toBe(true);
+        expect(record.fingerprints.observation.startsWith("pof2-")).toBe(true);
+        expect(record.fingerprints.decisionRequest.startsWith("drsf2-")).toBe(true);
+        expect(record.fingerprints.policyInput.startsWith("gpif2-")).toBe(true);
 
         expect(record.selectedDecision.selectedPatternRef).toBeGreaterThanOrEqual(0);
         expect(record.selectedDecision.selectedLogicalPatternKey).toBeDefined();
@@ -1263,7 +1263,7 @@ describe("Semantic Stall / Cycle Diagnostic V1 Production Suite (BP-SIM-AI-SEMAN
       const diag = result.semanticDiagnostics!;
 
       // Blocker E: Version Contract
-      expect(diag.semanticDiagnosticVersion).toBe(1);
+      expect(diag.semanticDiagnosticVersion).toBe(2);
 
       // Blocker D: Retention limit default 64 (under v9.2 rules, match naturally completes at 75 decisions > 64)
       expect(diag.traceRetentionLimit).toBe(64);

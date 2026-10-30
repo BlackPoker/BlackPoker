@@ -72,6 +72,7 @@ export class DecisionFeatureEncoder {
 
     const selfPlayer = obs.players?.find((p) => p.playerId === viewerId || p.isViewer);
     const opponentPlayer = obs.players?.find((p) => p.playerId !== viewerId && !p.isViewer);
+    const opponentId = opponentPlayer?.playerId ?? (viewerId === "p1" ? "p2" : "p1");
 
     // 1. Decision Context (8)
     const sourceIsAction = request.source?.type === "ACTION_REQUEST" ? 1 : 0;
@@ -86,6 +87,12 @@ export class DecisionFeatureEncoder {
       : obs.stageRequestRefs
         ? obs.stageRequestRefs.length
         : 0;
+
+    // Focus Context (Viewer Relative, v9.2 Core Flow)
+    // focusPlayerId が viewerId と一致すれば self=1, opponentId と一致すれば opp=1
+    // undefined, "system", 不正ID等は (0, 0) として安全にフェイルクローズ
+    const selfIsFocus = obs.focusPlayerId === viewerId ? 1 : 0;
+    const oppIsFocus = obs.focusPlayerId !== undefined && obs.focusPlayerId === opponentId ? 1 : 0;
 
     // 2. Legal Pattern Counts & Actionability (11)
     const catalog = request.catalog;
@@ -636,6 +643,10 @@ export class DecisionFeatureEncoder {
       reqTargetUnitIsDrive,
       reqTargetUnitFaceUp,
       reqTargetUnitFaceDown,
+
+      // 9. Focus Context (Viewer Relative, v9.2 Core Flow) (2)
+      selfIsFocus,
+      oppIsFocus,
     ];
 
     return DecisionFeatureScaler.scaleContext(values);

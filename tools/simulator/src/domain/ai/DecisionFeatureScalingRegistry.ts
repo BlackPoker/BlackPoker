@@ -1,15 +1,15 @@
 /**
- * Decision Feature Scaling Registry (Schema v5)
+ * Decision Feature Scaling Registry (Schema v6)
  *
- * Canonical pure TypeScript registry for Schema v5 decision features.
- * Total features: 306 (Context: 163, Pattern: 143).
+ * Canonical pure TypeScript registry for Schema v6 decision features.
+ * Total features: 308 (Context: 165, Pattern: 143).
  *
  * Pure TypeScript definitions for runtime O(1) indexed lookup.
- * Parity verified against docs/ai-feature-scaling-registry-v1-r2.json.
+ * Parity verified against docs/ai-v92-feature-schema-v6-registry-v1.json.
  */
 
 export const FEATURE_SCALING_REGISTRY_VERSION = "1.0.0-r2";
-export const FEATURE_SCALING_SCHEMA_VERSION = 5;
+export const FEATURE_SCALING_SCHEMA_VERSION = 6;
 
 export type ScalingDomain = 'CONTEXT' | 'PATTERN';
 
@@ -1510,6 +1510,24 @@ export const CONTEXT_SCALING_RULES: readonly FeatureScalingRule[] = [
     domain: "CONTEXT",
     index: 162,
     name: "request_target_unit_face_down",
+    scalingClass: "BOOLEAN",
+    scalingFunction: "identity",
+    parameter: {},
+    outputDomain: "[0, 1]",
+  },
+  {
+    domain: "CONTEXT",
+    index: 163,
+    name: "self_is_focus_player",
+    scalingClass: "BOOLEAN",
+    scalingFunction: "identity",
+    parameter: {},
+    outputDomain: "[0, 1]",
+  },
+  {
+    domain: "CONTEXT",
+    index: 164,
+    name: "opponent_is_focus_player",
     scalingClass: "BOOLEAN",
     scalingFunction: "identity",
     parameter: {},

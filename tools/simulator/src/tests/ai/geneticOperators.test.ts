@@ -215,9 +215,9 @@ describe("Genetic Operators V1 (BP-SIM-AI-GENETIC-OPERATORS-V1)", () => {
       }
     });
 
-    it("Test 5: total draw count is exactly 23,452", () => {
+    it("Test 5: total draw count is exactly 23,738", () => {
       const totalGenes = DNA_PATTERN_DIMENSION + DNA_INTERACTION_DIMENSION;
-      expect(totalGenes).toBe(23452);
+      expect(totalGenes).toBe(23738);
     });
 
     it("Test 6: crossover is 100% deterministic with identical seed", () => {
@@ -286,7 +286,7 @@ describe("Genetic Operators V1 (BP-SIM-AI-GENETIC-OPERATORS-V1)", () => {
       expect(res.contextPatternWeights).toEqual(weights.contextPatternWeights);
     });
 
-    it("Test 10: mutationRate = 1 mutates every gene and draws exactly 23,452 + 12 * 23,452 = 304,876 times", () => {
+    it("Test 10: mutationRate = 1 mutates every gene and draws exactly 23,738 + 12 * 23,738 = 308,594 times", () => {
       const config: GeneticOperatorConfig = {
         ...DEFAULT_GENETIC_OPERATOR_CONFIG,
         mutationRate: 1.0,
@@ -296,7 +296,7 @@ describe("Genetic Operators V1 (BP-SIM-AI-GENETIC-OPERATORS-V1)", () => {
       expect(countMutatedGenes(weights, res)).toBe(totalGenes);
 
       const expectedDraws = totalGenes + 12 * totalGenes;
-      expect(expectedDraws).toBe(304876);
+      expect(expectedDraws).toBe(308594);
     });
 
     it("Test 11: mutation is 100% deterministic", () => {

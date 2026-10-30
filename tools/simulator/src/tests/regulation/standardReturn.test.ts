@@ -1297,10 +1297,10 @@ describe("Official Regulation Phase 3.0-G - Return / 帰還 (action.unsummons) T
   // =========================================================================
   // 23. 不変条件検証 (FEATURE_SCHEMA_VERSION = 4, standard-pack.simulatorImplemented = true, standard-entry16 = false)
   // =========================================================================
-  it("Test 23: Invariants verification (FEATURE_SCHEMA_VERSION=5, simulatorImplemented=true for standard-pack)", () => {
-    expect(FEATURE_SCHEMA_VERSION).toBe(5);
+  it("Test 23: Invariants verification (FEATURE_SCHEMA_VERSION=6, simulatorImplemented=true for standard-pack)", () => {
+    expect(FEATURE_SCHEMA_VERSION).toBe(6);
     const dna = createManualGenericGenomeDNA();
-    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(23452);
+    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(23738);
 
     const regResult = RegulationValidator.validateRegulation(catalog, "standard-pack");
     expect(regResult.simulatorImplemented).toBe(true);

@@ -106,23 +106,23 @@ describe("Decision Feature Scaling (BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1)
   });
 
   describe("2. Canonical Scaling Registry Parity Test (docs parity)", () => {
-    const registryPath = path.resolve(__dirname, "../../../docs/ai-feature-scaling-registry-v1-r2.json");
+    const registryPath = path.resolve(__dirname, "../../../docs/ai-v92-feature-schema-v6-registry-v1.json");
     const jsonContent = fs.readFileSync(registryPath, "utf-8");
     const canonicalDoc = JSON.parse(jsonContent);
 
     it("should match schema version and registry metadata", () => {
-      expect(FEATURE_SCHEMA_VERSION).toBe(5);
-      expect(FEATURE_SCALING_SCHEMA_VERSION).toBe(5);
-      expect(canonicalDoc.schemaVersion).toBe(5);
+      expect(FEATURE_SCHEMA_VERSION).toBe(6);
+      expect(FEATURE_SCALING_SCHEMA_VERSION).toBe(6);
+      expect(canonicalDoc.schemaVersion).toBe(6);
       expect(FEATURE_SCALING_REGISTRY_VERSION).toBe("1.0.0-r2");
       expect(canonicalDoc.registryVersion).toBe("1.0.0-r2");
     });
 
-    it("should have exactly 163 context rules and 143 pattern rules matching canonical dimensions", () => {
-      expect(CONTEXT_SCALING_RULES.length).toBe(163);
-      expect(CONTEXT_FEATURE_DIMENSION).toBe(163);
-      expect(CONTEXT_FEATURE_NAMES.length).toBe(163);
-      expect(canonicalDoc.contextFeatures.length).toBe(163);
+    it("should have exactly 165 context rules and 143 pattern rules matching canonical dimensions", () => {
+      expect(CONTEXT_SCALING_RULES.length).toBe(165);
+      expect(CONTEXT_FEATURE_DIMENSION).toBe(165);
+      expect(CONTEXT_FEATURE_NAMES.length).toBe(165);
+      expect(canonicalDoc.contextFeatures.length).toBe(165);
 
       expect(PATTERN_SCALING_RULES.length).toBe(143);
       expect(PATTERN_FEATURE_DIMENSION).toBe(143);
@@ -130,8 +130,8 @@ describe("Decision Feature Scaling (BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1)
       expect(canonicalDoc.patternFeatures.length).toBe(143);
     });
 
-    it("should achieve 100% parity across all 163 Context scaling rules", () => {
-      for (let i = 0; i < 163; i++) {
+    it("should achieve 100% parity across all 165 Context scaling rules", () => {
+      for (let i = 0; i < 165; i++) {
         const codeRule = CONTEXT_SCALING_RULES[i];
         const docRule = canonicalDoc.contextFeatures[i];
 
@@ -176,13 +176,13 @@ describe("Decision Feature Scaling (BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1)
   });
 
   describe("3. DecisionFeatureScaler Fail-Closed Safety Tests", () => {
-    const validContext = new Array<number>(163).fill(0);
+    const validContext = new Array<number>(165).fill(0);
     const validPattern = new Array<number>(143).fill(0);
 
     it("should succeed and produce bounded values for valid all-zero inputs", () => {
       const scaledCtx = DecisionFeatureScaler.scaleContext(validContext);
-      expect(scaledCtx.length).toBe(163);
-      for (let i = 0; i < 163; i++) {
+      expect(scaledCtx.length).toBe(165);
+      for (let i = 0; i < 165; i++) {
         expect(scaledCtx[i]).toBe(0);
       }
 
@@ -306,7 +306,7 @@ describe("Decision Feature Scaling (BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1)
 
   describe("4. Vector Domain Enforcement", () => {
     it("should scale realistic non-zero context vector strictly into [-1, 1]", () => {
-      const sampleCtx = new Array<number>(163).fill(0);
+      const sampleCtx = new Array<number>(165).fill(0);
       sampleCtx[0] = 1; // source_is_action_request (BOOLEAN)
       sampleCtx[6] = 5; // turn_count (NONNEGATIVE_COUNT scale 10 -> 5/15 = 0.333...)
       sampleCtx[7] = 2; // stage_depth (NONNEGATIVE_COUNT scale 4 -> 2/6 = 0.333...)
@@ -318,7 +318,7 @@ describe("Decision Feature Scaling (BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1)
       }
 
       const scaled = DecisionFeatureScaler.scaleContext(sampleCtx);
-      expect(scaled.length).toBe(163);
+      expect(scaled.length).toBe(165);
 
       expect(scaled[0]).toBe(1.0);
       expect(scaled[6]).toBeCloseTo(5 / 15, 10);
@@ -434,31 +434,31 @@ describe("Decision Feature Scaling (BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1)
     });
   });
 
-  describe("5. DNA v4 Rejection & Schema v5 Scorer Compatibility", () => {
-    it("should reject v4 DNA in DecisionDNACodec.validate", () => {
+  describe("5. DNA v5 Rejection & Schema v6 Scorer Compatibility", () => {
+    it("should reject v5 DNA in DecisionDNACodec.validate", () => {
       const zeroDna = DecisionDNACodec.createZeroDecisionDNA();
-      expect(zeroDna.featureSchemaVersion).toBe(5);
+      expect(zeroDna.featureSchemaVersion).toBe(6);
 
-      const v4Dna = {
+      const v5Dna = {
         ...zeroDna,
-        featureSchemaVersion: 4,
+        featureSchemaVersion: 5,
       };
 
-      expect(() => DecisionDNACodec.validate(v4Dna)).toThrow(DecisionDNAValidationError);
+      expect(() => DecisionDNACodec.validate(v5Dna)).toThrow(DecisionDNAValidationError);
     });
 
     it("should fail closed in GenomeScorer when DNA schema version != feature schema version", () => {
       const zeroDna = DecisionDNACodec.createZeroDecisionDNA();
-      const v4Dna = {
+      const v5Dna = {
         ...zeroDna,
-        featureSchemaVersion: 4,
+        featureSchemaVersion: 5,
       };
 
       const dummyFeatures = {
-        featureSchemaVersion: 5,
+        featureSchemaVersion: 6,
         context: {
           featureNames: CONTEXT_FEATURE_NAMES,
-          values: new Array(163).fill(0),
+          values: new Array(165).fill(0),
         },
         patterns: [
           {
@@ -469,18 +469,18 @@ describe("Decision Feature Scaling (BP-SIM-AI-FEATURE-SCALING-IMPLEMENTATION-V1)
         ],
       };
 
-      expect(() => GenomeScorer.score(dummyFeatures, v4Dna as any)).toThrow(
+      expect(() => GenomeScorer.score(dummyFeatures, v5Dna as any)).toThrow(
         /FeatureSchemaVersion 不一致/
       );
     });
 
-    it("should successfully score Schema v5 features with Schema v5 Zero DNA", () => {
+    it("should successfully score Schema v6 features with Schema v6 Zero DNA", () => {
       const zeroDna = DecisionDNACodec.createZeroDecisionDNA();
       const dummyFeatures = {
-        featureSchemaVersion: 5,
+        featureSchemaVersion: 6,
         context: {
           featureNames: CONTEXT_FEATURE_NAMES,
-          values: DecisionFeatureScaler.scaleContext(new Array(163).fill(0)),
+          values: DecisionFeatureScaler.scaleContext(new Array(165).fill(0)),
         },
         patterns: [
           {

@@ -35,9 +35,9 @@ export class SemanticFingerprintCalculator {
   ): SemanticFingerprints {
     const structural = this.computeSgf1(state, sideState);
     const structuralTurnInvariant = this.computeSgf1Ti(state, sideState);
-    const observation = this.computePof1(request.observation);
-    const decisionRequest = this.computeDrsf1(request);
-    const policyInput = this.computeGpif1(request);
+    const observation = this.computePof2(request.observation);
+    const decisionRequest = this.computeDrsf2(request);
+    const policyInput = this.computeGpif2(request);
 
     return {
       structural,
@@ -74,37 +74,36 @@ export class SemanticFingerprintCalculator {
   }
 
   /**
-   * 3. Player Observation Fingerprint
-   * プレフィックス: "pof1-"
-   * 対象: Readonly<PlayerObservation> (秘密情報を排除した合法的観測)
+   * 3. Player Observation Fingerprint (v2)
+   * プレフィックス: "pof2-"
+   * 対象: Readonly<PlayerObservation> (focusPlayerId を含む合法的観測)
    */
-  public static computePof1(observation: Readonly<PlayerObservation>): string {
+  public static computePof2(observation: Readonly<PlayerObservation>): string {
     const projection = this.extractObservationProjection(observation);
     const canonicalJson = SemanticCanonicalSerializer.serialize(projection);
     const hash = SemanticSHA256.hash(canonicalJson);
-    return `pof1-${hash}`;
+    return `pof2-${hash}`;
   }
 
   /**
-   * 4. Decision Request Semantic Fingerprint
-   * プレフィックス: "drsf1-"
-   * 対象: Readonly<DecisionRequest> (プロトコル、判断プレイヤー、Source、観測、合法パターン、カタログ解決実体)
-   * 除外: matchId, decisionId, stateVersion, patternId, 表示用文字列
+   * 4. Decision Request Semantic Fingerprint (v2)
+   * プレフィックス: "drsf2-"
+   * 対象: Readonly<DecisionRequest> (pof2 準拠の Observation 射影を含む)
    */
-  public static computeDrsf1(request: Readonly<DecisionRequest>): string {
+  public static computeDrsf2(request: Readonly<DecisionRequest>): string {
     const projection = this.extractDecisionRequestProjection(request);
     const canonicalJson = SemanticCanonicalSerializer.serialize(projection);
     const hash = SemanticSHA256.hash(canonicalJson);
-    return `drsf1-${hash}`;
+    return `drsf2-${hash}`;
   }
 
   /**
-   * 5. Genome Policy Input Fingerprint
-   * プレフィックス: "gpif1-"
-   * 対象: DecisionFeatureEncoder.encode(request) から抽出した GenomePolicyScoringInputProjection
+   * 5. Genome Policy Input Fingerprint (v2)
+   * プレフィックス: "gpif2-"
+   * 対象: DecisionFeatureEncoder.encode(request) から抽出した GenomePolicyScoringInputProjection (Schema v6, 165次元)
    * 厳格な非丸め IEEE 754 浮動小数点シリアライズ
    */
-  public static computeGpif1(request: Readonly<DecisionRequest>): string {
+  public static computeGpif2(request: Readonly<DecisionRequest>): string {
     const encoded = DecisionFeatureEncoder.encode(request);
 
     if (encoded.featureSchemaVersion !== FEATURE_SCHEMA_VERSION) {
@@ -128,8 +127,58 @@ export class SemanticFingerprintCalculator {
     }
 
     const projection: GenomePolicyScoringInputProjection = {
-      featureSchemaVersion: 5,
+      featureSchemaVersion: 6,
       contextValues: encoded.context.values,
+      patterns: encoded.patterns.map((p) => ({
+        patternRef: p.patternRef,
+        values: p.values,
+      })),
+    };
+
+    const canonicalJson = SemanticCanonicalSerializer.serialize(projection);
+    const hash = SemanticSHA256.hash(canonicalJson);
+    return `gpif2-${hash}`;
+  }
+
+  /**
+   * Legacy v1 Player Observation Fingerprint
+   * プレフィックス: "pof1-"
+   * 注意: focusPlayerId を意図的に除外し、v1 互換性を維持します。
+   */
+  public static computePof1(observation: Readonly<PlayerObservation>): string {
+    const projection = { ...this.extractObservationProjection(observation) };
+    delete projection.focusPlayerId;
+    const canonicalJson = SemanticCanonicalSerializer.serialize(projection);
+    const hash = SemanticSHA256.hash(canonicalJson);
+    return `pof1-${hash}`;
+  }
+
+  /**
+   * Legacy v1 Decision Request Semantic Fingerprint
+   * プレフィックス: "drsf1-"
+   * 注意: observation.focusPlayerId を意図的に除外し、v1 互換性を維持します。
+   */
+  public static computeDrsf1(request: Readonly<DecisionRequest>): string {
+    const projection = JSON.parse(JSON.stringify(this.extractDecisionRequestProjection(request)));
+    if (projection && projection.observation) {
+      delete projection.observation.focusPlayerId;
+    }
+    const canonicalJson = SemanticCanonicalSerializer.serialize(projection);
+    const hash = SemanticSHA256.hash(canonicalJson);
+    return `drsf1-${hash}`;
+  }
+
+  /**
+   * Legacy v1 Genome Policy Input Fingerprint
+   * プレフィックス: "gpif1-"
+   * 注意: Feature Schema v5 相当（先頭163 Context 特徴量のみ）をプロジェクションします。
+   */
+  public static computeGpif1(request: Readonly<DecisionRequest>): string {
+    const encoded = DecisionFeatureEncoder.encode(request);
+
+    const projection: any = {
+      featureSchemaVersion: 5,
+      contextValues: encoded.context.values.slice(0, 163),
       patterns: encoded.patterns.map((p) => ({
         patternRef: p.patternRef,
         values: p.values,
@@ -831,6 +880,7 @@ export class SemanticFingerprintCalculator {
       viewerPlayerId: obs.viewerPlayerId,
       turnPlayerId: obs.turnPlayerId,
       chancePlayerId: obs.chancePlayerId,
+      focusPlayerId: obs.focusPlayerId,
       turnCount: obs.turnCount ?? 1,
       players: Array.isArray(obs.players)
         ? obs.players.map((p) => ({

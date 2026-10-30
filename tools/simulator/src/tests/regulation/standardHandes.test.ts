@@ -778,10 +778,10 @@ describe("Official Regulation Phase 3.0-F - Handes & Opponent Hand Effect Select
     expect(hashA).toBe(hashB);
   });
 
-  it("Test 17: AI compatibility - GenomePolicy with DNA 23452 and FEATURE_SCHEMA_VERSION = 5", () => {
-    expect(FEATURE_SCHEMA_VERSION).toBe(5);
+  it("Test 17: AI compatibility - GenomePolicy with DNA 23738 and FEATURE_SCHEMA_VERSION = 6", () => {
+    expect(FEATURE_SCHEMA_VERSION).toBe(6);
     const dna = createManualGenericGenomeDNA();
-    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(23452);
+    expect(dna.patternWeights.length + dna.contextPatternWeights.length).toBe(23738);
 
     const genomePolicy = new GenomePolicy(dna);
 

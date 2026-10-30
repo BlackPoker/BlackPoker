@@ -73,14 +73,14 @@ describe("Decision DNA Format v1 & Genome Scorer v1 (Phase 3.1)", () => {
   };
 
   describe("AA. Decision DNA Format & Validation", () => {
-    it("1. 定数と次元数が正しく定義されていること (163, 143, 23309, 23452)", () => {
+    it("1. 定数と次元数が正しく定義されていること (165, 143, 23595, 23738)", () => {
       expect(DNA_FORMAT_VERSION).toBe(1);
-      expect(DNA_CONTEXT_DIMENSION).toBe(163);
+      expect(DNA_CONTEXT_DIMENSION).toBe(165);
       expect(DNA_PATTERN_DIMENSION).toBe(143);
-      expect(DNA_INTERACTION_DIMENSION).toBe(163 * 143);
-      expect(DNA_INTERACTION_DIMENSION).toBe(23309);
-      expect(DNA_TOTAL_WEIGHTS).toBe(143 + 23309);
-      expect(DNA_TOTAL_WEIGHTS).toBe(23452);
+      expect(DNA_INTERACTION_DIMENSION).toBe(165 * 143);
+      expect(DNA_INTERACTION_DIMENSION).toBe(23595);
+      expect(DNA_TOTAL_WEIGHTS).toBe(143 + 23595);
+      expect(DNA_TOTAL_WEIGHTS).toBe(23738);
       expect(SCORING_MODEL_V1).toBe("linear-bilinear-v1");
     });
 
@@ -88,12 +88,12 @@ describe("Decision DNA Format v1 & Genome Scorer v1 (Phase 3.1)", () => {
       const zeroDna = DecisionDNACodec.createZeroDecisionDNA({ id: "zero-001", name: "Zero Agent" });
 
       expect(zeroDna.dnaFormatVersion).toBe(1);
-      expect(zeroDna.featureSchemaVersion).toBe(5);
+      expect(zeroDna.featureSchemaVersion).toBe(6);
       expect(zeroDna.scoringModel).toBe("linear-bilinear-v1");
-      expect(zeroDna.contextDimension).toBe(163);
+      expect(zeroDna.contextDimension).toBe(165);
       expect(zeroDna.patternDimension).toBe(143);
       expect(zeroDna.patternWeights.length).toBe(143);
-      expect(zeroDna.contextPatternWeights.length).toBe(23309);
+      expect(zeroDna.contextPatternWeights.length).toBe(23595);
       expect(zeroDna.patternWeights.every((w) => w === 0)).toBe(true);
       expect(zeroDna.contextPatternWeights.every((w) => w === 0)).toBe(true);
       expect(zeroDna.metadata?.name).toBe("Zero Agent");

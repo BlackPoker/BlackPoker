@@ -319,7 +319,7 @@ export class SemanticStallCycleDetector {
    */
   public getResult(): SemanticDiagnosticResult {
     return {
-      semanticDiagnosticVersion: 1,
+      semanticDiagnosticVersion: 2,
       totalTraceCount: this.totalTraceCount,
       traceRetentionLimit: this.traceRetentionLimit,
       traceTruncated: this.totalTraceCount > this.traceRetentionLimit,

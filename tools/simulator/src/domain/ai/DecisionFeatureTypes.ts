@@ -22,12 +22,12 @@
  */
 
 /**
- * Decision Feature Schema Version (Version 5)
+ * Decision Feature Schema Version (Version 6)
  */
-export const FEATURE_SCHEMA_VERSION = 5;
+export const FEATURE_SCHEMA_VERSION = 6;
 
 /**
- * Ordered list of Context Feature names (Version 5)
+ * Ordered list of Context Feature names (Version 6)
  */
 export const CONTEXT_FEATURE_NAMES = [
   // 1. Decision Context (Viewer Relative) (8)
@@ -219,6 +219,10 @@ export const CONTEXT_FEATURE_NAMES = [
   "request_target_unit_is_drive",
   "request_target_unit_face_up",
   "request_target_unit_face_down",
+
+  // 9. Focus Context (Viewer Relative, v9.2 Core Flow) (2)
+  "self_is_focus_player",
+  "opponent_is_focus_player",
 ] as const;
 
 export type ContextFeatureName = (typeof CONTEXT_FEATURE_NAMES)[number];
@@ -404,6 +408,7 @@ export const PATTERN_FEATURE_NAMES = [
 
 export type PatternFeatureName = (typeof PATTERN_FEATURE_NAMES)[number];
 export const PATTERN_FEATURE_DIMENSION = PATTERN_FEATURE_NAMES.length;
+export const DECISION_FEATURE_TOTAL_DIMENSION = CONTEXT_FEATURE_DIMENSION + PATTERN_FEATURE_DIMENSION;
 
 /**
  * 盤面・文脈特徴量コンテナ

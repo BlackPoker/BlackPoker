@@ -815,9 +815,9 @@ describe("Official Action Implementation 1.0: Search Foundation Tests (A to T)",
     const submittedStep = session.submitDecision(genomeDecision);
     expect(submittedStep.type === "WAITING_FOR_DECISION" || submittedStep.type === "PROGRESSED").toBe(true);
 
-    // 4. DecisionFeatureEncoder (23452次元特徴量エンコーダ)
+    // 4. DecisionFeatureEncoder (23738次元特徴量エンコーダ)
     const encoded = DecisionFeatureEncoder.encode(nextStep.request);
-    expect(encoded.featureSchemaVersion).toBe(5);
+    expect(encoded.featureSchemaVersion).toBe(6);
     expect(encoded.context.values.length).toBe(DecisionFeatureEncoder.CONTEXT_DIMENSION);
     expect(encoded.patterns.length).toBe(nextStep.request.patterns.length);
   });

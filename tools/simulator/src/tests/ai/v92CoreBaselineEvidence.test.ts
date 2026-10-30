@@ -129,8 +129,8 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
       const enc1 = DecisionFeatureEncoder.encode(req1);
       const enc2 = DecisionFeatureEncoder.encode(req2);
 
-      // Context 163-dim vector is identical because focusPlayerId is not used in Schema v5
-      expect(enc1.context.values).toEqual(enc2.context.values);
+      // Context 163-dim base vector is identical across 0..162, while indices 163 and 164 reflect focusPlayerId in Schema v6
+      expect(enc1.context.values.slice(0, 163)).toEqual(enc2.context.values.slice(0, 163));
       expect(enc1.patterns).toEqual(enc2.patterns);
     });
 

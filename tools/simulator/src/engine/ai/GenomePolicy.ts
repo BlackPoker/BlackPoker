@@ -54,7 +54,7 @@ export class GenomePolicy implements DecisionPolicy {
     // 2. GenomeScorer で全合法パターンのスコアを計算
     const scoredPatterns = GenomeScorer.score(encodedFeatures, this.dna);
 
-    // 3. 決定論的 Argmax (タイブレーク: 最小 patternRef 優先)
+    // 3. 決定論的 Argmax (タイブレーク: 最初に出現した最高スコア手 (first-encountered maximum-score pattern) 優先)
     let bestScore = -Infinity;
     let bestPatternRef = scoredPatterns[0].patternRef;
 

@@ -23,11 +23,11 @@ export interface SemanticFingerprints {
   readonly structural: string;
   /** 構造的盤面フィンガープリント (Variant S2, Turn-Invariant: プレフィックス "sgf1-ti-") */
   readonly structuralTurnInvariant: string;
-  /** プレイヤー観測情報フィンガープリント (プレフィックス "pof1-") */
+  /** プレイヤー観測情報フィンガープリント (プレフィックス "pof2-") */
   readonly observation: string;
-  /** 判断要求意味論フィンガープリント (プレフィックス "drsf1-") */
+  /** 判断要求意味論フィンガープリント (プレフィックス "drsf2-") */
   readonly decisionRequest: string;
-  /** ポリシー入力特徴量数値フィンガープリント (プレフィックス "gpif1-") */
+  /** ポリシー入力特徴量数値フィンガープリント (プレフィックス "gpif2-") */
   readonly policyInput: string;
 }
 
@@ -128,8 +128,8 @@ export class SemanticDiagnosticValidationError extends Error {
  * シミュレーション完了時に返却される診断集計結果
  */
 export interface SemanticDiagnosticResult {
-  /** セマンティック診断バージョン (契約値: 1) */
-  readonly semanticDiagnosticVersion: 1;
+  /** セマンティック診断バージョン (契約値: 2) */
+  readonly semanticDiagnosticVersion: 2;
   /** 実行中に生成された全トレースレコードの総数 */
   readonly totalTraceCount: number;
   /** 保持トレースの上限設定 */
@@ -143,12 +143,12 @@ export interface SemanticDiagnosticResult {
 }
 
 /**
- * GenomePolicy スコアリング入力プロジェクション (Feature Schema v5)
- * ※ EncodedDecisionFeatures から抽出され、gpif1 算出に供される正規化構造
+ * GenomePolicy スコアリング入力プロジェクション (Feature Schema v6)
+ * ※ EncodedDecisionFeatures から抽出され、gpif2 算出に供される正規化構造
  */
 export interface GenomePolicyScoringInputProjection {
-  readonly featureSchemaVersion: 5;
-  readonly contextValues: readonly number[]; // Exactly 163 IEEE 754 floats
+  readonly featureSchemaVersion: 6;
+  readonly contextValues: readonly number[]; // Exactly 165 IEEE 754 floats
   readonly patterns: readonly {
     readonly patternRef: number;
     readonly values: readonly number[]; // Exactly 143 IEEE 754 floats
