@@ -13,6 +13,7 @@ import {
   PlaytestMatchMode,
   PlaytestPolicyId,
   PlaytestSeatControllers,
+  PLAYTEST_POLICY_OPTIONS,
   normalizeHumanSeatForMode,
   createSeatControllers,
 } from "./PlaytestSeatController";
@@ -72,6 +73,22 @@ export function prepareScenarioMatchAttempt(
 ): PrepareScenarioMatchResult {
   const { definition, catalog, fullRulePackage, mode, humanSeat: rawHumanSeat, policyId } = params;
 
+  const regId = extractRegulationId(definition.environmentId);
+
+  // 0. Policy と環境の整合性チェック (Fail-Closed: Scenario経由での非対応AI生成を未然に防止)
+  if (mode === "humanVsAi") {
+    const selectedPolicyOpt = PLAYTEST_POLICY_OPTIONS.find((p) => p.id === policyId);
+    if (selectedPolicyOpt?.supportedRegulationIds) {
+      if (!regId || !selectedPolicyOpt.supportedRegulationIds.includes(regId)) {
+        return {
+          status: "PREPARE_ERROR",
+          title: "AI Policy 環境非対応エラー",
+          error: `AIポリシー "${selectedPolicyOpt.label}" は現在の対戦環境 (${definition.environmentId}) に対応していません (${selectedPolicyOpt.supportedRegulationIds.join(", ")}専用)。`,
+        };
+      }
+    }
+  }
+
   // 1. Prepare: Scenario コンパイル
   const outcome = ScenarioCompiler.compile(definition, catalog, fullRulePackage, {
     rareCardSelections: params.rareCardSelections,
@@ -102,9 +119,14 @@ export function prepareScenarioMatchAttempt(
   // 3. Prepare: SeatController および AI Policy の初期化
   const humanSeat = normalizeHumanSeatForMode(mode, rawHumanSeat);
   const seatControllers = createSeatControllers(mode, humanSeat, policyId);
+
   let policies: Record<string, DecisionPolicy>;
   try {
-    policies = PlaytestPolicyFactory.createPoliciesForMatch(seatControllers, definition.seed);
+    policies = PlaytestPolicyFactory.createPoliciesForMatch(
+      seatControllers,
+      definition.seed,
+      regId ?? undefined
+    );
   } catch (err: any) {
     return {
       status: "PREPARE_ERROR",
@@ -114,7 +136,6 @@ export function prepareScenarioMatchAttempt(
   }
 
   // 4. ActiveMatchContext および PreparedMatch の構築
-  const regId = extractRegulationId(definition.environmentId);
   const regDef = regId ? catalog.regulations.get(regId) : undefined;
   const regName = regDef?.name || definition.environmentId;
 

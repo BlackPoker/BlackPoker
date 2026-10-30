@@ -45,6 +45,11 @@ import {
 import { buildPlaytestDiagnosticBundleV1 } from "../../ui/playtest/PlaytestDiagnosticBundle";
 import { SimulationRunner } from "../../engine/simulation/SimulationRunner";
 import { FirstLegalPolicy } from "../../engine/simulation/DecisionPolicy";
+import React from "react";
+import TestRenderer, { act } from "react-test-renderer";
+import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
+import { prepareScenarioMatchAttempt } from "../../engine/playtest/ScenarioMatchCoordinator";
+import { ScenarioBuilderModal } from "../../ui/scenario/ScenarioBuilderModal";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -454,6 +459,350 @@ describe("Evolution Playtest Integration Tests (BP-SIM-AI-EVOLUTION-PLAYTEST-V1)
       expect(bundle.match.policyMetadata?.genomeId).toBe(EVOLUTION_G1_BEST_GENOME_ID);
       expect(bundle.match.policyMetadata?.schemaVersion).toBe(6);
       expect(bundle.match.policyMetadata?.fullDnaDigest).toBe(EVOLUTION_G1_BEST_FULL_DIGEST);
+    });
+  });
+
+  // =========================================================================
+  // Section 9: Scenario Match & Scenario Builder Integration (BP-SIM-AI-EVOLUTION-PLAYTEST-V1-R2)
+  // =========================================================================
+  describe("Section 9: Scenario Match & Scenario Builder Integration (BP-SIM-AI-EVOLUTION-PLAYTEST-V1-R2)", () => {
+    const validLightEntry16Scenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:light-entry16",
+      seed: 42,
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      turnCount: 1,
+      players: {
+        p1: {
+          hand: [
+            { suit: "S", rank: "A" },
+            { suit: "S", rank: "2" },
+          ],
+          field: [
+            {
+              componentId: "character.hero",
+              cards: [{ suit: "H", rank: "Q" }],
+              state: "charge",
+              face: "up",
+            },
+          ],
+          grave: [{ suit: "C", rank: "6" }],
+          life: { count: 12 }, // Total 16
+        },
+        p2: {
+          hand: [{ suit: "S", rank: "3" }],
+          field: [],
+          grave: [],
+          life: { count: 15 }, // Total 16
+        },
+      },
+    };
+
+    const validStandardPackScenario: ScenarioDefinitionV1 = {
+      version: 1,
+      environmentId: "official:standard-pack",
+      seed: 100,
+      turnPlayer: "p1",
+      chancePlayer: "p2",
+      turnCount: 2,
+      players: {
+        p1: {
+          hand: [
+            { suit: "S", rank: "A" },
+            { suit: "J", rank: "Joker", occurrence: 0 },
+          ],
+          field: [
+            {
+              componentId: "character.soldier",
+              cards: [{ suit: "H", rank: "10" }],
+              state: "charge",
+              face: "up",
+            },
+          ],
+          grave: [
+            { suit: "C", rank: "2" },
+            { suit: "C", rank: "3" },
+          ],
+          life: { count: 5 },
+          pack: { count: 44 }, // 2 + 1 + 2 + 5 + 44 = 54
+        },
+        p2: {
+          hand: [{ suit: "S", rank: "K" }],
+          field: [],
+          grave: [],
+          life: { count: 5 },
+          pack: { count: 48 }, // 1 + 0 + 0 + 5 + 48 = 54
+        },
+      },
+    };
+
+    it("1. Light＋Entry16のScenarioからEvolution AIを生成できること", () => {
+      const result = prepareScenarioMatchAttempt({
+        definition: validLightEntry16Scenario,
+        catalog,
+        fullRulePackage,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "evolution-g1-best",
+      });
+
+      expect(result.status).toBe("READY");
+      if (result.status === "READY") {
+        expect(result.prepared.policies.p2).toBeDefined();
+        expect(result.prepared.policies.p2.descriptor.name).toBe("Evolution g1 Best (Experimental)");
+        expect(result.prepared.activeMatch.regulationId).toBe("light-entry16");
+      }
+    });
+
+    it("2. Human p1 / Evolution AI p2でScenario対戦を開始し手番交代・自動決定が進行すること", async () => {
+      const result = prepareScenarioMatchAttempt({
+        definition: validLightEntry16Scenario,
+        catalog,
+        fullRulePackage,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "evolution-g1-best",
+      });
+
+      expect(result.status).toBe("READY");
+      if (result.status !== "READY") return;
+
+      const { session, initialStep, seatControllers, policies } = result.prepared;
+      expect(initialStep.type).toBe("WAITING_FOR_DECISION");
+      if (initialStep.type !== "WAITING_FOR_DECISION") return;
+
+      // p1 (Human) が最初の手番を実行 (action.end)
+      const req1 = initialStep.request;
+      expect(req1.playerId).toBe("p1");
+
+      const endActionRef = req1.patterns.findIndex((p) => {
+        if (p.kind !== "ACTION" || p.actionSelectionRef === undefined) return false;
+        return req1.catalog.actions[p.actionSelectionRef]?.actionId === "action.end";
+      });
+      expect(endActionRef).toBeGreaterThanOrEqual(0);
+
+      let step = session.submitDecision({
+        decisionId: req1.decisionId,
+        stateVersion: req1.stateVersion,
+        selectedPatternRef: endActionRef,
+      });
+
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      if (step.type !== "WAITING_FOR_DECISION") return;
+
+      // PASS
+      const passPatternRef = step.request.patterns.findIndex((p) => p.kind === "PASS");
+      expect(passPatternRef).toBeGreaterThanOrEqual(0);
+
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: passPatternRef,
+      });
+
+      // p2 (Evolution AI) の手番となり、自動決定が実行されること
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      if (step.type !== "WAITING_FOR_DECISION") return;
+      expect(step.request.playerId).toBe("p2");
+
+      const aiResult = await advanceAutomatedDecisions(
+        session,
+        step,
+        seatControllers,
+        policies,
+        { viewerPlayerId: "p1" }
+      );
+
+      expect(aiResult.status).toBe("STOPPED");
+      if (aiResult.status === "STOPPED") {
+        expect(aiResult.records.length).toBeGreaterThanOrEqual(1);
+        expect(aiResult.records[0].playerId).toBe("p2");
+        expect(["HUMAN_TURN", "FINISHED"]).toContain(aiResult.reason);
+      }
+    });
+
+    it("3. Standard＋PackのScenarioでは生成を拒絶すること (Fail-Closed)", () => {
+      const result = prepareScenarioMatchAttempt({
+        definition: validStandardPackScenario,
+        catalog,
+        fullRulePackage,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "evolution-g1-best",
+      });
+
+      expect(result.status).toBe("PREPARE_ERROR");
+      if (result.status === "PREPARE_ERROR") {
+        expect(result.error).toContain("Evolution g1 Best");
+        expect(result.error).toContain("standard-pack");
+      }
+    });
+
+    it("4. regulationId未指定 (core-battle 等) では生成を拒絶すること (Fail-Closed)", () => {
+      const coreBattleScenario: ScenarioDefinitionV1 = {
+        ...validLightEntry16Scenario,
+        environmentId: "core-battle",
+      };
+
+      const result = prepareScenarioMatchAttempt({
+        definition: coreBattleScenario,
+        catalog,
+        fullRulePackage,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "evolution-g1-best",
+      });
+
+      expect(result.status).toBe("PREPARE_ERROR");
+      if (result.status === "PREPARE_ERROR") {
+        expect(result.error).toContain("Evolution g1 Best");
+      }
+    });
+
+    it("5. Scenario BuilderのPolicy選択制約が通常のMatchSetupおよびPC簡易選択と100%一致すること", () => {
+      const environmentsToTest = [
+        "core-battle",
+        "official:light-entry16",
+        "official:standard-pack",
+        "official:pro-strategy",
+      ];
+
+      for (const envId of environmentsToTest) {
+        const isOfficial = envId.startsWith(OFFICIAL_ENV_PREFIX);
+        const regId = envId.startsWith(OFFICIAL_ENV_PREFIX)
+          ? envId.slice(OFFICIAL_ENV_PREFIX.length)
+          : null;
+
+        for (const opt of PLAYTEST_POLICY_OPTIONS) {
+          // 通常のMatchSetup / PC簡易選択側の判定
+          const mainIsSupported =
+            !opt.supportedRegulationIds ||
+            (regId !== null && opt.supportedRegulationIds.includes(regId));
+          const mainIsDisabled = (opt.requiresSeed && !isOfficial) || !mainIsSupported;
+
+          // Scenario Builder 側の判定
+          const builderIsSupported =
+            !opt.supportedRegulationIds ||
+            (regId !== null && opt.supportedRegulationIds.includes(regId));
+          const builderIsDisabled = (opt.requiresSeed && !isOfficial) || !builderIsSupported;
+
+          expect(builderIsDisabled).toBe(mainIsDisabled);
+
+          if (opt.id === "evolution-g1-best") {
+            if (envId === "official:light-entry16") {
+              expect(builderIsDisabled).toBe(false);
+            } else {
+              expect(builderIsDisabled).toBe(true);
+            }
+          }
+        }
+      }
+    });
+
+    it("6. ScenarioBuilderModal の UI レベルで非対応AIでの開始を遮断すること (Fail-Closed)", () => {
+      let started = false;
+      const onStart = () => {
+        started = true;
+      };
+
+      // A: official:standard-pack (非対応環境) で evolution-g1-best を初期設定してマウント
+      let renderer: TestRenderer.ReactTestRenderer;
+      act(() => {
+        renderer = TestRenderer.create(
+          React.createElement(ScenarioBuilderModal, {
+            isOpen: true,
+            onClose: () => {},
+            catalog,
+            fullRulePackage,
+            onStartScenario: onStart,
+            initialEnvironmentId: "official:standard-pack",
+            initialMode: "humanVsAi",
+            initialPolicyId: "evolution-g1-best",
+            initialTab: "settings",
+          })
+        );
+      });
+
+      // 開始ボタンを探す
+      const buttons = renderer!.root.findAllByType("button");
+      const modalStartBtn = buttons.find((b) => {
+        const span = b.children.find((c: any) => typeof c === "object" && c.props?.children === "初期盤面で対戦開始");
+        return Boolean(span);
+      });
+
+      expect(modalStartBtn).toBeDefined();
+      expect(modalStartBtn!.props.disabled).toBe(true);
+
+      // 非対応警告が表示されていること
+      const warnings = renderer!.root.findAllByProps({
+        "data-testid": "scenario-builder-policy-incompatible-warning",
+      });
+      expect(warnings.length).toBeGreaterThan(0);
+
+      // disabled状態でクリックしても onStart は発火しないこと
+      act(() => {
+        modalStartBtn!.props.onClick();
+      });
+      expect(started).toBe(false);
+
+      // B: official:light-entry16 (対応環境) で evolution-g1-best の場合は開始可能
+      let lightRenderer: TestRenderer.ReactTestRenderer;
+      act(() => {
+        lightRenderer = TestRenderer.create(
+          React.createElement(ScenarioBuilderModal, {
+            isOpen: true,
+            onClose: () => {},
+            catalog,
+            fullRulePackage,
+            onStartScenario: onStart,
+            initialEnvironmentId: "official:light-entry16",
+            initialMode: "humanVsAi",
+            initialPolicyId: "evolution-g1-best",
+            initialTab: "settings",
+          })
+        );
+      });
+
+      const lightButtons = lightRenderer!.root.findAllByType("button");
+      const lightStartBtn = lightButtons.find((b) => {
+        const span = b.children.find((c: any) => typeof c === "object" && c.props?.children === "初期盤面で対戦開始");
+        return Boolean(span);
+      });
+      expect(lightStartBtn).toBeDefined();
+      expect(lightStartBtn!.props.disabled).toBe(false);
+
+      const lightWarnings = lightRenderer!.root.findAllByProps({
+        "data-testid": "scenario-builder-policy-incompatible-warning",
+      });
+      expect(lightWarnings.length).toBe(0);
+
+      act(() => {
+        lightStartBtn!.props.onClick();
+      });
+      expect(started).toBe(true);
+    });
+
+    it("7. 既存Scenarioと既存AI (playtestConservative, firstLegal) の回帰がないこと", () => {
+      const conservativeResult = prepareScenarioMatchAttempt({
+        definition: validLightEntry16Scenario,
+        catalog,
+        fullRulePackage,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "playtestConservative",
+      });
+      expect(conservativeResult.status).toBe("READY");
+
+      const firstLegalStandardResult = prepareScenarioMatchAttempt({
+        definition: validStandardPackScenario,
+        catalog,
+        fullRulePackage,
+        mode: "humanVsAi",
+        humanSeat: "p1",
+        policyId: "firstLegal",
+      });
+      expect(firstLegalStandardResult.status).toBe("READY");
     });
   });
 });

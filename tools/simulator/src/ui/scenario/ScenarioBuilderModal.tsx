@@ -24,6 +24,7 @@ import { copyTextToClipboard } from "../utils/clipboard";
 import {
   OFFICIAL_ENV_PREFIX,
   extractRegulationId,
+  isOfficialEnvironment,
   getAvailableEnvironments,
 } from "../../engine/playtest/PlaytestEnvironmentController";
 import { ScenarioAuthoringResolver } from "../../engine/scenario/ScenarioAuthoringResolver";
@@ -254,6 +255,23 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     if (initialPolicyId) setSelectedPolicyId(initialPolicyId);
     setIsChallengeEnabled(Boolean(initialChallengeDefinition));
   }, [initialMode, initialPolicyId, initialChallengeDefinition]);
+
+  // 選択中ポリシーの現在の環境に対するサポート状態の判定
+  const currentRegulationId = extractRegulationId(environmentId);
+  const isOfficial = isOfficialEnvironment(environmentId);
+  const selectedPolicyOpt = PLAYTEST_POLICY_OPTIONS.find((opt) => opt.id === selectedPolicyId);
+  const isPolicySupported = useMemo(() => {
+    if (matchMode !== "humanVsAi") return true;
+    if (!selectedPolicyOpt) return false;
+    if (selectedPolicyOpt.requiresSeed && !isOfficial) return false;
+    if (selectedPolicyOpt.supportedRegulationIds) {
+      return (
+        currentRegulationId !== null &&
+        selectedPolicyOpt.supportedRegulationIds.includes(currentRegulationId)
+      );
+    }
+    return true;
+  }, [matchMode, selectedPolicyOpt, isOfficial, currentRegulationId]);
 
   // プレイヤーごとのカード配置 Draft
   const [p1Hand, setP1Hand] = useState<ScenarioCardRefV1[]>(
@@ -730,6 +748,15 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
   // 共有 URL コピーハンドラ
   const handleCopyShareUrl = async () => {
     try {
+      if (!isPolicySupported) {
+        setShareNotice({
+          type: "error",
+          message: `選択中のAIポリシー「${selectedPolicyOpt?.label}」は現在の環境に対応していません。`,
+        });
+        setTimeout(() => setShareNotice(null), 3000);
+        return;
+      }
+
       const challengeDef: ChallengeDefinitionV1 | undefined = isChallengeEnabled
         ? { version: 1, kind: "WIN_CURRENT_TURN" }
         : undefined;
@@ -767,7 +794,7 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
 
   // Scenario 開始
   const handleStart = () => {
-    if (compileOutcome.type !== "READY" || !isRareReady) return;
+    if (compileOutcome.type !== "READY" || !isRareReady || !isPolicySupported) return;
     const challengeDef: ChallengeDefinitionV1 | undefined = isChallengeEnabled
       ? { version: 1, kind: "WIN_CURRENT_TURN" }
       : undefined;
@@ -1059,12 +1086,35 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
                         onChange={(e) => setSelectedPolicyId(e.target.value as PlaytestPolicyId)}
                         className="w-full text-xs font-bold p-2.5 rounded-lg border border-zinc-300 bg-white text-zinc-900 focus:outline-none"
                       >
-                        {PLAYTEST_POLICY_OPTIONS.map((opt) => (
-                          <option key={opt.id} value={opt.id}>
-                            {opt.label} ({opt.description})
-                          </option>
-                        ))}
+                        {PLAYTEST_POLICY_OPTIONS.map((opt) => {
+                          const isSupported =
+                            !opt.supportedRegulationIds ||
+                            (currentRegulationId !== null && opt.supportedRegulationIds.includes(currentRegulationId));
+                          const isDisabled = (opt.requiresSeed && !isOfficial) || !isSupported;
+
+                          let suffix = "";
+                          if (opt.requiresSeed && !isOfficial) {
+                            suffix = " (Official環境専用)";
+                          } else if (!isSupported && opt.supportedRegulationIds) {
+                            suffix = ` (${opt.supportedRegulationIds.join(", ")}専用)`;
+                          }
+
+                          return (
+                            <option key={opt.id} value={opt.id} disabled={isDisabled}>
+                              {opt.label} ({opt.description}){suffix}
+                            </option>
+                          );
+                        })}
                       </select>
+                      {!isPolicySupported && (
+                        <div
+                          data-testid="scenario-builder-policy-error"
+                          className="mt-1.5 p-2 bg-rose-50 border border-rose-200 rounded text-[11px] font-bold text-rose-700"
+                        >
+                          選択中のAIポリシー「{selectedPolicyOpt?.label}」は現在の対戦環境（{environmentId}）に対応していません
+                          {selectedPolicyOpt?.supportedRegulationIds ? ` (${selectedPolicyOpt.supportedRegulationIds.join(", ")}専用)` : ""}。
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
@@ -1196,6 +1246,14 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
             キャンセル
           </button>
           <div className="flex items-center gap-3">
+            {!isPolicySupported && matchMode === "humanVsAi" && (
+              <span
+                data-testid="scenario-builder-policy-incompatible-warning"
+                className="text-[11px] text-amber-700 font-bold"
+              >
+                ※ 選択中のAIポリシーは現在の環境に対応していません
+              </span>
+            )}
             {!isRareReady && (
               <span
                 data-testid="scenario-builder-rare-incomplete-warning"
@@ -1206,9 +1264,9 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
             )}
             <button
               onClick={handleStart}
-              disabled={compileOutcome.type !== "READY" || !isRareReady}
+              disabled={compileOutcome.type !== "READY" || !isRareReady || !isPolicySupported}
               className={`px-6 py-2.5 rounded-xl font-bold text-xs shadow-sm transition flex items-center gap-2 ${
-                compileOutcome.type === "READY" && isRareReady
+                compileOutcome.type === "READY" && isRareReady && isPolicySupported
                   ? "bg-zinc-950 hover:bg-zinc-800 text-white cursor-pointer"
                   : "bg-zinc-200 text-zinc-400 cursor-not-allowed"
               }`}
