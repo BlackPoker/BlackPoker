@@ -17,7 +17,7 @@ import { LegalPattern } from "../../domain/decision/LegalPattern";
 import { DecisionCatalog } from "../../domain/decision/DecisionCatalog";
 import { PlayerObservation, PlayerObservationView } from "../../domain/decision/PlayerObservation";
 
-describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1)", () => {
+describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1)", () => {
   let catalog: any;
   let fullRulePackage: any;
   let lightRulePackage: any;
@@ -173,7 +173,7 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
 
   describe("Group 2: Baseline A Core & AI Integration Contracts", () => {
     it("2.1 focusPlayer initializes to turnPlayer and empty stage disallows PASS", () => {
-      const session = lightSessionFactory({ matchSeed: 12345, p1GenomeId: "g1", p2GenomeId: "g2" });
+      const session = lightSessionFactory({ matchIndex: 0, matchId: "m1", baseSeed: 12345, matchSeed: 12345, playerSeeds: { p1: 1, p2: 2 } });
       const step = session.advance();
       expect(step.type).toBe("WAITING_FOR_DECISION");
 
@@ -181,12 +181,14 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
       expect(session.state.focusPlayer).toBe(session.state.turnPlayer);
 
       // Empty stage does NOT allow PASS
-      const patterns = step.request.patterns;
-      expect(patterns.some((p: any) => p.kind === "PASS")).toBe(false);
+      if (step.type === "WAITING_FOR_DECISION") {
+        const patterns = step.request.patterns;
+        expect(patterns.some((p: any) => p.kind === "PASS")).toBe(false);
+      }
     });
 
     it("2.2 Snapshot V2 preserves focusPlayer and legacy V1 without focusPlayer is rejected", () => {
-      const session = lightSessionFactory({ matchSeed: 12345, p1GenomeId: "g1", p2GenomeId: "g2" });
+      const session = lightSessionFactory({ matchIndex: 0, matchId: "m1", baseSeed: 12345, matchSeed: 12345, playerSeeds: { p1: 1, p2: 2 } });
       session.advance();
 
       const snapV2 = GameSessionSnapshotCodec.capture(session);
@@ -207,8 +209,8 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
       const dnaZero = DecisionDNACodec.createZeroDecisionDNA();
       const policyZero = new GenomePolicy(dnaZero);
 
-      const session1 = lightSessionFactory({ matchSeed: 99999, p1GenomeId: "g1", p2GenomeId: "g2" });
-      const session2 = lightSessionFactory({ matchSeed: 99999, p1GenomeId: "g1", p2GenomeId: "g2" });
+      const session1 = lightSessionFactory({ matchIndex: 1, matchId: "m2", baseSeed: 99999, matchSeed: 99999, playerSeeds: { p1: 1, p2: 2 } });
+      const session2 = lightSessionFactory({ matchIndex: 2, matchId: "m3", baseSeed: 99999, matchSeed: 99999, playerSeeds: { p1: 1, p2: 2 } });
 
       const resOff = SimulationRunner.run(session1, { p1: policyZero, p2: policyZero }, { maxDecisions: 100, enableSemanticDiagnostics: false });
       const resOn = SimulationRunner.run(session2, { p1: policyZero, p2: policyZero }, { maxDecisions: 100, enableSemanticDiagnostics: true });
@@ -229,11 +231,172 @@ describe("v9.2 Core & AI Baseline Re-Evaluation Evidence Test Suite (BP-SIM-AI-V
       expect(fs.existsSync(evidencePath)).toBe(true);
 
       const data = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
-      expect(data.workId).toBe("BP-SIM-AI-V92-BASELINE-EVIDENCE-V1");
-      expect(data.startSha).toBe("92a7fc50674c20026118cf20460c6ee423451a71");
-      expect(data.baselineB.totalScheduledMatches).toBe(30);
-      expect(data.baselineB.determinism.overall).toBe(true);
-      expect(data.standardPackSmoke.allCompletedWithoutException).toBe(true);
+      expect(data.workId).toBe("BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1");
+      expect(data.startSha).toBe("b0949612dbd7c84ef293e4dfdbefc8dc14dff09d");
+      expect(data.baselineB.g0.totalScheduledMatches).toBe(30);
+      expect(data.baselineB.g0.completedMatches).toBe(30);
+      expect(data.baselineB.g1.totalScheduledMatches).toBe(30);
+      expect(data.baselineB.g1.completedMatches).toBe(30);
+      expect(data.baselineB.g0.determinism.overall).toBe(true);
+      expect(data.baselineB.g1.determinism.overall).toBe(true);
+      expect(data.standardPackSmoke.allRunsWithoutException).toBe(true);
+    });
+  });
+
+  describe("Group 4: Hardened Evidence Verification (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1)", () => {
+    let data: any;
+
+    beforeAll(() => {
+      const evidencePath = path.resolve(__dirname, "../../../reports/ai/v92-core-baseline-evidence-v1.json");
+      data = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
+    });
+
+    it("4.1 g0 / g1 full outcome accounting & decision ranges", () => {
+      // g0 accounting
+      expect(data.baselineB.g0.totalScheduledMatches).toBe(30);
+      expect(data.baselineB.g0.completedMatches).toBe(30);
+      expect(data.baselineB.g0.incompleteMatches).toBe(0);
+      expect(data.baselineB.g0.failedMatches).toBe(0);
+      expect(data.baselineB.g0.status).toBe("ADVANCED");
+      expect(data.baselineB.g0.decisionStats.min).toBe(36);
+      expect(data.baselineB.g0.decisionStats.max).toBe(88);
+
+      // g1 accounting
+      expect(data.baselineB.g1.totalScheduledMatches).toBe(30);
+      expect(data.baselineB.g1.completedMatches).toBe(30);
+      expect(data.baselineB.g1.incompleteMatches).toBe(0);
+      expect(data.baselineB.g1.failedMatches).toBe(0);
+      expect(data.baselineB.g1.status).toBe("ADVANCED");
+      expect(data.baselineB.g1.decisionStats.min).toBe(4);
+      expect(data.baselineB.g1.decisionStats.max).toBe(84);
+    });
+
+    it("4.2 g0 / g1 Run A vs Run B strict determinism & trace digest equality", () => {
+      // g0 Run A vs Run B
+      expect(data.baselineB.g0.determinism.matchesEqual).toBe(true);
+      expect(data.baselineB.g0.determinism.fitnessEqual).toBe(true);
+      expect(data.baselineB.g0.determinism.manifestEqual).toBe(true);
+      expect(data.baselineB.g0.determinism.decisionTraceDigestsEqual).toBe(true);
+      expect(data.baselineB.g0.determinism.overall).toBe(true);
+
+      // g1 Run A vs Run B
+      expect(data.baselineB.g1.determinism.populationEntriesEqual).toBe(true);
+      expect(data.baselineB.g1.determinism.dnaDigestsEqual).toBe(true);
+      expect(data.baselineB.g1.determinism.scheduleEqual).toBe(true);
+      expect(data.baselineB.g1.determinism.matchesEqual).toBe(true);
+      expect(data.baselineB.g1.determinism.fitnessEqual).toBe(true);
+      expect(data.baselineB.g1.determinism.manifestEqual).toBe(true);
+      expect(data.baselineB.g1.determinism.decisionTraceDigestsEqual).toBe(true);
+      expect(data.baselineB.g1.determinism.overall).toBe(true);
+    });
+
+    it("4.3 DNA digest & weight integrity", () => {
+      // g0 DNA integrity
+      expect(data.baselineB.g0.dnaDigests).toHaveLength(6);
+      for (const dna of data.baselineB.g0.dnaDigests) {
+        expect(dna.totalWeights).toBe(23452);
+        expect(dna.fullDnaDigest).toMatch(/^[0-9a-f]{64}$/);
+      }
+
+      // g1 DNA integrity
+      expect(data.baselineB.g1.dnaDigests).toHaveLength(6);
+      for (const dna of data.baselineB.g1.dnaDigests) {
+        expect(dna.totalWeights).toBe(23452);
+        expect(dna.fullDnaDigest).toMatch(/^[0-9a-f]{64}$/);
+      }
+    });
+
+    it("4.4 Schedule integrity & symmetry", () => {
+      const g0Matches = data.baselineB.g0.matchDetails;
+      expect(g0Matches).toHaveLength(30);
+
+      // Check match index sequence 0..29
+      for (let i = 0; i < 30; i++) {
+        expect(g0Matches[i].matchIndex).toBe(i);
+        expect(g0Matches[i].matchSeed).toBeDefined();
+        expect(g0Matches[i].p1GenomeId).not.toBe(g0Matches[i].p2GenomeId);
+      }
+
+      const g1Matches = data.baselineB.g1.matchDetails;
+      expect(g1Matches).toHaveLength(30);
+      for (let i = 0; i < 30; i++) {
+        expect(g1Matches[i].matchIndex).toBe(i);
+        expect(g1Matches[i].matchSeed).toBeDefined();
+        expect(g1Matches[i].p1GenomeId).not.toBe(g1Matches[i].p2GenomeId);
+      }
+    });
+
+    it("4.5 Per-match decision trace digest validity", () => {
+      const g0Matches = data.baselineB.g0.matchDetails;
+      for (const m of g0Matches) {
+        expect(m.decisionTraceDigest).toMatch(/^[0-9a-f]{64}$/);
+        expect(m.decisionTraceLength).toBeGreaterThan(0);
+      }
+
+      const g1Matches = data.baselineB.g1.matchDetails;
+      for (const m of g1Matches) {
+        expect(m.decisionTraceDigest).toMatch(/^[0-9a-f]{64}$/);
+        expect(m.decisionTraceLength).toBeGreaterThan(0);
+      }
+    });
+
+    it("4.6 Fitness conservation laws", () => {
+      // g0 conservation
+      const g0fc = data.baselineB.g0.fitnessConservation;
+      expect(g0fc.valid).toBe(true);
+      expect(g0fc.individualConservationAllOk).toBe(true);
+      expect(g0fc.winsEqualsDecisive).toBe(true);
+      expect(g0fc.lossesEqualsDecisive).toBe(true);
+      expect(g0fc.drawsEqualsMatchDraws).toBe(true);
+      expect(g0fc.completedEqualsDoubleMatches).toBe(true);
+      expect(g0fc.sumWins).toBe(30);
+      expect(g0fc.sumLosses).toBe(30);
+      expect(g0fc.sumDraws).toBe(0);
+      expect(g0fc.sumCompleted).toBe(60);
+
+      // g1 conservation
+      const g1fc = data.baselineB.g1.fitnessConservation;
+      expect(g1fc.valid).toBe(true);
+      expect(g1fc.individualConservationAllOk).toBe(true);
+      expect(g1fc.winsEqualsDecisive).toBe(true);
+      expect(g1fc.lossesEqualsDecisive).toBe(true);
+      expect(g1fc.drawsEqualsMatchDraws).toBe(true);
+      expect(g1fc.completedEqualsDoubleMatches).toBe(true);
+      expect(g1fc.sumWins).toBe(30);
+      expect(g1fc.sumLosses).toBe(30);
+      expect(g1fc.sumDraws).toBe(0);
+      expect(g1fc.sumCompleted).toBe(60);
+    });
+
+    it("4.7 Standard Pack Smoke 4 INCOMPLETE classification & allRunsWithoutException", () => {
+      const sp = data.standardPackSmoke;
+      expect(sp.matchesScheduled).toBe(4);
+      expect(sp.maxDecisions).toBe(200);
+      expect(sp.completedMatchesCount).toBe(0);
+      expect(sp.incompleteMatchesCount).toBe(4);
+      expect(sp.exceptionMatchesCount).toBe(0);
+      expect(sp.allRunsWithoutException).toBe(true);
+
+      for (const m of sp.matches) {
+        expect(m.completed).toBe(false);
+        expect(m.reason).toBe("最大判断回数 (200) に到達しました。");
+        expect(m.totalDecisions).toBe(200);
+        expect(m.error).toBeNull();
+      }
+    });
+
+    it("4.8 Baseline A direct vs indirect verification contract clarity", () => {
+      const bA = data.baselineA;
+      expect(bA.directVerificationContracts.focusPlayerInitializedTurnPlayer).toBe(true);
+      expect(bA.directVerificationContracts.emptyStagePassDisallowed).toBe(true);
+      expect(bA.directVerificationContracts.snapshotV2PreservesAndRestoresFocusPlayer).toBe(true);
+      expect(bA.directVerificationContracts.snapshotV1ExplicitlyRejected).toBe(true);
+      expect(bA.directVerificationContracts.passiveObserverDiagnosticParity).toBe(true);
+
+      expect(bA.indirectCoreFlowRegressionContracts.stageNonEmptyPassResolved).toBeDefined();
+      expect(bA.indirectCoreFlowRegressionContracts.systemChanceSingleResolution).toBeDefined();
+      expect(bA.indirectCoreFlowRegressionContracts.effectSelectionWorkflow).toBeDefined();
+      expect(bA.indirectCoreFlowRegressionContracts.endChargeDrawCycle).toBeDefined();
     });
   });
 });

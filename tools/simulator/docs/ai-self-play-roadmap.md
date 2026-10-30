@@ -1,7 +1,7 @@
 # BlackPoker Simulator AI Self-Play & Decision DNA ロードマップ
 
-作業ID: `BP-SIM-AI-V92-BASELINE-EVIDENCE-V1`
-更新日時: 2026-10-30 03:20 JST
+作業ID: `BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1`
+更新日時: 2026-10-30 09:30 JST
 
 ---
 
@@ -97,7 +97,7 @@
 | **Semantic Stall / Cycle Detection Design V1-R6** | **NOT ACCEPTED / SUPERSEDED BY R7** | `docs/ai-semantic-stall-cycle-detection-design-v1-r6.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r6.json` | - | Fail-Closed Status契約、gpif1とPolicy DNAの責務境界是正（EncodedDecisionFeatures出所確定）、Future Test #10過剰主張修正、first-encounteredタイブレーク実態整合、CCF GenomePolicy-onlyスコープ確定 (R7へ改訂) |
 | **Semantic Stall / Cycle Detection Design V1-R7** | **NOT ACCEPTED / SUPERSEDED BY R8** | `docs/ai-semantic-stall-cycle-detection-design-v1-r7.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r7.json` | - | SimulationRunner.run / GameSession実API統合境界整合（runMatch/applyDecision非実在API参照完全除去）、PASS / 2-PASS / Explicit End Core Flow意味論整合（PASSはターン終了しない、空ステージ2-PASSはターン継続、明示的action.endのみがターン進行） (R8へ改訂) |
 | **Semantic Stall / Cycle Detection Design V1-R8** | **FORMAL ACCEPTED** | `docs/ai-semantic-stall-cycle-detection-design-v1-r8.md`, `docs/ai-semantic-fingerprint-field-registry-v1-r8.json` | - | state.turnCount rationale是正、Endライフサイクル完全整合（Normal Action積載/2-PASS/End解決/Charge/Draw）、PRE_DECISION単一サンプリング境界確定（5大Fingerprint同一時点採取） |
-| **Semantic Diagnostic Implementation V1-R3** | **IMPLEMENTED / PENDING INDEPENDENT REVIEW** | `src/domain/ai/SemanticDiagnosticTypes.ts`, `src/engine/ai/SemanticCanonicalSerializer.ts`, `src/engine/ai/SemanticSHA256.ts`, `src/engine/ai/SemanticDynamicIdCanonicalizer.ts`, `src/engine/ai/SemanticFingerprintCalculator.ts`, `src/engine/ai/SemanticStallCycleDetector.ts`, `src/engine/simulation/SimulationRunner.ts` | `src/tests/ai/semanticDiagnostic.test.ts` | Canonical Design V1-R8準拠、受動的診断基盤、observation.stageRequestRefs & recentEvents完全網羅、EffectSelection.selectedValues順序保持、Generic Canonicalizer過剰除外撤回（パス固有bookkeeping除外保証） |
+| **Semantic Diagnostic Implementation V1-R4** | **FORMAL ACCEPTED** | `src/domain/ai/SemanticDiagnosticTypes.ts`, `src/engine/ai/SemanticCanonicalSerializer.ts`, `src/engine/ai/SemanticSHA256.ts`, `src/engine/ai/SemanticDynamicIdCanonicalizer.ts`, `src/engine/ai/SemanticFingerprintCalculator.ts`, `src/engine/ai/SemanticStallCycleDetector.ts`, `src/engine/simulation/SimulationRunner.ts` | `src/tests/ai/semanticDiagnostic.test.ts` | Canonical Design V1-R8準拠、受動的診断基盤、observation.stageRequestRefs & recentEvents完全網羅、EffectSelection.selectedValues順序保持、Generic Canonicalizer過剰除外撤回（パス固有bookkeeping除外保証） |
 | **Diagnostic Controlled Evidence** | **NOT STARTED** | - | - | 未着手 |
 | **Competitive Stall Escape** | **NOT STARTED** | - | - | 未着手 (将来 Policy 設計課題) |
 | **Test / Adversarial DNA** | **NOT STARTED** | - | - | 未着手 (将来探索設計課題) |
@@ -500,7 +500,7 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
    - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`tools/simulator/src/engine/ai/EvolutionLoop.ts`, `tools/simulator/src/domain/ai/EvolutionLoopTypes.ts`, `tools/simulator/src/tests/ai/evolutionLoop.test.ts`, 48 Canonical Tests)
    - **Controlled Multi-Generation Evidence**: **BLOCKED / NOT ACCEPTED** (BP-SIM-AI-EVOLUTION-LOOP-EVIDENCE-V1, `tools/simulator/src/cli/evolutionLoopControlledEvidence.ts`, `docs/ai-evolution-loop-controlled-evidence-v1.md`, Official `light-entry16`, N=6, R=1, g=0 30試合完走・世代交代成功, g=1 28/30試合未完了による有効個体不足)
    - **Evolution g1 Incomplete Analysis V1**: **ANALYZED / PENDING INDEPENDENT REVIEW** (BP-SIM-AI-EVOLUTION-INCOMPLETE-ANALYSIS-V1, `tools/simulator/src/cli/evolutionIncompleteAnalysis.ts`, `docs/ai-evolution-incomplete-analysis-v1.md`, Generation 1 28/30未完了試合の決定論的分析, PROGRESSING_LONG_MATCH / Turn 1 PASS過剰選好の特定)
-   - **v9.2 Core Flow Baseline Re-Evaluation Evidence**: **COMPLETED / PENDING INDEPENDENT REVIEW** (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1, `tools/simulator/src/cli/v92BaselineEvidenceRunner.ts`, `tools/simulator/src/tests/ai/v92CoreBaselineEvidence.test.ts`, `reports/ai/v92-core-baseline-evidence-v1.json`, 第9.2版コアフローでの再基準測定。Official `light-entry16`, N=6, R=1, g0 30/30試合完走・100% COMPLETED, g1 30/30試合完走・100% COMPLETED, 決定論的一致100%, Feature Schema v5 / Semantic Fingerprint の focusPlayerId 不感 Compatibility Gap 監査完了)
+   - **v9.2 Core Flow Baseline Re-Evaluation Evidence**: **COMPLETED / PENDING INDEPENDENT REVIEW** (BP-SIM-AI-V92-BASELINE-EVIDENCE-V1-R1, `tools/simulator/src/cli/v92BaselineEvidenceRunner.ts`, `tools/simulator/src/tests/ai/v92CoreBaselineEvidence.test.ts`, `reports/ai/v92-core-baseline-evidence-v1.json`, 第9.2版コアフローでの再基準測定。Official `light-entry16`, N=6, R=1, g0 30/30試合完走・100% COMPLETED, g1 30/30試合完走・100% COMPLETED, Run A/B 独立再構築決定論的一致100%, Decision Trace Logical Digest, Fitness 保存則, Feature Schema v5 / Semantic Fingerprint の focusPlayerId 不感 Compatibility Gap 監査完了)
    - **Parallel Evaluation**: **NOT IMPLEMENTED**
    - **Hall of Fame**: **NOT IMPLEMENTED**
    - **責務境界**: `GenerationRunner`（1世代プリミティブ）を直接順次呼び出し、世代ごとの `generationSeed` 直接導出、世代間チェーン整合性検証、`REEVALUATION_REQUIRED` での即時論理停止、および中間母集団 DNA 複製を排除した決定論的履歴集計を統括する上位オーケストレーション境界。Caller による母集団サイズ契約（`runnerConfig.builderConfig.populationSize`）を尊重し、暗黙のサイズ一定仮定や自動改変を行わない。また、`GenerationRunner` 内部実装のオブジェクト参照同一性（Reference Equality）への依存を排除し、Public Logical Contract に準拠する。
@@ -508,7 +508,8 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
 10. **Human Match Log Learning**: 人間の Canonical Match Log から特徴量を抽出し、初期 DNA シードへ反映
 11. **Semantic Stall / Cycle Diagnostic V1 (BP-SIM-AI-SEMANTIC-STALL-CYCLE-IMPL-V1-R4)**:
     - **設計ステータス**: **FORMAL ACCEPTED** (`tools/simulator/docs/ai-semantic-stall-cycle-detection-design-v1-r8.md`, `tools/simulator/docs/ai-semantic-fingerprint-field-registry-v1-r8.json`)
-    - **実装ステータス**: **IMPLEMENTED / PENDING INDEPENDENT REVIEW** (`src/domain/ai/SemanticDiagnosticTypes.ts`, `src/engine/ai/SemanticCanonicalSerializer.ts`, `src/engine/ai/SemanticSHA256.ts`, `src/engine/ai/SemanticDynamicIdCanonicalizer.ts`, `src/engine/ai/SemanticFingerprintCalculator.ts`, `src/engine/ai/SemanticStallCycleDetector.ts`, `src/engine/simulation/SimulationRunner.ts`, `src/tests/ai/semanticDiagnostic.test.ts`)
+    - **実装ステータス**: **FORMAL ACCEPTED** (`src/domain/ai/SemanticDiagnosticTypes.ts`, `src/engine/ai/SemanticCanonicalSerializer.ts`, `src/engine/ai/SemanticSHA256.ts`, `src/engine/ai/SemanticDynamicIdCanonicalizer.ts`, `src/engine/ai/SemanticFingerprintCalculator.ts`, `src/engine/ai/SemanticStallCycleDetector.ts`, `src/engine/simulation/SimulationRunner.ts`, `src/tests/ai/semanticDiagnostic.test.ts`)
+    - **第9.2版コアフローとの Compatibility Gap**: 第9.2版コアフローで導入された `focusPlayerId` に対し、`sgf1`/`sgf1-ti` は感度を持つが、`pof1`/`drsf1`/`gpif1` は射影から除外されているため不感である（Feature Schema v6 での対処を提言）。
     - **設計原則**: 受動的診断器（Passive Observer, `DEFAULT = DISABLED`）。診断の有無でゲーム進行、StateHasher、勝敗判定、手番進行、乱数消費を一切変えない。
     - **100% 決定論的パリティ契約**: 診断 OFF vs ON において、`completed`, `winner`, `reason`, `totalDecisions`, `turnCount`, `finalStateHash`, `decisionTrace` の論理プロパティが 100% byte-identical に一致することを保証。
     - **5大フィンガープリント**: `sgf1` (盤面構造 + Side State, Turn-Aware), `sgf1-ti` (盤面構造 + Side State, Turn-Invariant), `pof1` (PlayerObservation), `drsf1` (DecisionRequest Root + Observation + Patterns), `gpif1` (GenomePolicy Scoring Input Projection: EncodedDecisionFeatures)。
