@@ -259,21 +259,54 @@ describe("Feature Schema v6 & Semantic Diagnostic v2 Acceptance Suite (BP-SIM-AI
   it("Test 9: Argmax / First-Encountered Tie-Break Parity - strictly selects first encountered maximum pattern when scores tie", () => {
     const zeroDna = DecisionDNACodec.createZeroDecisionDNA();
     const policy = new GenomePolicy(zeroDna);
-
     const req = createSyntheticRequest("p1");
-    // Overwrite patterns to test [7, 2] order where all scores are 0.0
-    const tieReq: DecisionRequest = {
+
+    // Case 9-A: Explicit patternRef candidate order [7, 2] with tie scores (0.0)
+    // Verifies design requirement: candidate with patternRef = 7 appears first, selectedPatternRef === 7
+    const tieReq72: DecisionRequest = {
       ...req,
       patterns: [
-        { patternId: "pat-7", kind: "ACTION", actionSelectionRef: 0 },
-        { patternId: "pat-2", kind: "PASS" },
+        { patternId: "pat-7", kind: "ACTION", actionSelectionRef: 0, patternRef: 7 } as any,
+        { patternId: "pat-2", kind: "PASS", patternRef: 2 } as any,
       ],
     };
+    const resp72 = policy.choose(tieReq72);
+    expect(resp72.selectedPatternRef).toBe(7);
 
-    const resp = policy.choose(tieReq);
-    // Scored patterns will have patternRef 0 (pat-7) and patternRef 1 (pat-2)
-    // First encountered maximum (0.0) is patternRef 0
-    expect(resp.selectedPatternRef).toBe(0);
+    // Case 9-B: Reversed candidate order [2, 7] with tie scores (0.0)
+    // Verifies that it strictly selects first-encountered candidate (2), not minimum patternRef
+    const tieReq27: DecisionRequest = {
+      ...req,
+      patterns: [
+        { patternId: "pat-2", kind: "PASS", patternRef: 2 } as any,
+        { patternId: "pat-7", kind: "ACTION", actionSelectionRef: 0, patternRef: 7 } as any,
+      ],
+    };
+    const resp27 = policy.choose(tieReq27);
+    expect(resp27.selectedPatternRef).toBe(2);
+
+    // Case 9-C: Standard LegalPattern without explicit patternRef property (defaults to array index i)
+    // Candidate order [patA, patB] -> index 0 (patA) is chosen
+    const tieReqStandardAB: DecisionRequest = {
+      ...req,
+      patterns: [
+        { patternId: "pat-act-A", kind: "ACTION", actionSelectionRef: 0 },
+        { patternId: "pat-pass-B", kind: "PASS" },
+      ],
+    };
+    const respStandardAB = policy.choose(tieReqStandardAB);
+    expect(respStandardAB.selectedPatternRef).toBe(0);
+
+    // Case 9-D: Reversed standard candidate order [patB, patA] -> index 0 (patB) is chosen
+    const tieReqStandardBA: DecisionRequest = {
+      ...req,
+      patterns: [
+        { patternId: "pat-pass-B", kind: "PASS" },
+        { patternId: "pat-act-A", kind: "ACTION", actionSelectionRef: 0 },
+      ],
+    };
+    const respStandardBA = policy.choose(tieReqStandardBA);
+    expect(respStandardBA.selectedPatternRef).toBe(0);
   });
 
   // 10. Focus Self / Opponent / System Activation
@@ -399,6 +432,10 @@ describe("Feature Schema v6 & Semantic Diagnostic v2 Acceptance Suite (BP-SIM-AI
       expect(v6Reg.contextFeatures[i].scalingFunction).toBe(v5Reg.contextFeatures[i].scalingFunction);
       expect(v6Reg.contextFeatures[i].outputDomain).toBe(v5Reg.contextFeatures[i].outputDomain);
       expect(v6Reg.contextFeatures[i].parameter).toEqual(v5Reg.contextFeatures[i].parameter);
+
+      expect(CONTEXT_SCALING_RULES[i].scalingClass).toBe(v5Reg.contextFeatures[i].scalingClass);
+      expect(CONTEXT_SCALING_RULES[i].scalingFunction).toBe(v5Reg.contextFeatures[i].scalingFunction);
+      expect(CONTEXT_SCALING_RULES[i].outputDomain).toBe(v5Reg.contextFeatures[i].outputDomain);
     }
 
     for (let i = 0; i < 143; i++) {
@@ -407,6 +444,10 @@ describe("Feature Schema v6 & Semantic Diagnostic v2 Acceptance Suite (BP-SIM-AI
       expect(v6Reg.patternFeatures[i].scalingFunction).toBe(v5Reg.patternFeatures[i].scalingFunction);
       expect(v6Reg.patternFeatures[i].outputDomain).toBe(v5Reg.patternFeatures[i].outputDomain);
       expect(v6Reg.patternFeatures[i].parameter).toEqual(v5Reg.patternFeatures[i].parameter);
+
+      expect(PATTERN_SCALING_RULES[i].scalingClass).toBe(v5Reg.patternFeatures[i].scalingClass);
+      expect(PATTERN_SCALING_RULES[i].scalingFunction).toBe(v5Reg.patternFeatures[i].scalingFunction);
+      expect(PATTERN_SCALING_RULES[i].outputDomain).toBe(v5Reg.patternFeatures[i].outputDomain);
     }
   });
 
@@ -464,22 +505,72 @@ describe("Feature Schema v6 & Semantic Diagnostic v2 Acceptance Suite (BP-SIM-AI
 
   // 19. Diagnostic OFF/ON Parity
   it("Test 19: Diagnostic OFF/ON Parity - simulation outcome is 100% byte-identical between OFF and ON", () => {
-    const zeroDna = DecisionDNACodec.createZeroDecisionDNA();
-    const policy = new GenomePolicy(zeroDna);
+    const v5Dna = createSyntheticV5DNA();
+    const v6Dna = DecisionDNAMigration.migrateV5toV6(v5Dna);
+    const policy = new GenomePolicy(v6Dna);
 
-    const sessionOff = lightSessionFactory({ matchIndex: 1, matchId: "m-off", baseSeed: 98765, matchSeed: 98765, playerSeeds: { p1: 1, p2: 2 } });
-    const sessionOn = lightSessionFactory({ matchIndex: 1, matchId: "m-on", baseSeed: 98765, matchSeed: 98765, playerSeeds: { p1: 1, p2: 2 } });
+    const matchConfig = {
+      matchIndex: 1,
+      matchId: "m-off-on-parity",
+      baseSeed: 98765,
+      matchSeed: 98765,
+      playerSeeds: { p1: 1, p2: 2 },
+    };
+
+    const sessionOff = lightSessionFactory(matchConfig);
+    const sessionOn = lightSessionFactory(matchConfig);
 
     const resOff = SimulationRunner.run(sessionOff, { p1: policy, p2: policy }, { maxDecisions: 50, enableSemanticDiagnostics: false });
     const resOn = SimulationRunner.run(sessionOn, { p1: policy, p2: policy }, { maxDecisions: 50, enableSemanticDiagnostics: true });
 
+    // 1. High-level match outcomes
     expect(resOff.completed).toBe(resOn.completed);
     expect(resOff.winner).toBe(resOn.winner);
     expect(resOff.reason).toBe(resOn.reason);
     expect(resOff.totalDecisions).toBe(resOn.totalDecisions);
     expect(resOff.turnCount).toBe(resOn.turnCount);
     expect(resOff.finalStateHash).toBe(resOn.finalStateHash);
+
+    // 2. Full Decision Trace logical sequence parity
     expect(resOff.decisionTrace.length).toBe(resOn.decisionTrace.length);
+    for (let i = 0; i < resOff.decisionTrace.length; i++) {
+      const recOff = resOff.decisionTrace[i];
+      const recOn = resOn.decisionTrace[i];
+
+      expect(recOff.stepCount).toBe(recOn.stepCount);
+      expect(recOff.logicalDecisionId).toBe(recOn.logicalDecisionId);
+      expect(recOff.playerId).toBe(recOn.playerId);
+      expect(recOff.stateVersion).toBe(recOn.stateVersion);
+      expect(recOff.stateHash).toBe(recOn.stateHash);
+      expect(recOff.selectedPatternRef).toBe(recOn.selectedPatternRef);
+      expect(recOff.selectedLogicalPatternKey).toBe(recOn.selectedLogicalPatternKey);
+      expect(recOff.selectedPatternKind).toBe(recOn.selectedPatternKind);
+      expect(recOff.actionId).toBe(recOn.actionId);
+    }
+
+    // 3. Match Log normalized logical comparison
+    expect(resOff.matchLog).toBeDefined();
+    expect(resOn.matchLog).toBeDefined();
+
+    const normalizeLog = (log: any) => {
+      if (!log) return undefined;
+      const meta = {
+        ...log.meta,
+        startedAt: undefined,
+        finishedAt: undefined,
+      };
+      const events = (log.events || []).map((ev: any) => {
+        const copy = { ...ev };
+        delete copy.timestamp;
+        if ("decisionId" in copy) {
+          copy.decisionId = "<normalized-decision-id>";
+        }
+        return copy;
+      });
+      return { meta, events };
+    };
+
+    expect(normalizeLog(resOff.matchLog)).toEqual(normalizeLog(resOn.matchLog));
   });
 
   // 20. Same-Seed Match Determinism

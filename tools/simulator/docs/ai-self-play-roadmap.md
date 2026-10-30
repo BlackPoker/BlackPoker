@@ -541,10 +541,10 @@ Status: **IMPLEMENTED / PENDING INDEPENDENT REVIEW**
       - `targetRequest` からの絶対 sequence / bookkeeping 除外と semantic actionId / target 感度。
       - `selections` / `sourceEvent.payload` 等の汎用意味論ディクショナリ内キー名（`sequence`, `decisionId`, `actionName` 等）の保持。
       - 実ランタイム効果中断再開（`STAGE_RESOLUTION_INTERRUPTED`）フィクスチャによる検証完了。
-12. **Decision Feature Schema v6 & Semantic Fingerprint v2 (BP-SIM-AI-V92-FEATURE-SCHEMA-V6-IMPL-V1)**:
+12. **Decision Feature Schema v6 & Semantic Fingerprint v2 (BP-SIM-AI-V92-FEATURE-SCHEMA-V6-IMPL-V1 / R1)**:
     - **設計ステータス**: **FORMAL ACCEPTED** (`tools/simulator/docs/ai-v92-feature-schema-v6-design-v1.md`, `tools/simulator/docs/ai-v92-feature-schema-v6-registry-v1.json`, SHA: `16abecd28542bc607bacc64961360f8b70a13125`)
     - **実装ステータス**: **READY FOR INDEPENDENT REVIEW** (`src/domain/ai/DecisionFeatureTypes.ts`, `src/engine/ai/DecisionFeatureEncoder.ts`, `src/domain/ai/DecisionFeatureScalingRegistry.ts`, `src/engine/ai/DecisionDNALegacyValidator.ts`, `src/engine/ai/DecisionDNAMigration.ts`, `src/domain/ai/SemanticDiagnosticTypes.ts`, `src/engine/ai/SemanticFingerprintCalculator.ts`, `src/engine/ai/SemanticStallCycleDetector.ts`, `docs/ai-semantic-fingerprint-field-registry-v2-r1.json`, `src/tests/ai/v92FeatureSchemaV6Acceptance.test.ts`)
-    - **検証エビデンス**: 20/20 受入テスト全パス、全206テストファイル (2,908テスト) 100% PASS、シミュレータービルド・プレイアブル・シナリオ・コンペア検証 100% 成功。
+    - **検証エビデンス**: 20/20 受入テスト全パス（R1: Diagnostic OFF/ON 完全論理トレース・正規化ログパリティ、明示 [7, 2] および候補順逆転 Tie-Break パリティ、Regulation テスト10ファイル差分監査適合）、全206テストファイル (2,908テスト) 100% PASS、シミュレータービルド・プレイアブル・シナリオ・コンペア検証 100% 成功。
     - **目的**: 第9.2版コアフローの `focusPlayer` 導入に伴う Feature Schema v5 および Semantic Fingerprint（`pof1`/`drsf1`/`gpif1`）の感度欠落（Compatibility Gap）の解消。
     - **R2 改訂内容**:
       - **Tie-Break 契約是正**: `GenomePolicy.choose()` の実コード（`if (p.score > bestScore)` による更新・同点時不更新）を正本とし、**「最初に出現した最高スコア手（first-encountered maximum-score pattern）」** に定義を是正（`patternRef` 最小値優先の誤記を撤回）。受入テストに候補 `patternRef = [7, 2]`、両スコア `0` で `selectedPatternRef === 7` の検証を追加。
