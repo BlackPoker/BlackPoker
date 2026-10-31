@@ -12,7 +12,7 @@ import {
 } from "./characterUtils";
 import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
 import { validateCompleteOrder } from "./OrderSelectionValidator";
-import { findPhysicalCardInGrave, removePhysicalCardFromGrave, isCardLike } from "./graveCardUtils";
+import { findPhysicalCardInGrave, removePhysicalCardFromGrave, isCardLike, isDirectCard } from "./graveCardUtils";
 import { moveUnitToGraveyard, moveUnitToHand, resolveUniqueFieldUnitById } from "./unitMovementUtils";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
@@ -1623,8 +1623,20 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
       }
 
       // Unit wrapper自体が直接移動対象として指定された場合は拒絶 (fail-closed, lightPack Test Y Contract)
+      // 1) wrapper の unitId が直接 cardId として指定された場合は拒絶
+      // 2) cards 配列を持たない未対応・不正形式のエントリで id が一致する場合も拒絶
+      // ※ wrapper の id と内包カードの id が同一である場合 (先攻決定カード等) は、内包物理カードの正当な移動として許可
       const matchedWrapper = sourceCards.find(
-        (c: any) => c && !isCardLike(c) && (c.unitId === cardId || c.id === cardId)
+        (c: any) => {
+          if (!c || typeof c !== "object") return false;
+          if (typeof c.unitId === "string" && c.unitId === cardId) {
+            return true;
+          }
+          if (!isDirectCard(c) && !Array.isArray(c.cards) && c.id === cardId) {
+            return true;
+          }
+          return false;
+        }
       );
       if (matchedWrapper) {
         throw new Error(`moveCard: 墓地内のUnit wrapperまたは未対応形式のエントリは移動できません: ${cardId}`);

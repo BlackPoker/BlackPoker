@@ -21,15 +21,49 @@ export interface PhysicalCardLocationUnit {
 export type PhysicalCardLocation = PhysicalCardLocationDirect | PhysicalCardLocationUnit;
 
 /**
- * 対象オブジェクトがカード形式であるかを判定します。
+ * 対象オブジェクトが Unit wrapper 特有の属性 (unitId, cards, kind) を
+ * キーとして保持しているかを厳格に判定します (プロパティの存在自体を検査)。
  */
-export function isCardLike(entry: any): boolean {
+export function hasUnitWrapperProperty(obj: any): boolean {
+  if (obj == null || typeof obj !== "object") return false;
+  return "unitId" in obj || "cards" in obj || "kind" in obj;
+}
+
+/**
+ * Unit wrapper 内に内包される物理カードとして有効であるかを厳格に判定します。
+ * - 有効な文字列 ID を保持していること。
+ * - Unit wrapper 属性 (unitId, cards, kind) がキーとして一切含まれないこと (入れ子 wrapper の fail-closed)。
+ */
+export function isValidContainedCard(card: any): boolean {
   return (
-    entry != null &&
-    typeof entry === "object" &&
+    card != null &&
+    typeof card === "object" &&
+    typeof card.id === "string" &&
+    card.id.trim().length > 0 &&
+    !hasUnitWrapperProperty(card)
+  );
+}
+
+/**
+ * 対象オブジェクトが直接的な物理生カード（direct physical card）であるかを判定します。
+ * - 有効な文字列 ID、suit、rank を保持していること。
+ * - Unit wrapper 属性 (unitId, cards, kind) を一切含まないこと。
+ * - Canonical Normal Card および Canonical Joker と完全な互換性を持ちます。
+ */
+export function isDirectCard(entry: any): boolean {
+  return (
+    isValidContainedCard(entry) &&
     entry.suit !== undefined &&
     entry.rank !== undefined
   );
+}
+
+/**
+ * 対象オブジェクトがカード形式の属性（suit, rank）を備えているかを判定します（後方互換用）。
+ * 物理カードとしての直接エントリ判定を行います。
+ */
+export function isCardLike(entry: any): boolean {
+  return isDirectCard(entry);
 }
 
 /**
@@ -51,19 +85,16 @@ export function enumeratePhysicalCardsInGrave(grave: any[]): any[] {
     const entry = grave[gIdx];
     if (!entry) continue;
 
-    if (isCardLike(entry)) {
-      const cardId = entry.id;
-      if (cardId) {
-        if (seenCardIds.has(cardId)) {
-          throw new Error(`Grave内に重複したcard.id (${cardId}) が存在します (fail-closed)`);
-        }
-        seenCardIds.add(cardId);
-      }
-      result.push(entry);
-    } else if (Array.isArray(entry.cards)) {
+    // 1. Unit wrapper (複数カードまたは単一カードラッパー): 内包する cards を優先走査
+    if (Array.isArray(entry.cards)) {
       for (let cIdx = 0; cIdx < entry.cards.length; cIdx++) {
         const card = entry.cards[cIdx];
-        if (!isCardLike(card)) continue;
+        // wrapper 内の内包カードも厳格な物理カード検証を実施 (不正なカードや入れ子 wrapper は黙認せず fail-closed)
+        if (!isValidContainedCard(card)) {
+          throw new Error(
+            `enumeratePhysicalCardsInGrave: Grave内のUnit wrapper (${entry.unitId ?? "unknown"}) 内に不正または入れ子Unit wrapperが含まれています (cards[${cIdx}]): ${JSON.stringify(card)} (fail-closed)`
+          );
+        }
 
         const cardId = card.id;
         if (cardId) {
@@ -74,6 +105,16 @@ export function enumeratePhysicalCardsInGrave(grave: any[]): any[] {
         }
         result.push(card);
       }
+    } else if (isDirectCard(entry)) {
+      // 2. 直接配置された物理生カード
+      const cardId = entry.id;
+      if (cardId) {
+        if (seenCardIds.has(cardId)) {
+          throw new Error(`Grave内に重複したcard.id (${cardId}) が存在します (fail-closed)`);
+        }
+        seenCardIds.add(cardId);
+      }
+      result.push(entry);
     }
   }
 
@@ -95,21 +136,17 @@ export function findPhysicalCardInGrave(grave: any[], cardId: string): PhysicalC
     const entry = grave[gIdx];
     if (!entry) continue;
 
-    if (isCardLike(entry)) {
-      if (entry.id === cardId) {
-        if (foundLocation) {
-          throw new Error(`Grave内に重複したcard.id (${cardId}) が存在します (fail-closed)`);
-        }
-        foundLocation = {
-          type: "direct",
-          graveIndex: gIdx,
-          card: entry,
-        };
-      }
-    } else if (Array.isArray(entry.cards)) {
+    // 1. Unit wrapper 内を優先検索
+    if (Array.isArray(entry.cards)) {
       for (let cIdx = 0; cIdx < entry.cards.length; cIdx++) {
         const card = entry.cards[cIdx];
-        if (isCardLike(card) && card.id === cardId) {
+        // 内包カードの整合性を検証 (不正なカード・入れ子 wrapper は fail-closed)
+        if (!isValidContainedCard(card)) {
+          throw new Error(
+            `findPhysicalCardInGrave: Grave内のUnit wrapper (${entry.unitId ?? "unknown"}) 内に不正または入れ子Unit wrapperが含まれています (cards[${cIdx}]): ${JSON.stringify(card)} (fail-closed)`
+          );
+        }
+        if (card.id === cardId) {
           if (foundLocation) {
             throw new Error(`Grave内に重複したcard.id (${cardId}) が存在します (fail-closed)`);
           }
@@ -121,6 +158,18 @@ export function findPhysicalCardInGrave(grave: any[], cardId: string): PhysicalC
             card: card,
           };
         }
+      }
+    } else if (isDirectCard(entry)) {
+      // 2. 直接配置された物理生カードを検索
+      if (entry.id === cardId) {
+        if (foundLocation) {
+          throw new Error(`Grave内に重複したcard.id (${cardId}) が存在します (fail-closed)`);
+        }
+        foundLocation = {
+          type: "direct",
+          graveIndex: gIdx,
+          card: entry,
+        };
       }
     }
   }

@@ -159,6 +159,14 @@ export function moveUnitToHand(
     if (!isCanonicalPrintedCard(card)) {
       throw new Error(`moveUnitToHand: ユニット (${canonicalUnit.unitId}) に非Canonicalカードが含まれています: ${JSON.stringify(card)} (fail-closed)`);
     }
+
+    // 厳格な物理生カード検証 (fail-closed):
+    // Unit wrapper 特有の属性 (unitId, cards, kind) がキーとして存在する場合、暗黙にサニタイズせず即座に停止
+    if ("unitId" in card || "cards" in card || "kind" in card) {
+      throw new Error(
+        `moveUnitToHand: ユニット (${canonicalUnit.unitId}) のカード構成に不正なUnit wrapper属性 (unitId, cards, kind) が含まれています: ${JSON.stringify(card)} (fail-closed)`
+      );
+    }
   }
 
   // 手札に既に同一カードIDが存在しないか検証
