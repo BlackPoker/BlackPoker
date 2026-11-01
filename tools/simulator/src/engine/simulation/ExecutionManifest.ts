@@ -6,6 +6,11 @@ import { DecisionTraceRecord } from "./SimulationRunner.js";
 import { PolicyDescriptor } from "./DecisionPolicy.js";
 
 /**
+ * Git 検証ステータス
+ */
+export type GitVerificationStatus = "VERIFIED" | "FAILED" | "ENV_OVERRIDE";
+
+/**
  * 実験実行時の Git および未コミット状態のメタデータ
  */
 export interface GitExecutionMetadata {
@@ -13,6 +18,7 @@ export interface GitExecutionMetadata {
   readonly branch: string;
   readonly isDirty: boolean;
   readonly dirtyFiles: readonly string[];
+  readonly verificationStatus: GitVerificationStatus;
 }
 
 /**
@@ -100,6 +106,26 @@ export class ExecutionManifestDirtyStateError extends Error {
 }
 
 /**
+ * Git 検証失敗（fail-closed）による保存拒否エラー
+ */
+export class ExecutionManifestUnverifiedGitStateError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ExecutionManifestUnverifiedGitStateError";
+  }
+}
+
+/**
+ * 必須サブシステム欠落エラー (fail-closed)
+ */
+export class ExecutionManifestMissingSubsystemError extends Error {
+  constructor(message: string, public readonly missingPath: string) {
+    super(message);
+    this.name = "ExecutionManifestMissingSubsystemError";
+  }
+}
+
+/**
  * SHA-256 ハッシュを計算
  */
 function sha256(data: string | Buffer): string {
@@ -122,10 +148,41 @@ export function canonicalJsonStringify(obj: any): string {
 }
 
 /**
- * ディレクトリ内の全ファイルを再帰的に走査し、ファイル相対パスと内容から合成 Digest を計算
+ * git status --porcelain 出力の各行を解析して対象パスを抽出
+ *
+ * フォーマット仕様:
+ * - 先頭2文字: ステータスフラグ (XY)
+ * - 3文字目: 半角スペース
+ * - 4文字目以降: ファイルパス (リネーム時は "old -> new")
  */
-export function computeDirectoryContentDigest(dirPath: string): string {
+export function parsePorcelainLine(rawLine: string): string | null {
+  if (!rawLine || rawLine.length < 4) return null;
+  // 先頭2文字はフラグ、3文字目はスペース。slice(3) でパス部分を取得
+  const pathPart = rawLine.slice(3).trim();
+  if (!pathPart) return null;
+
+  // リネーム "R  old -> new" の場合は変更後の新しいパスを抽出
+  if (pathPart.includes(" -> ")) {
+    const parts = pathPart.split(" -> ");
+    return parts[parts.length - 1].trim();
+  }
+  return pathPart;
+}
+
+/**
+ * ディレクトリ内の全ファイルを再帰的に走査し、ファイル相対パスと内容から合成 Digest を計算
+ *
+ * @param dirPath 走査対象ディレクトリのパス
+ * @param required 必須フラグ。true の場合、ディレクトリが存在しなければ fail-closed で例外を送出
+ */
+export function computeDirectoryContentDigest(dirPath: string, required: boolean = true): string {
   if (!fs.existsSync(dirPath)) {
+    if (required) {
+      throw new ExecutionManifestMissingSubsystemError(
+        `CRITICAL MANIFEST INTEGRITY ERROR: 必須サブシステムディレクトリが存在しません: ${dirPath}`,
+        dirPath
+      );
+    }
     return sha256(`NOT_FOUND:${path.basename(dirPath)}`);
   }
 
@@ -153,7 +210,7 @@ export function computeDirectoryContentDigest(dirPath: string): string {
 }
 
 /**
- * Git メタデータを安全に取得 (Git コマンド失敗時のフォールバック付き)
+ * Git メタデータを安全に取得 (Git コマンド失敗時は fail-closed で dirty 扱い)
  */
 export function getGitExecutionMetadata(rootDir: string): GitExecutionMetadata {
   try {
@@ -162,6 +219,10 @@ export function getGitExecutionMetadata(rootDir: string): GitExecutionMetadata {
       encoding: "utf-8",
       stdio: ["ignore", "pipe", "ignore"],
     }).trim();
+
+    if (!headCommitSha || headCommitSha.length !== 40 || !/^[0-9a-f]{40}$/.test(headCommitSha)) {
+      throw new Error(`Invalid HEAD commit SHA format: '${headCommitSha}'`);
+    }
 
     let branch = "";
     try {
@@ -178,29 +239,44 @@ export function getGitExecutionMetadata(rootDir: string): GitExecutionMetadata {
       cwd: rootDir,
       encoding: "utf-8",
       stdio: ["ignore", "pipe", "ignore"],
-    }).trim();
+    });
 
-    const dirtyFiles = statusOutput
-      ? statusOutput
-          .split("\n")
-          .map((line) => line.trim().slice(3))
-          .filter((f) => f.length > 0)
-      : [];
+    const rawLines = statusOutput ? statusOutput.split(/\r?\n/) : [];
+    const dirtyFiles: string[] = [];
+    for (const line of rawLines) {
+      const parsed = parsePorcelainLine(line);
+      if (parsed) {
+        dirtyFiles.push(parsed);
+      }
+    }
 
     return {
       headCommitSha,
       branch,
       isDirty: dirtyFiles.length > 0,
       dirtyFiles,
+      verificationStatus: "VERIFIED",
     };
-  } catch {
-    // Git が利用できない環境でのフォールバック
-    const envSha = process.env.GIT_COMMIT_SHA || "0000000000000000000000000000000000000000";
+  } catch (err: any) {
+    // Git コマンドが利用できない・失敗した場合は、fail-closed 原則に基づき isDirty: true としてマーク
+    // (Git 未検証の状態で誤ってクリーンと判定される重大事故を防止)
+    const envSha = process.env.GIT_COMMIT_SHA;
+    if (envSha && envSha.length === 40 && /^[0-9a-f]{40}$/.test(envSha)) {
+      return {
+        headCommitSha: envSha,
+        branch: process.env.GIT_BRANCH || "env-override",
+        isDirty: true, // Git status 自体が検証不能なため安全側に倒して dirty
+        dirtyFiles: ["GIT_STATUS_COMMAND_UNAVAILABLE_ENV_SHA_ONLY"],
+        verificationStatus: "ENV_OVERRIDE",
+      };
+    }
+
     return {
-      headCommitSha: envSha,
+      headCommitSha: "UNVERIFIED_MISSING_GIT_SHA",
       branch: "unknown",
-      isDirty: false,
-      dirtyFiles: [],
+      isDirty: true, // fail-closed: 検証不能時は dirty 扱い
+      dirtyFiles: ["GIT_STATUS_COMMAND_FAILED_OR_GIT_NOT_FOUND"],
+      verificationStatus: "FAILED",
     };
   }
 }
@@ -210,11 +286,11 @@ export function getGitExecutionMetadata(rootDir: string): GitExecutionMetadata {
  */
 export function computeSubsystemContentDigests(rootDir: string): SubsystemContentDigests {
   const simDir = path.resolve(rootDir, "tools/simulator");
-  const rules = computeDirectoryContentDigest(path.resolve(simDir, "src/engine/rules"));
-  const simulation = computeDirectoryContentDigest(path.resolve(simDir, "src/engine/simulation"));
-  const ai = computeDirectoryContentDigest(path.resolve(simDir, "src/engine/ai"));
-  const regulations = computeDirectoryContentDigest(path.resolve(simDir, "src/data/regulations"));
-  const rulesPackage = computeDirectoryContentDigest(path.resolve(simDir, "src/data/rules-vnext"));
+  const rules = computeDirectoryContentDigest(path.resolve(simDir, "src/engine/rules"), true);
+  const simulation = computeDirectoryContentDigest(path.resolve(simDir, "src/engine/simulation"), true);
+  const ai = computeDirectoryContentDigest(path.resolve(simDir, "src/engine/ai"), true);
+  const regulations = computeDirectoryContentDigest(path.resolve(simDir, "src/data/regulations"), true);
+  const rulesPackage = computeDirectoryContentDigest(path.resolve(simDir, "src/data/rules-vnext"), true);
 
   // 依存関係 (package.json / package-lock.json)
   const pkgPath = path.resolve(simDir, "package.json");
@@ -225,6 +301,13 @@ export function computeSubsystemContentDigests(rootDir: string): SubsystemConten
   if (fs.existsSync(pkgPath)) depContent += fs.readFileSync(pkgPath, "utf-8");
   if (fs.existsSync(lockPath)) depContent += fs.readFileSync(lockPath, "utf-8");
   if (fs.existsSync(rootPkgPath)) depContent += fs.readFileSync(rootPkgPath, "utf-8");
+
+  if (!depContent) {
+    throw new ExecutionManifestMissingSubsystemError(
+      "CRITICAL MANIFEST INTEGRITY ERROR: 依存関係ファイル (package.json) が検出できませんでした。",
+      pkgPath
+    );
+  }
   const dependencies = sha256(depContent);
 
   return {
@@ -295,9 +378,22 @@ export function createExecutionManifest(params: {
 }
 
 /**
- * 実験結果の正式保存時に未コミット変更 (dirty state) がある場合は厳格に例外を投げる
+ * 実験結果の正式保存時に未コミット変更 (dirty state) または Git 検証不能状態がある場合は厳格に例外を投げる
+ *
+ * 【設計・運用上の重要事項】:
+ * 本関数 `assertNotDirty()` は現時点では独立した整合性検証ガード関数として提供されており、
+ * 既存のパイロット Runner 等への自動強制適用は未実装です。
+ * 将来の自動対戦実験や正式 Evidence 出力処理においては、後述の `saveOfficialEvidenceWithManifest()`
+ * を通じて本ガードを必ず呼び出すインターフェース契約を採用します。
  */
 export function assertNotDirty(manifest: ExecutionManifest): void {
+  if (manifest.gitMetadata.verificationStatus === "FAILED") {
+    throw new ExecutionManifestUnverifiedGitStateError(
+      `CRITICAL EXECUTION INTEGRITY FAILURE: Git メタデータの取得・検証に失敗しているため、正式保存は拒否されます (fail-closed)。\n` +
+        `Head SHA: ${manifest.gitMetadata.headCommitSha}, Verification: ${manifest.gitMetadata.verificationStatus}`
+    );
+  }
+
   if (manifest.gitMetadata.isDirty) {
     throw new ExecutionManifestDirtyStateError(
       `CRITICAL EXECUTION INTEGRITY FAILURE: 実験結果の正式保存は dirty な状態では許可されません。\n` +
@@ -305,5 +401,49 @@ export function assertNotDirty(manifest: ExecutionManifest): void {
         manifest.gitMetadata.dirtyFiles.map((f) => `  - ${f}`).join("\n"),
       manifest.gitMetadata.dirtyFiles
     );
+  }
+}
+
+/**
+ * 将来の正式な Evidence 保存処理で必ず Manifest ガードを強制するための標準保存インターフェース
+ */
+export interface SaveOfficialEvidenceParams<T> {
+  readonly filePath: string;
+  readonly evidenceData: T;
+  readonly manifest: ExecutionManifest;
+  readonly options?: {
+    readonly writeSeparateManifestFile?: boolean;
+    readonly allowDirtyBypassExplicitly?: boolean; // 原則禁止、テスト等の限定目的のみ
+  };
+}
+
+/**
+ * 正式な Evidence を Execution Manifest ガード付きで安全に保存する
+ *
+ * @throws {ExecutionManifestDirtyStateError} dirty 状態で保存しようとした場合
+ * @throws {ExecutionManifestUnverifiedGitStateError} Git 検証に失敗している場合
+ */
+export function saveOfficialEvidenceWithManifest<T extends Record<string, any>>(
+  params: SaveOfficialEvidenceParams<T>
+): void {
+  if (!params.options?.allowDirtyBypassExplicitly) {
+    assertNotDirty(params.manifest);
+  }
+
+  const outputPayload = {
+    ...params.evidenceData,
+    executionManifest: params.manifest,
+  };
+
+  const dir = path.dirname(params.filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  fs.writeFileSync(params.filePath, JSON.stringify(outputPayload, null, 2), "utf-8");
+
+  if (params.options?.writeSeparateManifestFile) {
+    const manifestPath = `${params.filePath}.manifest.json`;
+    fs.writeFileSync(manifestPath, JSON.stringify(params.manifest, null, 2), "utf-8");
   }
 }

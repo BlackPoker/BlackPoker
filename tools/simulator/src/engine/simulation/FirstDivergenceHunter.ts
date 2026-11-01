@@ -1,5 +1,6 @@
 import { DecisionTraceRecord, DecisionLegalPatternSummary } from "./SimulationRunner.js";
 import { PlayerKey } from "../../domain/decision/DecisionSource.js";
+import { canonicalJsonStringify } from "./ExecutionManifest.js";
 
 /**
  * 過去の R2 Evidence に関する限界の公式表明
@@ -11,10 +12,23 @@ export const R2_HISTORICAL_LIMITATION_NOTE =
   "間の初回分岐をステップ単位で厳密に特定・分類する目的で使用されます。";
 
 /**
+ * runtimeDecisionId を決定論的比較から除外する理由の公式表明
+ */
+export const RUNTIME_DECISION_ID_EXCLUSION_REASON =
+  "runtimeDecisionId (例: 'rt-0', 'dec-10' 等) はゲームセッションインスタンスの実行時に" +
+  "メモリ上でインクリメントされる一時的な動的ランタイムカウンタであり、セッション初期化順序や" +
+  "再試行バッファの動的状態に影響される可能性があります。一方、logicalDecisionId " +
+  "(例: 'd2-000000-p1-v1-4122835f') はステップ番号・手番プレイヤー・状態バージョン・" +
+  "論理状態ハッシュから純粋関数的に生成される決定論的一意キーであるため、同一Seed再実行の" +
+  "決定論的一致検証には logicalDecisionId を使用し、runtimeDecisionId は意図的に比較対象から除外します。";
+
+/**
  * 初回分岐の分類種別
  */
 export type DivergenceClassification =
   | "NO_DIVERGENCE"                     // 全ステップ、合法手、選択、状態Hashが完全一致
+  | "STEP_COUNT_MISMATCH"              // stepCount (ステップ番号) の不一致
+  | "LOGICAL_DECISION_ID_MISMATCH"     // 決定論的 logicalDecisionId の不一致
   | "ACTING_PLAYER_MISMATCH"           // 意思決定手番プレイヤーの不一致
   | "STATE_HASH_MISMATCH"              // 意思決定前の状態 Hash の不一致
   | "STATE_VERSION_MISMATCH"           // 状態バージョンの不一致
@@ -42,6 +56,7 @@ export interface DivergenceReport {
   readonly traceALength: number;
   readonly traceBLength: number;
   readonly historicalLimitationNote: string;
+  readonly runtimeDecisionIdExclusionReason: string;
   readonly details?: {
     readonly stepCount: number;
     readonly traceARecord?: Partial<DecisionTraceRecord>;
@@ -51,7 +66,7 @@ export interface DivergenceReport {
 }
 
 /**
- * 2つの合法パターン概要配列が完全一致するかを順序を含めて検証
+ * 2つの合法パターン概要配列が完全一致するかを順序および全決定論的フィールドを含めて検証
  */
 function compareLegalPatterns(
   patternsA: readonly DecisionLegalPatternSummary[],
@@ -68,6 +83,13 @@ function compareLegalPatterns(
     const a = patternsA[i];
     const b = patternsB[i];
 
+    if (a.patternRef !== b.patternRef) {
+      return {
+        match: false,
+        diffReason: `Index ${i} の patternRef 不一致: A=${a.patternRef}, B=${b.patternRef}`,
+        index: i,
+      };
+    }
     if (a.logicalPatternKey !== b.logicalPatternKey) {
       return {
         match: false,
@@ -89,13 +111,62 @@ function compareLegalPatterns(
         index: i,
       };
     }
+    if (a.actionSelectionRef !== b.actionSelectionRef) {
+      return {
+        match: false,
+        diffReason: `Index ${i} の actionSelectionRef 不一致: A=${a.actionSelectionRef}, B=${b.actionSelectionRef}`,
+        index: i,
+      };
+    }
+    if (a.keyCardSelectionRef !== b.keyCardSelectionRef) {
+      return {
+        match: false,
+        diffReason: `Index ${i} の keyCardSelectionRef 不一致: A=${a.keyCardSelectionRef}, B=${b.keyCardSelectionRef}`,
+        index: i,
+      };
+    }
+    if (a.keyUnitSelectionRef !== b.keyUnitSelectionRef) {
+      return {
+        match: false,
+        diffReason: `Index ${i} の keyUnitSelectionRef 不一致: A=${a.keyUnitSelectionRef}, B=${b.keyUnitSelectionRef}`,
+        index: i,
+      };
+    }
+    if (a.costPaymentRef !== b.costPaymentRef) {
+      return {
+        match: false,
+        diffReason: `Index ${i} の costPaymentRef 不一致: A=${a.costPaymentRef}, B=${b.costPaymentRef}`,
+        index: i,
+      };
+    }
+    if (a.targetSelectionRef !== b.targetSelectionRef) {
+      return {
+        match: false,
+        diffReason: `Index ${i} の targetSelectionRef 不一致: A=${a.targetSelectionRef}, B=${b.targetSelectionRef}`,
+        index: i,
+      };
+    }
+    if (a.effectSelectionRef !== b.effectSelectionRef) {
+      return {
+        match: false,
+        diffReason: `Index ${i} の effectSelectionRef 不一致: A=${a.effectSelectionRef}, B=${b.effectSelectionRef}`,
+        index: i,
+      };
+    }
+    if (a.orderSelectionRef !== b.orderSelectionRef) {
+      return {
+        match: false,
+        diffReason: `Index ${i} の orderSelectionRef 不一致: A=${a.orderSelectionRef}, B=${b.orderSelectionRef}`,
+        index: i,
+      };
+    }
   }
 
   return { match: true };
 }
 
 /**
- * 2つの PolicyDescriptor が一致するかを検証
+ * 2つの PolicyDescriptor が一致するかを検証 (metadata のキー順序に依存しない正規化比較)
  */
 function comparePolicyDescriptors(descA?: any, descB?: any): boolean {
   if (!descA && !descB) return true;
@@ -104,7 +175,7 @@ function comparePolicyDescriptors(descA?: any, descB?: any): boolean {
     descA.kind === descB.kind &&
     descA.policyVersion === descB.policyVersion &&
     descA.name === descB.name &&
-    JSON.stringify(descA.metadata ?? {}) === JSON.stringify(descB.metadata ?? {})
+    canonicalJsonStringify(descA.metadata ?? {}) === canonicalJsonStringify(descB.metadata ?? {})
   );
 }
 
@@ -125,6 +196,44 @@ export function huntFirstDivergence(
     const recA = traceA[i];
     const recB = traceB[i];
 
+    // 0. stepCount の検証
+    if (recA.stepCount !== recB.stepCount) {
+      return {
+        status: "DIVERGENCE_DETECTED",
+        classification: "STEP_COUNT_MISMATCH",
+        divergenceStepIndex: i,
+        divergenceLogicalDecisionId: recA.logicalDecisionId,
+        actingPlayer: recA.playerId,
+        preStateHashA: recA.stateHash,
+        preStateHashB: recB.stateHash,
+        explanation: `Index ${i} で stepCount が不一致: A=${recA.stepCount}, B=${recB.stepCount}`,
+        traceALength: traceA.length,
+        traceBLength: traceB.length,
+        historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
+        details: { stepCount: i, traceARecord: recA, traceBRecord: recB },
+      };
+    }
+
+    // 0.1 logicalDecisionId の検証
+    if (recA.logicalDecisionId !== recB.logicalDecisionId) {
+      return {
+        status: "DIVERGENCE_DETECTED",
+        classification: "LOGICAL_DECISION_ID_MISMATCH",
+        divergenceStepIndex: i,
+        divergenceLogicalDecisionId: recA.logicalDecisionId,
+        actingPlayer: recA.playerId,
+        preStateHashA: recA.stateHash,
+        preStateHashB: recB.stateHash,
+        explanation: `Step ${i} で logicalDecisionId が不一致: A='${recA.logicalDecisionId}', B='${recB.logicalDecisionId}'`,
+        traceALength: traceA.length,
+        traceBLength: traceB.length,
+        historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
+        details: { stepCount: i, traceARecord: recA, traceBRecord: recB },
+      };
+    }
+
     // 1. 手番プレイヤーの検証
     if (recA.playerId !== recB.playerId) {
       return {
@@ -139,6 +248,7 @@ export function huntFirstDivergence(
         traceALength: traceA.length,
         traceBLength: traceB.length,
         historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
         details: { stepCount: i, traceARecord: recA, traceBRecord: recB },
       };
     }
@@ -159,6 +269,7 @@ export function huntFirstDivergence(
         traceALength: traceA.length,
         traceBLength: traceB.length,
         historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
         details: { stepCount: i, traceARecord: recA, traceBRecord: recB },
       };
     }
@@ -177,6 +288,7 @@ export function huntFirstDivergence(
         traceALength: traceA.length,
         traceBLength: traceB.length,
         historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
         details: { stepCount: i, traceARecord: recA, traceBRecord: recB },
       };
     }
@@ -193,10 +305,11 @@ export function huntFirstDivergence(
         preStateHashB: recB.stateHash,
         explanation:
           `Step ${i} (${recA.playerId}) で policyDescriptor が不一致: ` +
-          `A=${JSON.stringify(recA.policyDescriptor)}, B=${JSON.stringify(recB.policyDescriptor)}`,
+          `A=${canonicalJsonStringify(recA.policyDescriptor)}, B=${canonicalJsonStringify(recB.policyDescriptor)}`,
         traceALength: traceA.length,
         traceBLength: traceB.length,
         historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
         details: { stepCount: i, traceARecord: recA, traceBRecord: recB },
       };
     }
@@ -218,6 +331,7 @@ export function huntFirstDivergence(
         traceALength: traceA.length,
         traceBLength: traceB.length,
         historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
         details: {
           stepCount: i,
           traceARecord: recA,
@@ -244,6 +358,7 @@ export function huntFirstDivergence(
         traceALength: traceA.length,
         traceBLength: traceB.length,
         historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
         details: {
           stepCount: i,
           traceARecord: recA,
@@ -269,6 +384,7 @@ export function huntFirstDivergence(
         traceALength: traceA.length,
         traceBLength: traceB.length,
         historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
         details: { stepCount: i, traceARecord: recA, traceBRecord: recB },
       };
     }
@@ -289,6 +405,7 @@ export function huntFirstDivergence(
         traceALength: traceA.length,
         traceBLength: traceB.length,
         historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
         details: { stepCount: i, traceARecord: recA, traceBRecord: recB },
       };
     }
@@ -308,6 +425,7 @@ export function huntFirstDivergence(
         traceALength: traceA.length,
         traceBLength: traceB.length,
         historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+        runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
         details: { stepCount: i, traceARecord: recA, traceBRecord: recB },
       };
     }
@@ -325,6 +443,7 @@ export function huntFirstDivergence(
       traceALength: traceA.length,
       traceBLength: traceB.length,
       historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+      runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
       details: {
         stepCount: minLen,
         diffSummary: `Trace A has ${traceA.length} steps, Trace B has ${traceB.length} steps`,
@@ -340,5 +459,6 @@ export function huntFirstDivergence(
     traceALength: traceA.length,
     traceBLength: traceB.length,
     historicalLimitationNote: R2_HISTORICAL_LIMITATION_NOTE,
+    runtimeDecisionIdExclusionReason: RUNTIME_DECISION_ID_EXCLUSION_REASON,
   };
 }

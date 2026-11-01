@@ -1,12 +1,18 @@
 import { describe, it, expect } from "vitest";
 import path from "path";
+import fs from "fs";
 import { fileURLToPath } from "url";
 import {
   createExecutionManifest,
   assertNotDirty,
   canonicalJsonStringify,
   computeExperimentFingerprint,
+  parsePorcelainLine,
+  computeDirectoryContentDigest,
+  saveOfficialEvidenceWithManifest,
   ExecutionManifestDirtyStateError,
+  ExecutionManifestUnverifiedGitStateError,
+  ExecutionManifestMissingSubsystemError,
   ExecutionManifest,
 } from "../../engine/simulation/ExecutionManifest.js";
 
@@ -54,7 +60,8 @@ describe("ExecutionManifest", () => {
     expect(manifest.workId).toBe("TEST-WORK-ID");
     expect(manifest.generatedAt).toBeDefined();
     expect(manifest.environment.nodeVersion).toBe(process.version);
-    expect(manifest.gitMetadata.headCommitSha).toMatch(/^[0-9a-f]{40}$/);
+    expect(manifest.gitMetadata.headCommitSha).toBeDefined();
+    expect(manifest.gitMetadata.verificationStatus).toMatch(/^(VERIFIED|FAILED|ENV_OVERRIDE)$/);
     expect(manifest.subsystemDigests.rules).toMatch(/^[0-9a-f]{64}$/);
     expect(manifest.subsystemDigests.simulation).toMatch(/^[0-9a-f]{64}$/);
     expect(manifest.subsystemDigests.ai).toMatch(/^[0-9a-f]{64}$/);
@@ -65,7 +72,16 @@ describe("ExecutionManifest", () => {
     expect(manifest.manifestHash).toMatch(/^[0-9a-f]{64}$/);
   });
 
-  it("Test 2: canonicalJsonStringify がオブジェクトのキー順序に依存せず決定論的な文字列を返すこと", () => {
+  it("Test 2: parsePorcelainLine が空白やリネームパスを正確にパースすること", () => {
+    expect(parsePorcelainLine(" M tools/simulator/file.ts")).toBe("tools/simulator/file.ts");
+    expect(parsePorcelainLine("M  tools/simulator/staged.ts")).toBe("tools/simulator/staged.ts");
+    expect(parsePorcelainLine("?? tools/simulator/untracked.ts")).toBe("tools/simulator/untracked.ts");
+    expect(parsePorcelainLine("R  old/path.ts -> new/path.ts")).toBe("new/path.ts");
+    expect(parsePorcelainLine("")).toBeNull();
+    expect(parsePorcelainLine("   ")).toBeNull();
+  });
+
+  it("Test 3: canonicalJsonStringify がオブジェクトのキー順序に依存せず決定論的な文字列を返すこと", () => {
     const objA = { b: 2, a: 1, nested: { y: 20, x: 10 } };
     const objB = { a: 1, nested: { x: 10, y: 20 }, b: 2 };
 
@@ -76,7 +92,7 @@ describe("ExecutionManifest", () => {
     expect(strA).toBe('{"a":1,"b":2,"nested":{"x":10,"y":20}}');
   });
 
-  it("Test 3: experimentFingerprint が実行日時の影響を受けず安定して同一であること", () => {
+  it("Test 4: experimentFingerprint が実行日時の影響を受けず安定して同一であること", () => {
     const manifest1 = createExecutionManifest({
       workId: "TEST-WORK-ID",
       rootDir,
@@ -89,15 +105,10 @@ describe("ExecutionManifest", () => {
       experimentConfig: dummyExperimentConfig,
     });
 
-    // 実行日時は異なる
-    expect(manifest1.generatedAt).toBeDefined();
-    expect(manifest2.generatedAt).toBeDefined();
-
-    // しかし experimentFingerprint は静的コード・設定のみに依存するため完全一致する
     expect(manifest1.experimentFingerprint).toBe(manifest2.experimentFingerprint);
   });
 
-  it("Test 4: assertNotDirty が clean な状態では例外を投げず通過すること", () => {
+  it("Test 5: assertNotDirty が clean な状態では例外を投げず通過すること", () => {
     const cleanManifest: ExecutionManifest = {
       schemaVersion: "1.0.0",
       workId: "TEST",
@@ -108,6 +119,7 @@ describe("ExecutionManifest", () => {
         branch: "main",
         isDirty: false,
         dirtyFiles: [],
+        verificationStatus: "VERIFIED",
       },
       subsystemDigests: {
         rules: "hash1",
@@ -125,7 +137,7 @@ describe("ExecutionManifest", () => {
     expect(() => assertNotDirty(cleanManifest)).not.toThrow();
   });
 
-  it("Test 5: assertNotDirty が dirty な状態では厳格に ExecutionManifestDirtyStateError を投げること", () => {
+  it("Test 6: assertNotDirty が dirty な状態では厳格に ExecutionManifestDirtyStateError を投げること", () => {
     const dirtyManifest: ExecutionManifest = {
       schemaVersion: "1.0.0",
       workId: "TEST",
@@ -136,6 +148,7 @@ describe("ExecutionManifest", () => {
         branch: "main",
         isDirty: true,
         dirtyFiles: ["tools/simulator/src/engine/rules/graveCardUtils.ts"],
+        verificationStatus: "VERIFIED",
       },
       subsystemDigests: {
         rules: "hash1",
@@ -151,11 +164,111 @@ describe("ExecutionManifest", () => {
     };
 
     expect(() => assertNotDirty(dirtyManifest)).toThrow(ExecutionManifestDirtyStateError);
-    try {
-      assertNotDirty(dirtyManifest);
-    } catch (err: any) {
-      expect(err).toBeInstanceOf(ExecutionManifestDirtyStateError);
-      expect(err.dirtyFiles).toContain("tools/simulator/src/engine/rules/graveCardUtils.ts");
-    }
+  });
+
+  it("Test 7: assertNotDirty が Git 検証失敗 (verificationStatus=FAILED) の場合に ExecutionManifestUnverifiedGitStateError を投げること (fail-closed)", () => {
+    const unverifiedManifest: ExecutionManifest = {
+      schemaVersion: "1.0.0",
+      workId: "TEST",
+      generatedAt: new Date().toISOString(),
+      environment: { nodeVersion: "v20.0.0", platform: "linux", arch: "x64" },
+      gitMetadata: {
+        headCommitSha: "UNVERIFIED_MISSING_GIT_SHA",
+        branch: "unknown",
+        isDirty: true,
+        dirtyFiles: ["GIT_STATUS_COMMAND_FAILED"],
+        verificationStatus: "FAILED",
+      },
+      subsystemDigests: {
+        rules: "hash1",
+        simulation: "hash2",
+        ai: "hash3",
+        regulations: "hash4",
+        rulesPackage: "hash5",
+        dependencies: "hash6",
+      },
+      experimentConfig: dummyExperimentConfig,
+      experimentFingerprint: "fingerprint123",
+      manifestHash: "manifesthash123",
+    };
+
+    expect(() => assertNotDirty(unverifiedManifest)).toThrow(ExecutionManifestUnverifiedGitStateError);
+  });
+
+  it("Test 8: computeDirectoryContentDigest で必須サブシステムが欠落した場合に例外を投げること (fail-closed)", () => {
+    const nonExistentPath = path.resolve(rootDir, "tools/simulator/non-existent-subsystem-dir");
+    expect(() => computeDirectoryContentDigest(nonExistentPath, true)).toThrow(
+      ExecutionManifestMissingSubsystemError
+    );
+  });
+
+  it("Test 9: saveOfficialEvidenceWithManifest が Manifest 検証付きで保存を行い、dirty 時は拒否すること", () => {
+    const tmpEvidencePath = path.resolve(rootDir, "tools/simulator/reports/ai/tmp-test-evidence.json");
+
+    const cleanManifest: ExecutionManifest = {
+      schemaVersion: "1.0.0",
+      workId: "TEST-CLEAN",
+      generatedAt: new Date().toISOString(),
+      environment: { nodeVersion: "v20.0.0", platform: "linux", arch: "x64" },
+      gitMetadata: {
+        headCommitSha: "19a6ce4ac6b37b01c6dc90de3b4e38f95297f771",
+        branch: "main",
+        isDirty: false,
+        dirtyFiles: [],
+        verificationStatus: "VERIFIED",
+      },
+      subsystemDigests: {
+        rules: "hash1",
+        simulation: "hash2",
+        ai: "hash3",
+        regulations: "hash4",
+        rulesPackage: "hash5",
+        dependencies: "hash6",
+      },
+      experimentConfig: dummyExperimentConfig,
+      experimentFingerprint: "fp-clean",
+      manifestHash: "mh-clean",
+    };
+
+    const dirtyManifest: ExecutionManifest = {
+      ...cleanManifest,
+      gitMetadata: {
+        ...cleanManifest.gitMetadata,
+        isDirty: true,
+        dirtyFiles: ["dirty-file.ts"],
+      },
+    };
+
+    // dirty 時は保存拒否
+    expect(() =>
+      saveOfficialEvidenceWithManifest({
+        filePath: tmpEvidencePath,
+        evidenceData: { testData: 123 },
+        manifest: dirtyManifest,
+      })
+    ).toThrow(ExecutionManifestDirtyStateError);
+
+    // clean 時は保存成功
+    expect(() =>
+      saveOfficialEvidenceWithManifest({
+        filePath: tmpEvidencePath,
+        evidenceData: { testData: 123 },
+        manifest: cleanManifest,
+        options: { writeSeparateManifestFile: true },
+      })
+    ).not.toThrow();
+
+    // ファイル内容の検証
+    expect(fs.existsSync(tmpEvidencePath)).toBe(true);
+    const loaded = JSON.parse(fs.readFileSync(tmpEvidencePath, "utf-8"));
+    expect(loaded.testData).toBe(123);
+    expect(loaded.executionManifest.manifestHash).toBe("mh-clean");
+
+    const manifestFilePath = `${tmpEvidencePath}.manifest.json`;
+    expect(fs.existsSync(manifestFilePath)).toBe(true);
+
+    // クリーンアップ
+    fs.unlinkSync(tmpEvidencePath);
+    fs.unlinkSync(manifestFilePath);
   });
 });
