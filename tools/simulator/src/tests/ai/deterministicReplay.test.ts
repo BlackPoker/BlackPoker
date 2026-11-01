@@ -131,6 +131,14 @@ describe("Deterministic Replay Gate (決定論的リプレイ検証)", () => {
     expect(divergence.status).toBe("NO_DIVERGENCE");
     expect(divergence.classification).toBe("NO_DIVERGENCE");
 
+    // 2 回再実行間での全対戦結果指標の完全一致検証
+    expect(res1.completed).toBe(res2.completed);
+    expect(res1.winner).toBe(res2.winner);
+    expect(res1.totalDecisions).toBe(res2.totalDecisions);
+    expect(res1.turnCount).toBe(res2.turnCount);
+    expect(res1.finalStateHash).toBe(res2.finalStateHash);
+    expect(computeTraceDigest(res1)).toBe(computeTraceDigest(res2));
+
     // 2. R3 Evidence の期待値検証
     expect(res1.completed).toBe(true);
     expect(res1.winner).toBe("p1");
@@ -172,6 +180,14 @@ describe("Deterministic Replay Gate (決定論的リプレイ検証)", () => {
     expect(divergence.status).toBe("NO_DIVERGENCE");
     expect(divergence.classification).toBe("NO_DIVERGENCE");
 
+    // 2 回再実行間での全対戦結果指標の完全一致検証
+    expect(res1.completed).toBe(res2.completed);
+    expect(res1.winner).toBe(res2.winner);
+    expect(res1.totalDecisions).toBe(res2.totalDecisions);
+    expect(res1.turnCount).toBe(res2.turnCount);
+    expect(res1.finalStateHash).toBe(res2.finalStateHash);
+    expect(computeTraceDigest(res1)).toBe(computeTraceDigest(res2));
+
     // 2. R3 Evidence の期待値検証
     expect(res1.completed).toBe(true);
     expect(res1.winner).toBe("p1");
@@ -212,6 +228,14 @@ describe("Deterministic Replay Gate (決定論的リプレイ検証)", () => {
     const divergence = huntFirstDivergence(res1.decisionTrace, res2.decisionTrace);
     expect(divergence.status).toBe("NO_DIVERGENCE");
     expect(divergence.classification).toBe("NO_DIVERGENCE");
+
+    // 2 回再実行間での全対戦結果指標の完全一致検証
+    expect(res1.completed).toBe(res2.completed);
+    expect(res1.winner).toBe(res2.winner);
+    expect(res1.totalDecisions).toBe(res2.totalDecisions);
+    expect(res1.turnCount).toBe(res2.turnCount);
+    expect(res1.finalStateHash).toBe(res2.finalStateHash);
+    expect(computeTraceDigest(res1)).toBe(computeTraceDigest(res2));
 
     // 2. R3 Evidence の期待値検証
     expect(res1.completed).toBe(true);

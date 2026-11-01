@@ -108,7 +108,7 @@ describe("ExecutionManifest", () => {
     expect(manifest1.experimentFingerprint).toBe(manifest2.experimentFingerprint);
   });
 
-  it("Test 5: assertNotDirty が clean な状態では例外を投げず通過すること", () => {
+  it("Test 5: assertNotDirty が clean かつ VERIFIED な状態では例外を投げず通過すること", () => {
     const cleanManifest: ExecutionManifest = {
       schemaVersion: "1.0.0",
       workId: "TEST",
@@ -195,14 +195,44 @@ describe("ExecutionManifest", () => {
     expect(() => assertNotDirty(unverifiedManifest)).toThrow(ExecutionManifestUnverifiedGitStateError);
   });
 
-  it("Test 8: computeDirectoryContentDigest で必須サブシステムが欠落した場合に例外を投げること (fail-closed)", () => {
+  it("Test 8: assertNotDirty が ENV_OVERRIDE の場合も正式保存を拒否すること (VERIFIED のみ許可)", () => {
+    const envOverrideManifest: ExecutionManifest = {
+      schemaVersion: "1.0.0",
+      workId: "TEST",
+      generatedAt: new Date().toISOString(),
+      environment: { nodeVersion: "v20.0.0", platform: "linux", arch: "x64" },
+      gitMetadata: {
+        headCommitSha: "19a6ce4ac6b37b01c6dc90de3b4e38f95297f771",
+        branch: "env-override",
+        isDirty: false,
+        dirtyFiles: [],
+        verificationStatus: "ENV_OVERRIDE", // 環境変数のみでGit status未検証
+      },
+      subsystemDigests: {
+        rules: "hash1",
+        simulation: "hash2",
+        ai: "hash3",
+        regulations: "hash4",
+        rulesPackage: "hash5",
+        dependencies: "hash6",
+      },
+      experimentConfig: dummyExperimentConfig,
+      experimentFingerprint: "fingerprint123",
+      manifestHash: "manifesthash123",
+    };
+
+    expect(() => assertNotDirty(envOverrideManifest)).toThrow(ExecutionManifestUnverifiedGitStateError);
+    expect(() => assertNotDirty(envOverrideManifest)).toThrow(/VERIFIED/);
+  });
+
+  it("Test 9: computeDirectoryContentDigest で必須サブシステムが欠落した場合に例外を投げること (fail-closed)", () => {
     const nonExistentPath = path.resolve(rootDir, "tools/simulator/non-existent-subsystem-dir");
     expect(() => computeDirectoryContentDigest(nonExistentPath, true)).toThrow(
       ExecutionManifestMissingSubsystemError
     );
   });
 
-  it("Test 9: saveOfficialEvidenceWithManifest が Manifest 検証付きで保存を行い、dirty 時は拒否すること", () => {
+  it("Test 10: saveOfficialEvidenceWithManifest が検証スキップ不可で常に assertNotDirty を強制すること", () => {
     const tmpEvidencePath = path.resolve(rootDir, "tools/simulator/reports/ai/tmp-test-evidence.json");
 
     const cleanManifest: ExecutionManifest = {
@@ -248,7 +278,7 @@ describe("ExecutionManifest", () => {
       })
     ).toThrow(ExecutionManifestDirtyStateError);
 
-    // clean 時は保存成功
+    // clean かつ VERIFIED 時は保存成功
     expect(() =>
       saveOfficialEvidenceWithManifest({
         filePath: tmpEvidencePath,

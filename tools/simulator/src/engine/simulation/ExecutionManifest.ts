@@ -381,15 +381,20 @@ export function createExecutionManifest(params: {
  * 実験結果の正式保存時に未コミット変更 (dirty state) または Git 検証不能状態がある場合は厳格に例外を投げる
  *
  * 【設計・運用上の重要事項】:
- * 本関数 `assertNotDirty()` は現時点では独立した整合性検証ガード関数として提供されており、
- * 既存のパイロット Runner 等への自動強制適用は未実装です。
- * 将来の自動対戦実験や正式 Evidence 出力処理においては、後述の `saveOfficialEvidenceWithManifest()`
- * を通じて本ガードを必ず呼び出すインターフェース契約を採用します。
+ * 1. 本関数 `assertNotDirty()` は現時点では独立した整合性検証ガード関数として提供されており、
+ *    既存のパイロット Runner 等への自動強制適用は未実装です。
+ * 2. 正式保存には Git 検証ステータス `VERIFIED` のみが許可され、`FAILED` および `ENV_OVERRIDE` は
+ *    fail-closed 原則に基づき例外を送出して拒否されます。
+ * 3. パフォーマンス保護のため、Git コマンドは試合ごとには実行しません。
+ *    今後の自動対戦実験 (Work 2 以降) では、「実験開始時」と「正式保存直前」の 2 回のみ検証する
+ *    運用を基本方針とします。
+ * 4. 正式 Evidence 出力処理においては、後述の `saveOfficialEvidenceWithManifest()`
+ *    を通じて本ガードを常に無条件で実行することを強制します。
  */
 export function assertNotDirty(manifest: ExecutionManifest): void {
-  if (manifest.gitMetadata.verificationStatus === "FAILED") {
+  if (manifest.gitMetadata.verificationStatus !== "VERIFIED") {
     throw new ExecutionManifestUnverifiedGitStateError(
-      `CRITICAL EXECUTION INTEGRITY FAILURE: Git メタデータの取得・検証に失敗しているため、正式保存は拒否されます (fail-closed)。\n` +
+      `CRITICAL EXECUTION INTEGRITY FAILURE: 正式保存には Git 検証ステータス 'VERIFIED' が必須です。'${manifest.gitMetadata.verificationStatus}' は拒否されます (fail-closed)。\n` +
         `Head SHA: ${manifest.gitMetadata.headCommitSha}, Verification: ${manifest.gitMetadata.verificationStatus}`
     );
   }
@@ -413,22 +418,23 @@ export interface SaveOfficialEvidenceParams<T> {
   readonly manifest: ExecutionManifest;
   readonly options?: {
     readonly writeSeparateManifestFile?: boolean;
-    readonly allowDirtyBypassExplicitly?: boolean; // 原則禁止、テスト等の限定目的のみ
   };
 }
 
 /**
  * 正式な Evidence を Execution Manifest ガード付きで安全に保存する
  *
+ * 【fail-closed 契約】:
+ * 検証スキップオプションは存在せず、常に必ず assertNotDirty() が実行されます。
+ *
  * @throws {ExecutionManifestDirtyStateError} dirty 状態で保存しようとした場合
- * @throws {ExecutionManifestUnverifiedGitStateError} Git 検証に失敗している場合
+ * @throws {ExecutionManifestUnverifiedGitStateError} Git 検証が 'VERIFIED' でない場合
  */
 export function saveOfficialEvidenceWithManifest<T extends Record<string, any>>(
   params: SaveOfficialEvidenceParams<T>
 ): void {
-  if (!params.options?.allowDirtyBypassExplicitly) {
-    assertNotDirty(params.manifest);
-  }
+  // 常に無条件で fail-closed ガードを実行
+  assertNotDirty(params.manifest);
 
   const outputPayload = {
     ...params.evidenceData,
