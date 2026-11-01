@@ -17,6 +17,7 @@ describe("Standard＋Pack Evolution Pilot R3 Verification Suite [BP-SIM-AI-V92-S
   const r3MdPath = path.join(rootDir, "tools/simulator/docs/ai-standard-pack-evolution-pilot-v1-r3.md");
   const r2JsonPath = path.join(rootDir, "tools/simulator/reports/ai/standard-pack-evolution-pilot-v1-r2.json");
   const championDnaPath = path.join(rootDir, "tools/simulator/src/data/ai/standard-pack-pilot-champion-v6.json");
+  const r3Data = JSON.parse(fs.readFileSync(r3JsonPath, "utf-8"));
 
   it("Test 1: R3 Evidence JSON exists and adheres to schema specifications", () => {
     expect(fs.existsSync(r3JsonPath)).toBe(true);
@@ -216,5 +217,92 @@ describe("Standard＋Pack Evolution Pilot R3 Verification Suite [BP-SIM-AI-V92-S
       })
     );
     expect(fullDigest).toBe("8623425d6ad29b2fc316e10f3ec4fd709dc81c5538fc9d9c62f69d3dfe7d6faa");
+  });
+
+  it("Test 11: Markdown report matches Evidence data exactly with table-level consistency and zero invalid assertions", () => {
+    expect(fs.existsSync(r3MdPath)).toBe(true);
+    const md = fs.readFileSync(r3MdPath, "utf-8");
+
+    const cand = r3Data.stageG.models["candidate"];
+    const off2 = r3Data.stageG.models["offspring-2"];
+    const off1 = r3Data.stageG.models["offspring-1"];
+
+    // 1. 3モデルの総合成績テーブル（表行の完全一致検証）
+    const candRowRegex = new RegExp(
+      `\\|\\s*\\*\\*Candidate\\*\\*\\s*\\(\`${cand.genomeId}\`\\)\\s*\\|\\s*${cand.completedMatches}\\s*\\|\\s*${cand.wins}\\s*\\|\\s*${cand.losses}\\s*\\|\\s*${cand.draws}\\s*\\|\\s*\\*\\*${(cand.winRate * 100).toFixed(1)}%\\*\\*\\s*\\|\\s*\\[${(cand.wilsonInterval.lower * 100).toFixed(1)}%,\\s*${(cand.wilsonInterval.upper * 100).toFixed(1)}%\\]\\s*\\|`
+    );
+    expect(candRowRegex.test(md)).toBe(true);
+
+    const off2RowRegex = new RegExp(
+      `\\|\\s*\\*\\*Offspring #2\\*\\*\\s*\\(\`${off2.genomeId}\`\\)\\s*\\|\\s*${off2.completedMatches}\\s*\\|\\s*${off2.wins}\\s*\\|\\s*${off2.losses}\\s*\\|\\s*${off2.draws}\\s*\\|\\s*\\*\\*${(off2.winRate * 100).toFixed(1)}%\\*\\*\\s*\\|\\s*\\[${(off2.wilsonInterval.lower * 100).toFixed(1)}%,\\s*${(off2.wilsonInterval.upper * 100).toFixed(1)}%\\]\\s*\\|`
+    );
+    expect(off2RowRegex.test(md)).toBe(true);
+
+    const off1RowRegex = new RegExp(
+      `\\|\\s*\\*\\*Offspring #1\\*\\*\\s*\\(\`${off1.genomeId}\`\\)\\s*\\|\\s*${off1.completedMatches}\\s*\\|\\s*${off1.wins}\\s*\\|\\s*${off1.losses}\\s*\\|\\s*${off1.draws}\\s*\\|\\s*\\*\\*${(off1.winRate * 100).toFixed(1)}%\\*\\*\\s*\\|\\s*\\[${(off1.wilsonInterval.lower * 100).toFixed(1)}%,\\s*${(off1.wilsonInterval.upper * 100).toFixed(1)}%\\]\\s*\\|`
+    );
+    expect(off1RowRegex.test(md)).toBe(true);
+
+    // 2. 座席および手番成績テーブルの完全一致検証
+    const candOrderRegex = new RegExp(
+      `\\|\\s*\\*\\*Candidate\\*\\*\\s*\\|\\s*${(cand.seatSummary.p1WinRate * 100).toFixed(1)}%\\s*\\(${cand.seatSummary.p1Wins}/${cand.seatSummary.p1Matches}\\)\\s*\\|\\s*${(cand.seatSummary.p2WinRate * 100).toFixed(1)}%\\s*\\(${cand.seatSummary.p2Wins}/${cand.seatSummary.p2Matches}\\)\\s*\\|\\s*\\*\\*${(cand.turnOrderSummary.firstWinRate * 100).toFixed(1)}%\\*\\*\\s*\\(${cand.turnOrderSummary.firstWins}/${cand.turnOrderSummary.firstMatches}\\)\\s*\\|\\s*\\*\\*${(cand.turnOrderSummary.secondWinRate * 100).toFixed(1)}%\\*\\*\\s*\\(${cand.turnOrderSummary.secondWins}/${cand.turnOrderSummary.secondMatches}\\)\\s*\\|`
+    );
+    expect(candOrderRegex.test(md)).toBe(true);
+
+    // 3. 相手別成績テーブル（TransferG1Best, SeededRandom, FirstLegal）の完全一致検証
+    for (const [modelKey, modelObj] of [["Candidate", cand], ["Offspring #2", off2], ["Offspring #1", off1]] as const) {
+      for (const [oppKey, oppLabel] of [["transfer-g1-best", "TransferG1Best"], ["seeded-random", "SeededRandom"], ["first-legal", "FirstLegal"]] as const) {
+        const stats = modelObj.byOpponent[oppKey];
+        const oppRowRegex = new RegExp(
+          `\\|\\s*(?:\\*\\*)?${modelKey}(?:\\*\\*)?\\s*\\|\\s*${oppLabel}\\s*\\|\\s*${(stats.winRate * 100).toFixed(1)}%\\s*\\(${stats.wins}/${stats.wins + stats.losses}\\)\\s*\\|\\s*${stats.pairedScoreAnalysis.meanScore.toFixed(3)}\\s*\\|\\s*\\[${stats.pairedScoreAnalysis.ci95Lower.toFixed(3)},\\s*${stats.pairedScoreAnalysis.ci95Upper.toFixed(3)}\\]\\s*\\|\\s*${stats.pairedScoreAnalysis.bothWonCount}\\s*\\|\\s*${stats.pairedScoreAnalysis.splitCount}\\s*\\|\\s*${stats.pairedScoreAnalysis.bothLostCount}\\s*\\|`
+        );
+        expect(oppRowRegex.test(md)).toBe(true);
+      }
+    }
+
+    // 4. McNemar 分割表 ($a, b, c, d$) および p 値
+    const mc2 = r3Data.stageG.mcNemarComparisons.candidateVsOffspring2;
+    expect(md).toContain(`両者勝利 ($a$): **${mc2.table.bothWon}** 試合`);
+    expect(md).toContain(`Candidate のみ勝利 ($b$): **${mc2.table.aOnlyWon}** 試合`);
+    expect(md).toContain(`Offspring #2 のみ勝利 ($c$): **${mc2.table.bOnlyWon}** 試合`);
+    expect(md).toContain(`両者敗北 ($d$): **${mc2.table.neitherWon}** 試合`);
+    expect(md).toContain(`不一致ペア数 ($b + c$): ${mc2.discordantTotal}`);
+    expect(md).toContain(`連続性補正 McNemar 統計量 ($\chi^2$): ${mc2.chiSquareStat.toFixed(4)}`);
+    expect(md).toContain(`**$p$ 値**: **${mc2.formattedPValue}**`);
+
+    const mc1 = r3Data.stageG.mcNemarComparisons.candidateVsOffspring1;
+    expect(md).toContain(`両者勝利 ($a$): **${mc1.table.bothWon}** 試合`);
+    expect(md).toContain(`Candidate のみ勝利 ($b$): **${mc1.table.aOnlyWon}** 試合`);
+    expect(md).toContain(`Offspring #1 のみ勝利 ($c$): **${mc1.table.bOnlyWon}** 試合`);
+    expect(md).toContain(`両者敗北 ($d$): **${mc1.table.neitherWon}** 試合`);
+    expect(md).toContain(`不一致ペア数 ($b + c$): ${mc1.discordantTotal}`);
+    expect(md).toContain(`連続性補正 McNemar 統計量 ($\chi^2$): ${mc1.chiSquareStat.toFixed(4)}`);
+    expect(md).toContain(`**$p$ 値**: **${mc1.formattedPValue}**`);
+
+    // 5. クラスター・ブートストラップ信頼区間
+    const boot2 = r3Data.stageG.clusterBootstrapAnalysis.candidateVsOffspring2;
+    expect(md).toContain(`[+${(boot2.ci95Lower * 100).toFixed(2)}%, +${(boot2.ci95Upper * 100).toFixed(2)}%]`);
+    const boot1 = r3Data.stageG.clusterBootstrapAnalysis.candidateVsOffspring1;
+    expect(md).toContain(`[+${(boot1.ci95Lower * 100).toFixed(2)}%, +${(boot1.ci95Upper * 100).toFixed(2)}%]`);
+
+    // 6. R2 差分 47 件および FirstLegal 46 件の内訳検証
+    expect(md).toContain(`変化が生じた試合は **${r3Data.r2Comparison.discrepanciesCount} 件** でした`);
+    expect(md).toContain("- **vs TransferG1Best (1 件)**:");
+    expect(md).toContain("- **vs SeededRandom (0 件)**:");
+    expect(md).toContain("- **vs FirstLegal (46 件)**:");
+    expect(md).toContain("Candidate: 55勝→63勝 [勝者変更 10 件]");
+    expect(md).toContain("Offspring #2: 51勝→58勝 [勝者変更 13 件]");
+    expect(md).toContain("Offspring #1: 26勝→31勝 [勝者変更 23 件]");
+
+    // 7. Seed 92023 完走結果 (160 decisions, 10 turns, p1 勝利)
+    expect(md).toContain("Seed 92023 (Candidate p1 vs TransferG1Best p2)");
+    expect(md).toContain("COMPLETED: 160 decisions, 10 turns, Winner: p1");
+
+    // 8. 古い誤記や未証明の因果断定が存在しないこと
+    expect(md).not.toContain("575 試合において、Core 修正に伴う予期せぬ勝敗反転や決定ループは発生せず");
+    expect(md).not.toContain("575試合で勝敗反転なし");
+    expect(md).not.toContain("Core修正がFirstLegalの勝率を改善");
+    expect(md).not.toContain("Core修正がFirstLegalを改善");
+    expect(md).toContain("未解決の再現性課題 (Unresolved Reproducibility Issue)");
   });
 });

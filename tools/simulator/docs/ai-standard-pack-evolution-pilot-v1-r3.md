@@ -1,11 +1,11 @@
 # BlackPoker Standard＋Pack Evolution Pilot V1 — R3 レポート
 
-**Work ID:** `BP-SIM-AI-V92-STANDARD-PACK-EVOLUTION-PILOT-V1-R3`  
-**Base SHA:** `69246844cad56a425c0bc8563a9aa2bd1416110d`  
-**Core Fix Commit:** `69246844cad56a425c0bc8563a9aa2bd1416110d`  
-**Regulation:** `standard-pack` (`official-standard-pack` v1.0.0)  
-**Campaign Seed:** `20261031`  
-**生成日時:** `2026-11-01T01:55:00.365Z`  
+- **Work ID:** `BP-SIM-AI-V92-STANDARD-PACK-EVOLUTION-PILOT-V1-R3`
+- **Base SHA:** `69246844cad56a425c0bc8563a9aa2bd1416110d`
+- **Core Fix Commit:** `69246844cad56a425c0bc8563a9aa2bd1416110d`
+- **Regulation:** `standard-pack` (`standard-pack` v1.0.0)
+- **Campaign Seed:** `20261031`
+- **生成日時:** `2026-11-01T01:55:00.365Z`
 
 ---
 
@@ -26,7 +26,7 @@
    - **Offspring #1**: `f882c794c57717d7808eef0fdf1695c002ccb2c2667ac9947e41e23dbb6fc853` (完全一致)
 
 2. **Seed 92023 の例外解消と 100% 完走**:
-   - R2 で例外停止（FAILED）した **Seed 92023 (Candidate p1 vs TransferG1Best p2)** が、Production Core 修正により **正常に完走（COMPLETED）** しました。
+   - R2 で例外停止（FAILED）した **Seed 92023 (Candidate p1 vs TransferG1Best p2)** が、Production Core 修正により **正常に完走（COMPLETED: 160 decisions, 10 turns, Winner: p1）** しました。
    - 576 試合全体の完了率は **100.0% (576/576, FAILED: 0, INCOMPLETE: 0)** を達成しました。
 
 3. **初期手番集計の是正による先攻・後攻成績**:
@@ -38,18 +38,38 @@
 4. **統計的有意差とクラスター・ブートストラップ信頼区間**:
    - **Candidate vs Offspring #2**:
      - 全体勝率: **80.7%** vs **69.3%**
-     - McNemar 検定: 不一致ペア $b=47, c=26$、$chi^2 = 6.8906$、**p = 0.0081**（有意水準 $alpha = 0.05$ で有意差あり）
-     - **95% クラスター・ブートストラップ信頼区間**: **[3.65%, 19.27%]**（0 を跨がず、Candidate の優位性が維持）
+     - McNemar 検定: 不一致ペア $b=43, c=21$、$chi^2 = 6.8906$、**p = 0.0081**（有意水準 $alpha = 0.05$ で有意差あり）
+     - **95% クラスター・ブートストラップ信頼区間**: **[+3.65%, +19.27%]**（0 を跨がず、Candidate の優位性が維持）
    - **Candidate vs Offspring #1**:
      - 全体勝率: **80.7%** vs **47.4%**
-     - McNemar 検定: 不一致ペア $b=75, c=15$、$chi^2 = 42.2234$、**p < 0.0001**（有意差あり）
-     - **95% クラスター・ブートストラップ信頼区間**: **[24.48%, 42.19%]**
+     - McNemar 検定: 不一致ペア $b=79, c=15$、$chi^2 = 42.2234$、**p < 0.0001**（有意差あり）
+     - **95% クラスター・ブートストラップ信頼区間**: **[+24.48%, +42.19%]**
 
 ---
 
 ## 2. R2 と R3 の試合別比較 (Deltas)
 
 576 試合中、R2 と R3 で結果に変化が生じた試合は **47 件** でした。
+
+### 2.1 差分の内訳
+- **vs TransferG1Best (1 件)**:
+  - Seed 92023（Candidate as p1）: R2 で FAILED（墓地 Unit wrapper 例外）だった対戦が、Core 修正により正常完走（Winner: p1、160 decisions、10 turns）。
+  - 残る 191 試合は、Trace Digest まで **100% 完全一致**。
+- **vs SeededRandom (0 件)**:
+  - 全 192 試合で勝者・着手系列（Trace Digest）が **100% 完全一致**。
+- **vs FirstLegal (46 件)**:
+  - 46 試合で勝者が変化（Candidate: 55勝→63勝 [勝者変更 10 件]、Offspring #2: 51勝→58勝 [勝者変更 13 件]、Offspring #1: 26勝→31勝 [勝者変更 23 件]）。
+  - 192 試合すべての Trace Digest が変化。
+
+### 2.2 FirstLegal 差分に関する分析と未解決の再現性課題 (Unresolved Reproducibility Issue)
+- **観察事実**:
+  - R2 コードベース（Base SHA `82d5c5a`）を用いた Seed 92001 Leg 0 の直接実行では、R3 と同一結果（Decisions: 124, Winner: p1, TraceDigest: `cf982b06...`）が再現されることが確認されています。
+  - また、TransferG1Best（191/192試合一致）および SeededRandom（192/192試合一致）では高い決定論的一致が確認されており、Candidate・Offspring の DNA や初期状態生成に差異はありません。
+- **原因未確定の扱い**:
+  - GitHub 上の R2 および R3 Runner はいずれも `new FirstLegalPolicy(false)` を指定して実装されています。
+  - R2 Evidence JSON 生成時に記録された FirstLegal の数値（Decisions: 175, Winner: p2 等）と再実行結果との不一致の原因については、当時の実行環境や設定差異を示す客観的なログ・履歴等の証拠が揃っていないため、現時点では「Core修正による因果改善」と断定せず、**未解決の再現性課題**として管理します。
+
+### 2.3 差分全件リスト (47 件)
 
 | 試合 ID / 条件 | R2 状態 | R3 状態 | 勝者 (R2 -> R3) | 備考 |
 |---|---|---|---|---|
@@ -100,8 +120,6 @@
 | `offspring-1:first-legal:92030:model_as_p2` | COMPLETED | COMPLETED | p1 -> p2 | Winner changed: R2(p1) -> R3(p2) |
 | `offspring-1:first-legal:92032:model_as_p1` | COMPLETED | COMPLETED | p2 -> p1 | Winner changed: R2(p2) -> R3(p1) |
 | `offspring-1:first-legal:92032:model_as_p2` | COMPLETED | COMPLETED | p1 -> p2 | Winner changed: R2(p1) -> R3(p2) |
-
-Seed 92023 の例外が解消された以外の 575 試合において、Core 修正に伴う予期せぬ勝敗反転や決定ループは発生せず、Core 修正の安全性が実証されました。
 
 ---
 
