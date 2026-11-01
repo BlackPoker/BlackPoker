@@ -133,16 +133,39 @@ function sha256(data: string | Buffer): string {
 }
 
 /**
+ * 決定論的リプレイ検証および R3 Evidence と完全一致する Full DNA Digest を計算
+ */
+export function computeFullDnaDigest(dna: any): string {
+  return sha256(
+    JSON.stringify({
+      dnaFormatVersion: dna.dnaFormatVersion,
+      featureSchemaVersion: dna.featureSchemaVersion,
+      scoringModel: dna.scoringModel,
+      contextDimension: dna.contextDimension,
+      patternDimension: dna.patternDimension,
+      patternWeights: dna.patternWeights,
+      contextPatternWeights: dna.contextPatternWeights,
+    })
+  );
+}
+
+/**
  * オブジェクトのキーをアルファベット順にソートして決定論的な JSON 文字列を生成
+ * (標準 JSON.stringify と整合させ、値が undefined のキーは除外する)
  */
 export function canonicalJsonStringify(obj: any): string {
+  if (obj === undefined) {
+    return "null";
+  }
   if (obj === null || typeof obj !== "object") {
     return JSON.stringify(obj);
   }
   if (Array.isArray(obj)) {
-    return `[${obj.map((item) => canonicalJsonStringify(item)).join(",")}]`;
+    return `[${obj.map((item) => (item === undefined ? "null" : canonicalJsonStringify(item))).join(",")}]`;
   }
-  const keys = Object.keys(obj).sort();
+  const keys = Object.keys(obj)
+    .filter((k) => obj[k] !== undefined)
+    .sort();
   const entries = keys.map((k) => `${JSON.stringify(k)}:${canonicalJsonStringify(obj[k])}`);
   return `{${entries.join(",")}}`;
 }
@@ -418,6 +441,7 @@ export interface SaveOfficialEvidenceParams<T> {
   readonly manifest: ExecutionManifest;
   readonly options?: {
     readonly writeSeparateManifestFile?: boolean;
+    readonly allowOverwrite?: boolean;
   };
 }
 
@@ -425,7 +449,9 @@ export interface SaveOfficialEvidenceParams<T> {
  * 正式な Evidence を Execution Manifest ガード付きで安全に保存する
  *
  * 【fail-closed 契約】:
- * 検証スキップオプションは存在せず、常に必ず assertNotDirty() が実行されます。
+ * 1. 検証スキップオプションは存在せず、常に必ず assertNotDirty() が実行されます。
+ * 2. 既存ファイルの予期せぬ上書きを防ぐため、既存ファイルが存在する場合は原則として保存を拒否します。
+ * 3. 途中書き込み失敗による破損を防ぐため、一時ファイルへ書き込み後に原子的置換 (renameSync) で配置します。
  *
  * @throws {ExecutionManifestDirtyStateError} dirty 状態で保存しようとした場合
  * @throws {ExecutionManifestUnverifiedGitStateError} Git 検証が 'VERIFIED' でない場合
@@ -433,11 +459,19 @@ export interface SaveOfficialEvidenceParams<T> {
 export function saveOfficialEvidenceWithManifest<T extends Record<string, any>>(
   params: SaveOfficialEvidenceParams<T>
 ): void {
-  // 常に無条件で fail-closed ガードを実行
+  // 1. 常に無条件で fail-closed ガードを実行
   assertNotDirty(params.manifest);
+
+  // 2. 既存ファイルの上書き防止
+  if (fs.existsSync(params.filePath) && !params.options?.allowOverwrite) {
+    throw new Error(
+      `SECURITY CONTRACT VIOLATION: 出力先ファイル '${params.filePath}' は既に存在します。上書きは厳格に禁止されています (fail-closed)。`
+    );
+  }
 
   const outputPayload = {
     ...params.evidenceData,
+    artifactCategory: "OFFICIAL",
     executionManifest: params.manifest,
   };
 
@@ -446,10 +480,48 @@ export function saveOfficialEvidenceWithManifest<T extends Record<string, any>>(
     fs.mkdirSync(dir, { recursive: true });
   }
 
-  fs.writeFileSync(params.filePath, JSON.stringify(outputPayload, null, 2), "utf-8");
+  // 3. 原子的書き込み (Atomic Write)
+  const tmpPath = `${params.filePath}.tmp.${process.pid}.${Date.now()}`;
+  fs.writeFileSync(tmpPath, JSON.stringify(outputPayload, null, 2), "utf-8");
+  fs.renameSync(tmpPath, params.filePath);
 
   if (params.options?.writeSeparateManifestFile) {
     const manifestPath = `${params.filePath}.manifest.json`;
-    fs.writeFileSync(manifestPath, JSON.stringify(params.manifest, null, 2), "utf-8");
+    if (fs.existsSync(manifestPath) && !params.options?.allowOverwrite) {
+      throw new Error(
+        `SECURITY CONTRACT VIOLATION: 出力先ファイル '${manifestPath}' は既に存在します。上書きは厳格に禁止されています (fail-closed)。`
+      );
+    }
+    const tmpManifestPath = `${manifestPath}.tmp.${process.pid}.${Date.now()}`;
+    fs.writeFileSync(tmpManifestPath, JSON.stringify(params.manifest, null, 2), "utf-8");
+    fs.renameSync(tmpManifestPath, manifestPath);
   }
+}
+
+/**
+ * テスト専用の Evidence 保存処理
+ * (正式 Evidence と明確に区別するため artifactCategory: "TEST" を付与し、原子的書き込みを実施)
+ */
+export function saveTestEvidenceWithManifest<T extends Record<string, any>>(
+  params: SaveOfficialEvidenceParams<T>
+): void {
+  assertNotDirty(params.manifest);
+
+  const outputPayload = {
+    ...params.evidenceData,
+    artifactCategory: "TEST",
+    executionManifest: {
+      ...params.manifest,
+      manifestCategory: "TEST_EXECUTION",
+    },
+  };
+
+  const dir = path.dirname(params.filePath);
+  if (!fs.existsSync(dir)) {
+    fs.mkdirSync(dir, { recursive: true });
+  }
+
+  const tmpPath = `${params.filePath}.tmp.${process.pid}.${Date.now()}`;
+  fs.writeFileSync(tmpPath, JSON.stringify(outputPayload, null, 2), "utf-8");
+  fs.renameSync(tmpPath, params.filePath);
 }

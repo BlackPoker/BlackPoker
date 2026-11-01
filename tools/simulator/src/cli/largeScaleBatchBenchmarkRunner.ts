@@ -124,6 +124,46 @@ async function main() {
     };
   };
 
+  // 【出力先検証 (対戦開始前の fail-closed 事前検証)】
+  const args = process.argv.slice(2);
+  let requestedOutputFile: string | undefined = undefined;
+  let saveRequested = false;
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--output-file" && i + 1 < args.length) {
+      requestedOutputFile = path.resolve(process.cwd(), args[++i]);
+      saveRequested = true;
+    } else if (args[i] === "--save") {
+      saveRequested = true;
+    }
+  }
+
+  const protectedEvidencePath = path.resolve(
+    rootDir,
+    "tools/simulator/reports/ai/large-scale-batch-benchmark-stage1.json"
+  );
+  const defaultVerifiedEvidencePath = path.resolve(
+    rootDir,
+    "tools/simulator/reports/ai/large-scale-batch-benchmark-stage1-verified.json"
+  );
+
+  const targetOutputFile = requestedOutputFile ?? defaultVerifiedEvidencePath;
+
+  if (saveRequested) {
+    if (path.resolve(targetOutputFile) === protectedEvidencePath) {
+      throw new Error(
+        `SECURITY CONTRACT VIOLATION: 既存暫定 Evidence (${protectedEvidencePath}) の上書きは厳格に禁止されています (fail-closed)。`
+      );
+    }
+    // 既存ファイルが存在する場合は原則として上書きを拒否
+    if (fs.existsSync(targetOutputFile)) {
+      throw new Error(
+        `SECURITY CONTRACT VIOLATION: 出力先ファイル '${targetOutputFile}' は既に存在します。上書きは厳格に禁止されています (fail-closed)。`
+      );
+    }
+    console.log(`[Config] Evidence 出力先事前検証 PASS (新規ファイル): ${targetOutputFile}`);
+  }
+
   const stageResults: StageBenchmarkResult[] = [];
   const STAGE_MATCH_COUNTS = [100, 300, 500];
 
@@ -190,37 +230,6 @@ async function main() {
     console.log(`  - メモリ増加量:    ${formatBytes(perf.memory.heapGrowthBytes)} (Heap) / ${formatBytes(perf.memory.rssGrowthBytes)} (RSS)`);
     console.log(`  - CPU 使用率:      ${perf.cpu.cpuUtilizationPercent.toFixed(1)} % (Total CPU: ${formatMs(perf.cpu.totalCpuTimeMs)})`);
     console.log(`  - 推定 1万試合所要時間: ${(perf.estimated10kMatchesDurationSec / 60).toFixed(1)} 分 (${perf.estimated10kMatchesDurationHours.toFixed(2)} 時間)`);
-  }
-
-  // CLI 引数の処理 (--output-file, --save)
-  const args = process.argv.slice(2);
-  let requestedOutputFile: string | undefined = undefined;
-  let saveRequested = false;
-
-  for (let i = 0; i < args.length; i++) {
-    if (args[i] === "--output-file" && i + 1 < args.length) {
-      requestedOutputFile = path.resolve(process.cwd(), args[++i]);
-      saveRequested = true;
-    } else if (args[i] === "--save") {
-      saveRequested = true;
-    }
-  }
-
-  const protectedEvidencePath = path.resolve(
-    rootDir,
-    "tools/simulator/reports/ai/large-scale-batch-benchmark-stage1.json"
-  );
-  const defaultVerifiedEvidencePath = path.resolve(
-    rootDir,
-    "tools/simulator/reports/ai/large-scale-batch-benchmark-stage1-verified.json"
-  );
-
-  const targetOutputFile = requestedOutputFile ?? defaultVerifiedEvidencePath;
-
-  if (path.resolve(targetOutputFile) === protectedEvidencePath) {
-    throw new Error(
-      `SECURITY CONTRACT VIOLATION: 既存暫定 Evidence (${protectedEvidencePath}) の上書きは厳格に禁止されています (fail-closed)。`
-    );
   }
 
   if (saveRequested && final500RunResult) {

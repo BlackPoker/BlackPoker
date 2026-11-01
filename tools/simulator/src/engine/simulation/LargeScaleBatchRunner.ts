@@ -8,6 +8,8 @@ import {
   createExecutionManifest,
   assertNotDirty,
   saveOfficialEvidenceWithManifest,
+  saveTestEvidenceWithManifest,
+  computeFullDnaDigest,
   ExecutionManifest,
   ExperimentConfigManifest,
   GitExecutionMetadata,
@@ -139,40 +141,19 @@ export function computeTraceDigestFromSimulation(simRes: SimulationResult): stri
 
 /**
  * チェックポイントの完全な正規化チェックサムを計算
- * (すべての保存済み試合の matchIndex, matchId, status, winner, finalStateHash, traceDigest, Seed, 失敗情報を含む)
+ *
+ * 【仕様契約】:
+ * checksum 自身を除く、チェックポイントの全永続化内容（completedMatches の seats, reason, durationMs、
+ * failures、全設定値、タイムスタンプ等）を canonicalJsonStringify でキー順序も含めて正規化し、SHA-256 を算出します。
+ *
+ * ※注意: 本チェックサムは誤破損・ファイル欠損・偶発的不整合の検出を目的とする fail-closed ガードであり、
+ * チェックサムを再計算可能な第三者による意図的改ざんの防止（暗号署名）までは保証しません。
  */
 export function computeCheckpointChecksum(
-  state: Omit<BatchCheckpointState, "checksum">
+  state: BatchCheckpointState | Omit<BatchCheckpointState, "checksum">
 ): string {
-  const canonicalPayload = {
-    checkpointVersion: state.checkpointVersion,
-    batchId: state.batchId,
-    baseSeed: state.baseSeed,
-    experimentFingerprint: state.experimentFingerprint,
-    regulationId: state.regulationId,
-    rulePackageDigest: state.rulePackageDigest,
-    playerPoliciesDigest: state.playerPoliciesDigest,
-    totalTargetMatches: state.totalTargetMatches,
-    maxDecisionsPerMatch: state.maxDecisionsPerMatch,
-    lastCompletedIndex: state.lastCompletedIndex,
-    completedMatches: state.completedMatches.map((m) => ({
-      matchIndex: m.matchIndex,
-      matchId: m.matchId,
-      status: m.status,
-      completed: m.completed,
-      winner: m.winner ?? null,
-      totalDecisions: m.totalDecisions,
-      turnCount: m.turnCount,
-      finalStateHash: m.finalStateHash ?? null,
-      traceDigest: m.traceDigest ?? null,
-      baseSeed: m.baseSeed,
-      matchSeed: m.matchSeed,
-      playerSeeds: m.playerSeeds,
-      failure: m.failure ?? null,
-    })),
-    failures: state.failures,
-  };
-  return sha256(canonicalJsonStringify(canonicalPayload));
+  const { checksum: _discard, ...withoutChecksum } = state as any;
+  return sha256(canonicalJsonStringify(withoutChecksum));
 }
 
 /**
@@ -183,8 +164,9 @@ export function validatePolicyConsistency(params: {
   readonly expectedModels?: readonly ModelManifestEntry[];
   readonly actualSeats: Record<string, LargeScaleSeatInfo>;
   readonly actualPolicies: Record<string, DecisionPolicy>;
+  readonly matchCtx?: LargeScaleMatchContext;
 }): void {
-  const { expectedPolicies, expectedModels, actualSeats, actualPolicies } = params;
+  const { expectedPolicies, expectedModels, actualSeats, actualPolicies, matchCtx } = params;
   if (!expectedPolicies || expectedPolicies.length === 0) {
     return;
   }
@@ -212,27 +194,53 @@ export function validatePolicyConsistency(params: {
       );
     }
 
-    // GenomePolicy の DNA 整合性検証
-    if (actualPolicy.descriptor.kind === "genome") {
-      const actualDna = (actualPolicy as any).dna;
-      if (actualDna && expectedModels && expectedModels.length > 0) {
-        const actualDnaFullDigest = sha256(
-          canonicalJsonStringify({
-            dnaFormatVersion: actualDna.dnaFormatVersion,
-            featureSchemaVersion: actualDna.featureSchemaVersion,
-            scoringModel: actualDna.scoringModel,
-            contextDimension: actualDna.contextDimension,
-            patternDimension: actualDna.patternDimension,
-            patternWeights: actualDna.patternWeights,
-            contextPatternWeights: actualDna.contextPatternWeights,
-          })
-        );
-        const matchingModel = expectedModels.find((m) => m.fullDnaDigest === actualDnaFullDigest);
-        if (!matchingModel) {
+    // 固定設定値の照合 (preferPass 等)
+    if (exp.constructorSettings) {
+      for (const [key, expectedVal] of Object.entries(exp.constructorSettings)) {
+        if (key === "derivation") continue; // derivation はシード照合で別途検証
+        const actualVal =
+          (actualPolicy as any)[key] ?? actualPolicy.descriptor.metadata?.[key];
+        if (actualVal !== undefined && actualVal !== expectedVal) {
           throw new LargeScaleBatchConfigurationError(
-            `座席 '${seat}' の GenomePolicy DNA Digest (${actualDnaFullDigest}) が Manifest の models リストに存在しません`
+            `座席 '${seat}' の設定値 '${key}' 不一致 (Expected: ${expectedVal}, Actual: ${actualVal})`
           );
         }
+      }
+    }
+
+    // SeededRandom 乱数シードの照合
+    if (actualPolicy.descriptor.kind === "random" && matchCtx) {
+      const expectedSeed = matchCtx.playerSeeds[seat];
+      const actualSeed =
+        (actualPolicy as any).rng?.seed ?? actualPolicy.descriptor.metadata?.seed;
+      if (expectedSeed !== undefined && actualSeed !== undefined && actualSeed !== expectedSeed) {
+        throw new LargeScaleBatchConfigurationError(
+          `座席 '${seat}' の SeededRandom シード不一致 (Expected: ${expectedSeed}, Actual: ${actualSeed})`
+        );
+      }
+    }
+
+    // GenomePolicy の DNA 整合性検証 (検証スキップ禁止契約)
+    if (actualPolicy.descriptor.kind === "genome") {
+      if (!expectedModels || expectedModels.length === 0) {
+        throw new LargeScaleBatchConfigurationError(
+          `座席 '${seat}' に GenomePolicy が指定されていますが、Manifest に models 定義が存在しません (検証スキップ禁止)`
+        );
+      }
+      const actualDna = (actualPolicy as any).dna;
+      if (!actualDna) {
+        throw new LargeScaleBatchConfigurationError(
+          `座席 '${seat}' の GenomePolicy に DNA が設定されていません`
+        );
+      }
+
+      // R3 Evidence および deterministicReplay と完全に同一の統一関数で Digest 算出
+      const actualDnaFullDigest = computeFullDnaDigest(actualDna);
+      const matchingModel = expectedModels.find((m) => m.fullDnaDigest === actualDnaFullDigest);
+      if (!matchingModel) {
+        throw new LargeScaleBatchConfigurationError(
+          `座席 '${seat}' の GenomePolicy DNA Digest (${actualDnaFullDigest}) が Manifest の models リストに存在しません`
+        );
       }
     }
   }
@@ -249,7 +257,11 @@ export interface LargeScaleMatchContext {
   readonly playerSeeds: Record<string, number>;
 }
 
-export interface RunBatchExecutionResult {
+/**
+ * 正式バッチ実行結果
+ * (正式 Evidence 保存インターフェースのみを提供し、テスト用保存経路は一切露出しない)
+ */
+export interface OfficialBatchExecutionResult {
   readonly summary: LargeScaleBatchSummary;
   readonly performance: LargeScalePerformanceMetrics;
   readonly matches: readonly LargeScaleMatchResult[];
@@ -258,6 +270,38 @@ export interface RunBatchExecutionResult {
   readonly postManifest: ExecutionManifest;
   readonly newlyExecutedMatches: number;
   readonly saveEvidence: (outputFilePath: string) => void;
+}
+
+/**
+ * テスト用バッチ実行結果
+ * (テスト専用保存インターフェースのみを提供し、正式 Evidence 保存インターフェースは一切露出しない)
+ */
+export interface TestBatchExecutionResult {
+  readonly summary: LargeScaleBatchSummary;
+  readonly performance: LargeScalePerformanceMetrics;
+  readonly matches: readonly LargeScaleMatchResult[];
+  readonly failures: readonly LargeScaleFailureRecord[];
+  readonly initialManifest: ExecutionManifest;
+  readonly postManifest: ExecutionManifest;
+  readonly newlyExecutedMatches: number;
+  readonly saveEvidenceForTesting: (
+    outputFilePath: string,
+    options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
+  ) => void;
+}
+
+/**
+ * 内部実行結果型 (runBatchInternal の返却用)
+ */
+export interface RunBatchExecutionResult {
+  readonly summary: LargeScaleBatchSummary;
+  readonly performance: LargeScalePerformanceMetrics;
+  readonly matches: readonly LargeScaleMatchResult[];
+  readonly failures: readonly LargeScaleFailureRecord[];
+  readonly initialManifest: ExecutionManifest;
+  readonly postManifest: ExecutionManifest;
+  readonly newlyExecutedMatches: number;
+  readonly saveEvidence?: (outputFilePath: string) => void;
   readonly saveEvidenceForTesting?: (
     outputFilePath: string,
     options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
@@ -289,8 +333,23 @@ export class LargeScaleBatchRunner {
     };
     readonly rulePackageDigest: string;
     readonly resumeCheckpointPath?: string;
-  }): Promise<RunBatchExecutionResult> {
-    return this.runBatchInternal(params, undefined);
+  }): Promise<OfficialBatchExecutionResult> {
+    if (!params.config.playerPolicies || params.config.playerPolicies.length === 0) {
+      throw new LargeScaleBatchConfigurationError(
+        "正式バッチ実験では playerPolicies の設定が必須です (実験条件欠落拒否)"
+      );
+    }
+    const result = await this.runBatchInternal(params, undefined);
+    return {
+      summary: result.summary,
+      performance: result.performance,
+      matches: result.matches,
+      failures: result.failures,
+      initialManifest: result.initialManifest,
+      postManifest: result.postManifest,
+      newlyExecutedMatches: result.newlyExecutedMatches,
+      saveEvidence: result.saveEvidence!,
+    };
   }
 
   /**
@@ -307,8 +366,18 @@ export class LargeScaleBatchRunner {
     readonly rulePackageDigest: string;
     readonly resumeCheckpointPath?: string;
     readonly testGitMetadata?: GitExecutionMetadata;
-  }): Promise<RunBatchExecutionResult> {
-    return this.runBatchInternal(params, params.testGitMetadata);
+  }): Promise<TestBatchExecutionResult> {
+    const result = await this.runBatchInternal(params, params.testGitMetadata);
+    return {
+      summary: result.summary,
+      performance: result.performance,
+      matches: result.matches,
+      failures: result.failures,
+      initialManifest: result.initialManifest,
+      postManifest: result.postManifest,
+      newlyExecutedMatches: result.newlyExecutedMatches,
+      saveEvidenceForTesting: result.saveEvidenceForTesting!,
+    };
   }
 
   private static async runBatchInternal(
@@ -539,6 +608,7 @@ export class LargeScaleBatchRunner {
           expectedModels: config.models,
           actualSeats: policyBundle.seats,
           actualPolicies: policyBundle.policies,
+          matchCtx,
         });
 
         // Simulation 実行 (onStep でリングバッファに直近10件を退避)
@@ -888,119 +958,122 @@ export class LargeScaleBatchRunner {
     }
 
     // 7. 正式 Evidence 保存クロージャ (保存直前のリアルタイム検証)
-    const saveEvidence = (outputFilePath: string): void => {
-      // テスト用メタデータ注入時は正式保存を物理的に拒否 (fail-closed)
-      if (injectedGitMetadata) {
-        throw new ExecutionManifestUnverifiedGitStateError(
-          "SECURITY CONTRACT VIOLATION: テスト用Git注入環境では正式Evidenceファイルの保存は厳格に禁止されています (fail-closed)。"
-        );
-      }
+    let saveEvidence: ((outputFilePath: string) => void) | undefined = undefined;
+    let saveEvidenceForTesting:
+      | ((
+          outputFilePath: string,
+          options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
+        ) => void)
+      | undefined = undefined;
 
-      // 保存直前のリアルタイム Git 状態・主要サブシステム再検証
-      const preSaveManifest = createExecutionManifest({
-        workId: config.workId,
-        rootDir,
-        experimentConfig: postManifest.experimentConfig,
-      });
-
-      assertNotDirty(preSaveManifest);
-
-      if (preSaveManifest.gitMetadata.headCommitSha !== postManifest.gitMetadata.headCommitSha) {
-        throw new ExecutionManifestIntegrityMismatchError(
-          `保存直前に HEAD Commit SHA の変更が検出されました (Post: ${postManifest.gitMetadata.headCommitSha}, PreSave: ${preSaveManifest.gitMetadata.headCommitSha})`
-        );
-      }
-      if (
-        JSON.stringify(preSaveManifest.subsystemDigests) !==
-        JSON.stringify(postManifest.subsystemDigests)
-      ) {
-        throw new ExecutionManifestIntegrityMismatchError(
-          `保存直前に主要サブシステムコードの変更が検出されました (fail-closed)`
-        );
-      }
-
-      const evidencePayload: LargeScaleBatchEvidence = {
-        schemaVersion: LARGE_SCALE_BATCH_VERSION,
-        workId: config.workId,
-        generatedAt: new Date().toISOString(),
-        executionManifest: preSaveManifest,
-        configuration: {
-          batchId: config.batchId,
+    if (!injectedGitMetadata) {
+      saveEvidence = (outputFilePath: string): void => {
+        // 保存直前のリアルタイム Git 状態・主要サブシステム再検証
+        const preSaveManifest = createExecutionManifest({
           workId: config.workId,
-          baseSeed: config.baseSeed,
-          matchCount: config.matchCount,
-          maxDecisionsPerMatch: maxDecisions,
-          regulationId: config.regulationId,
-        },
-        summary,
-        performance,
-        matches,
-        isolatedFailures: failures,
-        reproducibilityRecipe: {
-          baseSeed: config.baseSeed,
-          sampleIndices: [0, Math.floor(config.matchCount / 2), config.matchCount - 1],
-        },
-      };
+          rootDir,
+          experimentConfig: postManifest.experimentConfig,
+        });
 
-      saveOfficialEvidenceWithManifest({
-        filePath: outputFilePath,
-        evidenceData: evidencePayload,
-        manifest: preSaveManifest,
-      });
-    };
+        assertNotDirty(preSaveManifest);
 
-    // テスト専用保存クロージャ (単体テストでのみ使用)
-    const saveEvidenceForTesting = (
-      outputFilePath: string,
-      options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
-    ): void => {
-      const manifestToValidate: ExecutionManifest = options?.preSaveGitMetadata
-        ? {
-            ...postManifest,
-            gitMetadata: options.preSaveGitMetadata,
-          }
-        : postManifest;
+        if (preSaveManifest.gitMetadata.headCommitSha !== postManifest.gitMetadata.headCommitSha) {
+          throw new ExecutionManifestIntegrityMismatchError(
+            `保存直前に HEAD Commit SHA の変更が検出されました (Post: ${postManifest.gitMetadata.headCommitSha}, PreSave: ${preSaveManifest.gitMetadata.headCommitSha})`
+          );
+        }
+        if (
+          JSON.stringify(preSaveManifest.subsystemDigests) !==
+          JSON.stringify(postManifest.subsystemDigests)
+        ) {
+          throw new ExecutionManifestIntegrityMismatchError(
+            `保存直前に主要サブシステムコードの変更が検出されました (fail-closed)`
+          );
+        }
 
-      assertNotDirty(manifestToValidate);
-
-      if (
-        options?.preSaveGitMetadata &&
-        options.preSaveGitMetadata.headCommitSha !== postManifest.gitMetadata.headCommitSha
-      ) {
-        throw new ExecutionManifestIntegrityMismatchError(
-          `保存直前に HEAD Commit SHA の変更が検出されました (Post: ${postManifest.gitMetadata.headCommitSha}, PreSave: ${options.preSaveGitMetadata.headCommitSha})`
-        );
-      }
-
-      const evidencePayload: LargeScaleBatchEvidence = {
-        schemaVersion: LARGE_SCALE_BATCH_VERSION,
-        workId: config.workId,
-        generatedAt: new Date().toISOString(),
-        executionManifest: manifestToValidate,
-        configuration: {
-          batchId: config.batchId,
+        const evidencePayload: LargeScaleBatchEvidence = {
+          schemaVersion: LARGE_SCALE_BATCH_VERSION,
           workId: config.workId,
-          baseSeed: config.baseSeed,
-          matchCount: config.matchCount,
-          maxDecisionsPerMatch: maxDecisions,
-          regulationId: config.regulationId,
-        },
-        summary,
-        performance,
-        matches,
-        isolatedFailures: failures,
-        reproducibilityRecipe: {
-          baseSeed: config.baseSeed,
-          sampleIndices: [0, Math.floor(config.matchCount / 2), config.matchCount - 1],
-        },
-      };
+          generatedAt: new Date().toISOString(),
+          executionManifest: preSaveManifest,
+          configuration: {
+            batchId: config.batchId,
+            workId: config.workId,
+            baseSeed: config.baseSeed,
+            matchCount: config.matchCount,
+            maxDecisionsPerMatch: maxDecisions,
+            regulationId: config.regulationId,
+          },
+          summary,
+          performance,
+          matches,
+          isolatedFailures: failures,
+          reproducibilityRecipe: {
+            baseSeed: config.baseSeed,
+            sampleIndices: [0, Math.floor(config.matchCount / 2), config.matchCount - 1],
+          },
+        };
 
-      saveOfficialEvidenceWithManifest({
-        filePath: outputFilePath,
-        evidenceData: evidencePayload,
-        manifest: manifestToValidate,
-      });
-    };
+        saveOfficialEvidenceWithManifest({
+          filePath: outputFilePath,
+          evidenceData: evidencePayload,
+          manifest: preSaveManifest,
+        });
+      };
+    } else {
+      // テスト専用保存クロージャ (単体テストでのみ使用)
+      saveEvidenceForTesting = (
+        outputFilePath: string,
+        options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
+      ): void => {
+        const manifestToValidate: ExecutionManifest = options?.preSaveGitMetadata
+          ? {
+              ...postManifest,
+              gitMetadata: options.preSaveGitMetadata,
+            }
+          : postManifest;
+
+        assertNotDirty(manifestToValidate);
+
+        if (
+          options?.preSaveGitMetadata &&
+          options.preSaveGitMetadata.headCommitSha !== postManifest.gitMetadata.headCommitSha
+        ) {
+          throw new ExecutionManifestIntegrityMismatchError(
+            `保存直前に HEAD Commit SHA の変更が検出されました (Post: ${postManifest.gitMetadata.headCommitSha}, PreSave: ${options.preSaveGitMetadata.headCommitSha})`
+          );
+        }
+
+        const evidencePayload: LargeScaleBatchEvidence = {
+          schemaVersion: LARGE_SCALE_BATCH_VERSION,
+          workId: config.workId,
+          generatedAt: new Date().toISOString(),
+          executionManifest: manifestToValidate,
+          configuration: {
+            batchId: config.batchId,
+            workId: config.workId,
+            baseSeed: config.baseSeed,
+            matchCount: config.matchCount,
+            maxDecisionsPerMatch: maxDecisions,
+            regulationId: config.regulationId,
+          },
+          summary,
+          performance,
+          matches,
+          isolatedFailures: failures,
+          reproducibilityRecipe: {
+            baseSeed: config.baseSeed,
+            sampleIndices: [0, Math.floor(config.matchCount / 2), config.matchCount - 1],
+          },
+        };
+
+        saveTestEvidenceWithManifest({
+          filePath: outputFilePath,
+          evidenceData: evidencePayload,
+          manifest: manifestToValidate,
+        });
+      };
+    }
 
     return {
       summary,
