@@ -166,11 +166,18 @@ export interface BatchCheckpointState {
   readonly checkpointVersion: string;
   readonly batchId: string;
   readonly baseSeed: number;
+  readonly experimentFingerprint: string;
+  readonly regulationId: string;
+  readonly rulePackageDigest: string;
+  readonly playerPoliciesDigest: string;
   readonly totalTargetMatches: number;
+  readonly maxDecisionsPerMatch: number;
   readonly lastCompletedIndex: number;
   readonly timestamp: string;
   readonly completedMatches: readonly LargeScaleMatchResult[];
   readonly failures: readonly LargeScaleFailureRecord[];
+  /** 整合性検証用チェックサム */
+  readonly checksum: string;
 }
 
 /**
@@ -186,7 +193,8 @@ export interface LargeScaleBatchConfig {
   readonly rulePackageId?: string;
   readonly rulePackageVersion?: string;
   readonly rootDir?: string;
-  readonly overrideGitMetadata?: GitExecutionMetadata;
+  /** Git HEAD の期待値（指定されている場合、実際の Git HEAD と照合して二重検証） */
+  readonly expectedGitCommitSha?: string;
   readonly models?: readonly ModelManifestEntry[];
   readonly playerPolicies?: readonly PlayerPolicyManifestEntry[];
   readonly memorySamplingInterval?: number;

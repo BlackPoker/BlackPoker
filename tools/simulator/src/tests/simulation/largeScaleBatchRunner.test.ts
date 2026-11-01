@@ -9,6 +9,7 @@ import { createCoreBattlePresetState } from "../../engine/session/playtest/creat
 import { MatchSetupCoordinator } from "../../engine/session/setup/MatchSetupCoordinator.js";
 import {
   RandomPolicy,
+  FirstLegalPolicy,
   DecisionPolicy,
   PolicyDescriptor,
 } from "../../engine/simulation/DecisionPolicy.js";
@@ -17,54 +18,76 @@ import {
   LargeScaleBatchRunner,
   LargeScaleMatchContext,
   ExecutionManifestIntegrityMismatchError,
+  LargeScaleBatchConfigurationError,
 } from "../../engine/simulation/LargeScaleBatchRunner.js";
 import {
   LargeScaleBatchConfig,
   LargeScaleSeatInfo,
+  BatchCheckpointState,
 } from "../../domain/simulation/LargeScaleBatchTypes.js";
-import { GitExecutionMetadata } from "../../engine/simulation/ExecutionManifest.js";
+import {
+  GitExecutionMetadata,
+  computeDirectoryContentDigest,
+  computeExperimentFingerprint,
+  ExecutionManifestUnverifiedGitStateError,
+  ExecutionManifestDirtyStateError,
+} from "../../engine/simulation/ExecutionManifest.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const rootDir = path.resolve(__dirname, "../../../../../");
 
 /**
- * 意図的に例外を発生させるモックポリシー (Failure Isolation テスト用)
+ * 指定ステップ数で意図的に例外を投げるテスト用ポリシー
  */
-class FaultyPolicy implements DecisionPolicy {
-  readonly descriptor: PolicyDescriptor = {
-    kind: "faulty",
-    policyVersion: 1,
-    name: "FaultyPolicy",
-  };
+class StepFailingPolicy implements DecisionPolicy {
+  private currentStep = 0;
 
-  choose(): any {
-    throw new Error("FAULT_INJECTION: Intentional policy failure during simulation");
+  constructor(
+    public readonly failAtStep: number = 3,
+    public readonly descriptor: PolicyDescriptor = {
+      kind: "step-failing",
+      policyVersion: 1,
+      name: "StepFailingPolicy",
+    }
+  ) {}
+
+  choose(request: any): any {
+    this.currentStep++;
+    if (this.currentStep >= this.failAtStep) {
+      throw new Error(`FAULT_INJECTION: Failed at step ${this.currentStep}`);
+    }
+    return {
+      decisionId: request.decisionId,
+      stateVersion: request.stateVersion,
+      selectedPatternRef: 0,
+    };
   }
 }
 
-describe("LargeScaleBatchRunner (大規模自動対戦基盤 第1段階)", () => {
+describe("LargeScaleBatchRunner Stage 1 R1 (堅牢性・再現性・診断情報検証)", () => {
   let rulePackage: any;
-  const rulePackageDigest = "dummy-rule-pkg-digest-12345";
-  const testCheckpointDir = path.resolve(rootDir, "tools/simulator/.artifacts/checkpoints/test");
+  const testRulesDir = path.resolve(rootDir, "tools/simulator/src/data/rules-vnext");
+  const rulePackageDigest = computeDirectoryContentDigest(testRulesDir, true);
+  const testCheckpointDir = path.resolve(rootDir, "tools/simulator/.artifacts/checkpoints/test-r1");
 
-  beforeAll(async () => {
-    const rulesDir = path.resolve(rootDir, "tools/simulator/src/data/rules-vnext");
-    const fullPackage = await loadRulePackageFromDirectory(rulesDir);
-    rulePackage = getPlaytestRulePackage(fullPackage);
-
-    if (fs.existsSync(testCheckpointDir)) {
-      fs.rmSync(testCheckpointDir, { recursive: true, force: true });
-    }
-  });
-
-  const dummyGitMetadata: GitExecutionMetadata = {
-    headCommitSha: "17b6e967e5987a157bb1aa3ea51e7d148e3c0719",
+  const cleanTestGitMetadata: GitExecutionMetadata = {
+    headCommitSha: "ff0c4a71509ce07f27afab41ba9846499cc7cee1",
     branch: "BlackPoker/issue551-core-flow",
     isDirty: false,
     dirtyFiles: [],
     verificationStatus: "VERIFIED",
   };
+
+  beforeAll(async () => {
+    const fullPackage = await loadRulePackageFromDirectory(testRulesDir);
+    rulePackage = getPlaytestRulePackage(fullPackage);
+
+    if (fs.existsSync(testCheckpointDir)) {
+      fs.rmSync(testCheckpointDir, { recursive: true, force: true });
+    }
+    fs.mkdirSync(testCheckpointDir, { recursive: true });
+  });
 
   const sessionFactory = (_ctx: LargeScaleMatchContext) => {
     const rawState = createCoreBattlePresetState();
@@ -73,13 +96,13 @@ describe("LargeScaleBatchRunner (大規模自動対戦基盤 第1段階)", () =>
   };
 
   const createPolicyFactory =
-    (faultyIndex: number = -1) =>
+    (faultyIndex: number = -1, failAtStep: number = 3) =>
     (ctx: LargeScaleMatchContext) => {
       const isFaulty = ctx.matchIndex === faultyIndex;
       const p1Policy = isFaulty
-        ? new FaultyPolicy()
-        : new RandomPolicy(new SeededRandom(ctx.playerSeeds.p1), "RandomAI-P1");
-      const p2Policy = new RandomPolicy(new SeededRandom(ctx.playerSeeds.p2), "RandomAI-P2");
+        ? new StepFailingPolicy(failAtStep)
+        : new FirstLegalPolicy(false);
+      const p2Policy = new RandomPolicy(new SeededRandom(ctx.playerSeeds.p2), "SeededRandom-P2");
 
       const seats: Record<string, LargeScaleSeatInfo> = {
         p1: {
@@ -103,245 +126,372 @@ describe("LargeScaleBatchRunner (大規模自動対戦基盤 第1段階)", () =>
       };
     };
 
-  it("Test 1: 決定論的再実行一致テスト (同一Seed・Policyで全指標が完全一致すること)", async () => {
-    const config: LargeScaleBatchConfig = {
-      batchId: "test-deterministic",
-      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1",
-      baseSeed: 8888,
-      matchCount: 5,
-      maxDecisionsPerMatch: 100,
-      regulationId: "test-core-battle",
-      rootDir,
-      overrideGitMetadata: dummyGitMetadata,
-    };
-
-    const run1 = await LargeScaleBatchRunner.runBatch({
-      config,
-      sessionFactory,
-      policyFactory: createPolicyFactory(),
-      rulePackageDigest,
-    });
-
-    const run2 = await LargeScaleBatchRunner.runBatch({
-      config,
-      sessionFactory,
-      policyFactory: createPolicyFactory(),
-      rulePackageDigest,
-    });
-
-    // 1. サマリーの完全一致
-    expect(run1.summary.totalMatches).toBe(run2.summary.totalMatches);
-    expect(run1.summary.completedCount).toBe(run2.summary.completedCount);
-    expect(run1.summary.incompleteCount).toBe(run2.summary.incompleteCount);
-    expect(run1.summary.failedCount).toBe(run2.summary.failedCount);
-    expect(run1.summary.winsByPlayer).toEqual(run2.summary.winsByPlayer);
-
-    // 2. 各試合の決定論的指標の一致
-    expect(run1.matches.length).toBe(run2.matches.length);
-    for (let i = 0; i < run1.matches.length; i++) {
-      const m1 = run1.matches[i];
-      const m2 = run2.matches[i];
-
-      expect(m1.matchId).toBe(m2.matchId);
-      expect(m1.status).toBe(m2.status);
-      expect(m1.completed).toBe(m2.completed);
-      expect(m1.winner).toBe(m2.winner);
-      expect(m1.totalDecisions).toBe(m2.totalDecisions);
-      expect(m1.turnCount).toBe(m2.turnCount);
-      expect(m1.finalStateHash).toBe(m2.finalStateHash);
-      expect(m1.traceDigest).toBe(m2.traceDigest);
-      expect(m1.traceDigest).not.toBe("");
-    }
-  });
-
-  it("Test 2: メモリ保護契約テスト (通常完了試合で生の DecisionTrace を保持しないこと)", async () => {
-    const config: LargeScaleBatchConfig = {
-      batchId: "test-memory-guard",
-      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1",
-      baseSeed: 9999,
-      matchCount: 3,
-      maxDecisionsPerMatch: 50,
-      regulationId: "test-core-battle",
-      rootDir,
-      overrideGitMetadata: dummyGitMetadata,
-    };
-
-    const result = await LargeScaleBatchRunner.runBatch({
-      config,
-      sessionFactory,
-      policyFactory: createPolicyFactory(),
-      rulePackageDigest,
-    });
-
-    expect(result.matches.length).toBe(3);
-    for (const match of result.matches) {
-      // 生の decisionTrace や finalState が含まれていないことをアサート
-      expect((match as any).decisionTrace).toBeUndefined();
-      expect((match as any).finalState).toBeUndefined();
-      expect((match as any).matchLog).toBeUndefined();
-
-      // 代わりに traceDigest が記録されていること
-      expect(match.traceDigest).toBeDefined();
-      expect(typeof match.traceDigest).toBe("string");
-      expect(match.traceDigest!.length).toBe(64); // SHA-256
-    }
-  });
-
-  it("Test 3: 障害分離テスト (特定試合での例外発生時もバッチ全体が中断されず FAILED として隔離・詳細保存されること)", async () => {
-    const config: LargeScaleBatchConfig = {
-      batchId: "test-failure-isolation",
-      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1",
-      baseSeed: 1234,
-      matchCount: 4,
-      maxDecisionsPerMatch: 500, // 決着がつく十分な回数
-      regulationId: "test-core-battle",
-      rootDir,
-      overrideGitMetadata: dummyGitMetadata,
-    };
-
-    // matchIndex 2 のみ FaultyPolicy を投入
-    const result = await LargeScaleBatchRunner.runBatch({
-      config,
-      sessionFactory,
-      policyFactory: createPolicyFactory(2),
-      rulePackageDigest,
-    });
-
-    expect(result.summary.totalMatches).toBe(4);
-    expect(result.summary.failedCount).toBe(1);
-    expect(result.summary.completedCount).toBe(3);
-
-    const failedMatch = result.matches[2];
-    expect(failedMatch.status).toBe("FAILED");
-    expect(failedMatch.completed).toBe(false);
-    expect(failedMatch.failure).toBeDefined();
-    expect(failedMatch.failure!.phase).toBe("SIMULATION");
-    expect(failedMatch.failure!.errorMessage).toContain("FAULT_INJECTION");
-
-    // 他の試合 (0, 1, 3) は正常完了
-    expect(result.matches[0].status).toBe("COMPLETED");
-    expect(result.matches[1].status).toBe("COMPLETED");
-    expect(result.matches[3].status).toBe("COMPLETED");
-
-    // 障害情報が failures リストにも集約されていること
-    expect(result.failures.length).toBe(1);
-    expect(result.failures[0].matchIndex).toBe(2);
-  });
-
-  it("Test 4: 中断・再開 (チェックポイント) 整合性テスト (再開時に重複や欠落がなく一括実行と一致すること)", async () => {
-    const batchId = "test-resume-checkpoint";
-    const config: LargeScaleBatchConfig = {
-      batchId,
-      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1",
-      baseSeed: 7777,
-      matchCount: 6,
-      maxDecisionsPerMatch: 50,
-      regulationId: "test-core-battle",
-      checkpointInterval: 3, // 3試合ごとに保存
-      checkpointDir: testCheckpointDir,
-      rootDir,
-      overrideGitMetadata: dummyGitMetadata,
-    };
-
-    // 1. 最初から全6試合を一括実行 (期待値)
-    const goldenRun = await LargeScaleBatchRunner.runBatch({
-      config,
-      sessionFactory,
-      policyFactory: createPolicyFactory(),
-      rulePackageDigest,
-    });
-
-    const chkFile3 = path.join(testCheckpointDir, `${batchId}-chk-000003.json`);
-    expect(fs.existsSync(chkFile3)).toBe(true);
-
-    // 2. 3試合目のチェックポイントから再開実行
-    const resumedRun = await LargeScaleBatchRunner.runBatch({
-      config,
-      sessionFactory,
-      policyFactory: createPolicyFactory(),
-      rulePackageDigest,
-      resumeCheckpointPath: chkFile3,
-    });
-
-    expect(resumedRun.matches.length).toBe(6);
-    expect(resumedRun.summary.completedCount).toBe(goldenRun.summary.completedCount);
-
-    // 全試合の ID, status, winner, traceDigest が一括実行と完全一致
-    for (let i = 0; i < 6; i++) {
-      expect(resumedRun.matches[i].matchId).toBe(goldenRun.matches[i].matchId);
-      expect(resumedRun.matches[i].status).toBe(goldenRun.matches[i].status);
-      expect(resumedRun.matches[i].winner).toBe(goldenRun.matches[i].winner);
-      expect(resumedRun.matches[i].finalStateHash).toBe(goldenRun.matches[i].finalStateHash);
-      expect(resumedRun.matches[i].traceDigest).toBe(goldenRun.matches[i].traceDigest);
-    }
-  });
-
-  it("Test 5: 正式 Evidence 保存と Execution Manifest 整合性検証", async () => {
-    const config: LargeScaleBatchConfig = {
-      batchId: "test-evidence-save",
-      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1",
-      baseSeed: 5555,
-      matchCount: 2,
-      maxDecisionsPerMatch: 500, // 決着がつく十分な回数
-      regulationId: "test-core-battle",
-      rootDir,
-      overrideGitMetadata: dummyGitMetadata,
-    };
-
-    const run = await LargeScaleBatchRunner.runBatch({
-      config,
-      sessionFactory,
-      policyFactory: createPolicyFactory(),
-      rulePackageDigest,
-    });
-
-    const tmpEvidencePath = path.resolve(
-      rootDir,
-      "tools/simulator/reports/ai/tmp-batch-test-evidence.json"
-    );
-
-    // 正式保存
-    expect(() => run.saveEvidence(tmpEvidencePath)).not.toThrow();
-    expect(fs.existsSync(tmpEvidencePath)).toBe(true);
-
-    const saved = JSON.parse(fs.readFileSync(tmpEvidencePath, "utf-8"));
-    expect(saved.workId).toBe("BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1");
-    expect(saved.executionManifest).toBeDefined();
-    expect(saved.executionManifest.gitMetadata.verificationStatus).toBe("VERIFIED");
-    expect(saved.summary.completedCount).toBe(2);
-    expect(saved.performance.matchesPerSecond).toBeGreaterThan(0);
-    expect(saved.performance.estimated10kMatchesDurationHours).toBeGreaterThan(0);
-
-    // クリーンアップ
-    fs.unlinkSync(tmpEvidencePath);
-  });
-
-  it("Test 6: fail-closed 検証 (Git 検証ステータスが FAILED または dirty の場合は開始時に拒否されること)", async () => {
-    const dirtyGitMetadata: GitExecutionMetadata = {
-      headCommitSha: "17b6e967e5987a157bb1aa3ea51e7d148e3c0719",
-      branch: "BlackPoker/issue551-core-flow",
+  it("Test 1: Git状態未検証・環境変数のみ (ENV_OVERRIDE/FAILED) 時は正式保存を拒否すること (fail-closed)", async () => {
+    const unverifiedMetadata: GitExecutionMetadata = {
+      headCommitSha: "ff0c4a71509ce07f27afab41ba9846499cc7cee1",
+      branch: "env-override",
       isDirty: true,
-      dirtyFiles: ["dirty-file.ts"],
-      verificationStatus: "VERIFIED",
+      dirtyFiles: ["GIT_STATUS_COMMAND_UNAVAILABLE_ENV_SHA_ONLY"],
+      verificationStatus: "ENV_OVERRIDE",
     };
 
     const config: LargeScaleBatchConfig = {
-      batchId: "test-dirty-reject",
-      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1",
-      baseSeed: 1111,
+      batchId: "test-git-unverified",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R1",
+      baseSeed: 1001,
       matchCount: 2,
-      regulationId: "test-core-battle",
+      regulationId: "standard-pack",
       rootDir,
-      overrideGitMetadata: dirtyGitMetadata,
     };
 
+    // runBatchForTesting でも ENV_OVERRIDE の場合は assertNotDirty で拒否される
     await expect(
-      LargeScaleBatchRunner.runBatch({
+      LargeScaleBatchRunner.runBatchForTesting({
         config,
         sessionFactory,
         policyFactory: createPolicyFactory(),
         rulePackageDigest,
+        testGitMetadata: unverifiedMetadata,
+      })
+    ).rejects.toThrow(ExecutionManifestUnverifiedGitStateError);
+  });
+
+  it("Test 2: dirty 状態では正式実行および保存が拒否されること", async () => {
+    const dirtyMetadata: GitExecutionMetadata = {
+      headCommitSha: "ff0c4a71509ce07f27afab41ba9846499cc7cee1",
+      branch: "test",
+      isDirty: true,
+      dirtyFiles: ["tools/simulator/src/engine/rules/graveCardUtils.ts"],
+      verificationStatus: "VERIFIED",
+    };
+
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-git-dirty",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R1",
+      baseSeed: 1002,
+      matchCount: 2,
+      regulationId: "standard-pack",
+      rootDir,
+    };
+
+    await expect(
+      LargeScaleBatchRunner.runBatchForTesting({
+        config,
+        sessionFactory,
+        policyFactory: createPolicyFactory(),
+        rulePackageDigest,
+        testGitMetadata: dirtyMetadata,
+      })
+    ).rejects.toThrow(ExecutionManifestDirtyStateError);
+  });
+
+  it("Test 3: ルールパッケージの実内容が変化した場合に Digest が変化すること", () => {
+    const originalDigest = computeDirectoryContentDigest(testRulesDir, true);
+    expect(originalDigest).toMatch(/^[0-9a-f]{64}$/);
+
+    // バージョン番号 ("1.0.0") と内容 Digest は明確に異なる
+    expect(originalDigest).not.toBe("1.0.0");
+
+    // 別ディレクトリ（ai）の Digest と一致しない
+    const aiDir = path.resolve(rootDir, "tools/simulator/src/engine/ai");
+    const aiDigest = computeDirectoryContentDigest(aiDir, true);
+    expect(originalDigest).not.toBe(aiDigest);
+  });
+
+  it("Test 4: Policy 設定の変更が実験 Fingerprint に正しく反映されること", () => {
+    const p1 = new FirstLegalPolicy(false);
+    const p2 = new FirstLegalPolicy(true); // preferPass: true
+
+    const baseConfig = {
+      regulationId: "standard-pack",
+      rulePackageId: "official-standard-pack",
+      rulePackageVersion: "1.0.0",
+      rulePackageDigest: "abc123digest",
+      campaignSeed: 92000,
+      randomGenerator: "deriveBatchSeed",
+      decisionTraceVersion: 2,
+      models: [],
+    };
+
+    const fp1 = computeExperimentFingerprint({
+      gitCommitSha: "ff0c4a71509ce07f27afab41ba9846499cc7cee1",
+      subsystemDigests: {
+        rules: "1",
+        simulation: "2",
+        ai: "3",
+        regulations: "4",
+        rulesPackage: "5",
+        dependencies: "6",
+      },
+      experimentConfig: {
+        ...baseConfig,
+        playerPolicies: [{ seat: "p1", descriptor: p1.descriptor }],
+      },
+    });
+
+    const fp2 = computeExperimentFingerprint({
+      gitCommitSha: "ff0c4a71509ce07f27afab41ba9846499cc7cee1",
+      subsystemDigests: {
+        rules: "1",
+        simulation: "2",
+        ai: "3",
+        regulations: "4",
+        rulesPackage: "5",
+        dependencies: "6",
+      },
+      experimentConfig: {
+        ...baseConfig,
+        playerPolicies: [{ seat: "p1", descriptor: p2.descriptor }],
+      },
+    });
+
+    // PolicyDescriptor の metadata (preferPass) が異なれば Fingerprint も異なる
+    expect(fp1).not.toBe(fp2);
+  });
+
+  it("Test 5: FAILED 試合において onStep リングバッファから直前 Decision Trace が保存されること", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-failure-ringbuffer",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R1",
+      baseSeed: 3333,
+      matchCount: 3,
+      maxDecisionsPerMatch: 500,
+      regulationId: "standard-pack",
+      rootDir,
+    };
+
+    // matchIndex 1 のみステップ 5 で意図的例外
+    const result = await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(1, 5),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    expect(result.summary.totalMatches).toBe(3);
+    expect(result.summary.failedCount).toBe(1);
+    expect(result.summary.completedCount).toBe(2);
+
+    const failedMatch = result.matches[1];
+    expect(failedMatch.status).toBe("FAILED");
+    expect(failedMatch.failure).toBeDefined();
+    expect(failedMatch.failure!.phase).toBe("SIMULATION");
+    expect(failedMatch.failure!.errorName).toBe("Error");
+    expect(failedMatch.failure!.errorMessage).toContain("FAULT_INJECTION: Failed at step 5");
+
+    // 直前トレーススナップショットが存在し、発生直前のレコードが保存されていること
+    expect(failedMatch.failure!.decisionTraceSnapshot).toBeDefined();
+    expect(failedMatch.failure!.decisionTraceSnapshot!.length).toBeGreaterThan(0);
+    expect(failedMatch.failure!.decisionTraceSnapshot!.length).toBeLessThanOrEqual(10);
+    expect(failedMatch.failure!.occurredAtStep).toBeGreaterThan(0);
+
+    // 正常試合 (0, 2) は生トレースを保持せず traceDigest のみ
+    expect((result.matches[0] as any).decisionTrace).toBeUndefined();
+    expect(result.matches[0].traceDigest).toBeDefined();
+    expect(result.matches[0].status).toBe("COMPLETED");
+  });
+
+  it("Test 6: 異なる Fingerprint / Regulation / RulePackageDigest のチェックポイントから再開できないこと", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-chk-reject",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R1",
+      baseSeed: 4444,
+      matchCount: 4,
+      regulationId: "standard-pack",
+      checkpointInterval: 2,
+      checkpointDir: testCheckpointDir,
+      rootDir,
+    };
+
+    // まず 2 試合の正常チェックポイントを作成
+    await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    const chkFile = path.join(testCheckpointDir, "test-chk-reject-chk-000002.json");
+    expect(fs.existsSync(chkFile)).toBe(true);
+
+    // 1. regulationId が異なる設定で再開しようとすると拒否 (Fingerprint 不一致検出)
+    const diffRegConfig: LargeScaleBatchConfig = {
+      ...config,
+      regulationId: "light-pack", // 変更
+    };
+    await expect(
+      LargeScaleBatchRunner.runBatchForTesting({
+        config: diffRegConfig,
+        sessionFactory,
+        policyFactory: createPolicyFactory(),
+        rulePackageDigest,
+        resumeCheckpointPath: chkFile,
+        testGitMetadata: cleanTestGitMetadata,
+      })
+    ).rejects.toThrow(ExecutionManifestIntegrityMismatchError);
+
+    // 2. rulePackageDigest が異なる設定で再開しようとすると拒否
+    await expect(
+      LargeScaleBatchRunner.runBatchForTesting({
+        config,
+        sessionFactory,
+        policyFactory: createPolicyFactory(),
+        rulePackageDigest: "altered-digest-9999",
+        resumeCheckpointPath: chkFile,
+        testGitMetadata: cleanTestGitMetadata,
+      })
+    ).rejects.toThrow(ExecutionManifestIntegrityMismatchError);
+  });
+
+  it("Test 7: チェックポイント破損・重複・欠落を検出して再開を拒否すること", async () => {
+    const chkFile = path.join(testCheckpointDir, "test-chk-reject-chk-000002.json");
+    const raw = fs.readFileSync(chkFile, "utf-8");
+    const chk: BatchCheckpointState = JSON.parse(raw);
+
+    // 1. 試合インデックスに欠落がある場合 (0, 2 となり 1 が欠落)
+    const corruptedIndexChk = {
+      ...chk,
+      completedMatches: [
+        chk.completedMatches[0],
+        { ...chk.completedMatches[1], matchIndex: 2 },
+      ],
+    };
+    const corruptedPath = path.join(testCheckpointDir, "corrupted-discontinuity.json");
+    fs.writeFileSync(corruptedPath, JSON.stringify(corruptedIndexChk, null, 2), "utf-8");
+
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-chk-reject",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R1",
+      baseSeed: 4444,
+      matchCount: 4,
+      regulationId: "standard-pack",
+      rootDir,
+    };
+
+    await expect(
+      LargeScaleBatchRunner.runBatchForTesting({
+        config,
+        sessionFactory,
+        policyFactory: createPolicyFactory(),
+        rulePackageDigest,
+        resumeCheckpointPath: corruptedPath,
+        testGitMetadata: cleanTestGitMetadata,
       })
     ).rejects.toThrow();
+  });
+
+  it("Test 8: 再開後の性能指標が再開後に実際に実行された試合数と整合すること", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-resume-metrics",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R1",
+      baseSeed: 5555,
+      matchCount: 4,
+      regulationId: "standard-pack",
+      checkpointInterval: 2,
+      checkpointDir: testCheckpointDir,
+      rootDir,
+    };
+
+    // 2 試合実行してチェックポイント作成
+    await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    const chkFile = path.join(testCheckpointDir, "test-resume-metrics-chk-000002.json");
+    expect(fs.existsSync(chkFile)).toBe(true);
+
+    // チェックポイントから後半 2 試合を再開実行
+    const resumedResult = await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      resumeCheckpointPath: chkFile,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    // 総合試合数は 4
+    expect(resumedResult.matches.length).toBe(4);
+    expect(resumedResult.summary.completedCount).toBe(4);
+
+    // 再開後に新規実行された試合数は 2
+    expect(resumedResult.newlyExecutedMatches).toBe(2);
+
+    // スループットは再開後実行分 (2 試合) に基づいて計算されていること (> 0)
+    expect(resumedResult.performance.matchesPerSecond).toBeGreaterThan(0);
+    expect(resumedResult.performance.latencies.medianMs).toBeGreaterThan(0);
+  });
+
+  it("Test 9: 通常完了試合において巨大な生 DecisionTrace を蓄積せずメモリ保護されていること", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-memory-protection",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R1",
+      baseSeed: 6666,
+      matchCount: 3,
+      regulationId: "standard-pack",
+      rootDir,
+    };
+
+    const result = await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    for (const match of result.matches) {
+      expect((match as any).decisionTrace).toBeUndefined();
+      expect((match as any).finalState).toBeUndefined();
+      expect(match.traceDigest).toBeDefined();
+      expect(match.traceDigest!.length).toBe(64);
+      expect(match.finalStateHash).toBeDefined();
+    }
+  });
+
+  it("Test 10: 決定論的再実行一致テスト (同一Seed・Policyで全指標が完全一致すること)", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-deterministic-parity",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R1",
+      baseSeed: 7777,
+      matchCount: 3,
+      regulationId: "standard-pack",
+      rootDir,
+    };
+
+    const run1 = await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    const run2 = await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    expect(run1.summary.totalMatches).toBe(run2.summary.totalMatches);
+    expect(run1.summary.completedCount).toBe(run2.summary.completedCount);
+    expect(run1.summary.winsByPlayer).toEqual(run2.summary.winsByPlayer);
+
+    for (let i = 0; i < run1.matches.length; i++) {
+      expect(run1.matches[i].matchId).toBe(run2.matches[i].matchId);
+      expect(run1.matches[i].status).toBe(run2.matches[i].status);
+      expect(run1.matches[i].winner).toBe(run2.matches[i].winner);
+      expect(run1.matches[i].totalDecisions).toBe(run2.matches[i].totalDecisions);
+      expect(run1.matches[i].finalStateHash).toBe(run2.matches[i].finalStateHash);
+      expect(run1.matches[i].traceDigest).toBe(run2.matches[i].traceDigest);
+    }
   });
 });

@@ -2,14 +2,17 @@ import * as crypto from "crypto";
 import * as fs from "fs";
 import * as path from "path";
 import { GameSession } from "../session/GameSession";
-import { DecisionPolicy, PolicyDescriptor } from "./DecisionPolicy";
-import { SimulationRunner, SimulationResult } from "./SimulationRunner";
+import { DecisionPolicy } from "./DecisionPolicy";
+import { SimulationRunner, SimulationResult, DecisionTraceRecord } from "./SimulationRunner";
 import {
   createExecutionManifest,
   assertNotDirty,
   saveOfficialEvidenceWithManifest,
   ExecutionManifest,
   ExperimentConfigManifest,
+  GitExecutionMetadata,
+  computeDirectoryContentDigest,
+  canonicalJsonStringify,
 } from "./ExecutionManifest";
 import {
   LARGE_SCALE_BATCH_VERSION,
@@ -28,7 +31,7 @@ import {
 } from "../../domain/simulation/LargeScaleBatchTypes";
 
 /**
- * 実験開始時と終了時の Execution Manifest 不整合を示す例外 (fail-closed)
+ * 実験開始時と終了時、またはチェックポイントとの Execution Manifest 不整合を示す例外 (fail-closed)
  */
 export class ExecutionManifestIntegrityMismatchError extends Error {
   constructor(message: string) {
@@ -56,11 +59,56 @@ function resolveRootDir(customDir?: string): string {
   if (fs.existsSync(path.resolve(process.cwd(), "tools/simulator"))) {
     return process.cwd();
   }
-  // tools/simulator 内で実行されている場合
   if (fs.existsSync(path.resolve(process.cwd(), "src/engine"))) {
     return path.resolve(process.cwd(), "../..");
   }
   return path.resolve(__dirname, "../../../../../");
+}
+
+/**
+ * 直近 N 件の意思決定トレースのみを保持するリングバッファ (メモリ保護と障害診断の両立)
+ */
+export class RecentDecisionTraceRingBuffer {
+  private readonly buffer: DecisionTraceRecord[];
+  private head: number = 0;
+  private count: number = 0;
+
+  constructor(public readonly capacity: number = 10) {
+    this.buffer = new Array(capacity);
+  }
+
+  push(record: DecisionTraceRecord): void {
+    this.buffer[this.head] = record;
+    this.head = (this.head + 1) % this.capacity;
+    if (this.count < this.capacity) {
+      this.count++;
+    }
+  }
+
+  toArray(): DecisionTraceRecord[] {
+    const result: DecisionTraceRecord[] = [];
+    if (this.count < this.capacity) {
+      for (let i = 0; i < this.count; i++) {
+        result.push(this.buffer[i]);
+      }
+    } else {
+      for (let i = 0; i < this.capacity; i++) {
+        const idx = (this.head + i) % this.capacity;
+        result.push(this.buffer[idx]);
+      }
+    }
+    return result;
+  }
+
+  get length(): number {
+    return this.count;
+  }
+
+  clear(): void {
+    this.head = 0;
+    this.count = 0;
+    this.buffer.fill(undefined as any);
+  }
 }
 
 /**
@@ -87,6 +135,28 @@ export function computeTraceDigestFromSimulation(simRes: SimulationResult): stri
 }
 
 /**
+ * チェックポイントのチェックサムを計算
+ */
+export function computeCheckpointChecksum(
+  state: Omit<BatchCheckpointState, "checksum">
+): string {
+  const payload = {
+    batchId: state.batchId,
+    baseSeed: state.baseSeed,
+    experimentFingerprint: state.experimentFingerprint,
+    regulationId: state.regulationId,
+    rulePackageDigest: state.rulePackageDigest,
+    playerPoliciesDigest: state.playerPoliciesDigest,
+    totalTargetMatches: state.totalTargetMatches,
+    maxDecisionsPerMatch: state.maxDecisionsPerMatch,
+    lastCompletedIndex: state.lastCompletedIndex,
+    matchCount: state.completedMatches.length,
+    failureCount: state.failures.length,
+  };
+  return sha256(canonicalJsonStringify(payload));
+}
+
+/**
  * 試合コンテキスト
  */
 export interface LargeScaleMatchContext {
@@ -97,20 +167,32 @@ export interface LargeScaleMatchContext {
   readonly playerSeeds: Record<string, number>;
 }
 
+export interface RunBatchExecutionResult {
+  readonly summary: LargeScaleBatchSummary;
+  readonly performance: LargeScalePerformanceMetrics;
+  readonly matches: readonly LargeScaleMatchResult[];
+  readonly failures: readonly LargeScaleFailureRecord[];
+  readonly initialManifest: ExecutionManifest;
+  readonly postManifest: ExecutionManifest;
+  readonly newlyExecutedMatches: number;
+  readonly saveEvidence: (outputFilePath: string) => void;
+}
+
 /**
  * 大規模バッチ実行ランナー
  *
  * 【設計原則】:
- * 1. Execution Manifest を実験開始時と終了時に検証し、試合ごとの Git コマンド実行を完全排除。
- * 2. 生の Decision Trace は通常試合では保持せず、traceDigest に圧縮してメモリを保護（ヒープ枯渇防止）。
- * 3. 失敗試合（FAILED / INCOMPLETE）は勝敗に変換せず、原因究明用トレースを詳細退避。
- * 4. 途中停止・再開に対応したチェックポイント機能を提供。
+ * 1. Execution Manifest を実験開始時と終了時に Git CLI で実検証し、未検証 VERIFIED の捏造を完全排除。
+ * 2. 試合ごとの Git コマンド実行を完全排除し、高スループットを維持。
+ * 3. 通常試合では生 Decision Trace 配列を破棄し、traceDigest のみ保持してメモリを保護。
+ * 4. FAILED / INCOMPLETE 試合では onStep リングバッファから直前トレースを詳細退避。
+ * 5. 厳格な実験条件照合・原子的置換に対応したチェックポイント機能を提供。
  */
 export class LargeScaleBatchRunner {
   public static readonly VERSION = LARGE_SCALE_BATCH_VERSION;
 
   /**
-   * バッチ実行のライフサイクルを管理し、Evidence を生成する実行クラス
+   * 正式実行用メソッド (Git CLI による HEAD & status 検証を必須とする fail-closed 契約)
    */
   public static async runBatch(params: {
     readonly config: LargeScaleBatchConfig;
@@ -121,15 +203,41 @@ export class LargeScaleBatchRunner {
     };
     readonly rulePackageDigest: string;
     readonly resumeCheckpointPath?: string;
-  }): Promise<{
-    summary: LargeScaleBatchSummary;
-    performance: LargeScalePerformanceMetrics;
-    matches: readonly LargeScaleMatchResult[];
-    failures: readonly LargeScaleFailureRecord[];
-    initialManifest: ExecutionManifest;
-    postManifest: ExecutionManifest;
-    saveEvidence: (outputFilePath: string) => void;
-  }> {
+  }): Promise<RunBatchExecutionResult> {
+    return this.runBatchInternal(params, undefined);
+  }
+
+  /**
+   * テスト専用実行メソッド (単体テスト・異常系シミュレーションでのみ Git メタデータ注入を許可)
+   * ※ 本番・正式実験での使用は禁止
+   */
+  public static async runBatchForTesting(params: {
+    readonly config: LargeScaleBatchConfig;
+    readonly sessionFactory: (ctx: LargeScaleMatchContext) => GameSession;
+    readonly policyFactory: (ctx: LargeScaleMatchContext) => {
+      policies: Record<string, DecisionPolicy>;
+      seats: Record<string, LargeScaleSeatInfo>;
+    };
+    readonly rulePackageDigest: string;
+    readonly resumeCheckpointPath?: string;
+    readonly testGitMetadata?: GitExecutionMetadata;
+  }): Promise<RunBatchExecutionResult> {
+    return this.runBatchInternal(params, params.testGitMetadata);
+  }
+
+  private static async runBatchInternal(
+    params: {
+      readonly config: LargeScaleBatchConfig;
+      readonly sessionFactory: (ctx: LargeScaleMatchContext) => GameSession;
+      readonly policyFactory: (ctx: LargeScaleMatchContext) => {
+        policies: Record<string, DecisionPolicy>;
+        seats: Record<string, LargeScaleSeatInfo>;
+      };
+      readonly rulePackageDigest: string;
+      readonly resumeCheckpointPath?: string;
+    },
+    injectedGitMetadata?: GitExecutionMetadata
+  ): Promise<RunBatchExecutionResult> {
     const { config, sessionFactory, policyFactory, rulePackageDigest, resumeCheckpointPath } = params;
 
     // 0. 設定検証
@@ -137,12 +245,13 @@ export class LargeScaleBatchRunner {
       throw new LargeScaleBatchConfigurationError("matchCount must be >= 1");
     }
 
-    // 1. 実験開始時 Manifest 取得 & fail-closed ガード
     const rootDir = resolveRootDir(config.rootDir);
+
+    // 1. 実験開始時 Manifest 取得 & fail-closed ガード
     const experimentConfig: ExperimentConfigManifest = {
       regulationId: config.regulationId,
       rulePackageId: config.rulePackageId ?? "official-rules",
-      rulePackageVersion: config.rulePackageVersion ?? "9.2.0",
+      rulePackageVersion: config.rulePackageVersion ?? "1.0.0",
       rulePackageDigest,
       campaignSeed: config.baseSeed,
       randomGenerator: "32-bit FNV-1a pure function deriveBatchSeed",
@@ -155,10 +264,24 @@ export class LargeScaleBatchRunner {
       workId: config.workId,
       rootDir,
       experimentConfig,
-      overrideGitMetadata: config.overrideGitMetadata,
+      overrideGitMetadata: injectedGitMetadata,
     });
-    // 未コミット変更や Git 検証失敗があれば即座に拒否
+
+    // 未コミット変更や Git 検証失敗があれば即座に拒否 (fail-closed)
     assertNotDirty(initialManifest);
+
+    // 期待される Commit SHA との照合ガード (指定がある場合)
+    const expectedSha =
+      config.expectedGitCommitSha ||
+      process.env.EXPECTED_GIT_COMMIT_SHA ||
+      process.env.GIT_COMMIT_SHA;
+    if (expectedSha) {
+      if (initialManifest.gitMetadata.headCommitSha !== expectedSha) {
+        throw new ExecutionManifestIntegrityMismatchError(
+          `Git HEAD Commit SHA が期待値と一致しません (Expected: ${expectedSha}, Actual: ${initialManifest.gitMetadata.headCommitSha})`
+        );
+      }
+    }
 
     // 2. CPU / メモリ Baseline 測定
     const startWallClock = globalThis.performance.now();
@@ -178,23 +301,93 @@ export class LargeScaleBatchRunner {
       },
     ];
 
-    // 3. チェックポイントの復元（再開時）
+    // 3. チェックポイントの復元と厳格な整合性検証
     const matches: LargeScaleMatchResult[] = [];
     const failures: LargeScaleFailureRecord[] = [];
-    const matchDurationsMs: number[] = [];
+    const newlyExecutedDurationsMs: number[] = [];
     let startIndex = 0;
+    const maxDecisions = config.maxDecisionsPerMatch ?? 500;
+    const playerPoliciesDigest = sha256(canonicalJsonStringify(config.playerPolicies ?? []));
 
-    if (resumeCheckpointPath && fs.existsSync(resumeCheckpointPath)) {
+    if (resumeCheckpointPath) {
+      if (!fs.existsSync(resumeCheckpointPath)) {
+        throw new LargeScaleBatchConfigurationError(
+          `指定されたチェックポイントファイルが存在しません: ${resumeCheckpointPath}`
+        );
+      }
       const rawCheckpoint = fs.readFileSync(resumeCheckpointPath, "utf-8");
-      const chk: BatchCheckpointState = JSON.parse(rawCheckpoint);
-      if (chk.batchId === config.batchId && chk.baseSeed === config.baseSeed) {
-        matches.push(...chk.completedMatches);
-        failures.push(...chk.failures);
-        startIndex = chk.lastCompletedIndex + 1;
-        for (const m of chk.completedMatches) {
-          matchDurationsMs.push(m.durationMs);
+      let chk: BatchCheckpointState;
+      try {
+        chk = JSON.parse(rawCheckpoint);
+      } catch (err: any) {
+        throw new LargeScaleBatchConfigurationError(
+          `チェックポイントファイルが破損しています (JSON parse error): ${err.message}`
+        );
+      }
+
+      // チェックサム検証
+      const expectedChecksum = computeCheckpointChecksum(chk);
+      if (chk.checksum !== expectedChecksum) {
+        throw new ExecutionManifestIntegrityMismatchError(
+          `チェックポイントのチェックサムが一致しません (ファイル破損または改ざん検出)`
+        );
+      }
+
+      // 実験条件の厳格照合
+      if (chk.batchId !== config.batchId) {
+        throw new LargeScaleBatchConfigurationError(
+          `チェックポイントの batchId ('${chk.batchId}') が現在の設定 ('${config.batchId}') と一致しません`
+        );
+      }
+      if (chk.baseSeed !== config.baseSeed) {
+        throw new LargeScaleBatchConfigurationError(
+          `チェックポイントの baseSeed (${chk.baseSeed}) が現在の設定 (${config.baseSeed}) と一致しません`
+        );
+      }
+      if (chk.experimentFingerprint !== initialManifest.experimentFingerprint) {
+        throw new ExecutionManifestIntegrityMismatchError(
+          `チェックポイントの experimentFingerprint が現在の Manifest と一致しません (コード・設定・DNA が異なります)`
+        );
+      }
+      if (chk.regulationId !== config.regulationId) {
+        throw new LargeScaleBatchConfigurationError(
+          `チェックポイントの regulationId ('${chk.regulationId}') が現在の設定 ('${config.regulationId}') と一致しません`
+        );
+      }
+      if (chk.rulePackageDigest !== rulePackageDigest) {
+        throw new LargeScaleBatchConfigurationError(
+          `チェックポイントの rulePackageDigest が現在の設定と一致しません`
+        );
+      }
+      if (chk.totalTargetMatches !== config.matchCount) {
+        throw new LargeScaleBatchConfigurationError(
+          `チェックポイントの totalTargetMatches (${chk.totalTargetMatches}) が現在の matchCount (${config.matchCount}) と一致しません`
+        );
+      }
+      if (chk.maxDecisionsPerMatch !== maxDecisions) {
+        throw new LargeScaleBatchConfigurationError(
+          `チェックポイントの maxDecisionsPerMatch (${chk.maxDecisionsPerMatch}) が現在の設定 (${maxDecisions}) と一致しません`
+        );
+      }
+
+      // 保存済み試合 Index の連続性・重複・欠落の検証
+      if (chk.completedMatches.length !== chk.lastCompletedIndex + 1) {
+        throw new LargeScaleBatchConfigurationError(
+          `チェックポイント内の試合数 (${chk.completedMatches.length}) と lastCompletedIndex (${chk.lastCompletedIndex}) に不整合があります`
+        );
+      }
+      for (let idx = 0; idx < chk.completedMatches.length; idx++) {
+        const m = chk.completedMatches[idx];
+        if (m.matchIndex !== idx) {
+          throw new LargeScaleBatchConfigurationError(
+            `チェックポイント内の試合インデックスに重複または欠落があります (期待: ${idx}, 実際: ${m.matchIndex})`
+          );
         }
       }
+
+      matches.push(...chk.completedMatches);
+      failures.push(...chk.failures);
+      startIndex = chk.lastCompletedIndex + 1;
     }
 
     const checkpointDir =
@@ -202,9 +395,10 @@ export class LargeScaleBatchRunner {
       path.resolve(rootDir, "tools/simulator/.artifacts/checkpoints");
     const checkpointInterval = config.checkpointInterval ?? 100;
     const memorySamplingInterval = config.memorySamplingInterval ?? 25;
-    const maxDecisions = config.maxDecisionsPerMatch ?? 500;
 
     // 4. 試合実行ループ (Git コマンドは試合ごとに実行しない)
+    const traceRingBuffer = new RecentDecisionTraceRingBuffer(10);
+
     for (let i = startIndex; i < config.matchCount; i++) {
       const matchStartTime = globalThis.performance.now();
       const matchSeed = deriveBatchSeed(config.baseSeed, i, "match");
@@ -229,6 +423,9 @@ export class LargeScaleBatchRunner {
       } | undefined;
       let simRes: SimulationResult | undefined;
       let failureRecord: LargeScaleFailureRecord | undefined;
+      let executedDecisions = 0;
+
+      traceRingBuffer.clear();
 
       try {
         // Session 生成
@@ -245,14 +442,18 @@ export class LargeScaleBatchRunner {
           throw { phase: "POLICY_SETUP", error: err };
         }
 
-        // Simulation 実行
+        // Simulation 実行 (onStep でリングバッファに直近10件を退避)
         try {
           simRes = SimulationRunner.run(session, policyBundle.policies, {
             maxDecisions,
             enableSemanticDiagnostics: false,
+            onStep: (stepInfo) => {
+              executedDecisions = stepInfo.stepCount;
+              traceRingBuffer.push(stepInfo.record);
+            },
           });
         } catch (err: any) {
-          throw { phase: "SIMULATION", error: err };
+          throw { phase: "SIMULATION", error: err, step: executedDecisions };
         }
       } catch (wrapper: any) {
         const phase = wrapper?.phase ?? "UNKNOWN";
@@ -260,7 +461,9 @@ export class LargeScaleBatchRunner {
         const errorName = err?.name || "Error";
         const errorMessage = err?.message || String(err);
         const errorStack = err?.stack;
+        const occurredAtStep = wrapper?.step ?? executedDecisions;
 
+        // FAILED 試合では直前トレースを退避
         failureRecord = {
           matchIndex: i,
           matchId,
@@ -268,12 +471,14 @@ export class LargeScaleBatchRunner {
           errorName,
           errorMessage,
           errorStack,
+          occurredAtStep,
+          decisionTraceSnapshot: traceRingBuffer.toArray(),
         };
         failures.push(failureRecord);
       }
 
       const matchDurationMs = globalThis.performance.now() - matchStartTime;
-      matchDurationsMs.push(matchDurationMs);
+      newlyExecutedDurationsMs.push(matchDurationMs);
 
       // 結果サマリー構築
       if (failureRecord) {
@@ -282,8 +487,8 @@ export class LargeScaleBatchRunner {
           matchId,
           status: "FAILED",
           completed: false,
-          totalDecisions: 0,
-          turnCount: 0,
+          totalDecisions: failureRecord.occurredAtStep ?? 0,
+          turnCount: session?.state?.turnCount ?? 0,
           durationMs: matchDurationMs,
           baseSeed: config.baseSeed,
           matchSeed,
@@ -307,7 +512,7 @@ export class LargeScaleBatchRunner {
             errorName: "IncompleteMatchWarning",
             errorMessage: `Match exceeded max decisions limit (${maxDecisions}) without completion`,
             occurredAtStep: simRes.totalDecisions,
-            decisionTraceSnapshot: simRes.decisionTrace?.slice(-10), // 直前10件のみ退避
+            decisionTraceSnapshot: traceRingBuffer.toArray(),
             canonicalMatchLog: simRes.matchLog,
           };
           failures.push(incompleteFailure);
@@ -334,7 +539,8 @@ export class LargeScaleBatchRunner {
           failure: incompleteFailure,
         });
 
-        // 【メモリ保護】: simRes.decisionTrace はスコープアウトさせて GC 対象にする
+        // 【メモリ保護】: 通常完了試合ではリングバッファと生 trace を破棄して GC 対象にする
+        traceRingBuffer.clear();
         simRes = undefined;
         session = undefined;
         policyBundle = undefined;
@@ -357,7 +563,8 @@ export class LargeScaleBatchRunner {
       // 進捗コールバック
       if (config.onProgress && ((i + 1) % 50 === 0 || i === config.matchCount - 1)) {
         const currentElapsed = globalThis.performance.now() - startWallClock;
-        const speed = (i + 1) / (currentElapsed / 1000);
+        const newlyDone = i + 1 - startIndex;
+        const speed = newlyDone > 0 ? newlyDone / (currentElapsed / 1000) : 0;
         const mem = process.memoryUsage();
         config.onProgress({
           completedMatches: i + 1,
@@ -367,7 +574,7 @@ export class LargeScaleBatchRunner {
         });
       }
 
-      // チェックポイント保存
+      // チェックポイント保存 (原子的置換: tmp -> rename)
       if ((i + 1) % checkpointInterval === 0 && (i + 1) < config.matchCount) {
         if (!fs.existsSync(checkpointDir)) {
           fs.mkdirSync(checkpointDir, { recursive: true });
@@ -376,17 +583,29 @@ export class LargeScaleBatchRunner {
           checkpointDir,
           `${config.batchId}-chk-${String(i + 1).padStart(6, "0")}.json`
         );
-        const chkData: BatchCheckpointState = {
+        const stateWithoutChecksum: Omit<BatchCheckpointState, "checksum"> = {
           checkpointVersion: LARGE_SCALE_BATCH_VERSION,
           batchId: config.batchId,
           baseSeed: config.baseSeed,
+          experimentFingerprint: initialManifest.experimentFingerprint,
+          regulationId: config.regulationId,
+          rulePackageDigest,
+          playerPoliciesDigest,
           totalTargetMatches: config.matchCount,
+          maxDecisionsPerMatch: maxDecisions,
           lastCompletedIndex: i,
           timestamp: new Date().toISOString(),
           completedMatches: matches,
           failures,
         };
-        fs.writeFileSync(chkFile, JSON.stringify(chkData, null, 2), "utf-8");
+        const chkData: BatchCheckpointState = {
+          ...stateWithoutChecksum,
+          checksum: computeCheckpointChecksum(stateWithoutChecksum),
+        };
+
+        const tmpFile = `${chkFile}.tmp.${Date.now()}`;
+        fs.writeFileSync(tmpFile, JSON.stringify(chkData, null, 2), "utf-8");
+        fs.renameSync(tmpFile, chkFile);
       }
     }
 
@@ -397,7 +616,7 @@ export class LargeScaleBatchRunner {
     if (finalMem.rss > peakRss) peakRss = finalMem.rss;
     if (finalMem.heapUsed > peakHeapUsed) peakHeapUsed = finalMem.heapUsed;
 
-    // CPU メトリクス算出
+    // CPU メトリクス
     const userCpuMs = endCpu.user / 1000;
     const sysCpuMs = endCpu.system / 1000;
     const totalCpuMs = userCpuMs + sysCpuMs;
@@ -411,7 +630,7 @@ export class LargeScaleBatchRunner {
       cpuUtilizationPercent,
     };
 
-    // メモリテレメトリ算出
+    // メモリテレメトリ
     const memoryTelemetry: MemoryTelemetry = {
       baselineRssBytes: initialMem.rss,
       baselineHeapUsedBytes: initialMem.heapUsed,
@@ -424,21 +643,30 @@ export class LargeScaleBatchRunner {
       samples: memorySamples,
     };
 
-    // レイテンシ分布算出
-    const sortedDurations = [...matchDurationsMs].sort((a, b) => a - b);
-    const n = sortedDurations.length;
+    // レイテンシ分布算出 (今回実際に実行された試合の計測時間に基づく)
+    const sortedDurations = [...newlyExecutedDurationsMs].sort((a, b) => a - b);
+    const newlyExecutedCount = sortedDurations.length;
     const sumDuration = sortedDurations.reduce((a, b) => a + b, 0);
-    const meanDuration = n > 0 ? sumDuration / n : 0;
+    const meanDuration = newlyExecutedCount > 0 ? sumDuration / newlyExecutedCount : 0;
     const medianDuration =
-      n > 0
-        ? n % 2 === 1
-          ? sortedDurations[Math.floor(n / 2)]
-          : (sortedDurations[n / 2 - 1] + sortedDurations[n / 2]) / 2
+      newlyExecutedCount > 0
+        ? newlyExecutedCount % 2 === 1
+          ? sortedDurations[Math.floor(newlyExecutedCount / 2)]
+          : (sortedDurations[newlyExecutedCount / 2 - 1] + sortedDurations[newlyExecutedCount / 2]) / 2
         : 0;
 
-    const p90Duration = n > 0 ? sortedDurations[Math.max(0, Math.ceil(0.9 * n) - 1)] : 0;
-    const p95Duration = n > 0 ? sortedDurations[Math.max(0, Math.ceil(0.95 * n) - 1)] : 0;
-    const p99Duration = n > 0 ? sortedDurations[Math.max(0, Math.ceil(0.99 * n) - 1)] : 0;
+    const p90Duration =
+      newlyExecutedCount > 0
+        ? sortedDurations[Math.max(0, Math.ceil(0.9 * newlyExecutedCount) - 1)]
+        : 0;
+    const p95Duration =
+      newlyExecutedCount > 0
+        ? sortedDurations[Math.max(0, Math.ceil(0.95 * newlyExecutedCount) - 1)]
+        : 0;
+    const p99Duration =
+      newlyExecutedCount > 0
+        ? sortedDurations[Math.max(0, Math.ceil(0.99 * newlyExecutedCount) - 1)]
+        : 0;
 
     const latencies: LatencyPercentiles = {
       meanMs: meanDuration,
@@ -446,17 +674,22 @@ export class LargeScaleBatchRunner {
       p90Ms: p90Duration,
       p95Ms: p95Duration,
       p99Ms: p99Duration,
-      minMs: n > 0 ? sortedDurations[0] : 0,
-      maxMs: n > 0 ? sortedDurations[n - 1] : 0,
+      minMs: newlyExecutedCount > 0 ? sortedDurations[0] : 0,
+      maxMs: newlyExecutedCount > 0 ? sortedDurations[newlyExecutedCount - 1] : 0,
     };
 
-    // スループットと推定値
-    const matchesPerSecond = n > 0 ? n / (wallClockElapsedMs / 1000) : 0;
+    // スループット (今回実際に実行された試合数 / ウォールクロック時間)
+    const matchesPerSecond =
+      newlyExecutedCount > 0 ? newlyExecutedCount / (wallClockElapsedMs / 1000) : 0;
     const estimated10kDurationSec =
       matchesPerSecond > 0 ? 10000 / matchesPerSecond : 0;
     const estimated10kDurationHours = estimated10kDurationSec / 3600;
 
-    const totalDecisionsCount = matches.reduce((acc, m) => acc + m.totalDecisions, 0);
+    const newlyExecutedMatchesList = matches.slice(startIndex);
+    const totalDecisionsCount = newlyExecutedMatchesList.reduce(
+      (acc, m) => acc + m.totalDecisions,
+      0
+    );
     const meanMsPerDecision =
       totalDecisionsCount > 0 ? sumDuration / totalDecisionsCount : null;
 
@@ -524,10 +757,9 @@ export class LargeScaleBatchRunner {
       workId: config.workId,
       rootDir,
       experimentConfig: initialManifest.experimentConfig,
-      overrideGitMetadata: config.overrideGitMetadata,
+      overrideGitMetadata: injectedGitMetadata,
     });
 
-    // 終了時整合性の厳格検証
     if (postManifest.gitMetadata.verificationStatus !== "VERIFIED") {
       throw new ExecutionManifestIntegrityMismatchError(
         `終了時の Git 検証ステータスが VERIFIED ではありません (${postManifest.gitMetadata.verificationStatus})`
@@ -552,9 +784,8 @@ export class LargeScaleBatchRunner {
       );
     }
 
-    // 7. 正式 Evidence 保存クロージャの構築
+    // 7. 正式 Evidence 保存クロージャ
     const saveEvidence = (outputFilePath: string): void => {
-      // 保存直前に最終ガード
       assertNotDirty(postManifest);
 
       const evidencePayload: LargeScaleBatchEvidence = {
@@ -594,6 +825,7 @@ export class LargeScaleBatchRunner {
       failures,
       initialManifest,
       postManifest,
+      newlyExecutedMatches: newlyExecutedCount,
       saveEvidence,
     };
   }
