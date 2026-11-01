@@ -192,7 +192,47 @@ async function main() {
     console.log(`  - 推定 1万試合所要時間: ${(perf.estimated10kMatchesDurationSec / 60).toFixed(1)} 分 (${perf.estimated10kMatchesDurationHours.toFixed(2)} 時間)`);
   }
 
-  console.log("\n[Note] 既存の large-scale-batch-benchmark-stage1.json は保護のため上書きしません。");
+  // CLI 引数の処理 (--output-file, --save)
+  const args = process.argv.slice(2);
+  let requestedOutputFile: string | undefined = undefined;
+  let saveRequested = false;
+
+  for (let i = 0; i < args.length; i++) {
+    if (args[i] === "--output-file" && i + 1 < args.length) {
+      requestedOutputFile = path.resolve(process.cwd(), args[++i]);
+      saveRequested = true;
+    } else if (args[i] === "--save") {
+      saveRequested = true;
+    }
+  }
+
+  const protectedEvidencePath = path.resolve(
+    rootDir,
+    "tools/simulator/reports/ai/large-scale-batch-benchmark-stage1.json"
+  );
+  const defaultVerifiedEvidencePath = path.resolve(
+    rootDir,
+    "tools/simulator/reports/ai/large-scale-batch-benchmark-stage1-verified.json"
+  );
+
+  const targetOutputFile = requestedOutputFile ?? defaultVerifiedEvidencePath;
+
+  if (path.resolve(targetOutputFile) === protectedEvidencePath) {
+    throw new Error(
+      `SECURITY CONTRACT VIOLATION: 既存暫定 Evidence (${protectedEvidencePath}) の上書きは厳格に禁止されています (fail-closed)。`
+    );
+  }
+
+  if (saveRequested && final500RunResult) {
+    console.log(`\n--------------------------------------------------------------------------------`);
+    console.log(`  Evidence 保存処理: ${targetOutputFile}`);
+    console.log(`--------------------------------------------------------------------------------`);
+    final500RunResult.saveEvidence(targetOutputFile);
+    console.log(`  [Success] 正式 Evidence ファイルの保存が完了しました。`);
+  } else {
+    console.log(`\n[Note] Evidence 保存はスキップされました (--save または --output-file <path> を指定して保存)。`);
+    console.log(`[Note] 既存の large-scale-batch-benchmark-stage1.json は保護されています。`);
+  }
 }
 
 main().catch((err) => {

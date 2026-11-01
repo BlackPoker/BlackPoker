@@ -19,6 +19,7 @@ import {
   LargeScaleMatchContext,
   ExecutionManifestIntegrityMismatchError,
   LargeScaleBatchConfigurationError,
+  computeCheckpointChecksum,
 } from "../../engine/simulation/LargeScaleBatchRunner.js";
 import {
   LargeScaleBatchConfig,
@@ -493,5 +494,257 @@ describe("LargeScaleBatchRunner Stage 1 R1 (堅牢性・再現性・診断情報
       expect(run1.matches[i].finalStateHash).toBe(run2.matches[i].finalStateHash);
       expect(run1.matches[i].traceDigest).toBe(run2.matches[i].traceDigest);
     }
+  });
+
+  it("Test 11: チェックポイント内の試合結果改ざん（winner 改ざん）が再開時に確実に拒否されること", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-tamper-winner",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R2",
+      baseSeed: 8881,
+      matchCount: 4,
+      regulationId: "standard-pack",
+      rootDir,
+      checkpointInterval: 2,
+      checkpointDir: testCheckpointDir,
+    };
+
+    await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    const chkFile = path.join(testCheckpointDir, "test-tamper-winner-chk-000002.json");
+    expect(fs.existsSync(chkFile)).toBe(true);
+
+    // チェックポイントファイルを読み込み、保存済み試合の winner を改ざん
+    const rawData = fs.readFileSync(chkFile, "utf-8");
+    const chkJson = JSON.parse(rawData);
+    const originalWinner = chkJson.completedMatches[0].winner;
+    chkJson.completedMatches[0].winner = originalWinner === "p1" ? "p2" : "p1";
+    // checksum は元のままで書き出す (改ざん状態)
+    fs.writeFileSync(chkFile, JSON.stringify(chkJson, null, 2), "utf-8");
+
+    await expect(
+      LargeScaleBatchRunner.runBatchForTesting({
+        config,
+        sessionFactory,
+        policyFactory: createPolicyFactory(),
+        rulePackageDigest,
+        resumeCheckpointPath: chkFile,
+        testGitMetadata: cleanTestGitMetadata,
+      })
+    ).rejects.toThrow(ExecutionManifestIntegrityMismatchError);
+  });
+
+  it("Test 12: チェックポイント内の traceDigest 改ざんが再開時に確実に拒否されること", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-tamper-trace",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R2",
+      baseSeed: 8882,
+      matchCount: 4,
+      regulationId: "standard-pack",
+      rootDir,
+      checkpointInterval: 2,
+      checkpointDir: testCheckpointDir,
+    };
+
+    await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    const chkFile = path.join(testCheckpointDir, "test-tamper-trace-chk-000002.json");
+    expect(fs.existsSync(chkFile)).toBe(true);
+
+    const rawData = fs.readFileSync(chkFile, "utf-8");
+    const chkJson = JSON.parse(rawData);
+    // traceDigest を改ざん
+    chkJson.completedMatches[0].traceDigest = "0000000000000000000000000000000000000000000000000000000000000000";
+    fs.writeFileSync(chkFile, JSON.stringify(chkJson, null, 2), "utf-8");
+
+    await expect(
+      LargeScaleBatchRunner.runBatchForTesting({
+        config,
+        sessionFactory,
+        policyFactory: createPolicyFactory(),
+        rulePackageDigest,
+        resumeCheckpointPath: chkFile,
+        testGitMetadata: cleanTestGitMetadata,
+      })
+    ).rejects.toThrow(ExecutionManifestIntegrityMismatchError);
+  });
+
+  it("Test 13: チェックポイントのバージョン不一致が再開時に確実に拒否されること", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-version-mismatch",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R2",
+      baseSeed: 8883,
+      matchCount: 4,
+      regulationId: "standard-pack",
+      rootDir,
+      checkpointInterval: 2,
+      checkpointDir: testCheckpointDir,
+    };
+
+    await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    const chkFile = path.join(testCheckpointDir, "test-version-mismatch-chk-000002.json");
+    expect(fs.existsSync(chkFile)).toBe(true);
+
+    const rawData = fs.readFileSync(chkFile, "utf-8");
+    const chkJson = JSON.parse(rawData);
+    chkJson.checkpointVersion = "9.9.9-invalid";
+    // チェックサムは新バージョンに合わせて再計算 (バージョン不一致ガード単体のテスト)
+    const { checksum: _discard, ...withoutChecksum } = chkJson;
+    chkJson.checksum = computeCheckpointChecksum(withoutChecksum);
+    fs.writeFileSync(chkFile, JSON.stringify(chkJson, null, 2), "utf-8");
+
+    await expect(
+      LargeScaleBatchRunner.runBatchForTesting({
+        config,
+        sessionFactory,
+        policyFactory: createPolicyFactory(),
+        rulePackageDigest,
+        resumeCheckpointPath: chkFile,
+        testGitMetadata: cleanTestGitMetadata,
+      })
+    ).rejects.toThrow(LargeScaleBatchConfigurationError);
+  });
+
+  it("Test 14: テスト用 Git 注入環境で正式 Evidence 保存 (saveEvidence) を呼ぶと物理的に拒否されること (fail-closed)", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-save-evidence-fail-closed",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R2",
+      baseSeed: 8884,
+      matchCount: 2,
+      regulationId: "standard-pack",
+      rootDir,
+    };
+
+    const runResult = await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    const dummyOutputFile = path.join(testCheckpointDir, "dummy-official-evidence.json");
+
+    // saveEvidence は注入環境では例外送出されること
+    expect(() => {
+      runResult.saveEvidence(dummyOutputFile);
+    }).toThrow(ExecutionManifestUnverifiedGitStateError);
+
+    // saveEvidenceForTesting は正常に保存できること
+    expect(runResult.saveEvidenceForTesting).toBeDefined();
+    runResult.saveEvidenceForTesting!(dummyOutputFile);
+    expect(fs.existsSync(dummyOutputFile)).toBe(true);
+    fs.unlinkSync(dummyOutputFile);
+  });
+
+  it("Test 15: Policy 設定と実際の生成ポリシーの整合性検証（不一致時に拒否されること）", async () => {
+    const p1Expected: PolicyDescriptor = {
+      kind: "first-legal",
+      policyVersion: 1,
+      name: "FirstLegalPolicy",
+    };
+    const p2Expected: PolicyDescriptor = {
+      kind: "random",
+      policyVersion: 1,
+      name: "RandomPolicy",
+    };
+
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-policy-mismatch",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R2",
+      baseSeed: 8885,
+      matchCount: 2,
+      regulationId: "standard-pack",
+      rootDir,
+      playerPolicies: [
+        { seat: "p1", descriptor: p1Expected },
+        { seat: "p2", descriptor: p2Expected },
+      ],
+    };
+
+    // policyFactory が p1 に RandomPolicy を返す（不一致）
+    const mismatchPolicyFactory = (ctx: LargeScaleMatchContext) => {
+      const p1Random = new RandomPolicy(new SeededRandom(1), "Mismatch-P1");
+      const p2Random = new RandomPolicy(new SeededRandom(2), "SeededRandom-P2");
+      return {
+        policies: { p1: p1Random, p2: p2Random },
+        seats: {
+          p1: { playerKey: "p1", policyId: "Mismatch-P1", policyDescriptor: p1Random.descriptor },
+          p2: { playerKey: "p2", policyId: "SeededRandom-P2", policyDescriptor: p2Random.descriptor },
+        },
+      };
+    };
+
+    await expect(
+      LargeScaleBatchRunner.runBatchForTesting({
+        config,
+        sessionFactory,
+        policyFactory: mismatchPolicyFactory,
+        rulePackageDigest,
+        testGitMetadata: cleanTestGitMetadata,
+      })
+    ).rejects.toThrow(LargeScaleBatchConfigurationError);
+  });
+
+  it("Test 16: バッチ終了後に Git 状態が変更（dirty 化または HEAD SHA 変更）された場合、保存が確実に拒否されること", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-presave-git-changed",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R2",
+      baseSeed: 8886,
+      matchCount: 2,
+      regulationId: "standard-pack",
+      rootDir,
+    };
+
+    const runResult = await LargeScaleBatchRunner.runBatchForTesting({
+      config,
+      sessionFactory,
+      policyFactory: createPolicyFactory(),
+      rulePackageDigest,
+      testGitMetadata: cleanTestGitMetadata,
+    });
+
+    const dummyOutputFile = path.join(testCheckpointDir, "dummy-presave-test.json");
+
+    // ケース 1: 保存直前に dirty 化した場合
+    const dirtyPreSaveMetadata: GitExecutionMetadata = {
+      ...cleanTestGitMetadata,
+      isDirty: true,
+      dirtyFiles: ["modified_after_batch.ts"],
+    };
+    expect(() => {
+      runResult.saveEvidenceForTesting!(dummyOutputFile, {
+        preSaveGitMetadata: dirtyPreSaveMetadata,
+      });
+    }).toThrow(ExecutionManifestDirtyStateError);
+
+    // ケース 2: 保存直前に HEAD SHA が変更された場合
+    const modifiedShaMetadata: GitExecutionMetadata = {
+      ...cleanTestGitMetadata,
+      headCommitSha: "0000000000000000000000000000000000000000",
+    };
+    expect(() => {
+      runResult.saveEvidenceForTesting!(dummyOutputFile, {
+        preSaveGitMetadata: modifiedShaMetadata,
+      });
+    }).toThrow(ExecutionManifestIntegrityMismatchError);
   });
 });

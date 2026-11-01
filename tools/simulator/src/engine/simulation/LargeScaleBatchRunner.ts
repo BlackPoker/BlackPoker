@@ -11,8 +11,11 @@ import {
   ExecutionManifest,
   ExperimentConfigManifest,
   GitExecutionMetadata,
+  PlayerPolicyManifestEntry,
+  ModelManifestEntry,
   computeDirectoryContentDigest,
   canonicalJsonStringify,
+  ExecutionManifestUnverifiedGitStateError,
 } from "./ExecutionManifest";
 import {
   LARGE_SCALE_BATCH_VERSION,
@@ -135,12 +138,14 @@ export function computeTraceDigestFromSimulation(simRes: SimulationResult): stri
 }
 
 /**
- * チェックポイントのチェックサムを計算
+ * チェックポイントの完全な正規化チェックサムを計算
+ * (すべての保存済み試合の matchIndex, matchId, status, winner, finalStateHash, traceDigest, Seed, 失敗情報を含む)
  */
 export function computeCheckpointChecksum(
   state: Omit<BatchCheckpointState, "checksum">
 ): string {
-  const payload = {
+  const canonicalPayload = {
+    checkpointVersion: state.checkpointVersion,
     batchId: state.batchId,
     baseSeed: state.baseSeed,
     experimentFingerprint: state.experimentFingerprint,
@@ -150,10 +155,87 @@ export function computeCheckpointChecksum(
     totalTargetMatches: state.totalTargetMatches,
     maxDecisionsPerMatch: state.maxDecisionsPerMatch,
     lastCompletedIndex: state.lastCompletedIndex,
-    matchCount: state.completedMatches.length,
-    failureCount: state.failures.length,
+    completedMatches: state.completedMatches.map((m) => ({
+      matchIndex: m.matchIndex,
+      matchId: m.matchId,
+      status: m.status,
+      completed: m.completed,
+      winner: m.winner ?? null,
+      totalDecisions: m.totalDecisions,
+      turnCount: m.turnCount,
+      finalStateHash: m.finalStateHash ?? null,
+      traceDigest: m.traceDigest ?? null,
+      baseSeed: m.baseSeed,
+      matchSeed: m.matchSeed,
+      playerSeeds: m.playerSeeds,
+      failure: m.failure ?? null,
+    })),
+    failures: state.failures,
   };
-  return sha256(canonicalJsonStringify(payload));
+  return sha256(canonicalJsonStringify(canonicalPayload));
+}
+
+/**
+ * Policy 設定と実際の生成ポリシーの整合性を照合
+ */
+export function validatePolicyConsistency(params: {
+  readonly expectedPolicies?: readonly PlayerPolicyManifestEntry[];
+  readonly expectedModels?: readonly ModelManifestEntry[];
+  readonly actualSeats: Record<string, LargeScaleSeatInfo>;
+  readonly actualPolicies: Record<string, DecisionPolicy>;
+}): void {
+  const { expectedPolicies, expectedModels, actualSeats, actualPolicies } = params;
+  if (!expectedPolicies || expectedPolicies.length === 0) {
+    return;
+  }
+
+  for (const exp of expectedPolicies) {
+    const seat = exp.seat;
+    const actualSeatInfo = actualSeats[seat];
+    const actualPolicy = actualPolicies[seat];
+
+    if (!actualSeatInfo || !actualPolicy) {
+      throw new LargeScaleBatchConfigurationError(
+        `座席 '${seat}' に対するポリシーが生成されていません`
+      );
+    }
+
+    if (actualPolicy.descriptor.kind !== exp.descriptor.kind) {
+      throw new LargeScaleBatchConfigurationError(
+        `座席 '${seat}' のポリシー種別不一致 (Expected: ${exp.descriptor.kind}, Actual: ${actualPolicy.descriptor.kind})`
+      );
+    }
+
+    if (actualPolicy.descriptor.policyVersion !== exp.descriptor.policyVersion) {
+      throw new LargeScaleBatchConfigurationError(
+        `座席 '${seat}' のポリシーバージョン不一致 (Expected: ${exp.descriptor.policyVersion}, Actual: ${actualPolicy.descriptor.policyVersion})`
+      );
+    }
+
+    // GenomePolicy の DNA 整合性検証
+    if (actualPolicy.descriptor.kind === "genome") {
+      const actualDna = (actualPolicy as any).dna;
+      if (actualDna && expectedModels && expectedModels.length > 0) {
+        const actualDnaFullDigest = sha256(
+          canonicalJsonStringify({
+            dnaFormatVersion: actualDna.dnaFormatVersion,
+            featureSchemaVersion: actualDna.featureSchemaVersion,
+            scoringModel: actualDna.scoringModel,
+            contextDimension: actualDna.contextDimension,
+            patternDimension: actualDna.patternDimension,
+            patternWeights: actualDna.patternWeights,
+            contextPatternWeights: actualDna.contextPatternWeights,
+          })
+        );
+        const matchingModel = expectedModels.find((m) => m.fullDnaDigest === actualDnaFullDigest);
+        if (!matchingModel) {
+          throw new LargeScaleBatchConfigurationError(
+            `座席 '${seat}' の GenomePolicy DNA Digest (${actualDnaFullDigest}) が Manifest の models リストに存在しません`
+          );
+        }
+      }
+    }
+  }
 }
 
 /**
@@ -176,6 +258,10 @@ export interface RunBatchExecutionResult {
   readonly postManifest: ExecutionManifest;
   readonly newlyExecutedMatches: number;
   readonly saveEvidence: (outputFilePath: string) => void;
+  readonly saveEvidenceForTesting?: (
+    outputFilePath: string,
+    options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
+  ) => void;
 }
 
 /**
@@ -334,6 +420,11 @@ export class LargeScaleBatchRunner {
       }
 
       // 実験条件の厳格照合
+      if (chk.checkpointVersion !== LARGE_SCALE_BATCH_VERSION) {
+        throw new LargeScaleBatchConfigurationError(
+          `チェックポイントのバージョン ('${chk.checkpointVersion}') が現在のランナーバージョン ('${LARGE_SCALE_BATCH_VERSION}') と一致しません`
+        );
+      }
       if (chk.batchId !== config.batchId) {
         throw new LargeScaleBatchConfigurationError(
           `チェックポイントの batchId ('${chk.batchId}') が現在の設定 ('${config.batchId}') と一致しません`
@@ -442,6 +533,14 @@ export class LargeScaleBatchRunner {
           throw { phase: "POLICY_SETUP", error: err };
         }
 
+        // Policy 設定と実行条件の整合性照合
+        validatePolicyConsistency({
+          expectedPolicies: config.playerPolicies,
+          expectedModels: config.models,
+          actualSeats: policyBundle.seats,
+          actualPolicies: policyBundle.policies,
+        });
+
         // Simulation 実行 (onStep でリングバッファに直近10件を退避)
         try {
           simRes = SimulationRunner.run(session, policyBundle.policies, {
@@ -456,8 +555,12 @@ export class LargeScaleBatchRunner {
           throw { phase: "SIMULATION", error: err, step: executedDecisions };
         }
       } catch (wrapper: any) {
-        const phase = wrapper?.phase ?? "UNKNOWN";
         const err = wrapper?.error ?? wrapper;
+        if (err instanceof LargeScaleBatchConfigurationError) {
+          throw err;
+        }
+
+        const phase = wrapper?.phase ?? "UNKNOWN";
         const errorName = err?.name || "Error";
         const errorMessage = err?.message || String(err);
         const errorStack = err?.stack;
@@ -784,15 +887,43 @@ export class LargeScaleBatchRunner {
       );
     }
 
-    // 7. 正式 Evidence 保存クロージャ
+    // 7. 正式 Evidence 保存クロージャ (保存直前のリアルタイム検証)
     const saveEvidence = (outputFilePath: string): void => {
-      assertNotDirty(postManifest);
+      // テスト用メタデータ注入時は正式保存を物理的に拒否 (fail-closed)
+      if (injectedGitMetadata) {
+        throw new ExecutionManifestUnverifiedGitStateError(
+          "SECURITY CONTRACT VIOLATION: テスト用Git注入環境では正式Evidenceファイルの保存は厳格に禁止されています (fail-closed)。"
+        );
+      }
+
+      // 保存直前のリアルタイム Git 状態・主要サブシステム再検証
+      const preSaveManifest = createExecutionManifest({
+        workId: config.workId,
+        rootDir,
+        experimentConfig: postManifest.experimentConfig,
+      });
+
+      assertNotDirty(preSaveManifest);
+
+      if (preSaveManifest.gitMetadata.headCommitSha !== postManifest.gitMetadata.headCommitSha) {
+        throw new ExecutionManifestIntegrityMismatchError(
+          `保存直前に HEAD Commit SHA の変更が検出されました (Post: ${postManifest.gitMetadata.headCommitSha}, PreSave: ${preSaveManifest.gitMetadata.headCommitSha})`
+        );
+      }
+      if (
+        JSON.stringify(preSaveManifest.subsystemDigests) !==
+        JSON.stringify(postManifest.subsystemDigests)
+      ) {
+        throw new ExecutionManifestIntegrityMismatchError(
+          `保存直前に主要サブシステムコードの変更が検出されました (fail-closed)`
+        );
+      }
 
       const evidencePayload: LargeScaleBatchEvidence = {
         schemaVersion: LARGE_SCALE_BATCH_VERSION,
         workId: config.workId,
         generatedAt: new Date().toISOString(),
-        executionManifest: postManifest,
+        executionManifest: preSaveManifest,
         configuration: {
           batchId: config.batchId,
           workId: config.workId,
@@ -814,7 +945,60 @@ export class LargeScaleBatchRunner {
       saveOfficialEvidenceWithManifest({
         filePath: outputFilePath,
         evidenceData: evidencePayload,
-        manifest: postManifest,
+        manifest: preSaveManifest,
+      });
+    };
+
+    // テスト専用保存クロージャ (単体テストでのみ使用)
+    const saveEvidenceForTesting = (
+      outputFilePath: string,
+      options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
+    ): void => {
+      const manifestToValidate: ExecutionManifest = options?.preSaveGitMetadata
+        ? {
+            ...postManifest,
+            gitMetadata: options.preSaveGitMetadata,
+          }
+        : postManifest;
+
+      assertNotDirty(manifestToValidate);
+
+      if (
+        options?.preSaveGitMetadata &&
+        options.preSaveGitMetadata.headCommitSha !== postManifest.gitMetadata.headCommitSha
+      ) {
+        throw new ExecutionManifestIntegrityMismatchError(
+          `保存直前に HEAD Commit SHA の変更が検出されました (Post: ${postManifest.gitMetadata.headCommitSha}, PreSave: ${options.preSaveGitMetadata.headCommitSha})`
+        );
+      }
+
+      const evidencePayload: LargeScaleBatchEvidence = {
+        schemaVersion: LARGE_SCALE_BATCH_VERSION,
+        workId: config.workId,
+        generatedAt: new Date().toISOString(),
+        executionManifest: manifestToValidate,
+        configuration: {
+          batchId: config.batchId,
+          workId: config.workId,
+          baseSeed: config.baseSeed,
+          matchCount: config.matchCount,
+          maxDecisionsPerMatch: maxDecisions,
+          regulationId: config.regulationId,
+        },
+        summary,
+        performance,
+        matches,
+        isolatedFailures: failures,
+        reproducibilityRecipe: {
+          baseSeed: config.baseSeed,
+          sampleIndices: [0, Math.floor(config.matchCount / 2), config.matchCount - 1],
+        },
+      };
+
+      saveOfficialEvidenceWithManifest({
+        filePath: outputFilePath,
+        evidenceData: evidencePayload,
+        manifest: manifestToValidate,
       });
     };
 
@@ -827,6 +1011,7 @@ export class LargeScaleBatchRunner {
       postManifest,
       newlyExecutedMatches: newlyExecutedCount,
       saveEvidence,
+      saveEvidenceForTesting,
     };
   }
 }
