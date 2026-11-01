@@ -12,7 +12,7 @@ import {
 } from "./characterUtils";
 import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
 import { validateCompleteOrder } from "./OrderSelectionValidator";
-import { findPhysicalCardInGrave, removePhysicalCardFromGrave, isCardLike, isDirectCard } from "./graveCardUtils";
+import { findPhysicalCardInGrave, removePhysicalCardFromGrave, isCardLike, isDirectCard, hasUnitWrapperProperty } from "./graveCardUtils";
 import { moveUnitToGraveyard, moveUnitToHand, resolveUniqueFieldUnitById } from "./unitMovementUtils";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
@@ -1617,9 +1617,22 @@ export function moveCardHandler(effectInterpreter?: EffectInterpreter): CommandH
 
     let actualCard: any;
     if (fromZone === "grave") {
-      const cardId = typeof cardToMove === "object" && cardToMove !== null ? (cardToMove.id ?? cardToMove.unitId) : cardToMove;
-      if (typeof cardId !== "string" || !cardId) {
-        throw new Error(`moveCard: 移動対象のカードIDが不正です`);
+      let cardId: string;
+      if (typeof cardToMove === "object" && cardToMove !== null) {
+        // Unit wrapper オブジェクト自体の直接指定は拒絶 (fail-closed, 暗黙変換禁止)
+        if (hasUnitWrapperProperty(cardToMove)) {
+          throw new Error(
+            `moveCard: 墓地内のUnit wrapperオブジェクト自身を直接移動対象に指定することはできません (fail-closed): ${JSON.stringify(cardToMove)}`
+          );
+        }
+        if (typeof cardToMove.id !== "string" || !cardToMove.id.trim()) {
+          throw new Error(`moveCard: 移動対象カードオブジェクトのIDが不正です (fail-closed)`);
+        }
+        cardId = cardToMove.id;
+      } else if (typeof cardToMove === "string" && cardToMove.trim().length > 0) {
+        cardId = cardToMove;
+      } else {
+        throw new Error(`moveCard: 移動対象のカード指定が不正です: ${JSON.stringify(cardToMove)} (fail-closed)`);
       }
 
       // Unit wrapper自体が直接移動対象として指定された場合は拒絶 (fail-closed, lightPack Test Y Contract)

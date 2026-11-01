@@ -367,4 +367,142 @@ describe("Production Core Regression R3 Tests (BP-SIM-AI-V92-STANDARD-PACK-EVOLU
       }
     }
   });
+
+  // =========================================================================
+  // ケース 8: 墓地内の不正エントリ検出の fail-closed 検証
+  // =========================================================================
+  describe("Case 8: Invalid entry detection in grave (fail-closed)", () => {
+    it("throws when grave contains null or non-object entry", () => {
+      const invalidGraves = [
+        [null],
+        [undefined],
+        [123],
+        ["invalid-string"],
+      ];
+
+      for (const grave of invalidGraves) {
+        expect(() => enumeratePhysicalCardsInGrave(grave as any)).toThrow(/不正なエントリ \(null\/非オブジェクト\)/);
+        expect(() => findPhysicalCardInGrave(grave as any, "card-1")).toThrow(/不正なエントリ \(null\/非オブジェクト\)/);
+      }
+    });
+
+    it("throws when grave contains invalid Unit wrapper (cards: null or cards not array)", () => {
+      const invalidWrappers = [
+        { unitId: "u1", cards: null, kind: "Unit" },
+        { unitId: "u2", cards: "not-an-array", kind: "Unit" },
+        { unitId: "u3", cards: { id: "card1" }, kind: "Unit" },
+      ];
+
+      for (const wrapper of invalidWrappers) {
+        expect(() => enumeratePhysicalCardsInGrave([wrapper])).toThrow(/認識できない不正なエントリが存在します/);
+        expect(() => findPhysicalCardInGrave([wrapper], "card1")).toThrow(/認識できない不正なエントリが存在します/);
+      }
+    });
+
+    it("throws when grave contains unrecognised object entry (neither direct card nor unit wrapper)", () => {
+      const invalidEntries = [
+        { foo: "bar" },
+        { id: "partial-card" }, // suit/rank なし直接配置 (直接カード境界違反)
+        { randomProp: 42 },
+      ];
+
+      for (const entry of invalidEntries) {
+        expect(() => enumeratePhysicalCardsInGrave([entry])).toThrow(/認識できない不正なエントリが存在します/);
+        expect(() => findPhysicalCardInGrave([entry], "partial-card")).toThrow(/認識できない不正なエントリが存在します/);
+      }
+    });
+  });
+
+  // =========================================================================
+  // ケース 9: moveCard で Unit wrapper オブジェクト自身を直接指定した場合の拒絶 (fail-closed)
+  // =========================================================================
+  describe("Case 9: Direct Unit wrapper object specification in moveCard is rejected (fail-closed)", () => {
+    it("rejects when Unit wrapper object is passed directly to moveCard without implicit id extraction", () => {
+      const rawCard = { id: "p1-c-CJ", suit: "C", rank: "J", value: 11 };
+      const wrapper = {
+        unitId: "unit-first-draw-p1-c-CJ",
+        id: "p1-c-CJ",
+        suit: "C",
+        rank: "J",
+        value: 11,
+        cards: [rawCard],
+        kind: "墓地カード",
+      };
+
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: {
+            grave: [wrapper],
+            hand: [],
+            life: [],
+            graveTopCardId: "p1-c-CJ",
+          },
+        },
+      };
+
+      // wrapper オブジェクト自身を直接 card に指定した場合、暗黙に card.id を採用せず拒絶されること
+      expect(() => {
+        registry.execute(
+          "moveCard",
+          {
+            from: "grave",
+            to: "hand",
+            card: wrapper,
+          },
+          { playerKey: "p1", state } as any
+        );
+      }).toThrow(/Unit wrapperオブジェクト自身を直接移動対象に指定することはできません \(fail-closed\)/);
+
+      // 墓地および手札が変化していないこと
+      expect(state.players.p1.grave).toHaveLength(1);
+      expect(state.players.p1.hand).toHaveLength(0);
+    });
+  });
+
+  // =========================================================================
+  // ケース 10: moveCard で正常な物理カードオブジェクトを指定した場合の合法移動検証
+  // =========================================================================
+  describe("Case 10: Valid physical card object specification in moveCard is permitted", () => {
+    it("permits moving card when a valid physical card object is passed to moveCard", () => {
+      const rawCard = { id: "p1-c-CJ", suit: "C", rank: "J", value: 11 };
+      const wrapper = {
+        unitId: "unit-first-draw-p1-c-CJ",
+        id: "p1-c-CJ",
+        cards: [rawCard],
+        kind: "墓地カード",
+      };
+
+      const state: any = {
+        stateVersion: 1,
+        players: {
+          p1: {
+            grave: [wrapper],
+            hand: [],
+            life: [],
+            graveTopCardId: "p1-c-CJ",
+          },
+        },
+      };
+
+      // 正常な物理カードオブジェクト { id: "p1-c-CJ", suit: "C", rank: "J", value: 11 } を指定
+      registry.execute(
+        "moveCard",
+        {
+          from: "grave",
+          to: "hand",
+          card: { id: "p1-c-CJ", suit: "C", rank: "J", value: 11 },
+        },
+        { playerKey: "p1", state } as any
+      );
+
+      // 正常に移動完了すること
+      expect(state.players.p1.grave).toHaveLength(0);
+      expect(state.players.p1.hand).toHaveLength(1);
+      expect(state.players.p1.hand[0].id).toBe("p1-c-CJ");
+      expect(state.players.p1.hand[0].suit).toBe("C");
+      expect(state.players.p1.hand[0].rank).toBe("J");
+      expect(hasUnitWrapperProperty(state.players.p1.hand[0])).toBe(false);
+    });
+  });
 });

@@ -30,6 +30,25 @@ export function hasUnitWrapperProperty(obj: any): boolean {
 }
 
 /**
+ * 【検証境界の設計思想】
+ * 1. isValidContainedCard (内包カード境界):
+ *    Unit wrapper (unit.cards) 内に格納される物理カードを検証。
+ *    - 有効な文字列 ID を保持していること。
+ *    - Unit wrapper 属性 (unitId, cards, kind) がキーとして存在しないこと (入れ子 wrapper の fail-closed)。
+ *    - 既存仕様・テストモック（ライフからのダメージ墓地送りなど、suit/rank が省略された最小限カードオブジェクト）
+ *      との互換性を維持するため、suit/rank は省略可能な部分カード表現として許容します。
+ * 2. isDirectCard (直接配置カード境界):
+ *    墓地配列 (player.grave) に直接配置されるカードを検証。
+ *    - isValidContainedCard を満たすこと。
+ *    - 有効な suit および rank を必須とすること (Normal Card / Joker)。
+ *    - 先攻決定やプリセット破棄のラッパーが生カードとして誤認されるのを完全に防止します。
+ * 3. moveUnitToHand (手札移動境界):
+ *    手札に配置されるカードは、手札操作やプレイで完全な印刷カード情報が必要となるため、
+ *    isCanonicalPrintedCard (id, suit, rank, value 等の完全な正規カード) を必須とし、
+ *    wrapper 属性 (unitId, cards, kind) を一切持たないことを厳格に検証します。
+ */
+
+/**
  * Unit wrapper 内に内包される物理カードとして有効であるかを厳格に判定します。
  * - 有効な文字列 ID を保持していること。
  * - Unit wrapper 属性 (unitId, cards, kind) がキーとして一切含まれないこと (入れ子 wrapper の fail-closed)。
@@ -71,6 +90,7 @@ export function isCardLike(entry: any): boolean {
  * - 直接カードエントリ: そのカード自身
  * - Unit wrapper: wrapper.cards 配列内の各物理カード
  * - Unit wrapper 自体は候補に含まれません。
+ * - 不正なエントリ（null、非オブジェクト、不正なwrapper、cards非配列、認識不能エントリ）は fail-closed で例外をスローします。
  * - 重複した card.id が存在する場合は fail-closed で例外をスローします。
  */
 export function enumeratePhysicalCardsInGrave(grave: any[]): any[] {
@@ -83,7 +103,11 @@ export function enumeratePhysicalCardsInGrave(grave: any[]): any[] {
 
   for (let gIdx = 0; gIdx < grave.length; gIdx++) {
     const entry = grave[gIdx];
-    if (!entry) continue;
+    if (entry == null || typeof entry !== "object") {
+      throw new Error(
+        `enumeratePhysicalCardsInGrave: Grave内に不正なエントリ (null/非オブジェクト) が存在します [index: ${gIdx}]: ${JSON.stringify(entry)} (fail-closed)`
+      );
+    }
 
     // 1. Unit wrapper (複数カードまたは単一カードラッパー): 内包する cards を優先走査
     if (Array.isArray(entry.cards)) {
@@ -115,6 +139,11 @@ export function enumeratePhysicalCardsInGrave(grave: any[]): any[] {
         seenCardIds.add(cardId);
       }
       result.push(entry);
+    } else {
+      // 3. 物理カードとしてもUnit wrapperとしても成立しない認識不能な不正エントリ (fail-closed)
+      throw new Error(
+        `enumeratePhysicalCardsInGrave: Grave内に認識できない不正なエントリが存在します [index: ${gIdx}]: ${JSON.stringify(entry)} (fail-closed)`
+      );
     }
   }
 
@@ -123,6 +152,7 @@ export function enumeratePhysicalCardsInGrave(grave: any[]): any[] {
 
 /**
  * 指定された cardId を持つ物理カードの位置を墓地から検索します。
+ * 不正なエントリ（null、非オブジェクト、不正なwrapper、cards非配列、認識不能エントリ）は fail-closed で例外をスローします。
  * 重複が存在する場合は fail-closed で例外をスローします。
  */
 export function findPhysicalCardInGrave(grave: any[], cardId: string): PhysicalCardLocation | undefined {
@@ -134,7 +164,11 @@ export function findPhysicalCardInGrave(grave: any[], cardId: string): PhysicalC
 
   for (let gIdx = 0; gIdx < grave.length; gIdx++) {
     const entry = grave[gIdx];
-    if (!entry) continue;
+    if (entry == null || typeof entry !== "object") {
+      throw new Error(
+        `findPhysicalCardInGrave: Grave内に不正なエントリ (null/非オブジェクト) が存在します [index: ${gIdx}]: ${JSON.stringify(entry)} (fail-closed)`
+      );
+    }
 
     // 1. Unit wrapper 内を優先検索
     if (Array.isArray(entry.cards)) {
@@ -171,6 +205,11 @@ export function findPhysicalCardInGrave(grave: any[], cardId: string): PhysicalC
           card: entry,
         };
       }
+    } else {
+      // 3. 物理カードとしてもUnit wrapperとしても成立しない認識不能な不正エントリ (fail-closed)
+      throw new Error(
+        `findPhysicalCardInGrave: Grave内に認識できない不正なエントリが存在します [index: ${gIdx}]: ${JSON.stringify(entry)} (fail-closed)`
+      );
     }
   }
 
