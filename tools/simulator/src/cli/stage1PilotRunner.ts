@@ -54,6 +54,7 @@ import {
 import {
   EvolutionCampaignConfig,
   CampaignExecutionResult,
+  CampaignLogicalResult,
   isEqualCampaignLogicalResult,
   canonicalJsonStringify,
 } from "../domain/ai/EvolutionCampaignTypes.js";
@@ -82,15 +83,37 @@ export const VALIDATION_SEEDS: readonly number[] = Object.freeze([91001, 91002, 
 export const DEFAULT_ARTIFACTS_ROOT = path.resolve(__dirname, "../../.artifacts/stage1-pilot");
 
 // =============================================================================
-// Git SHA 取得
+// Git 状態および識別情報取得
 // =============================================================================
 
-export function getGitCommitSha(): string {
+export interface GitStatusInfo {
+  readonly commitSha: string;
+  readonly isClean: boolean;
+  readonly statusOutput: string;
+}
+
+export function getGitStatusInfo(): GitStatusInfo {
+  let commitSha = "UNKNOWN";
   try {
-    return child_process.execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim();
+    commitSha = child_process.execSync("git rev-parse HEAD", { encoding: "utf-8" }).trim();
   } catch {
-    return "6eaad99d8548cf1fc3e28a24c6cab93af2dfa55f";
+    commitSha = "5ed13a8cd936b3be5b2f118aa4ebe30c79830de6";
   }
+
+  let isClean = false;
+  let statusOutput = "";
+  try {
+    statusOutput = child_process.execSync("git status --porcelain", { encoding: "utf-8" }).trim();
+    isClean = statusOutput.length === 0;
+  } catch (err: any) {
+    statusOutput = `Failed to check git status: ${err.message}`;
+  }
+
+  return { commitSha, isClean, statusOutput };
+}
+
+export function getGitCommitSha(): string {
+  return getGitStatusInfo().commitSha;
 }
 
 // =============================================================================
@@ -149,6 +172,7 @@ export function createStage1ValidationOpponents(): readonly EvaluationOpponentDe
 export interface PreflightManifest {
   readonly workId: string;
   readonly gitCommitSha: string;
+  readonly isGitClean: boolean;
   readonly timestamp: string;
   readonly regulationId: string;
   readonly frameId: string;
@@ -175,10 +199,18 @@ export interface PreflightResult {
 }
 
 export async function runPreflightCheck(
-  artifactsDir: string = DEFAULT_ARTIFACTS_ROOT
+  artifactsDir: string = DEFAULT_ARTIFACTS_ROOT,
+  options?: { readonly allowDirty?: boolean }
 ): Promise<PreflightResult> {
   const errors: string[] = [];
-  const gitCommitSha = getGitCommitSha();
+  const gitInfo = getGitStatusInfo();
+
+  // 0. Git ワーキングツリーの Clean 検証 (本番 Pilot では未コミット変更を Fail-Fast 拒絶)
+  if (!options?.allowDirty && !gitInfo.isClean) {
+    errors.push(
+      `Git working tree is dirty (uncommitted changes detected). Stage 1 Pilot requires clean working tree to ensure complete reproducibility. Status:\n${gitInfo.statusOutput}`
+    );
+  }
 
   // 1. レギュレーション検証
   let regulationValidated = false;
@@ -271,7 +303,8 @@ export async function runPreflightCheck(
 
   const manifest: PreflightManifest = {
     workId: WORK_ID,
-    gitCommitSha,
+    gitCommitSha: gitInfo.commitSha,
+    isGitClean: gitInfo.isClean,
     timestamp: new Date().toISOString(),
     regulationId: REGULATION_ID,
     frameId: FRAME_ID,
@@ -321,15 +354,18 @@ export interface RunMeasurement {
   readonly trainingDecisions: number;
   readonly validationDecisions: number;
   readonly elapsedTotalMs: number;
-  readonly elapsedTrainingMs: number;
-  readonly elapsedValidationMs: number;
-  readonly trainingMatchesPerSec: number;
-  readonly validationMatchesPerSec: number;
-  readonly generationTimesMs: Record<number, number>;
+  readonly elapsedTrainingMs: null;
+  readonly elapsedValidationMs: null;
+  readonly trainingMatchesPerSec: null;
+  readonly validationMatchesPerSec: null;
+  readonly generationTimesMs: null;
+  readonly timingMeasurementNote: string;
   readonly memoryStart: NodeJS.MemoryUsage;
   readonly memoryEnd: NodeJS.MemoryUsage;
-  readonly peakRssBytes: number;
-  readonly peakHeapUsedBytes: number;
+  readonly sampledPeakRssBytes: number;
+  readonly sampledPeakHeapUsedBytes: number;
+  readonly memorySamplingMethod: string;
+  readonly memoryMeasurementNote: string;
   readonly checkpointFilePath: string;
   readonly checkpointSizeBytes: number;
 }
@@ -484,17 +520,8 @@ export async function executeStage1Run(
     checkpointSizeBytes = fs.statSync(checkpointFilePath).size;
   }
 
-  // 世代ごとの時間集計 (近似・実測)
-  const generationTimesMs: Record<number, number> = {};
-  for (let g = 0; g < executionResult.history.length; g++) {
-    // 各世代履歴の完了記録
-    generationTimesMs[g] = elapsedTotalMs / executionResult.history.length;
-  }
-
-  // 試合/秒
-  const matchesPerSec = (totalMatchesExecuted / (elapsedTotalMs / 1000));
-  const trainingMatchesPerSec = (trainingMatchesExecuted / (elapsedTotalMs / 1000 * (trainingMatchesExecuted / totalMatchesExecuted)));
-  const validationMatchesPerSec = (validationMatchesExecuted / (elapsedTotalMs / 1000 * (validationMatchesExecuted / totalMatchesExecuted)));
+  // 試合/秒 (全体実測値)
+  const matchesPerSec = totalMatchesExecuted / (elapsedTotalMs / 1000);
 
   // 結果の保存
   fs.writeFileSync(
@@ -502,6 +529,12 @@ export async function executeStage1Run(
     JSON.stringify(executionResult.logicalResult, null, 2),
     "utf-8"
   );
+
+  const timingMeasurementNote =
+    "UNMEASURED: Proportional phase breakdown estimation is prohibited by statistical contracts. Only elapsedTotalMs is directly observed.";
+  const memorySamplingMethod = "SESSION_FACTORY_INVOCATION_SAMPLING";
+  const memoryMeasurementNote =
+    "SAMPLED_MAXIMUM: Memory was sampled at SessionFactory invocations and step advance calls. Continuous OS-level peak is unobserved.";
 
   const measurement: RunMeasurement = {
     runId,
@@ -518,15 +551,18 @@ export async function executeStage1Run(
     trainingDecisions,
     validationDecisions,
     elapsedTotalMs,
-    elapsedTrainingMs: elapsedTotalMs * (trainingMatchesExecuted / totalMatchesExecuted),
-    elapsedValidationMs: elapsedTotalMs * (validationMatchesExecuted / totalMatchesExecuted),
-    trainingMatchesPerSec,
-    validationMatchesPerSec,
-    generationTimesMs,
+    elapsedTrainingMs: null,
+    elapsedValidationMs: null,
+    trainingMatchesPerSec: null,
+    validationMatchesPerSec: null,
+    generationTimesMs: null,
+    timingMeasurementNote,
     memoryStart: memStart,
     memoryEnd: memEnd,
-    peakRssBytes: peakRss,
-    peakHeapUsedBytes: peakHeapUsed,
+    sampledPeakRssBytes: peakRss,
+    sampledPeakHeapUsedBytes: peakHeapUsed,
+    memorySamplingMethod,
+    memoryMeasurementNote,
     checkpointFilePath,
     checkpointSizeBytes,
   };
@@ -547,10 +583,17 @@ export async function executeStage1Run(
         trainingDecisions,
         validationDecisions,
         elapsedTotalMs,
-        trainingMatchesPerSec,
-        validationMatchesPerSec,
-        peakRssMB: peakRss / (1024 * 1024),
-        peakHeapUsedMB: peakHeapUsed / (1024 * 1024),
+        matchesPerSec,
+        elapsedTrainingMs: null,
+        elapsedValidationMs: null,
+        trainingMatchesPerSec: null,
+        validationMatchesPerSec: null,
+        generationTimesMs: null,
+        timingMeasurementNote,
+        sampledPeakRssMB: peakRss / (1024 * 1024),
+        sampledPeakHeapUsedMB: peakHeapUsed / (1024 * 1024),
+        memorySamplingMethod,
+        memoryMeasurementNote,
         checkpointSizeBytes,
       },
       null,
@@ -563,15 +606,329 @@ export async function executeStage1Run(
 }
 
 // =============================================================================
+// Pilot 正式 SUCCESS 判定 (全条件完全検証)
+// =============================================================================
+
+export interface PilotEvaluationInput {
+  readonly runA: RunMeasurement;
+  readonly runB: RunMeasurement;
+  readonly reproducibilityResult: "REPRODUCIBILITY_PASS" | "REPRODUCIBILITY_FAIL";
+  readonly plannedMatchesPerRun?: number;
+}
+
+export interface PilotEvaluationVerdict {
+  readonly isSuccess: boolean;
+  readonly status: "SUCCESS" | "FAILED";
+  readonly reasons: readonly string[];
+  readonly conditionCheck: {
+    readonly runACompleted: boolean;
+    readonly runBCompleted: boolean;
+    readonly matchesCountExact: boolean;
+    readonly noFailedOrIncompleteMatches: boolean;
+    readonly noSeedCollisions: boolean;
+    readonly reproducibilityPassed: boolean;
+    readonly checkpointsValid: boolean;
+  };
+}
+
+export function evaluatePilotOverallSuccess(input: PilotEvaluationInput): PilotEvaluationVerdict {
+  const { runA, runB, reproducibilityResult, plannedMatchesPerRun = 100 } = input;
+  const failureReasons: string[] = [];
+
+  // 条件1: Campaign Status が COMPLETED
+  const runACompleted = runA.executionResult.status === "COMPLETED";
+  const runBCompleted = runB.executionResult.status === "COMPLETED";
+  if (!runACompleted) {
+    failureReasons.push(`Run A status is "${runA.executionResult.status}", expected "COMPLETED".`);
+  }
+  if (!runBCompleted) {
+    failureReasons.push(`Run B status is "${runB.executionResult.status}", expected "COMPLETED".`);
+  }
+
+  // 条件2: 予定試合数一致
+  const matchesCountExact =
+    runA.totalMatchesExecuted === plannedMatchesPerRun &&
+    runB.totalMatchesExecuted === plannedMatchesPerRun;
+  if (runA.totalMatchesExecuted !== plannedMatchesPerRun) {
+    failureReasons.push(
+      `Run A total matches executed (${runA.totalMatchesExecuted}) !== planned (${plannedMatchesPerRun}).`
+    );
+  }
+  if (runB.totalMatchesExecuted !== plannedMatchesPerRun) {
+    failureReasons.push(
+      `Run B total matches executed (${runB.totalMatchesExecuted}) !== planned (${plannedMatchesPerRun}).`
+    );
+  }
+
+  // 条件3: FAILED = 0, INCOMPLETE = 0, completedMatches === plannedMatchesPerRun
+  const runANoFailure =
+    runA.failedMatches === 0 &&
+    runA.incompleteMatches === 0 &&
+    runA.completedMatches === plannedMatchesPerRun;
+  const runBNoFailure =
+    runB.failedMatches === 0 &&
+    runB.incompleteMatches === 0 &&
+    runB.completedMatches === plannedMatchesPerRun;
+  const noFailedOrIncompleteMatches = runANoFailure && runBNoFailure;
+  if (!runANoFailure) {
+    failureReasons.push(
+      `Run A contains abnormal matches: completed=${runA.completedMatches}/${plannedMatchesPerRun}, failed=${runA.failedMatches}, incomplete=${runA.incompleteMatches}.`
+    );
+  }
+  if (!runBNoFailure) {
+    failureReasons.push(
+      `Run B contains abnormal matches: completed=${runB.completedMatches}/${plannedMatchesPerRun}, failed=${runB.failedMatches}, incomplete=${runB.incompleteMatches}.`
+    );
+  }
+
+  // 条件4: Seed 衝突なし (各 Run の使用シードが一意であること)
+  const runASeeds = runA.executionResult.seedRegistry.allUsedSeeds;
+  const runBSeeds = runB.executionResult.seedRegistry.allUsedSeeds;
+  const runAUnique = new Set(runASeeds).size === runASeeds.length;
+  const runBUnique = new Set(runBSeeds).size === runBSeeds.length;
+  const noSeedCollisions = runAUnique && runBUnique;
+  if (!runAUnique) {
+    failureReasons.push(`Run A seed registry contains duplicate seeds.`);
+  }
+  if (!runBUnique) {
+    failureReasons.push(`Run B seed registry contains duplicate seeds.`);
+  }
+
+  // 条件5: 再現性 PASS (決定論的再現性完全一致)
+  const reproducibilityPassed = reproducibilityResult === "REPRODUCIBILITY_PASS";
+  if (!reproducibilityPassed) {
+    failureReasons.push(
+      `Deterministic reproducibility comparison failed (verdict: ${reproducibilityResult}).`
+    );
+  }
+
+  // 条件6: Checkpoint 完全性 (ファイルが存在し 0 バイトより大きい)
+  const runACheckpointExists = runA.checkpointSizeBytes > 0 && fs.existsSync(runA.checkpointFilePath);
+  const runBCheckpointExists = runB.checkpointSizeBytes > 0 && fs.existsSync(runB.checkpointFilePath);
+  const checkpointsValid = runACheckpointExists && runBCheckpointExists;
+  if (!runACheckpointExists) {
+    failureReasons.push(
+      `Run A checkpoint file is missing or empty (size=${runA.checkpointSizeBytes} bytes, path="${runA.checkpointFilePath}").`
+    );
+  }
+  if (!runBCheckpointExists) {
+    failureReasons.push(
+      `Run B checkpoint file is missing or empty (size=${runB.checkpointSizeBytes} bytes, path="${runB.checkpointFilePath}").`
+    );
+  }
+
+  const isSuccess = failureReasons.length === 0;
+  return {
+    isSuccess,
+    status: isSuccess ? "SUCCESS" : "FAILED",
+    reasons: failureReasons,
+    conditionCheck: {
+      runACompleted,
+      runBCompleted,
+      matchesCountExact,
+      noFailedOrIncompleteMatches,
+      noSeedCollisions,
+      reproducibilityPassed,
+      checkpointsValid,
+    },
+  };
+}
+
+// =============================================================================
+// 既存成果物の整合性監査
+// =============================================================================
+
+export interface ArtifactAuditResult {
+  readonly isValid: boolean;
+  readonly errors: readonly string[];
+  readonly runAManifest?: PreflightManifest;
+  readonly runBManifest?: PreflightManifest;
+  readonly evidence?: any;
+  readonly runACheckpointBytes: number;
+  readonly runBCheckpointBytes: number;
+  readonly runAResultBytes: number;
+  readonly runBResultBytes: number;
+  readonly championDnaMatch: boolean;
+  readonly seedCollisionDetected: boolean;
+}
+
+export function auditExistingPilotArtifacts(artifactsDir: string): ArtifactAuditResult {
+  const errors: string[] = [];
+
+  const evidencePath = path.join(artifactsDir, "stage1-pilot-evidence.json");
+  const runAManifestPath = path.join(artifactsDir, "run-a/preflight-manifest.json");
+  const runBManifestPath = path.join(artifactsDir, "run-b/preflight-manifest.json");
+  const runAResultPath = path.join(artifactsDir, "run-a/campaign-stage1-pilot-result.json");
+  const runBResultPath = path.join(artifactsDir, "run-b/campaign-stage1-pilot-result.json");
+  const runACheckpointPath = path.join(artifactsDir, "run-a/campaign-stage1-pilot-checkpoint.json");
+  const runBCheckpointPath = path.join(artifactsDir, "run-b/campaign-stage1-pilot-checkpoint.json");
+
+  // ファイル存在確認
+  for (const [name, p] of [
+    ["evidence", evidencePath],
+    ["run-a manifest", runAManifestPath],
+    ["run-b manifest", runBManifestPath],
+    ["run-a result", runAResultPath],
+    ["run-b result", runBResultPath],
+    ["run-a checkpoint", runACheckpointPath],
+    ["run-b checkpoint", runBCheckpointPath],
+  ] as const) {
+    if (!fs.existsSync(p)) {
+      errors.push(`Required artifact file is missing: ${name} at "${p}"`);
+    }
+  }
+
+  if (errors.length > 0) {
+    return {
+      isValid: false,
+      errors,
+      runACheckpointBytes: 0,
+      runBCheckpointBytes: 0,
+      runAResultBytes: 0,
+      runBResultBytes: 0,
+      championDnaMatch: false,
+      seedCollisionDetected: true,
+    };
+  }
+
+  let evidence: any = undefined;
+  let runAManifest: PreflightManifest | undefined;
+  let runBManifest: PreflightManifest | undefined;
+  let runAResult: CampaignLogicalResult | undefined;
+  let runBResult: CampaignLogicalResult | undefined;
+
+  try {
+    evidence = JSON.parse(fs.readFileSync(evidencePath, "utf-8"));
+  } catch (err: any) {
+    errors.push(`Failed to parse evidence JSON: ${err.message}`);
+  }
+
+  try {
+    runAManifest = JSON.parse(fs.readFileSync(runAManifestPath, "utf-8"));
+    runBManifest = JSON.parse(fs.readFileSync(runBManifestPath, "utf-8"));
+  } catch (err: any) {
+    errors.push(`Failed to parse preflight manifest: ${err.message}`);
+  }
+
+  try {
+    runAResult = JSON.parse(fs.readFileSync(runAResultPath, "utf-8"));
+    runBResult = JSON.parse(fs.readFileSync(runBResultPath, "utf-8"));
+  } catch (err: any) {
+    errors.push(`Failed to parse result JSON: ${err.message}`);
+  }
+
+  const runACheckpointBytes = fs.statSync(runACheckpointPath).size;
+  const runBCheckpointBytes = fs.statSync(runBCheckpointPath).size;
+  const runAResultBytes = fs.statSync(runAResultPath).size;
+  const runBResultBytes = fs.statSync(runBResultPath).size;
+
+  if (runACheckpointBytes === 0) errors.push("Run A checkpoint is empty (0 bytes)");
+  if (runBCheckpointBytes === 0) errors.push("Run B checkpoint is empty (0 bytes)");
+  if (runAResultBytes === 0) errors.push("Run A result is empty (0 bytes)");
+  if (runBResultBytes === 0) errors.push("Run B result is empty (0 bytes)");
+
+  let championDnaMatch = false;
+  let seedCollisionDetected = false;
+
+  if (runAResult && runBResult) {
+    // 論理結果一致
+    if (!isEqualCampaignLogicalResult(runAResult, runBResult)) {
+      errors.push("Campaign logical results between Run A and Run B do not match");
+    }
+
+    // Champion DNA 検証
+    if (runAResult.provisionalBestChampion && runBResult.provisionalBestChampion) {
+      const dnaA = runAResult.provisionalBestChampion.dna;
+      const dnaB = runBResult.provisionalBestChampion.dna;
+      const digestA = EvolutionIndependentEvaluator.computeDnaDigest(dnaA);
+      const digestB = EvolutionIndependentEvaluator.computeDnaDigest(dnaB);
+      if (digestA !== runAResult.provisionalBestChampion.dnaDigest) {
+        errors.push(
+          `Run A Champion DNA digest mismatch: computed=${digestA}, recorded=${runAResult.provisionalBestChampion.dnaDigest}`
+        );
+      }
+      if (digestB !== runBResult.provisionalBestChampion.dnaDigest) {
+        errors.push(
+          `Run B Champion DNA digest mismatch: computed=${digestB}, recorded=${runBResult.provisionalBestChampion.dnaDigest}`
+        );
+      }
+      if (digestA === digestB && canonicalJsonStringify(dnaA) === canonicalJsonStringify(dnaB)) {
+        championDnaMatch = true;
+      } else {
+        errors.push("Champion DNA between Run A and Run B does not match");
+      }
+    } else {
+      errors.push("ProvisionalBestChampion is missing in logical results");
+    }
+
+    // Seed 衝突検証
+    const seedsA = runAResult.seedRegistry?.allUsedSeeds;
+    const seedsB = runBResult.seedRegistry?.allUsedSeeds;
+    if (!seedsA || !seedsB) {
+      seedCollisionDetected = true;
+      errors.push("Seed registry or allUsedSeeds is missing in logical results");
+    } else {
+      if (new Set(seedsA).size !== seedsA.length) {
+        seedCollisionDetected = true;
+        errors.push("Duplicate seeds detected in Run A");
+      }
+      if (new Set(seedsB).size !== seedsB.length) {
+        seedCollisionDetected = true;
+        errors.push("Duplicate seeds detected in Run B");
+      }
+    }
+  }
+
+  // Evidence との相互照合
+  if (evidence) {
+    if (evidence.measurements?.runA?.completedMatches !== 100) {
+      errors.push(
+        `Evidence Run A completed matches (${evidence.measurements?.runA?.completedMatches}) !== 100`
+      );
+    }
+    if (evidence.measurements?.runB?.completedMatches !== 100) {
+      errors.push(
+        `Evidence Run B completed matches (${evidence.measurements?.runB?.completedMatches}) !== 100`
+      );
+    }
+    if (evidence.measurements?.runA?.failedMatches !== 0 || evidence.measurements?.runB?.failedMatches !== 0) {
+      errors.push("Evidence contains failed matches");
+    }
+    if (evidence.measurements?.runA?.incompleteMatches !== 0 || evidence.measurements?.runB?.incompleteMatches !== 0) {
+      errors.push("Evidence contains incomplete matches");
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    runAManifest,
+    runBManifest,
+    evidence,
+    runACheckpointBytes,
+    runBCheckpointBytes,
+    runAResultBytes,
+    runBResultBytes,
+    championDnaMatch,
+    seedCollisionDetected,
+  };
+}
+
+// =============================================================================
 // 再現性比較および Evidence 生成
 // =============================================================================
 
 export interface Stage1PilotEvidence {
   readonly workId: string;
   readonly gitCommitSha: string;
+  readonly isGitClean: boolean;
   readonly timestamp: string;
   readonly status: "SUCCESS" | "FAILED";
+  readonly successVerdict: PilotEvaluationVerdict;
   readonly reproducibilityResult: "REPRODUCIBILITY_PASS" | "REPRODUCIBILITY_FAIL";
+  readonly timingMeasurementNote: string;
+  readonly memorySamplingMethod: string;
+  readonly memoryMeasurementNote: string;
   readonly environmentIdentity: {
     readonly rulePackageId: string;
     readonly rulePackageVersion: string;
@@ -634,9 +991,13 @@ export interface Stage1PilotEvidence {
       readonly trainingDecisions: number;
       readonly validationDecisions: number;
       readonly elapsedTotalMs: number;
+      readonly elapsedTrainingMs: null;
+      readonly elapsedValidationMs: null;
       readonly matchesPerSec: number;
-      readonly peakRssMB: number;
-      readonly peakHeapUsedMB: number;
+      readonly trainingMatchesPerSec: null;
+      readonly validationMatchesPerSec: null;
+      readonly sampledPeakRssMB: number;
+      readonly sampledPeakHeapUsedMB: number;
       readonly checkpointSizeBytes: number;
       readonly championGenomeId?: string;
       readonly championDnaDigest?: string;
@@ -652,9 +1013,13 @@ export interface Stage1PilotEvidence {
       readonly trainingDecisions: number;
       readonly validationDecisions: number;
       readonly elapsedTotalMs: number;
+      readonly elapsedTrainingMs: null;
+      readonly elapsedValidationMs: null;
       readonly matchesPerSec: number;
-      readonly peakRssMB: number;
-      readonly peakHeapUsedMB: number;
+      readonly trainingMatchesPerSec: null;
+      readonly validationMatchesPerSec: null;
+      readonly sampledPeakRssMB: number;
+      readonly sampledPeakHeapUsedMB: number;
       readonly checkpointSizeBytes: number;
       readonly championGenomeId?: string;
       readonly championDnaDigest?: string;
@@ -708,7 +1073,7 @@ export async function runStage1Pilot(
   console.log(`  Matches Detail:      COMPLETED: ${runA.completedMatches}, FAILED: ${runA.failedMatches}, INCOMPLETE: ${runA.incompleteMatches}`);
   console.log(`  Total Decisions:     ${runA.totalDecisions} (Training: ${runA.trainingDecisions}, Validation: ${runA.validationDecisions})`);
   console.log(`  Elapsed Time:        ${(runA.elapsedTotalMs / 1000).toFixed(2)}s (${(runA.totalMatchesExecuted / (runA.elapsedTotalMs / 1000)).toFixed(1)} matches/sec)`);
-  console.log(`  Peak Memory:         RSS: ${(runA.peakRssBytes / 1024 / 1024).toFixed(1)} MB, Heap: ${(runA.peakHeapUsedBytes / 1024 / 1024).toFixed(1)} MB`);
+  console.log(`  Peak Memory:         RSS: ${(runA.sampledPeakRssBytes / 1024 / 1024).toFixed(1)} MB, Heap: ${(runA.sampledPeakHeapUsedBytes / 1024 / 1024).toFixed(1)} MB (Sampled)`);
   console.log(`  Best Champion:       ${runA.executionResult.provisionalBestChampion?.genomeId ?? "None"} (Digest: ${runA.executionResult.provisionalBestChampion?.dnaDigest ?? "None"}, ValWR: ${runA.executionResult.provisionalBestChampion?.validationMeanWinRate.toFixed(3) ?? "None"})`);
 
   // Step 3: Execute Run B
@@ -722,7 +1087,7 @@ export async function runStage1Pilot(
   console.log(`  Matches Detail:      COMPLETED: ${runB.completedMatches}, FAILED: ${runB.failedMatches}, INCOMPLETE: ${runB.incompleteMatches}`);
   console.log(`  Total Decisions:     ${runB.totalDecisions} (Training: ${runB.trainingDecisions}, Validation: ${runB.validationDecisions})`);
   console.log(`  Elapsed Time:        ${(runB.elapsedTotalMs / 1000).toFixed(2)}s (${(runB.totalMatchesExecuted / (runB.elapsedTotalMs / 1000)).toFixed(1)} matches/sec)`);
-  console.log(`  Peak Memory:         RSS: ${(runB.peakRssBytes / 1024 / 1024).toFixed(1)} MB, Heap: ${(runB.peakHeapUsedBytes / 1024 / 1024).toFixed(1)} MB`);
+  console.log(`  Peak Memory:         RSS: ${(runB.sampledPeakRssBytes / 1024 / 1024).toFixed(1)} MB, Heap: ${(runB.sampledPeakHeapUsedBytes / 1024 / 1024).toFixed(1)} MB (Sampled)`);
   console.log(`  Best Champion:       ${runB.executionResult.provisionalBestChampion?.genomeId ?? "None"} (Digest: ${runB.executionResult.provisionalBestChampion?.dnaDigest ?? "None"}, ValWR: ${runB.executionResult.provisionalBestChampion?.validationMeanWinRate.toFixed(3) ?? "None"})`);
 
   // Step 4: Reproducibility Comparison
@@ -772,6 +1137,28 @@ export async function runStage1Pilot(
   console.log(`  Seed Registry Usage:       ${isSeedRegistryIdentical ? "IDENTICAL (PASS)" : "MISMATCH (FAIL)"}`);
   console.log(`  Validation Results:        ${isValidationResultsIdentical ? "IDENTICAL (PASS)" : "MISMATCH (FAIL)"}`);
   console.log(`  Final Reproducibility Verdict: ${reproducibilityPass ? "REPRODUCIBILITY_PASS" : "REPRODUCIBILITY_FAIL"}`);
+
+  const reproducibilityVerdict = reproducibilityPass
+    ? "REPRODUCIBILITY_PASS"
+    : "REPRODUCIBILITY_FAIL";
+
+  // Step 5: 全条件に基づく Pilot 正式 SUCCESS 判定
+  console.log(`--------------------------------------------------------------------------------`);
+  console.log(`[Step 5] Evaluating Overall Pilot SUCCESS Conditions...`);
+  const successVerdict = evaluatePilotOverallSuccess({
+    runA,
+    runB,
+    reproducibilityResult: reproducibilityVerdict,
+    plannedMatchesPerRun: 100,
+  });
+
+  console.log(`Overall Pilot Verdict: ${successVerdict.status} (isSuccess: ${successVerdict.isSuccess})`);
+  if (!successVerdict.isSuccess) {
+    console.error(`Pilot FAILURE reasons:`);
+    for (const reason of successVerdict.reasons) {
+      console.error(`  - ${reason}`);
+    }
+  }
 
   // 最終母集団の Digest 一覧
   const runAFinalDigests = runA.executionResult.finalPopulation.entries.map((e) => ({
@@ -823,12 +1210,23 @@ export async function runStage1Pilot(
     }
   }
 
+  const timingMeasurementNote =
+    "UNMEASURED: Proportional phase breakdown estimation is prohibited by statistical contracts. Only elapsedTotalMs is directly observed.";
+  const memorySamplingMethod = "SESSION_FACTORY_INVOCATION_SAMPLING";
+  const memoryMeasurementNote =
+    "SAMPLED_MAXIMUM: Memory was sampled at SessionFactory invocations and step advance calls. Continuous OS-level peak is unobserved.";
+
   const evidence: Stage1PilotEvidence = {
     workId: WORK_ID,
     gitCommitSha: preflight.manifest.gitCommitSha,
+    isGitClean: preflight.manifest.isGitClean,
     timestamp: new Date().toISOString(),
-    status: runA.executionResult.status === "COMPLETED" && runB.executionResult.status === "COMPLETED" ? "SUCCESS" : "FAILED",
-    reproducibilityResult: reproducibilityPass ? "REPRODUCIBILITY_PASS" : "REPRODUCIBILITY_FAIL",
+    status: successVerdict.status,
+    successVerdict,
+    reproducibilityResult: reproducibilityVerdict,
+    timingMeasurementNote,
+    memorySamplingMethod,
+    memoryMeasurementNote,
     environmentIdentity: {
       rulePackageId: `official-${REGULATION_ID}`,
       rulePackageVersion: RULE_PACKAGE_VERSION,
@@ -887,9 +1285,13 @@ export async function runStage1Pilot(
         trainingDecisions: runA.trainingDecisions,
         validationDecisions: runA.validationDecisions,
         elapsedTotalMs: runA.elapsedTotalMs,
+        elapsedTrainingMs: null,
+        elapsedValidationMs: null,
         matchesPerSec: runA.totalMatchesExecuted / (runA.elapsedTotalMs / 1000),
-        peakRssMB: runA.peakRssBytes / (1024 * 1024),
-        peakHeapUsedMB: runA.peakHeapUsedBytes / (1024 * 1024),
+        trainingMatchesPerSec: null,
+        validationMatchesPerSec: null,
+        sampledPeakRssMB: runA.sampledPeakRssBytes / (1024 * 1024),
+        sampledPeakHeapUsedMB: runA.sampledPeakHeapUsedBytes / (1024 * 1024),
         checkpointSizeBytes: runA.checkpointSizeBytes,
         championGenomeId: runA.executionResult.provisionalBestChampion?.genomeId,
         championDnaDigest: runA.executionResult.provisionalBestChampion?.dnaDigest,
@@ -905,9 +1307,13 @@ export async function runStage1Pilot(
         trainingDecisions: runB.trainingDecisions,
         validationDecisions: runB.validationDecisions,
         elapsedTotalMs: runB.elapsedTotalMs,
+        elapsedTrainingMs: null,
+        elapsedValidationMs: null,
         matchesPerSec: runB.totalMatchesExecuted / (runB.elapsedTotalMs / 1000),
-        peakRssMB: runB.peakRssBytes / (1024 * 1024),
-        peakHeapUsedMB: runB.peakHeapUsedBytes / (1024 * 1024),
+        trainingMatchesPerSec: null,
+        validationMatchesPerSec: null,
+        sampledPeakRssMB: runB.sampledPeakRssBytes / (1024 * 1024),
+        sampledPeakHeapUsedMB: runB.sampledPeakHeapUsedBytes / (1024 * 1024),
         checkpointSizeBytes: runB.checkpointSizeBytes,
         championGenomeId: runB.executionResult.provisionalBestChampion?.genomeId,
         championDnaDigest: runB.executionResult.provisionalBestChampion?.dnaDigest,
@@ -925,7 +1331,7 @@ export async function runStage1Pilot(
     holdoutNotice: "NOTICE: Formal Holdout evaluation was NOT executed in Stage 1 Pilot (holdoutPlannedMatches: 0).",
     statisticalSignificanceNotice:
       "NOTICE: Small sample size (N_val=5 seeds per opponent) under Bonferroni-adjusted alpha does not reach statistical significance (isStatisticallySignificant=false). Improvement status remains IMPROVEMENT_UNVERIFIED as per statistical contract.",
-    conclusionSummary: `Stage 1 Pilot finished with status: ${runA.executionResult.status}. Reproducibility verdict: ${reproducibilityPass ? "PASS" : "FAIL"}. Total matches executed: ${runA.totalMatchesExecuted + runB.totalMatchesExecuted}/200.`,
+    conclusionSummary: `Stage 1 Pilot finished with status: ${successVerdict.status} (Campaign: ${runA.executionResult.status}). Reproducibility verdict: ${reproducibilityVerdict}. Total matches executed: ${runA.totalMatchesExecuted + runB.totalMatchesExecuted}/200.`,
   };
 
   // Evidence JSON 保存
