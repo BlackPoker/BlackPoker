@@ -1,8 +1,8 @@
-# BlackPoker Simulator Work 3: Standard＋Pack 多世代進化学習 設計仕様書
+# BlackPoker Simulator Work 3: Standard＋Pack 多世代進化学習 設計仕様書 (R1)
 
-**作業ID:** `BP-SIM-AI-V92-WORK3-MULTIGENERATION-EVOLUTION-PLAN`  
+**作業ID:** `BP-SIM-AI-V92-WORK3-MULTIGENERATION-EVOLUTION-PLAN-R1`  
 **ステータス:** **PROPOSED / PLAN ONLY (PENDING INDEPENDENT REVIEW)**  
-**Base SHA:** `28a070cc60815e904dd530f07ff27da955e3bfdf`  
+**Base SHA:** `959d6048597e4450786f14cd0ff72882658ad27d`  
 **対象ブランチ:** `BlackPoker/issue551-core-flow`  
 **作成日時:** 2026-11-02  
 
@@ -12,7 +12,7 @@
 
 Work 2 において、大規模自動対戦基盤の整備および 10,000 試合安定性試験（`BP-SIM-AI-V92-WORK2-10K-STABILITY-GATE`）が正式承認されました。
 実機測定では 10,000 試合を約 40 分で完走し、`FAILED = 0`、`INCOMPLETE = 0`、決定論的再現性、およびメモリ安全性が立証されています。
-ただし、この実測値は `FirstLegalPolicy` vs `SeededRandom` のベンチマークであり、`GenomePolicy` 同士の対戦性能と同一ではありません。
+ただし、この実測値は `FirstLegalPolicy` vs `SeededRandom` のベンチマークであり、`GenomePolicy` 同士の対戦性能と同一視することはできません。
 
 本 Work 3 の目的は、公式レギュレーション **Standard＋Pack**（`official:standard-pack`）において、意思決定重み（Decision DNA）を多世代にわたり進化させ、客観的に強い AI を獲得できる多世代進化学習基盤を設計することです。
 
@@ -31,15 +31,15 @@ Work 2 において、大規模自動対戦基盤の整備および 10,000 試�
 
 リポジトリ内の既存実装（`tools/simulator/src/`）を精査し、Work 3 における再利用性を以下の 4 カテゴリに分類しました。
 
-| コンポーネント | 実装ファイル | 現状の責務 | Work 3 での分類 | 分類理由・対応方針 |
+| コンポーネント | 正確な実装パス | 現状の責務 | Work 3 での分類 | 分類理由・対応方針 |
 | :--- | :--- | :--- | :---: | :--- |
-| **`EvolutionLoop`** | `src/engine/ai/EvolutionLoop.ts` | 複数世代の決定論的順次実行統括、世代間チェーン検証、REEVALUATION 停止 | **1. 実装済みで再利用可能** | 世代遷移プリミティブとして完全再利用。設計原則 8 に従い、世代間比較や早期終了は内包させず上位層へ委ねる。 |
+| **`EvolutionLoop`** | `src/engine/ai/EvolutionLoop.ts` | 複数世代の決定論的順次実行統括、世代間チェーン検証、REEVALUATION 停止 | **1. 実装済みで再利用可能** | 世代遷移プリミティブとして完全再利用。設計原則 8 に従い、評価や早期終了は内包せず上位層へ委譲。 |
 | **`GenerationRunner`** | `src/engine/ai/GenerationRunner.ts` | 1世代内の Double Round Robin 自己対戦、Outcome 集計、適応度計算 | **1. 実装済みで再利用可能** | 1世代実行境界として完全再利用。対戦数計算式 $N(N-1) \times R$ に完全準拠。 |
-| **`GenerationBuilder`** | `src/engine/ai/GenerationBuilder.ts` | $g \rightarrow g+1$ の母集団構築、Elite 保存、Offspring 生成、DNA 検証 | **1. 実装済みで再利用可能** | 入力不変性・決定論的アセンブリ契約が確立しており、そのまま再利用可能。 |
+| **`GenerationBuilder`** | `src/engine/ai/GenerationBuilder.ts` | $g \rightarrow g+1$ の母集団構築、Elite 保存、Offspring 生成、DNA 検証 | **1. 実装済みで再利用可能** | 入力不変性・決定論的アセンブリ契約が確立しており再利用。 |
 | **`FitnessEvaluator`** | `src/engine/ai/FitnessEvaluator.ts` | Outcome-First 適応度計算（$\text{wins} / \text{completed}$）、Fail-Closed 検証 | **1. 実装済みで再利用可能** | Outcome-First 原則（"Victory is the objective. Life is a resource, not a score."）の維持に不可欠。 |
-| **`PopulationSelector`** | `src/engine/ai/PopulationSelector.ts` | VALID 個体プールからのトーナメント親選択、同点時の Seeded Tie-Break | **1. 実装済みで再利用可能** | 決定論的トーナメント選択アルゴリズムをそのまま再利用。 |
+| **`PopulationSelector`** | `src/engine/ai/PopulationSelector.ts` | VALID 個体プールからのトーナメント親選択、同点時の Seeded Tie-Break | **1. 実装済みで再利用可能** | 決定論的トーナメント選択アルゴリズムを再利用。 |
 | **`GeneticCrossover`** | `src/engine/ai/GeneticCrossover.ts` | Block-Segmented Uniform Crossover による親 DNA の交叉 | **1. 実装済みで再利用可能** | 23,738 重みのブロック交叉を決定論的に実行可能。 |
-| **`GeneticMutation`** | `src/engine/ai/GeneticMutation.ts` | 正規分布摂動（Box-Muller）による重み突然変異、Clamp 処理 | **1. 実装済みで再利用可能** | 決定論的変異演算子を再利用。設定パラメータ（$\sigma$, rate）の探索余地あり。 |
+| **`GeneticMutation`** | `src/engine/ai/GeneticMutation.ts` | 正規分布摂動（Box-Muller）による重み突然変異、Clamp 処理 | **1. 実装済みで再利用可能** | 決定論的変異演算子を再利用。 |
 | **`ParentPairAssembler`** | `src/engine/ai/ParentPairAssembler.ts` | トーナメント選択親からの交叉ペア編成、Self-Mating 再試行 | **1. 実装済みで再利用可能** | ペア編成契約が確立済み。 |
 | **`GenomePolicy`** | `src/engine/ai/GenomePolicy.ts` | DecisionRequest を入力とし、Encoder と Scorer で手を選択する Policy | **1. 実装済みで再利用可能** | Core 契約に完全準拠（全 GameState への不正アクセスなし）。対人戦でも同一 Policy を使用。 |
 | **`DecisionDNACodec`** | `src/engine/ai/DecisionDNACodec.ts` | DecisionDNA の JSON シリアライズ/デシリアライズ、ディープクローン、形式検証 | **1. 実装済みで再利用可能** | DNA 形式検証・不変性保護の基盤として再利用。 |
@@ -47,9 +47,10 @@ Work 2 において、大規模自動対戦基盤の整備および 10,000 試�
 | **`DecisionFeatureEncoder`** | `src/engine/ai/DecisionFeatureEncoder.ts` | 観測情報から特徴量（308次元）を正規化・有界スケーリング抽出 | **1. 実装済みで再利用可能** | Feature Scaling v6 対応済み。 |
 | **`ExecutionManifest`** | `src/engine/manifest/ExecutionManifest.ts` | Git 検証、RulePackage Digest、SHA-256 チェックサム保護 | **1. 実装済みで再利用可能** | 正式 Evidence 保存の fail-closed 契約（`VERIFIED` 必須）を再利用。 |
 | **`LargeScaleBatchRunner`** | `src/simulation/LargeScaleBatchRunner.ts` | 大規模バッチ実行、正規化 JSON チェックポイント、SHA-256 改ざん検出 | **1. 実装済みで再利用可能** | チェックポイント・Resume 機構の参照実装として再利用。 |
+| **`FirstLegalPolicy`** | `src/engine/simulation/DecisionPolicy.ts` | 合法手リストの先頭手を選択する決定論的 Policy | **1. 実装済みで再利用可能** | ルール提示順序に従う単純 Baseline。攻撃性等の戦略性は持たず、基本的行動遂行のアンカーとして機能。 |
 | **`EvolutionDNALoader`** | `src/engine/ai/EvolutionDNALoader.ts` | Champion DNA の読み込みと Playtest への提供 | **2. 検証・拡張が必要** | 現状 `light-entry16` の g1-best にハードコードされており、Standard＋Pack 向けへの拡張が必要。 |
-| **`PolicyExperimentRunner`** | `src/engine/ai/PolicyExperimentRunner.ts` | 2者間（Pairwise）の座席入れ替え対戦実験 | **2. 検証・拡張が必要** | 単一ペア実験用であり、多世代 Champion 評価用ベンチマークスイートとしての検証が不足。 |
-| **`BaselinePolicies`** | `src/engine/ai/BaselinePolicies.ts` | FirstLegal, SeededRandom, Zero, ManualGeneric | **2. 検証・拡張が必要** | 評価相手としての Baseline Suite が揃っているが、Standard＋Pack での勝率水準の事前把握が必要。 |
+| **`PolicyExperimentRunner`** | `src/engine/ai/PolicyExperimentRunner.ts` | 2者間（Pairwise）の座席入れ替え対戦実験 | **2. 検証・拡張が必要** | 単一ペア実験用であり、全 `decisionRecords` を配列蓄積する実装のため、大規模評価時のメモリ肥大化対策が必要。 |
+| **`BaselinePolicies`** | `src/engine/ai/BaselinePolicies.ts` | FirstLegal, SeededRandom, Zero, ManualGeneric | **2. 検証・拡張が必要** | Standard＋Pack での勝率水準の事前把握が必要。 |
 | **評価・選定マネージャー** | *(未実装)* | 世代間比較、Validation 評価、Champion 選定、Early Stopping | **3. 新規実装が必要** | `EvolutionCampaignManager` / `EvolutionIndependentEvaluator` の新設が必要。 |
 | **Holdout 評価ハーネス** | *(未実装)* | 未使用 Seed による最終 Holdout テスト、統計的検定（95% CI） | **3. 新規実装が必要** | Train / Validation / Test の 3 層分離と有意性検定の仕組み。 |
 | **多世代 DNA 可視化 UI** | *(未実装)* | 世代ごとの重み分布や系統樹のブラウザ上での可視化 | **4. Work 3 では不要** | コア学習・強さ認定には直接不要（将来の可視化課題）。 |
@@ -70,20 +71,18 @@ Work 2 において、大規模自動対戦基盤の整備および 10,000 試�
 
 ## 2. Work 3 で不足している機能 (Gap Analysis)
 
-既存実装は「1 世代の自己対戦と次世代構築（GenerationRunner / GenerationBuilder）」および「機械的な複数世代ループ（EvolutionLoop）」の低水準プリミティブを提供していますが、**「AI が本当に強くなったかを客観的に評価し、強い DNA を安全に抽出・運用する仕組み」**が完全に欠落しています。
-
 1. **世代間評価・Champion 選定レイヤーの欠落:**
-   - `EvolutionLoop` は設計原則 8 により、世代間 Fitness 比較や Champion 選定を責務外としています。したがって、全世代を通じて「どの個体が真に最も強いのか」を選び出す上位オーケストレータが存在しません。
+   - `EvolutionLoop` は設計原則 8 により世代間比較を責務外としているため、全世代を通じて「どの個体が真に最も強いのか」を選出・追跡する上位管理者が不在。
 2. **Train / Validation / Test の厳格なデータセット分離基盤:**
-   - 既存のパイロットでは、同一の Seed 群が学習・評価・検証に繰り返し使われており、機械学習における「データ漏洩（Data Contamination）」が発生していました。未知の盤面・展開に対する汎化性能を保証する Holdout 機構がありません。
+   - 未知の盤面・展開に対する汎化性能を保証する Holdout 機構がなく、同一 Seed 群が繰り返し評価に使われることによる「評価データの汚染（Data Contamination）」を防止する仕組みが欠落。
 3. **固定 Baseline Policy との独立評価ハーネス:**
-   - 自己対戦の勝率（相対評価）のみでは、世代全体が共倒れ（例: 双方 PASS 連打の千日手）になっても見かけ上の高適応度が出てしまいます。外部の固定アンカー（FirstLegal, SeededRandom, Zero DNA）と戦わせて絶対的な能力を測るハーネスが未整備です。
+   - 自己対戦の勝率（相対評価）のみでは、世代全体が共倒れ（双方 PASS 連打など）になっても見かけ上の高適応度が出てしまうため、外部の固定アンカー（FirstLegal, SeededRandom, Zero DNA）と戦わせて絶対的な能力を測るハーネスが未整備。
 4. **統計的有意性の検定・客観的判定基準:**
-   - 「10 勝 2 敗だから強くなった」といった小サンプルでの偶然の偏りを排除し、二項検定や信頼区間（95% CI）に基づいて「有意に改善した」と判定するロジックがありません。
+   - 座席反転ペア対戦の相関を考慮し、偶然の偏りを排除して「有意に改善した」と判定する検定ロジックが未整備。
 5. **Standard＋Pack 向け Champion DNA 管理と Playtest 接続:**
-   - 現行の `EvolutionDNALoader` は `light-entry16` 専用のハードコードであり、Standard＋Pack の学習済み Champion DNA をブラウザ Playtest に安全にロードする汎用インターフェースが未整備です。
+   - `light-entry16` 専用のローダーを Standard＋Pack 向けに汎用化し、UI で安全に対戦させる導線が未整備。
 6. **多世代実行の中断・再開（Resume）と Execution Manifest 統合:**
-   - 10 世代以上の学習は数十分〜数時間に及ぶ可能性がありますが、世代途中で安全にチェックポイントを保存し、同一のシード系列・DNA 系譜から 1 ビットの狂いもなく再開する統合管理機構がありません。
+   - 世代単位で安全にチェックポイントを保存し、同一のシード系列・DNA 系譜から 1 ビットの狂いもなく再開する統合管理機構が未整備。
 
 ---
 
@@ -96,110 +95,74 @@ Work 2 において、大規模自動対戦基盤の整備および 10,000 試�
 - **原則 2:** 決定論性 (campaignSeed と sourceGeneration による直接シード導出)
 - **原則 8:** **世代間 Fitness 比較・改善率計算・早期終了の排除**
 
-`EvolutionLoop` を改造して評価ロジックや早期終了を埋め込むことは禁止します。`EvolutionLoop` は「決定論的な世代交代の実行エンジン」として純粋性を保ちます。
+`EvolutionLoop` を改造して評価ロジックや早期終了を埋め込むことは禁止します。
 
-### 3.2 提案アーキテクチャ階層図
+### 3.2 `EvolutionLoop` と `CampaignManager` の接続方式
 
-責務を直交分離するため、以下の 4 層アーキテクチャを提案します。
+既存の `EvolutionLoop` の Public Contract を維持したまま、世代ごとの Validation・早期終了・チェックポイントを成立させる接続方式を以下のように設計します。
 
-```mermaid
-flowchart TD
-    subgraph CampaignLayer["1. Campaign Orchestration Layer (新規)"]
-        CampaignManager["EvolutionCampaignManager"]
-        CheckpointMgr["CampaignCheckpointManager"]
-        EvidenceSaver["CampaignEvidenceSaver"]
-    end
+#### (1) `generationCount: 1` によるステップ駆動方式の成立性
+- `EvolutionLoop.ts` において、`generationCount` は **世代遷移回数（`requestedTransitions`）** として定義されています。
+- `initialPopulation.generation = g` に対し、`generationCount: 1` で実行すると、世代 $g$ の自己対戦（Double Round Robin）が実行され、$g \rightarrow g+1$ の母集団構築が行われて `finalPopulation.generation = g+1` が返されます。
+- したがって、上位の `EvolutionCampaignManager` が `EvolutionLoop.run({ initialPopulation: P_g, config: { generationCount: 1, ... }, campaignSeed })` を世代ごとに呼び出す方式は、既存契約と 100% 整合します。
 
-    subgraph EvaluationLayer["2. Independent Evaluation Layer (新規)"]
-        IndepEvaluator["EvolutionIndependentEvaluator"]
-        ValidationHarness["ValidationBenchmarkHarness (固定Seed)"]
-        HoldoutHarness["HoldoutTestHarness (未使用Seed・ブラインド)"]
-        StatisticalGate["StatisticalSignificanceGate (95% CI)"]
-    end
+#### (2) 一括実行と分割実行での決定論的完全一致の保証
+- `EvolutionLoop` では、各世代のシードが以下のように導出されます：
+  $$\text{generationSeed} = \text{deriveSeed}(\text{campaignSeed}, \text{canonicalGenerationStreamKey}(\text{sourceGeneration}))$$
+- この導出は前世代の実行結果や乱数状態に依存せず、`campaignSeed` と `sourceGeneration` のみから純粋関数で計算されます。
+- したがって、最初から `generationCount: G` で一括実行した場合と、`generationCount: 1` を $G$ 回呼び出して前回の `finalPopulation` を次回の `initialPopulation` として引き渡した場合で、生成される世代シード、対戦スケジュール、対戦結果、選定親、交叉・変異シード、および次世代 DNA は **1 ビットの狂いもなく完全同一** になることが数学的・構造的に保証されます。
 
-    subgraph EvolutionPrimitiveLayer["3. Evolution Primitive Layer (既存再利用)"]
-        EvoLoop["EvolutionLoop"]
-        GenRunner["GenerationRunner"]
-        GenBuilder["GenerationBuilder"]
-        FitnessEval["FitnessEvaluator (Outcome-First)"]
-        PopSelector["PopulationSelector"]
-        GeneticOps["GeneticOperators (Crossover/Mutation)"]
-    end
+#### (3) 評価対象母集団の特定と Validation のタイミング
+- `EvolutionLoop(generationCount: 1)` を実行すると、以下の成果物が得られます：
+  - `logicalResult.fitnessSnapshot`: 世代 $g$ の自己対戦実績（各個体の勝率・適応度）
+  - `logicalResult.finalPopulation`: 交叉・突然変異によって新たに生成された未対戦の次世代母集団 $P_{g+1}$
+- **Champion 候補の特定:**
+  - 評価対象とすべきは、未対戦の $P_{g+1}$ ではなく、**自己対戦を完了して適応度が確定した世代 $g$ の個体群** です。
+  - 世代 $g$ の中で最も自己対戦適応度が高い個体（同点時は Seeded Tie-Break）を **「世代 $g$ の Champion 候補」** として特定します。
+- **Validation の実行タイミング:**
+  - `EvolutionLoop` の実行完了直後、次世代 $g+1$ の自己対戦を開始する前に、世代 $g$ の Champion 候補に対して `EvolutionIndependentEvaluator` による Validation（固定 Baseline 群との対戦）を実行します。
 
-    subgraph ExecutionLayer["4. Core Simulation & Execution Layer (既存再利用)"]
-        SimRunner["SimulationRunner"]
-        GenomePolicy["GenomePolicy"]
-        FeatureEncoder["DecisionFeatureEncoder (Schema v6)"]
-        Manifest["ExecutionManifest (Git fail-closed)"]
-    end
+#### (4) Early Stopping と保存 Champion の定義
+- Validation スコアを歴代の Champion 候補と比較し、改善が認められれば「暫定最良 Champion」を更新します。
+- 連続 $K$ 世代にわたり改善が認められない場合は Early Stopping を発動します。
+- **保存 Champion の厳格な定義:**
+  - Early Stopping 後（または全世代完走後）に保存される Champion は、「最終世代の個体」ではなく、**「全世代を通じて Validation スコアが最高であった暫定最良 Champion（Best-Validation Individual）」** です。
+  - これにより、末期世代で過学習や性能ドリフトが発生していた場合でも、最良状態の DNA が確実に保護されます。
 
-    CampaignManager -->|"1世代実行委譲"| EvoLoop
-    EvoLoop --> GenRunner
-    GenRunner --> SimRunner
-    GenRunner --> FitnessEval
-    GenRunner --> GenBuilder
-    GenBuilder --> PopSelector
-    GenBuilder --> GeneticOps
-    SimRunner --> GenomePolicy
-    GenomePolicy --> FeatureEncoder
-
-    CampaignManager -->|"各世代候補評価"| IndepEvaluator
-    IndepEvaluator --> ValidationHarness
-    ValidationHarness --> SimRunner
-    IndepEvaluator --> StatisticalGate
-
-    CampaignManager -->|"最終Champion独立認定"| HoldoutHarness
-    HoldoutHarness --> SimRunner
-    HoldoutHarness --> StatisticalGate
-
-    CampaignManager --> CheckpointMgr
-    CampaignManager --> EvidenceSaver
-    EvidenceSaver --> Manifest
-```
-
-### 3.3 各レイヤーの責務境界
-
-1. **`EvolutionCampaignManager` (新規上位レイヤー):**
-   - キャンペーン全体のライフサイクル統括（初期集団生成、世代進行、中断・再開、終了判定）。
-   - 各世代の終了時に `EvolutionIndependentEvaluator` を呼び出し、Validation 評価を実施。
-   - 世代間での Champion 候補の追跡、停滞（Stagnation）の検出、Early Stopping の判断。
-   - キャンペーン完了時、最終 Champion を選定して Holdout テストを実行し、正式 Evidence を保存。
-2. **`EvolutionIndependentEvaluator` (新規独立評価レイヤー):**
-   - 自己対戦ループから完全に隔離された独立対戦ハーネス。
-   - 固定された対戦相手（FirstLegal, SeededRandom, Zero DNA, 過去 Champion）に対するベンチマーク実行。
-   - 先後手バイアスを排除した座席入れ替え（Seat-Swapped Paired Matches）の強制。
-   - 二項検定および Wilson スコア信頼区間（95% CI）による統計的有意性の算出。
-3. **`EvolutionLoop` / `GenerationRunner` (既存低水準プリミティブ):**
-   - 1 世代の自己対戦（Double Round Robin）と次世代母集団の決定論的構築に専念。
-4. **`ExecutionManifest` / `LargeScaleBatchRunner` (基盤レイヤー):**
-   - Git fail-closed 検証（`VERIFIED` 必須）、チェックポイント改ざん検出、不変性保護。
+#### (5) Resume 時の重複防止
+- チェックポイントには、① 完了済み世代 $g$ の結果・Validation レコード、② 構築済み次世代母集団 $P_{g+1}$、③ 暫定最良 Champion を不可分（アトミック）に保存します。
+- 再開時は $P_{g+1}$ をロードして世代 $g+1$ の自己対戦から開始するため、世代 $g$ の自己対戦や Validation の再実行（二重実行）は発生しません。
 
 ---
 
 ## 4. 多世代進化のアルゴリズムと学習条件 (Evolution Algorithm)
 
-### 4.1 進化ライフサイクル
+### 4.1 進化ライフサイクルの完全フロー
 
 ```text
 [初期母集団生成 (多様性確保)]
          ↓
- ┌─→ [自己対戦 (Double Round Robin)]  ← GenerationRunner
+ ┌─→ [自己対戦 (Double Round Robin)]  ← GenerationRunner (1世代実行)
  │       ↓
  │   [Fitness評価 (Outcome-First)]     ← FitnessEvaluator
  │       ↓
- │   [Validation評価 (固定相手)]       ← EvolutionIndependentEvaluator (新規)
+ │   [世代 g Champion候補特定]         ← 自己対戦最上位個体
  │       ↓
- │   [Champion候補選定 & 早期停止判定] ← EvolutionCampaignManager (新規)
+ │   [Validation評価 (固定相手)]       ← EvolutionIndependentEvaluator
+ │       ↓
+ │   [Champion候補追跡 & 早期停止判定] ← EvolutionCampaignManager
  │       ↓ (継続の場合)
  │   [親選択 (Tournament Selection)]   ← PopulationSelector
  │       ↓
  │   [交叉 & 突然変異 (Elite保存)]     ← GenerationBuilder / GeneticOperators
  │       ↓
- │   [次世代母集団生成]                ← PopulationSnapshot(g+1)
+ │   [次世代母集団 P_(g+1) 生成]       ← PopulationSnapshot(g+1)
  │       ↓
- └── (次世代ループへ)
-         ↓ (完了 / 早期停止)
-[最終 Champion 認定 (未使用 Holdout テスト)] ← HoldoutTestHarness (新規)
+ │   [チェックポイント保存]            ← CampaignCheckpointManager
+ │       ↓
+ └── (世代 g+1 のループへ)
+         ↓ (全世代完走 または Early Stopping)
+[最終 Champion 認定 (未使用 Holdout テスト)] ← HoldoutTestHarness (完全ブラインド)
          ↓
 [正式 Evidence & Champion DNA 保存]          ← ExecutionManifest 統合
          ↓
@@ -208,238 +171,199 @@ flowchart TD
 
 ### 4.2 初期母集団の生成と多様性の確保
 
-- **課題:** 全ゲノムを同一の Zero DNA（全重み 0.0）から開始すると、第 0 世代の自己対戦がすべて同一挙動となり、初期の多様性が失われます。
-- **提案手法 (Seeded Diverse Initialization):**
-  - 個体 0: **Zero DNA**（基準アンカー）
-  - 個体 1: **Manual Generic Genome**（既存の発見的重み）
-  - 個体 $2 \sim N-1$: **微小摂動 DNA**（Zero または Manual DNA に対し、Campaign Seed から派生した決定論的乱数で微小なガウス摂動 $\mathcal{N}(0, \sigma_{\text{init}}^2)$ を加えた重み）
-  - すべての初期 DNA は `DecisionDNACodec.validate()` を通過させ、有限数・有界値を保証します。
+全ゲノムを同一の Zero DNA（全重み 0.0）から開始すると、第 0 世代の自己対戦がすべて同一挙動となり、多様性が失われます。
+- 個体 0: **Zero DNA**（基準アンカー）
+- 個体 1: **Manual Generic Genome**（既存の発見的重み）
+- 個体 $2 \sim N-1$: **微小摂動 DNA**（Zero または Manual DNA に対し、Campaign Seed から派生した決定論的乱数で微小なガウス摂動 $\mathcal{N}(0, \sigma_{\text{init}}^2)$ を加えた重み）
+- すべての初期 DNA は `DecisionDNACodec.validate()` を通過させ、有限数・有界値を保証します。
 
-### 4.3 自己対戦スケジュールと対戦数計算
+### 4.3 自己対戦スケジュールと試合数計算式
 
-既存の `GenerationRunner.planSchedule` の Double Round Robin 契約をそのまま使用します。
-母集団サイズを $N$、ペア繰り返し数を $R$（デフォルト $R=1$）とすると、1 世代あたりの自己対戦数は厳密に以下となります：
+既存の `GenerationRunner.planSchedule` の Double Round Robin 契約を完全遵守します。
+母集団サイズを $N$、ペア繰り返し数を $R$（基本 $R=1$）とすると、1 世代あたりの自己対戦数は厳密に以下となります：
 
-$$\text{Matches per Generation} = N(N - 1) \times R$$
+$$M_{\text{train\_gen}} = N(N - 1) \times R$$
 
-- $N = 6, R = 1 \implies 30$ 試合 / 世代
-- $N = 10, R = 1 \implies 90$ 試合 / 世代
-- $N = 16, R = 1 \implies 240$ 試合 / 世代
+世代遷移回数を $G$（$g=0 \rightarrow \dots \rightarrow g=G$）とすると、総自己対戦数は：
+
+$$M_{\text{train\_total}} = G \times N(N - 1) \times R$$
 
 ### 4.4 Outcome-First Fitness 評価
 
 既存 `FitnessEvaluator` の設計原則を 100% 遵守します：
 $$\text{fitnessScore} = \frac{\text{wins} \times 1.0 + \text{draws} \times 0.5}{\text{completedMatches}}$$
 - **"Victory is the objective. Life is a resource, not a score."**
-- ライフ残量、与ダメージ、ターン数、特定カード使用回数などを安易にスコアへ加算することは固く禁止します。ゲームの勝敗のみを学習の評価軸とします。
+- ライフ残量、与ダメージ、ターン数などを安易にスコアへ加算することは固く禁止します。
 - FAILED 試合が 1 件でも発生した個体は即座に `status: "INVALID"`（失格）とし、選択プールから完全除外します。
-
-### 4.5 親選択・遺伝的操作子・エリート保存
-
-- **選択方式:** トーナメント選択（`tournamentSize: 2` または `3`）。VALID 個体プールから非復元抽出。
-- **エリート保存 (`eliteCount`):**
-  - 母集団の上位 $E$ 個体（例: $N=10$ のとき $E=2$、上位 20%）を無改変で次世代へ直接コピー。
-  - エリート個体は参照共有を断つため `DecisionDNACodec.clone()` で完全隔離。
-- **交叉方式:** `GeneticCrossover`（Block-Segmented Uniform Crossover）。親 A と親 B の重みブロックを 50% の確率で均一組み換え。
-- **突然変異方式:** `GeneticMutation`（Deterministic Normal Mutation）。
-  - 変異率 $\mu_{\text{rate}} = 0.05 \sim 0.10$（各重みが変異する確率）
-  - 変異強度 $\sigma_{\text{mut}} = 0.05 \sim 0.10$
-  - 重み有界 Clamp: $[-1.0, 1.0]$ の範囲内に強制クリッピング。
-
-### 4.6 局所最適（過剰 PASS 連打等）への収束対策
-
-過去の Pilot で確認された「双方が PASS を連打して千日手になる」現象を防止するため、以下の多層防御を設計に組み込みます：
-1. **Semantic Stall Detector の常時監視:**
-   - 自己対戦ループにおいて、同一盤面・手番が循環する千日手や、有意な盤面変化を伴わない PASS 連続を検知。
-2. **多様性メトリクス (Population Genetic Diversity):**
-   - 世代ごとの母集団内 DNA 重みの平均ユークリッド距離 / コサイン類似度を計測。
-   - 多様性が極端に喪失（全個体がほぼ同一 DNA に収束）した場合、`DIVERSITY_LOSS_WARNING` を発行し、変異率を一時的に引き上げる（Adaptive Mutation Boost）。
-3. **外部アンカーとの対戦義務化（Validation ゲート）:**
-   - 自己対戦でどんなに高勝率であっても、FirstLegalPolicy に対し勝率が著しく低下（PASS 連打で自滅）した個体は Champion 候補から失格とする。
-
-### 4.7 停止条件と Resume 整合性
-
-- **正常完了条件:** 設定された全世代（$G$ 世代）の学習と最終 Holdout 評価が完了。
-- **Early Stopping (早期停止):**
-  - 連続 $K$ 世代（例: 3 世代）にわたり Validation スコアの改善が認められない場合、無駄な計算リソース消費を防ぐため正常停止。
-- **異常停止 (Fail-Closed):**
-  - `REEVALUATION_REQUIRED`: 未完了試合や FAILED 試合の発生により有効個体数が不足した場合、直ちに停止。
-  - `INTEGRITY_ERROR`: 世代番号の不一致、チェックサム不一致、DNA ダイジェスト不整合を検知した場合、即座に例外送出。
-- **Resume 整合性:**
-  - チェックポイントには、その時点の `currentPopulation`、世代番号 $g$、`campaignSeed`、およびこれまでの全世代レコードを完全保存。
-  - 再開時は `campaignSeed` と再開世代 $g$ から次のシード `deriveSeed(campaignSeed, streamKey)` が一意に導出されるため、途中で停止しても再開後の実行結果は最初から一括実行した場合と完全に決定論的一致（Bit-Identical）します。
 
 ---
 
 ## 5. 強さの評価・統計判定・過学習防止方法 (Strength Evaluation)
 
-### 5.1 自己対戦の限界と固定対戦相手による独立評価
+### 5.1 自己対戦の限界と評価の2大軸の分離
 
-自己対戦（Self-Play）の適応度のみで進化させると、以下の問題が不可避的に生じます：
-- **じゃんけんループ（Cyclic Non-transitive Meta）:** A は B に勝ち、B は C に勝ち、C は A に勝つというメタ循環が発生し、絶対的な強さが向上しない。
-- **共倒れ最適化（Collusive Stagnation）:** 母集団全体が「初手からお互いに何もしない」ような自滅的戦略に収束しても、相対勝率は 50% 前後で安定してしまう。
+自己対戦（Self-Play）の適応度のみでは、メタ循環（じゃんけん関係）や共倒れ（PASS 連打への収束）を検出できません。
+したがって、評価を以下の **2 大軸** に明確に分離します：
 
-したがって、**「固定された外部 Baseline に対する対戦成績」**を強さの独立指標として定義します。
+1. **絶対的能力水準（Absolute Competency）:**
+   - 固定された外部 Baseline に対する対戦成績。ゲームの基本行動遂行能力、ランダム行動耐性、無学習状態に対する優位性を測る。
+2. **進化的向上度（Evolutionary Improvement）:**
+   - 初期世代（$g=0$ Champion）および過去世代 Champion との直接比較。学習が進むことで初期状態よりも有意に強くなっているかを測る。
 
-### 5.2 評価対戦相手の選定と役割
+### 5.2 評価対戦相手の選定と選定根拠
 
-| 対戦相手 Policy | 役割 | 選定根拠 | 合格基準の目安 |
+| 対戦相手 Policy | 役割 | 選定根拠 | 設計上の初期仮説目標 (Provisional Target) |
 | :--- | :--- | :--- | :--- |
-| **`FirstLegalPolicy`** | ルール理解・前進圧力の検証 | 最も基本的かつ攻撃的な合法手を指し続ける Baseline。これに勝てない AI は、ゲームの基本前進力において失格。 | **勝率 > 60%** (Standard＋Pack) |
-| **`SeededRandom`** | ランダムノイズ耐性の検証 | 予測不能な奇手やランダム行動に対して取りこぼさず、確実に勝ち切れるかを検証。 | **勝率 > 70%** |
-| **`Zero DNA (GenomePolicy)`** | 学習の原点に対する優位性 | 重み付けが一切存在しない初期ゲノム（Argmax タイブレークのみで行動）に対する優位性の確認。 | **勝率 > 65%** |
-| **`Past Champion (g-1, g-2...)`** | 世代を通じた絶対的成長の検証 | 前世代の Champion に対し、現世代の Champion が有利または互角以上であることの確認。 | **勝率 $\ge$ 50%** |
+| **`FirstLegalPolicy`** | ルール提示順序に従う単純行動に対する優位性 | 最も基本的な決定論的 Baseline。これに安定して勝てない AI は、ゲーム遂行の基本水準において不十分。 | ペア勝率 > 55%（仮値、実証後に再校正） |
+| **`SeededRandom`** | ランダムノイズ・奇手耐性の検証 | 予測不能な行動に対して取りこぼさず、確実に勝ち切れるかを検証。 | ペア勝率 > 65%（仮値、実証後に再校正） |
+| **`Zero DNA (GenomePolicy)`** | 無学習状態に対する優位性の検証 | 重み付けが一切存在しない初期ゲノムに対する優位性の確認。 | ペア勝率 > 60%（仮値、実証後に再校正） |
+| **`Past Champion (g=0, g-1)`** | 世代を通じた絶対的成長の検証 | 初期世代および前世代の Champion に対し、優位または互角以上であることの確認。 | ペア勝率 $\ge$ 50% |
+
+> [!NOTE]
+> 上記の目標勝率は、過去の Standard＋Pack での十分な対戦実績が存在しないため、**「設計上の初期仮説（Provisional Target）」** として扱います。Stage 1 (Small Pilot) の実測値に基づき、後続ステージの合格基準を正式校正します。
 
 ### 5.3 Train / Validation / Test の厳格な 3 層分離
 
-機械学習のデータセット分離原則をシミュレーション対戦の Seed 空間に適用します。
+データ漏洩（Contamination）を防ぐため、シード空間を厳格に 3 層分離します。
 
 ```text
 [全シード空間 (Campaign Seed から決定論的派生)]
-  ├── Training Seeds   (自己対戦用: 世代 g ごとに異なるストリーム)
-  ├── Validation Seeds (各世代 Champion 候補選定用: 全世代共通の固定 100 Seeds)
-  └── Holdout Test Seeds (最終 Champion 独立認定用: 未使用の未知 200 Seeds)
+  ├── Training Seeds     (自己対戦用: 世代 g ごとに独立ストリーム派生)
+  ├── Validation Seeds   (各世代 Champion 候補選定用: 全世代共通の固定 Seed 群)
+  └── Holdout Test Seeds (最終 Champion 独立認定用: 完全ブラインド・未使用 Seed 群)
 ```
 
-1. **Training Set (進化・親選択):**
-   - 各世代の `GenerationRunner` による自己対戦にのみ使用。
-   - `deriveSeed(campaignSeed, "generation-" + g)` により世代ごとに独立したシードを生成。
-2. **Validation Set (世代間比較・Champion 候補選定):**
-   - キャンペーン開始時に固定されたシード群（例: 50 〜 100 Seeds）。
-   - 各世代終了時に、その世代の暫定トップ個体が固定 Baseline 群と対戦。
-   - 世代間での実力向上や Early Stopping の判定に使用。
-3. **Test / Holdout Set (最終実力認定):**
-   - **完全ブラインド・未使用のシード群**（例: 200 Seeds）。
-   - 学習中やパラメータ探索中には一切実行せず、アクセスを遮断。
-   - キャンペーン終了後に、選定された最終 Champion DNA に対して **「1度きり」** 実行。
-   - ※Holdout テストの結果を見て DNA やアルゴリズムを再調整した場合は、その Holdout は汚染されたとみなし、次回は新たな Holdout Seed を使用する。
+- **Holdout Test の保護原則:**
+  - **Stage 1 (Small Pilot) では Holdout Test を一切実行しません。**
+  - Holdout Test は、Stage 3（または最終候補が存在するステージ）の完了時に、**最終 Champion 1体に対してのみ 1 回限り** 実行します。
+  - Holdout 結果を見てアルゴリズムやハイパーパラメータを調整した場合、その Holdout Seed は汚染されたとみなし、次回は新たな Seed 集合を割り当てます。
 
-### 5.4 公平性と統計的検定
+### 5.4 座席反転ペア対戦と統計的判定の厳格化
 
-偶然の偏りによる「見かけ上の強さ」を科学的に排除するため、以下の統計設計を義務付けます：
+#### (1) 座席反転ペア対戦 (Seat-Swapped Paired Matches)
+単一の Seed $S$ において、先後手を入れ替えた以下の 2 試合（1 ペア）を必ず実行します：
+- Leg 0: $P_1 = \text{Candidate}, P_2 = \text{Opponent}$ (Seed: $S$)
+- Leg 1: $P_1 = \text{Opponent}, P_2 = \text{Candidate}$ (Seed: $S$)
 
-1. **先後手バイアスの完全排除 (Seat-Swapped Paired Comparison):**
-   - 単一のシード $S$ に対し、必ず以下の 2 試合（1 ペア）を実行：
-     - Leg 0: $P_1 = \text{Champion}, P_2 = \text{Baseline}$ (Seed: $S$)
-     - Leg 1: $P_1 = \text{Baseline}, P_2 = \text{Champion}$ (Seed: $S$)
-   - 先攻有利・後攻有利の影響を完全に相殺したペア勝敗（Paired Outcome）を算出。
-2. **Wilson スコア信頼区間 (95% Confidence Interval):**
-   - 総試合数 $n$、勝利数 $w$、勝率 $\hat{p} = w/n$ に対し、95% 信頼区間 $[p_{\text{lower}}, p_{\text{upper}}]$ を算出：
-     $$p_{\text{lower}}, p_{\text{upper}} = \frac{\hat{p} + \frac{z^2}{2n} \pm z \sqrt{\frac{\hat{p}(1-\hat{p})}{n} + \frac{z^2}{4n^2}}}{1 + \frac{z^2}{n}} \quad (z = 1.96)$$
-3. **統計的改善認定基準 (Formal Acceptance Gate):**
-   - 最終 Champion が「強くなった」と客観的に認定されるための必須条件：
-     1. **対 FirstLegalPolicy:** 200 試合（100 ペア）において、勝率 $\hat{p} > 55.0\%$ かつ **95% 信頼区間の下限 $p_{\text{lower}} > 50.0\%$**（偶然の勝利である確率 $p < 0.05$）。
-     2. **対 Zero DNA:** 勝率 $\hat{p} > 60.0\%$ かつ $p_{\text{lower}} > 52.0\%$。
-     3. **対 初期世代 (g=0 Champion):** 勝率 $\hat{p} \ge 50.0\%$。
-   - 上記基準を満たさない場合、進化ループが完走していても学習結果は **「IMPROVEMENT_UNVERIFIED（未改善 / 失敗）」** として判定します。
+※座席反転により、特定の初期シードにおける先後手有利の影響を構造的に相殺・緩和し、座席による不公平性を低減します（「バイアスが完全に除去される」と過剰主張せず、相殺・緩和効果として位置付けます）。
+
+#### (2) ペア単位スコアリング (Paired Match Outcome)
+Leg 0 と Leg 1 は同一シードに基づくため互いに独立試行ではありません。したがって、統計的検定の独立試行の単位は「1試合」ではなく **「1ペア（2試合）」** として定義します。
+
+各ペア $i$ のペアスコア $X_i \in \{0.0, 0.25, 0.5, 0.75, 1.0\}$：
+- 2勝 0敗: $X_i = 1.0$ (ペア完勝)
+- 1勝 1分: $X_i = 0.75$
+- 1勝 1敗 または 2分: $X_i = 0.5$ (引き分け・相殺)
+- 1敗 1分: $X_i = 0.25$
+- 0勝 2敗: $X_i = 0.0$ (ペア完敗)
+
+平均ペアスコア $\bar{X} = \frac{1}{n} \sum_{i=1}^n X_i$ を算出し、ペア単位の勝率として扱います。
+
+#### (3) 異常系の厳格な扱い (Fail-Closed)
+- 引き分けはスコア 0.5 として厳密に計算に含めます。
+- **FAILED / INCOMPLETE 試合は勝敗へ自動換算（0勝や0.5分）してはなりません。**
+- FAILED が 1 件でも発生した場合は、評価全体を **`INVALID_EVIDENCE`**（無効な証拠）として失格・即時停止します。
+- INCOMPLETE が発生した場合は、**`INSUFFICIENT_EVIDENCE`**（証拠不十分）として判定保留とします。
+
+#### (4) 判定ステータスの 4 区分
+改善の成否を以下の 4 つの直交ステータスで厳密に区別します：
+1. **`IMPROVEMENT_VERIFIED` (改善認定):**
+   - 統計的検定（95% 信頼区間の下限 > 0.5）において、Baseline および初期 Champion に対する有意な改善が実証された状態。
+2. **`IMPROVEMENT_UNVERIFIED` (改善未証明):**
+   - サンプルサイズ不足やスコア差僅少により有意差が検出できなかった状態（※性能低下が証明されたわけではない）。
+3. **`CONFIRMED_REGRESSION` (性能低下確認):**
+   - 初期 Champion や Baseline に対し、統計的に有意に性能が劣化した状態。
+4. **`INVALID_EVIDENCE` (証拠無効):**
+   - FAILED 試合の混入、チェックサム不整合、データ破損等により評価が成立しない状態。
 
 ---
 
-## 6. 計算量と実験規模 (Computational Sizing)
+## 6. 学習規模と計算資源の試算 (Computational Sizing)
 
-### 6.1 GenomePolicy 対戦の計算コスト特性
+### 6.1 GenomePolicy 対戦の計算特性と試算シナリオ
 
-Work 2 で計測された FirstLegal vs SeededRandom のスループット（約 4.10 試合/秒）をそのまま GenomePolicy 同士の対戦に適用することはできません。
+GenomePolicy は 1 意思決定ごとに特徴量抽出（308次元）と全合法手重み計算（23,738重み）を行うため、FirstLegal より演算負荷が高くなります。
+現時点では Standard＋Pack での GenomePolicy vs GenomePolicy の大規模実測スループットは存在しないため、以下を **「仮のシナリオ試算値（Scenario Estimate）」** として定義します（実測値ではありません）。
 
-- **理由:** `GenomePolicy` は 1 意思決定ごとに、① 308 次元の特徴量抽出（`DecisionFeatureEncoder`）、② 全合法手に対する 23,738 重みの線形・相互作用スコア計算（`GenomeScorer`）を実行します。
-- **実測参考値:** 過去のベンチマークにおいて、GenomePolicy の 1 意思決定時間は約 **1.5 〜 2.5 ms**（FirstLegal の約 3〜5 倍）。
-- **1試合あたりの平均意思決定数:** Standard＋Pack では約 150 〜 200 decisions / 試合。
-- **推定対戦スループット:** 1 プロセスあたり約 **1.5 〜 2.5 試合/秒**（保守的に 2.0 試合/秒と見積もる）。
+- **仮定シナリオ値:** 1 プロセスあたり約 **2.0 試合/秒**（保守的仮定）
+- **工程別計算量の分離:**
 
-### 6.2 3段階の実験規模提案
+| 工程 | 対戦主体 | 1試合あたり意思決定数 | 備考 |
+| :--- | :--- | :---: | :--- |
+| **学習対戦 (Training)** | Genome vs Genome | 約 150 〜 200 | 両者が特徴量・重み計算を実行 |
+| **Validation 対戦** | Genome vs Baseline | 約 150 〜 200 | 片側のみ特徴量・重み計算を実行 |
+| **Holdout 対戦** | Genome vs Baseline / Genome | 約 150 〜 200 | 最終 Champion のみ 1 回実行 |
+| **DNA 生成・シリアライズ** | CPU 演算 | - | 世代あたり数 ms（無視可能） |
+| **Checkpoint** | JSON 直列化・ハッシュ・I/O | - | 世代あたり約 50 〜 150 ms |
+| **Resume 検証** | JSON デシリアライズ・検証 | - | 起動時 1 回、約 100 ms |
 
-最初から大規模な学習を実行せず、以下の 3 段階でリスクを段階的に解消します。
+### 6.2 Stage 別の再設計試合数と内訳
+
+各 Stage において、Seed 数、対戦相手数、座席反転（常に 2 試合）、Validation 世代数を完全に分離して集計しました。
+
+#### 試合数計算式
+- **Training 試合数:** $M_{\text{train}} = G \times N(N-1) \times R$
+- **Validation 試合数:** $M_{\text{val}} = G \times K_{\text{val}} \times S_{\text{val}} \times 2$
+- **Holdout 試合数:** $M_{\text{holdout}} = 1 \times K_{\text{holdout}} \times S_{\text{holdout}} \times 2$
+
+#### Stage 別集計表
 
 | 項目 | Stage 1: Small Pilot | Stage 2: Controlled Evolution | Stage 3: Large-Scale Evolution |
-| :--- | :--- | :--- | :--- |
-| **主目的** | 多世代遷移の正常性、決定論性、中断再開 | 複数世代での強さ改善確認、過学習検出 | 長時間安定学習、強力な Champion 獲得 |
-| **母集団サイズ ($N$)** | **$N = 6$** | **$N = 10$** | **$N = 16$** |
-| **世代数 ($G$)** | **$G = 3$** ($g=0, 1, 2$) | **$G = 6$** ($g=0 \sim 5$) | **$G = 15 \sim 20$** |
-| **自己対戦数 / 世代** | $6 \times 5 = 30$ 試合 | $10 \times 9 = 90$ 試合 | $16 \times 15 = 240$ 試合 |
-| **総自己対戦数** | 90 試合 | 540 試合 | 3,600 〜 4,800 試合 |
-| **Validation 試合数** | 各世代 20 試合 $\times 3 = 60$ 試合 | 各世代 40 試合 $\times 6 = 240$ 試合 | 各世代 60 試合 $\times 20 = 1,200$ 試合 |
-| **Holdout 試合数** | 50 試合 | 100 試合 | 200 試合 |
-| **総対戦数** | **約 200 試合** | **約 880 試合** | **約 5,000 〜 6,200 試合** |
-| **推定所要時間** (2.0 mps) | **約 1.5 〜 2 分** | **約 7 〜 10 分** | **約 40 〜 55 分** |
-| **推定メモリ (Heap)** | $\le 120$ MB | $\le 180$ MB | $\le 250$ MB |
-| **完了条件** | 200戦完走、決定論的一致、Resume整合 | 世代間勝率改善、過学習・PASS停止なし | 統計的検定合格、正式 Champion 保存 |
+| :--- | :---: | :---: | :---: |
+| **主目的** | 複数世代遷移、決定論性、中断再開 | 改善傾向確認、PASS千日手検出 | 長時間安定学習、最終 Champion 認定 |
+| **母集団サイズ ($N$)** | **$N = 6$** | **$N = 8$** | **$N = 12$** |
+| **世代遷移回数 ($G$)** | **$G = 2$** ($g=0 \rightarrow 1 \rightarrow 2$) | **$G = 5$** ($g=0 \rightarrow \dots \rightarrow 5$) | **$G = 10$** ($g=0 \rightarrow \dots \rightarrow 10$) |
+| **自己対戦 / 世代** | $6 \times 5 = 30$ 試合 | $8 \times 7 = 56$ 試合 | $12 \times 11 = 132$ 試合 |
+| **Training 総試合数** | **60 試合** | **280 試合** | **1,320 試合** |
+| **Validation 相手数 ($K_{\text{val}}$)** | 2 種 (FirstLegal, SeededRandom) | 2 種 (FirstLegal, SeededRandom) | 2 種 (FirstLegal, SeededRandom) |
+| **Validation Seed数 ($S_{\text{val}}$)** | 5 Seeds (座席反転計 10 試合/相手) | 10 Seeds (座席反転計 20 試合/相手) | 15 Seeds (座席反転計 30 試合/相手) |
+| **Validation 試合 / 世代** | $1 \times 2 \times 5 \times 2 = 20$ 試合 | $1 \times 2 \times 10 \times 2 = 40$ 試合 | $1 \times 2 \times 15 \times 2 = 60$ 試合 |
+| **Validation 総試合数** | **40 試合** (2世代分) | **200 試合** (5世代分) | **600 試合** (10世代分) |
+| **Holdout 実施有無** | **なし (0 試合)** | 探索用 Holdout (Stage 2 専用) | **本番 Holdout (完全未使用)** |
+| **Holdout 相手数 ($K_{\text{holdout}}$)** | - | 3 種 (FirstLegal, Random, Zero) | 4 種 (FirstLegal, Random, Zero, g0) |
+| **Holdout Seed数 ($S_{\text{holdout}}$)** | - | 20 Seeds | 30 Seeds |
+| **Holdout 総試合数** | **0 試合** | **120 試合** ($1 \times 3 \times 20 \times 2$) | **240 試合** ($1 \times 4 \times 30 \times 2$) |
+| **Stage 総試合数** | **100 試合** | **600 試合** | **2,160 試合** |
+| **推定所要時間 (仮定 2.0 mps)** | **約 1 分** | **約 5 〜 7 分** | **約 18 〜 25 分** |
+| **推定 Heap メモリ** | $\le 120$ MB | $\le 180$ MB | $\le 250$ MB |
 
-> [!NOTE]
-> Work 2 で判明した性能ドリフト（長時間実行時のスループット低下傾向）を踏まえ、Stage 3 でも総対戦数を 6,000 試合前後に抑えています。これにより、1 回の学習プロセスが 1 時間以内に確実に収まる安全な設計としています。
+> [!IMPORTANT]
+> 「1時間以内に確実に完走する」という保証表現は撤回します。
+> **適応型再見積もり計画:** 最初の Stage 1 (Small Pilot: 100 試合) において、実機コンテナ環境での GenomePolicy の実測スループットおよびメモリ推移を計測します。その実測プロファイルに基づき、Stage 2 および Stage 3 の試合数・所要時間を正式に再校正します。
 
 ---
 
 ## 7. 学習結果と Evidence の保存設計 (Evidence & Resume Design)
 
-### 7.1 保存すべきメタデータ体系
+### 7.1 メモリ肥大化対策 (`PolicyExperimentRunner` 統合方針)
 
-正式な学習成果として、以下の情報を包含する Evidence JSON を出力します：
+- **課題:** 既存の `PolicyExperimentRunner` は `decisionRecords: PolicyDecisionRecord[]` を全件メモリ配列に無制限 `push` しており、数千試合の評価時にメモリ爆発を招く構造的リスクがあります。
+- **対策:**
+  - 評価用に対戦ループを重複実装することは避け、`PolicyExperimentRunner` または `SimulationRunner` の呼び出しにおいて、生レコードの蓄積を抑止し、勝敗カウントおよび動作メトリクスの **ストリーミング集計（O(1) メモリ）** を行う設計とします。
 
-1. **環境・検証メタデータ:**
-   - Git Commit SHA、`verificationStatus: "VERIFIED"`、Dirty 状態（`isDirty: false`）
-   - RulePackage Digest (`standard-pack` 1.0.0)
-   - Feature Schema Version (`6`)、DNA Format Version (`1`)
-2. **キャンペーン設定:**
-   - `campaignSeed`、母集団サイズ $N$、世代数 $G$、選択設定、変異設定
-3. **世代履歴レコード (`generations` 配列):**
-   - 各世代の `generationSeed`、自己対戦サマリ、Validation スコア
-   - 生の全 Decision Trace は含めず、`traceDigest` のみを保持（メモリ・容量爆発防止）
-4. **最終 Champion DNA:**
-   - 選定された Champion の Genome ID、系譜（Lineage）、全重み配列
-   - `fullDnaDigest`、`patternWeightsDigest`、`contextPatternWeightsDigest`
-5. **独立評価 (Holdout) レポート:**
-   - Baseline 別勝敗（勝/分/敗/完了率）、Wilson 95% 信頼区間、統計判定結果（`PASSED` / `FAILED`）
-
-### 7.2 一時 Checkpoint と 正式 Evidence の分離
+### 7.2 一時 Checkpoint と 正式 Evidence の厳格な分離
 
 - **一時 Checkpoint (`.artifacts/checkpoints/`):**
-  - 1 世代終了ごとに保存される途中再開用ファイル。
-  - 最新の `PopulationSnapshot`（全個体の DNA）と未完了世代情報を保持。
-  - Git 管理外（`.gitignore` 対象）。次回実行時に自動検出・再開可能。
+  - 1 世代終了ごとに保存される途中再開用ファイル（Git 管理外）。
+  - 保存内容: 完了世代番号 $g$、`currentPopulation`、歴代 Validation レコード、暫定最良 Champion、`campaignSeed`。
 - **正式 Evidence (`tools/simulator/reports/ai/`):**
-  - キャンペーン全工程および Holdout テストが完了した後にのみ生成。
-  - Git 管理下に対象コミットとともに永続化。
+  - キャンペーン全工程および Holdout テストが完了した後にのみ生成（Git 管理下）。
+  - 保存内容: Execution Manifest、Git Commit SHA (`VERIFIED`), RulePackage Digest, Feature Schema v6, DNA Format v1, Campaign Seed, 全世代サマリ, 最終 Champion DNA, Holdout ペアスコア・95% CI レポート。
+  - **学習未達成時の保存:** 統計的検定で改善が認められなかった場合でも、結果を改ざん・破棄せず、`status: "IMPROVEMENT_UNVERIFIED"` または `"CONFIRMED_REGRESSION"` として正式 Evidence を保存します。
 
 ---
 
-## 8. Playtest への接続方針 (Human vs AI & Browser Playtest Integration)
+## 8. Playtest への接続方針 (Human vs AI Integration)
 
-進化学習によって獲得された Champion DNA を、人間がブラウザ上で対戦できるよう接続する方針を策定します。
-
-### 8.1 Champion DNA のエクスポート形式
-
-学習完了時、Champion DNA は以下の 2 ファイルとして出力されます：
-1. `tools/simulator/src/data/ai/standard-pack-champion-v6.json` (純粋な DNA JSON)
-2. `tools/simulator/src/data/ai/standard-pack-champion-v6.manifest.json` (SHA-256、学習世代、Holdout 勝率を含むマニフェスト)
-
-### 8.2 `PlaytestPolicyFactory` への統合
-
-既存の [`PlaytestPolicyFactory.ts`](file:///c:/Users/black/git/github/BlackPoker-issue551/tools/simulator/src/engine/playtest/PlaytestPolicyFactory.ts) を拡張し、新しい Policy ID を登録します：
-
-```typescript
-// 拡張イメージ (設計案)
-case "evolution-standard-pack-champion": {
-  if (regulationId !== "standard-pack") {
-    throw new Error("Champion AI は Standard＋Pack 専用です");
-  }
-  return createStandardPackChampionPolicy();
-}
-```
-
-### 8.3 公平性と Core 境界の遵守 (Cheating Prevention)
-
-- **完全な観測境界の維持:**
-  - AI は `DecisionRequest` のみにアクセスします。生 `GameState` や相手の手札・山札・伏せカードの秘密情報へのアクセスは Core レベルで遮断されています。
-- **合法手の完全委譲:**
-  - AI が指す手はすべて `DecisionRequest.patterns` に含まれる Core 提示の合法手の中から選択されます。AI 側で非合法手を捏造することは構造的に不可能です。
-- **UI 表示:**
-  - 対戦画面において、AI の名前、獲得世代（例: `Gen-15 Champion`）、学習時勝率、DNA ダイジェストを表示し、プレイヤーに対する透明性を確保します。
+- **Champion DNA の出力:** `tools/simulator/src/data/ai/standard-pack-champion-v6.json` およびマニフェストを出力。
+- **`PlaytestPolicyFactory` の拡張:** Policy ID `evolution-standard-pack-champion` を新設し、UI から選択可能にする。
+- **Core 観測境界の維持:** AI は `DecisionRequest` の観測情報のみにアクセス。全 GameState や非公開情報へのアクセスは Core レベルで厳格遮断。
 
 ---
 
 ## 9. 段階的実装ロードマップ (Phased Implementation Roadmap)
 
-Work 3 全体を 5 つの独立レビュー可能なサブ Work に分割します。
+独立レビュー可能な 5 つのサブ Work に分割します。
 
 ```mermaid
 flowchart LR
@@ -455,93 +379,63 @@ flowchart LR
     W3_4 --> W3_5
 ```
 
-### Sub-Work 詳細仕様
+### Sub-Work 詳細仕様と完了条件
 
 #### 1. Work 3-1: 独立評価ハーネス・Train/Val/Test 分離・統計判定基盤
 - **Work ID:** `BP-SIM-AI-V92-WORK3-EVALUATOR-FOUNDATION`
-- **目的:** 学習を開始する前に、まず「強さを客観的に測る物差し」を実装・検証する。
-- **既存機能との関係:** `PolicyExperimentRunner`, `SimulationRunner`, `BaselinePolicies` を再利用。
+- **目的:** 学習を開始する前に、客観的な「強さの物差し（座席反転ペア対戦・ペア単位スコア・Train/Val/Test 分離）」を確立する。
+- **既存機能との関係:** `SimulationRunner`, `BaselinePolicies`, `ExecutionManifest` を再利用。
 - **変更・新規ファイル:**
-  - `src/domain/ai/EvolutionEvaluationTypes.ts` (新規: 評価設定・統計結果型定義)
-  - `src/engine/ai/EvolutionIndependentEvaluator.ts` (新規: 座席入れ替え・Wilson CI 計算・有意性判定)
+  - `src/domain/ai/EvolutionEvaluationTypes.ts` (新規: 評価設定・ペアスコア・統計結果型定義)
+  - `src/engine/ai/EvolutionIndependentEvaluator.ts` (新規: 座席反転ペア対戦・ストリーミング集計・ペアスコア検定)
   - `src/tests/ai/evolutionIndependentEvaluator.test.ts` (新規: 単体テスト)
-- **テスト方針:** 既知の勝率ダミーデータでの Wilson CI 計算検証、FirstLegal vs SeededRandom の座席入れ替え対戦の決定論性テスト。
-- **完了条件:** 単体テスト 100% PASS、型エラー 0 件。
+- **完了条件 (厳格な設計契約):**
+  1. 正しい Seed 分離（Train / Val / Holdout のシード重複がないことの検証）
+  2. 座席反転の整合性（同一 Seed で Leg 0 / Leg 1 が正しく実行されること）
+  3. 試合結果の保存・ペア単位再集計（引き分けスコア 0.5 の正確な計算）
+  4. 統計的判定の適用範囲（FAILED による `INVALID_EVIDENCE`、INCOMPLETE による `INSUFFICIENT_EVIDENCE` の Fail-Closed 処理）
+  5. 決定論的再現性（同一入力で完全同一の評価スコアが出力されること）
+  6. メモリ使用量の制限（全 `decisionRecords` をメモリ蓄積せず、ストリーミング集計で完了すること）
+  7. クリーン環境でのテスト 100% PASS、型エラー 0 件
 - **次 Work 移行条件:** 独立レビュー承認。
 
 #### 2. Work 3-2: Campaign Orchestrator・Champion 選定・Checkpoint/Resume 統合
 - **Work ID:** `BP-SIM-AI-V92-WORK3-CAMPAIGN-ORCHESTRATOR`
-- **目的:** `EvolutionLoop` の外側に、世代間評価、Champion 選定、Early Stopping、チェックポイント/Resume を統括する管理層を構築。
-- **既存機能との関係:** `EvolutionLoop`, `LargeScaleBatchRunner` (Checkpoint ロジック), `ExecutionManifest` を再利用。
-- **変更・新規ファイル:**
-  - `src/domain/ai/EvolutionCampaignTypes.ts` (新規)
-  - `src/engine/ai/EvolutionCampaignManager.ts` (新規)
-  - `src/tests/ai/evolutionCampaignManager.test.ts` (新規: モック/小規模でのループ・Resume テスト)
-- **テスト方針:** 途中停止からの決定論的再開テスト、チェックサム改ざん検知テスト、Early Stopping 発動テスト。
-- **完了条件:** テスト PASS、CI 成功。
+- **目的:** `EvolutionLoop(generationCount: 1)` を世代ごとに呼び出し、Validation、Champion 候補追跡、Early Stopping、チェックポイント/Resume を統括する管理層を構築。
+- **完了条件:** 途中停止からの決定論的再開テスト PASS、チェックサム改ざん検知テスト PASS、Early Stopping テスト PASS。
 - **次 Work 移行条件:** 独立レビュー承認。
 
 #### 3. Work 3-3: Stage 1 Small Pilot 実機検証と決定論性立証
 - **Work ID:** `BP-SIM-AI-V92-WORK3-STAGE1-PILOT`
-- **目的:** Standard＋Pack において、実機コンテナ環境で小規模（$N=6, G=3$, 約200試合）の多世代進化を実行し、決定論性と基盤の健全性を実証する。
-- **既存機能との関係:** Work 3-1, 3-2 の実装を使用。
-- **変更・新規ファイル:**
-  - `src/cli/evolutionStage1PilotRunner.ts` (新規 CLI)
-  - `reports/ai/evolution-stage1-pilot.json` (新規 Evidence)
-  - `src/tests/ai/evolutionStage1Pilot.test.ts` (新規 検証テスト)
-- **テスト方針:** 2 回実行での完全ビット一致（Run A === Run B）、全試合 COMPLETED、FAILED = 0。
-- **完了条件:** 3 世代完走、Evidence 保存、CI 成功。
+- **目的:** Standard＋Pack において、実機コンテナ環境で小規模（$N=6, G=2$, 計 100 試合）の多世代進化を実行し、決定論性と基盤の健全性を実証する。
+- **設計方針:** **Small Pilot の結果が期待した強さに届かない場合も、実験基盤として正常に動作していれば、その事実を Evidence に記録したうえで次の判断へ進める。**
+- **完了条件:** 100 試合完走、FAILED = 0、2回実行での完全ビット一致（Run A === Run B）、実測スループット・メモリプロファイル取得、Evidence 保存、CI 成功。
 - **次 Work 移行条件:** 独立レビュー承認。
 
 #### 4. Work 3-4: Stage 2 Controlled Evolution・強さ改善確認
 - **Work ID:** `BP-SIM-AI-V92-WORK3-STAGE2-CONTROLLED`
-- **目的:** $N=10, G=6$（約880試合）の中規模学習を実施し、Baseline に対する勝率の向上および多様性の維持を確認。
-- **変更・新規ファイル:**
-  - `src/cli/evolutionStage2ControlledRunner.ts` (新規 CLI)
-  - `reports/ai/evolution-stage2-controlled.json` (新規 Evidence)
-  - `src/tests/ai/evolutionStage2Controlled.test.ts` (新規 検証テスト)
+- **目的:** Stage 1 の実測プロファイルに基づき校正された規模（約 600 試合）で学習を実施し、Baseline に対する勝率向上傾向および多様性維持を確認。
 - **完了条件:** Validation スコアの向上確認、過剰 PASS ストール発生 0 件、CI 成功。
 - **次 Work 移行条件:** 独立レビュー承認。
 
 #### 5. Work 3-5: Stage 3 Large-Scale・Champion DNA 保存・Playtest 統合
 - **Work ID:** `BP-SIM-AI-V92-WORK3-STAGE3-CHAMPION-PLAYTEST`
-- **目的:** 本番規模（$N=16, G=15\sim 20$, 約5,000〜6,000試合）の学習を実行し、正式 Holdout 認定を受けた Champion DNA を生成・保存し、ブラウザ Playtest から対戦可能にする。
-- **変更・新規ファイル:**
-  - `src/data/ai/standard-pack-champion-v6.json` (新規 Champion DNA)
-  - `src/data/ai/standard-pack-champion-v6.manifest.json` (新規 マニフェスト)
-  - `src/engine/playtest/PlaytestPolicyFactory.ts` (更新: Champion 登録)
-  - `reports/ai/evolution-stage3-champion-evidence.json` (新規 正式 Evidence)
-  - `src/tests/ai/standardPackChampionPlaytestIntegration.test.ts` (新規 E2E テスト)
+- **目的:** 本番規模（約 2,000 試合規模）の学習を実行し、本番 Holdout 認定を受けた Champion DNA を生成・保存し、ブラウザ Playtest から対戦可能にする。
 - **完了条件:** 統計的検定（95% CI 下限 > 50%）合格、Playtest E2E テスト PASS、CI 成功。
 
 ---
 
 ## 10. リスク・未確定事項・推奨する最初のWork (Risks & Open Questions)
 
-### 10.1 主なリスクと緩和策
-
-1. **リスク 1: 過剰 PASS 連打（千日手）への局所収束**
-   - *リスク:* オフスプリングが安全策として PASS を過剰選択し、進歩が停止する。
-   - *緩和策:* `SemanticStallCycleDetector` による早期検知、FirstLegal に対する Validation 不合格時の即時失格ルール。
-2. **リスク 2: CPU スロットリングによる学習遅延**
-   - *リスク:* 長時間実行に伴い CPU クロックが低下し、学習時間が予定を超過する。
-   - *緩和策:* Stage 3 でも総対戦数を 6,000 試合以内（約 40〜55 分）に厳格制限。世代ごとの経過時間を監視。
-3. **リスク 3: 過学習（Training への特化と汎化性能の欠如）**
-   - *リスク:* 自己対戦の特定ペアにのみ勝てる歪んだ重みが形成される。
-   - *緩和策:* 完全ブラインドの未使用 Holdout Test による最終認定。固定 Baseline 群との Validation 評価の義務付け。
-
-### 10.2 未確定事項 (Open Questions)
-
-1. **Standard＋Pack における最適ハイパーパラメータ:**
-   - 突然変異率 $\mu_{\text{rate}}$ や強度 $\sigma_{\text{mut}}$ の最適値は未確定。Stage 1 / 2 の結果を見て決定論的に微調整する必要がある。
-2. **人間との体感難易度バランス:**
-   - FirstLegalPolicy に 80% 勝てる AI が、人間の BlackPoker プレイヤーに対してどの程度の強さ（初級・中級・上級）に相当するかは、Playtest を実施するまで未確定。
-
-### 10.3 推奨する最初の Work
-
-**推奨:** **`Work 3-1: BP-SIM-AI-V92-WORK3-EVALUATOR-FOUNDATION`** に最初に着手することを強く推奨します。
-
-- **理由:** 学習ループを先に回してしまうと、「その結果が本当に強くなっているのか」を客観的に検証できず、過去のパイロットと同様に評価の妥当性が議論のボトルネックになります。まず「ブレない物差し（座席反転対戦・Wilson 95% CI・Train/Val/Test 分離）」を確立してから学習アルゴリズムに進むことが、Fail-Closed な開発原則に合致します。
+- **主なリスクと緩和策:**
+  - *過剰 PASS ストール:* `SemanticStallCycleDetector` 常時監視と FirstLegal 不合格時の即時失格。
+  - *メモリ肥大化:* `PolicyExperimentRunner` での全意思決定レコード蓄積を廃止し、ストリーミング集計を採用。
+  - *過学習・選定バイアス:* Validation は候補絞り込みにのみ使い、最終実力認定は完全ブラインドの未使用 Holdout Test でのみ実施。
+- **未確定事項:**
+  - Standard＋Pack における GenomePolicy vs GenomePolicy の実測スループット（Stage 1 で実測取得予定）。
+  - 突然変異率・変異強度の最適値（Stage 1 / 2 の結果から決定論的に選定）。
+- **推奨する最初の Work:**
+  - **`Work 3-1: BP-SIM-AI-V92-WORK3-EVALUATOR-FOUNDATION`** への着手を強く推奨します。学習ループを回す前に、まず「ブレない物差し（Train/Val/Test 分離・座席反転ペア対戦・ストリーミング集計・Fail-Closed 判定）」を確立することが、安全な開発原則に合致します。
 
 ---
 
