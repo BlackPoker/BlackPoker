@@ -224,6 +224,12 @@ export interface LargeScaleBatchConfig {
   readonly checkpointInterval?: number;
   readonly checkpointDir?: string;
   readonly memorySafetyGuard?: MemorySafetyGuardConfig;
+  readonly onCheckpointSaved?: (info: {
+    readonly matchIndex: number;
+    readonly filePath: string;
+    readonly durationMs: number;
+    readonly fileSizeBytes: number;
+  }) => void;
   readonly onProgress?: (progress: {
     completedMatches: number;
     totalMatches: number;

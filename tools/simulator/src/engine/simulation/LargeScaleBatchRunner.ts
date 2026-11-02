@@ -672,6 +672,7 @@ export class LargeScaleBatchRunner {
 
     // チェックポイント書き出しヘルパー (原子的置換: tmp -> rename)
     const writeCheckpoint = (targetFilePath: string, lastIndex: number): void => {
+      const chkStartTime = globalThis.performance.now();
       if (!fs.existsSync(checkpointDir)) {
         fs.mkdirSync(checkpointDir, { recursive: true });
       }
@@ -696,8 +697,19 @@ export class LargeScaleBatchRunner {
       };
 
       const tmpFile = `${targetFilePath}.tmp.${Date.now()}`;
-      fs.writeFileSync(tmpFile, JSON.stringify(chkData, null, 2), "utf-8");
+      const serialized = JSON.stringify(chkData, null, 2);
+      fs.writeFileSync(tmpFile, serialized, "utf-8");
       fs.renameSync(tmpFile, targetFilePath);
+
+      const chkDurationMs = globalThis.performance.now() - chkStartTime;
+      if (config.onCheckpointSaved) {
+        config.onCheckpointSaved({
+          matchIndex: lastIndex,
+          filePath: targetFilePath,
+          durationMs: chkDurationMs,
+          fileSizeBytes: Buffer.byteLength(serialized, "utf-8"),
+        });
+      }
     };
 
     // メモリ安全ガード初期化
