@@ -21,6 +21,7 @@ import {
   ExecutionManifestIntegrityMismatchError,
   LargeScaleBatchConfigurationError,
   computeCheckpointChecksum,
+  MemorySafetyLimitExceededError,
 } from "../../engine/simulation/LargeScaleBatchRunner.js";
 import {
   LargeScaleBatchConfig,
@@ -966,5 +967,53 @@ describe("LargeScaleBatchRunner Stage 1 R1 (堅牢性・再現性・診断情報
     const overwritten = JSON.parse(fs.readFileSync(existingFilePath, "utf-8"));
     expect(overwritten.newResult).toBe(456);
     fs.unlinkSync(existingFilePath);
+  });
+
+  it("Test 23: メモリ安全上限超過時の安全中断および整合チェックポイント保存 (fail-closed)", async () => {
+    const config: LargeScaleBatchConfig = {
+      batchId: "test-memory-abort",
+      workId: "BP-SIM-AI-V92-WORK2-BATCH-FOUNDATION-STAGE1-R1",
+      baseSeed: 9999,
+      matchCount: 5,
+      regulationId: "standard-pack",
+      rootDir,
+      checkpointDir: testCheckpointDir,
+      memorySamplingInterval: 1, // 毎試合サンプリング
+      memorySafetyGuard: {
+        maxHeapUsedBytes: 1024, // 1KB (確実に超過する極小値)
+        consecutiveThreshold: 1,
+      },
+    };
+
+    let caughtError: MemorySafetyLimitExceededError | undefined;
+    try {
+      await LargeScaleBatchRunner.runBatchForTesting({
+        config,
+        sessionFactory,
+        policyFactory: createPolicyFactory(),
+        rulePackageDigest,
+        testGitMetadata: cleanTestGitMetadata,
+      });
+    } catch (err: any) {
+      if (err instanceof MemorySafetyLimitExceededError) {
+        caughtError = err;
+      } else {
+        throw err;
+      }
+    }
+
+    expect(caughtError).toBeDefined();
+    expect(caughtError!.name).toBe("MemorySafetyLimitExceededError");
+    expect(caughtError!.lastCompletedIndex).toBe(0);
+    expect(caughtError!.lastCheckpointPath).toBeDefined();
+    expect(fs.existsSync(caughtError!.lastCheckpointPath!)).toBe(true);
+
+    // 保存された中断チェックポイントの整合性検証
+    const rawChk = fs.readFileSync(caughtError!.lastCheckpointPath!, "utf-8");
+    const chk: BatchCheckpointState = JSON.parse(rawChk);
+    expect(chk.batchId).toBe("test-memory-abort");
+    expect(chk.lastCompletedIndex).toBe(0);
+    expect(chk.completedMatches.length).toBe(1);
+    expect(computeCheckpointChecksum(chk)).toBe(chk.checksum);
   });
 });

@@ -192,6 +192,18 @@ export interface BatchCheckpointState {
 }
 
 /**
+ * メモリ使用量急増時の安全中断ガード設定
+ */
+export interface MemorySafetyGuardConfig {
+  /** 許容最大 RSS バイト数（これを超過した状態が継続した場合に安全中断。例: 1.5 * 1024 * 1024 * 1024 = 1.5GB） */
+  readonly maxRssBytes?: number;
+  /** 許容最大 HeapUsed バイト数（これを超過した状態が継続した場合に安全中断。例: 1.0 * 1024 * 1024 * 1024 = 1.0GB） */
+  readonly maxHeapUsedBytes?: number;
+  /** 連続超過回数閾値（デフォルト: 2回） */
+  readonly consecutiveThreshold?: number;
+}
+
+/**
  * 大規模バッチ実行設定
  */
 export interface LargeScaleBatchConfig {
@@ -211,6 +223,7 @@ export interface LargeScaleBatchConfig {
   readonly memorySamplingInterval?: number;
   readonly checkpointInterval?: number;
   readonly checkpointDir?: string;
+  readonly memorySafetyGuard?: MemorySafetyGuardConfig;
   readonly onProgress?: (progress: {
     completedMatches: number;
     totalMatches: number;

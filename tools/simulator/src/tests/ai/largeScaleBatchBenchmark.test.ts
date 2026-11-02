@@ -291,7 +291,7 @@ describe("LargeScaleBatchBenchmark Stage 1 Evidence Gate", () => {
       expect(gcDiag!.gcAvailable).toBe(true);
       // 強制 GC 後の実残存ヒープが 100MB 未満であること
       expect(gcDiag!.postGcHeapUsedBytes).toBeLessThan(100 * 1024 * 1024);
-      // 強制 GC で 100MB 以上のヒープが回収され、リークがないことが実証されていること
+      // 強制 GC で 100MB 以上のヒープが回収され、長時間のV8ヒープ回収により一定水準までメモリが縮小されることが確認されていること
       expect(gcDiag!.reclaimedHeapBytes).toBeGreaterThan(100 * 1024 * 1024);
     });
 

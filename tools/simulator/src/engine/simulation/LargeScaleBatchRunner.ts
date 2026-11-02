@@ -58,6 +58,20 @@ export class LargeScaleBatchConfigurationError extends Error {
   }
 }
 
+/**
+ * メモリ使用量が安全上限を超過したことによる安全中断エラー
+ */
+export class MemorySafetyLimitExceededError extends Error {
+  constructor(
+    message: string,
+    public readonly lastCompletedIndex: number,
+    public readonly lastCheckpointPath?: string
+  ) {
+    super(message);
+    this.name = "MemorySafetyLimitExceededError";
+  }
+}
+
 function sha256(data: string): string {
   return crypto.createHash("sha256").update(data).digest("hex");
 }
@@ -656,6 +670,43 @@ export class LargeScaleBatchRunner {
     const checkpointInterval = config.checkpointInterval ?? 100;
     const memorySamplingInterval = config.memorySamplingInterval ?? 25;
 
+    // チェックポイント書き出しヘルパー (原子的置換: tmp -> rename)
+    const writeCheckpoint = (targetFilePath: string, lastIndex: number): void => {
+      if (!fs.existsSync(checkpointDir)) {
+        fs.mkdirSync(checkpointDir, { recursive: true });
+      }
+      const stateWithoutChecksum: Omit<BatchCheckpointState, "checksum"> = {
+        checkpointVersion: LARGE_SCALE_BATCH_VERSION,
+        batchId: config.batchId,
+        baseSeed: config.baseSeed,
+        experimentFingerprint: initialManifest.experimentFingerprint,
+        regulationId: config.regulationId,
+        rulePackageDigest,
+        playerPoliciesDigest,
+        totalTargetMatches: config.matchCount,
+        maxDecisionsPerMatch: maxDecisions,
+        lastCompletedIndex: lastIndex,
+        timestamp: new Date().toISOString(),
+        completedMatches: matches,
+        failures,
+      };
+      const chkData: BatchCheckpointState = {
+        ...stateWithoutChecksum,
+        checksum: computeCheckpointChecksum(stateWithoutChecksum),
+      };
+
+      const tmpFile = `${targetFilePath}.tmp.${Date.now()}`;
+      fs.writeFileSync(tmpFile, JSON.stringify(chkData, null, 2), "utf-8");
+      fs.renameSync(tmpFile, targetFilePath);
+    };
+
+    // メモリ安全ガード初期化
+    const memorySafetyGuard = config.memorySafetyGuard;
+    const maxRssBytes = memorySafetyGuard?.maxRssBytes;
+    const maxHeapUsedBytes = memorySafetyGuard?.maxHeapUsedBytes;
+    const consecutiveThreshold = memorySafetyGuard?.consecutiveThreshold ?? 2;
+    let consecutiveMemoryExceededCount = 0;
+
     // 4. 試合実行ループ (Git コマンドは試合ごとに実行しない)
     const traceRingBuffer = new RecentDecisionTraceRingBuffer(10);
 
@@ -819,7 +870,7 @@ export class LargeScaleBatchRunner {
         policyBundle = undefined;
       }
 
-      // メモリサンプリング
+      // メモリサンプリング & 安全上限監視
       if ((i + 1) % memorySamplingInterval === 0 || i === config.matchCount - 1) {
         const mem = process.memoryUsage();
         if (mem.rss > peakRss) peakRss = mem.rss;
@@ -831,6 +882,42 @@ export class LargeScaleBatchRunner {
           heapUsedBytes: mem.heapUsed,
           externalBytes: mem.external,
         });
+
+        // 安全中断ガード (RSS / HeapUsed の継続的急増監視)
+        if (maxRssBytes !== undefined || maxHeapUsedBytes !== undefined) {
+          const rssExceeded = maxRssBytes !== undefined && mem.rss > maxRssBytes;
+          const heapExceeded = maxHeapUsedBytes !== undefined && mem.heapUsed > maxHeapUsedBytes;
+
+          if (rssExceeded || heapExceeded) {
+            consecutiveMemoryExceededCount++;
+            if (consecutiveMemoryExceededCount >= consecutiveThreshold) {
+              const abortChkFile = path.join(
+                checkpointDir,
+                `${config.batchId}-abort-chk-${String(i + 1).padStart(6, "0")}.json`
+              );
+              writeCheckpoint(abortChkFile, i);
+
+              const details = [
+                rssExceeded
+                  ? `RSS: ${(mem.rss / (1024 * 1024)).toFixed(1)}MB > ${(maxRssBytes! / (1024 * 1024)).toFixed(1)}MB`
+                  : undefined,
+                heapExceeded
+                  ? `HeapUsed: ${(mem.heapUsed / (1024 * 1024)).toFixed(1)}MB > ${(maxHeapUsedBytes! / (1024 * 1024)).toFixed(1)}MB`
+                  : undefined,
+              ]
+                .filter(Boolean)
+                .join(", ");
+
+              throw new MemorySafetyLimitExceededError(
+                `メモリ安全上限超過によりバッチ実行を安全に中断しました (Match ${i + 1}/${config.matchCount}, 連続超過回数: ${consecutiveMemoryExceededCount}, ${details})。最後の整合チェックポイントを保持しました: ${abortChkFile}`,
+                i,
+                abortChkFile
+              );
+            }
+          } else {
+            consecutiveMemoryExceededCount = 0;
+          }
+        }
       }
 
       // 進捗コールバック
@@ -849,36 +936,11 @@ export class LargeScaleBatchRunner {
 
       // チェックポイント保存 (原子的置換: tmp -> rename)
       if ((i + 1) % checkpointInterval === 0 && (i + 1) < config.matchCount) {
-        if (!fs.existsSync(checkpointDir)) {
-          fs.mkdirSync(checkpointDir, { recursive: true });
-        }
         const chkFile = path.join(
           checkpointDir,
           `${config.batchId}-chk-${String(i + 1).padStart(6, "0")}.json`
         );
-        const stateWithoutChecksum: Omit<BatchCheckpointState, "checksum"> = {
-          checkpointVersion: LARGE_SCALE_BATCH_VERSION,
-          batchId: config.batchId,
-          baseSeed: config.baseSeed,
-          experimentFingerprint: initialManifest.experimentFingerprint,
-          regulationId: config.regulationId,
-          rulePackageDigest,
-          playerPoliciesDigest,
-          totalTargetMatches: config.matchCount,
-          maxDecisionsPerMatch: maxDecisions,
-          lastCompletedIndex: i,
-          timestamp: new Date().toISOString(),
-          completedMatches: matches,
-          failures,
-        };
-        const chkData: BatchCheckpointState = {
-          ...stateWithoutChecksum,
-          checksum: computeCheckpointChecksum(stateWithoutChecksum),
-        };
-
-        const tmpFile = `${chkFile}.tmp.${Date.now()}`;
-        fs.writeFileSync(tmpFile, JSON.stringify(chkData, null, 2), "utf-8");
-        fs.renameSync(tmpFile, chkFile);
+        writeCheckpoint(chkFile, i);
       }
     }
 
