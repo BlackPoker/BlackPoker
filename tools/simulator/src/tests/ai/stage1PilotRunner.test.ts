@@ -815,4 +815,138 @@ describe("Stage 1 Small Pilot CLI & Evidence Audit Foundation (Work 3-3 R2)", ()
     // 出自メモの存在
     expect(audit.provenanceNotePresent).toBe(true);
   });
+
+  it("Test 13: auditExistingPilotArtifacts rejects when MANIFEST_SHA256.json is missing", () => {
+    const fixtureDir = path.resolve(__dirname, `../../.tmp_fixture_test13_${Date.now()}`);
+    createValidAuditFixture(fixtureDir);
+
+    try {
+      const manifestPath = path.join(fixtureDir, "MANIFEST_SHA256.json");
+      fs.rmSync(manifestPath);
+
+      const audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.manifestIntegrity.hasManifestShaFile).toBe(false);
+      expect(audit.errors.some((e) => e.includes("MANIFEST_SHA256.json is missing"))).toBe(true);
+    } finally {
+      if (fs.existsSync(fixtureDir)) {
+        fs.rmSync(fixtureDir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("Test 14: auditExistingPilotArtifacts rejects when required file is missing from MANIFEST_SHA256.json", () => {
+    const fixtureDir = path.resolve(__dirname, `../../.tmp_fixture_test14_${Date.now()}`);
+    createValidAuditFixture(fixtureDir);
+
+    try {
+      const manifestPath = path.join(fixtureDir, "MANIFEST_SHA256.json");
+      const list = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+      // 必須ファイルを 1 件除外
+      const omitted = list.filter((item: any) => item.path !== "run-b/campaign-stage1-pilot-checkpoint.json");
+      fs.writeFileSync(manifestPath, JSON.stringify(omitted, null, 2), "utf-8");
+
+      const audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.manifestIntegrity.missingRequiredFiles).toContain("run-b/campaign-stage1-pilot-checkpoint.json");
+      expect(audit.errors.some((e) => e.includes('Required file "run-b/campaign-stage1-pilot-checkpoint.json" is not listed in MANIFEST_SHA256.json'))).toBe(true);
+    } finally {
+      if (fs.existsSync(fixtureDir)) {
+        fs.rmSync(fixtureDir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("Test 15: auditExistingPilotArtifacts fails-closed (isValid=false) when any required audit item is UNVERIFIED", () => {
+    const fixtureDir = path.resolve(__dirname, `../../.tmp_fixture_test15_${Date.now()}`);
+    createValidAuditFixture(fixtureDir);
+
+    try {
+      // Evidence の measurements.runA.totalDecisions を削除して totalDecisions を UNVERIFIED にする
+      const evPath = path.join(fixtureDir, "stage1-pilot-evidence.json");
+      const ev = JSON.parse(fs.readFileSync(evPath, "utf-8"));
+      delete ev.measurements.runA.totalDecisions;
+      fs.writeFileSync(evPath, JSON.stringify(ev, null, 2), "utf-8");
+
+      // MANIFEST_SHA256.json も更新してハッシュ不一致ではなく UNVERIFIED 自体の Fail-Closed をテスト
+      const manifestPath = path.join(fixtureDir, "MANIFEST_SHA256.json");
+      const list = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+      const evEntry = list.find((item: any) => item.path === "stage1-pilot-evidence.json");
+      if (evEntry) {
+        evEntry.sha256 = computeFileSha256(evPath);
+      }
+      fs.writeFileSync(manifestPath, JSON.stringify(list, null, 2), "utf-8");
+
+      const audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.verifications.totalDecisions.status).toBe("UNVERIFIED");
+      expect(audit.errors.some((e) => e.includes("Fail-Closed"))).toBe(true);
+    } finally {
+      if (fs.existsSync(fixtureDir)) {
+        fs.rmSync(fixtureDir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("Test 16: auditExistingPilotArtifacts rejects when metrics and result-derived actual match counts conflict (no fallback)", () => {
+    const fixtureDir = path.resolve(__dirname, `../../.tmp_fixture_test16_${Date.now()}`);
+    createValidAuditFixture(fixtureDir);
+
+    try {
+      // Run A Result の SeedRegistry 内の Training Seeds を 30個から28個に改変 (合計58試合)
+      const resPath = path.join(fixtureDir, "run-a/campaign-stage1-pilot-result.json");
+      const res = JSON.parse(fs.readFileSync(resPath, "utf-8"));
+      res.seedRegistry.trainingSeedsByGeneration[0] = res.seedRegistry.trainingSeedsByGeneration[0].slice(0, 28);
+      fs.writeFileSync(resPath, JSON.stringify(res, null, 2), "utf-8");
+
+      // MANIFEST_SHA256.json のハッシュも更新して純粋な試合数不一致を検出させる
+      const manifestPath = path.join(fixtureDir, "MANIFEST_SHA256.json");
+      const list = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+      const entry = list.find((item: any) => item.path === "run-a/campaign-stage1-pilot-result.json");
+      if (entry) {
+        entry.sha256 = computeFileSha256(resPath);
+      }
+      fs.writeFileSync(manifestPath, JSON.stringify(list, null, 2), "utf-8");
+
+      const audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.verifications.trainingMatches.status).toBe("FAIL");
+      expect(audit.errors.some((e) => e.includes("Training match count mismatch"))).toBe(true);
+    } finally {
+      if (fs.existsSync(fixtureDir)) {
+        fs.rmSync(fixtureDir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("Test 17: auditExistingPilotArtifacts rejects when Run B metrics is tampered", () => {
+    const fixtureDir = path.resolve(__dirname, `../../.tmp_fixture_test17_${Date.now()}`);
+    createValidAuditFixture(fixtureDir);
+
+    try {
+      // Run B Metrics の totalDecisions を改変 (1500 -> 1501)
+      const metricsPath = path.join(fixtureDir, "run-b/campaign-stage1-pilot-metrics.json");
+      const metB = JSON.parse(fs.readFileSync(metricsPath, "utf-8"));
+      metB.totalDecisions = 1501;
+      fs.writeFileSync(metricsPath, JSON.stringify(metB, null, 2), "utf-8");
+
+      // MANIFEST_SHA256 も更新して純粋な意思決定数不一致を検出させる
+      const manifestPath = path.join(fixtureDir, "MANIFEST_SHA256.json");
+      const list = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+      const entry = list.find((item: any) => item.path === "run-b/campaign-stage1-pilot-metrics.json");
+      if (entry) {
+        entry.sha256 = computeFileSha256(metricsPath);
+      }
+      fs.writeFileSync(manifestPath, JSON.stringify(list, null, 2), "utf-8");
+
+      const audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.verifications.totalDecisions.status).toBe("FAIL");
+      expect(audit.errors.some((e) => e.includes("Total decisions mismatch"))).toBe(true);
+    } finally {
+      if (fs.existsSync(fixtureDir)) {
+        fs.rmSync(fixtureDir, { recursive: true, force: true });
+      }
+    }
+  });
 });

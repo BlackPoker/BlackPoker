@@ -1015,6 +1015,18 @@ export function auditSeedRegistry(registry: any, runLabel: string): SeedAuditBre
   };
 }
 
+export const REQUIRED_PILOT_AUDIT_FILES = [
+  "run-a/preflight-manifest.json",
+  "run-a/campaign-stage1-pilot-result.json",
+  "run-a/campaign-stage1-pilot-metrics.json",
+  "run-a/campaign-stage1-pilot-checkpoint.json",
+  "run-b/preflight-manifest.json",
+  "run-b/campaign-stage1-pilot-result.json",
+  "run-b/campaign-stage1-pilot-metrics.json",
+  "run-b/campaign-stage1-pilot-checkpoint.json",
+  "stage1-pilot-evidence.json",
+] as const;
+
 export interface ArtifactAuditResult {
   readonly isValid: boolean;
   readonly errors: readonly string[];
@@ -1033,6 +1045,7 @@ export interface ArtifactAuditResult {
     readonly totalFilesChecked: number;
     readonly matchedFilesCount: number;
     readonly mismatches: readonly string[];
+    readonly missingRequiredFiles: readonly string[];
   };
   readonly checkpointIntegrity: {
     readonly runA: CheckpointIntegrityResult;
@@ -1073,34 +1086,43 @@ export function auditExistingPilotArtifacts(artifactsDir: string): ArtifactAudit
   const provenanceNotePath = path.join(artifactsDir, "AUDIT_PROVENANCE_NOTE.md");
 
   // 1. ファイル存在確認
-  for (const [name, p] of [
-    ["evidence", evidencePath],
-    ["run-a manifest", runAManifestPath],
-    ["run-b manifest", runBManifestPath],
-    ["run-a result", runAResultPath],
-    ["run-b result", runBResultPath],
-    ["run-a metrics", runAMetricsPath],
-    ["run-b metrics", runBMetricsPath],
-    ["run-a checkpoint", runACheckpointPath],
-    ["run-b checkpoint", runBCheckpointPath],
-  ] as const) {
-    if (!fs.existsSync(p)) {
-      errors.push(`Required artifact file is missing: ${name} at "${p}"`);
+  for (const relPath of REQUIRED_PILOT_AUDIT_FILES) {
+    const fullPath = path.join(artifactsDir, relPath);
+    if (!fs.existsSync(fullPath)) {
+      errors.push(`Required artifact file is missing: "${relPath}" at "${fullPath}"`);
     }
   }
 
-  // 2. MANIFEST_SHA256.json の実ハッシュ照合 (存在する場合)
+  // 2. MANIFEST_SHA256.json の実ハッシュ照合 (Fail-Closed: 欠落・不正形式・空・必須ファイル欠落はすべて FAIL)
   const manifestShaPath = path.join(artifactsDir, "MANIFEST_SHA256.json");
   let hasManifestShaFile = false;
   let totalFilesChecked = 0;
   let matchedFilesCount = 0;
   const shaMismatches: string[] = [];
+  const missingRequiredFiles: string[] = [];
 
-  if (fs.existsSync(manifestShaPath)) {
+  if (!fs.existsSync(manifestShaPath)) {
+    errors.push("MANIFEST_SHA256.json is missing in artifacts directory");
+  } else {
     hasManifestShaFile = true;
     try {
-      const manifestList = JSON.parse(fs.readFileSync(manifestShaPath, "utf-8"));
-      if (Array.isArray(manifestList)) {
+      const manifestContent = fs.readFileSync(manifestShaPath, "utf-8");
+      const manifestList = JSON.parse(manifestContent);
+      if (!Array.isArray(manifestList)) {
+        errors.push("MANIFEST_SHA256.json is not a valid JSON array");
+      } else if (manifestList.length === 0) {
+        errors.push("MANIFEST_SHA256.json contains empty file list");
+      } else {
+        // 必須ファイルが MANIFEST_SHA256.json に記録されているか検証
+        for (const reqFile of REQUIRED_PILOT_AUDIT_FILES) {
+          const found = manifestList.some((item) => item && item.path === reqFile);
+          if (!found) {
+            missingRequiredFiles.push(reqFile);
+            errors.push(`Required file "${reqFile}" is not listed in MANIFEST_SHA256.json`);
+          }
+        }
+
+        // 各ファイルのハッシュ照合
         for (const item of manifestList) {
           if (item && typeof item.path === "string" && typeof item.sha256 === "string") {
             const targetFilePath = path.join(artifactsDir, item.path);
@@ -1190,46 +1212,108 @@ export function auditExistingPilotArtifacts(artifactsDir: string): ArtifactAudit
     errors.push(`Run B seed audit failed: ${seedAuditRunB.details}`);
   }
 
-  // 6. 各種照合検証項目の作成 (PASS / FAIL / UNVERIFIED)
+  // 6. 各種照合検証項目の作成 (PASS / FAIL / UNVERIFIED, Fail-Closed)
   let championDnaMatch = false;
-  let seedCollisionDetected = false;
 
-  // 照合A: Training試合数 (Result vs Metrics vs Evidence)
+  // 照合A: Training試合数 (Result SeedRegistry vs Metrics across Run A and Run B, フォールバック廃止)
   let trainingMatchesVerif: ItemVerification<number> = { status: "UNVERIFIED", details: "Data missing" };
-  if (runAResult && runAMetrics && evidence) {
-    const resTrain = (runAResult as any).runtimeMetrics?.totalTrainingMatches ?? 60;
-    const metTrain = runAMetrics.trainingMatchesExecuted;
-    const evTrain = evidence.measurements?.runA?.trainingDecisions !== undefined ? 60 : undefined;
-    if (resTrain === 60 && metTrain === 60) {
-      trainingMatchesVerif = { status: "PASS", details: "Training matches match exact plan of 60", expected: 60, actual: metTrain };
+  if (runAResult && runBResult && runAMetrics && runBMetrics) {
+    const resTrainA = runAResult.seedRegistry?.trainingSeedsByGeneration
+      ? Object.values(runAResult.seedRegistry.trainingSeedsByGeneration).reduce((acc, seeds) => acc + (seeds?.length ?? 0), 0)
+      : undefined;
+    const resTrainB = runBResult.seedRegistry?.trainingSeedsByGeneration
+      ? Object.values(runBResult.seedRegistry.trainingSeedsByGeneration).reduce((acc, seeds) => acc + (seeds?.length ?? 0), 0)
+      : undefined;
+    const metTrainA = runAMetrics.trainingMatchesExecuted;
+    const metTrainB = runBMetrics.trainingMatchesExecuted;
+
+    if (
+      resTrainA === 60 &&
+      resTrainB === 60 &&
+      metTrainA === 60 &&
+      metTrainB === 60
+    ) {
+      trainingMatchesVerif = {
+        status: "PASS",
+        details: "Training matches match exact plan of 60 across Run A and Run B (Result SeedRegistry & Metrics)",
+        expected: 60,
+        actual: metTrainA,
+      };
     } else {
-      trainingMatchesVerif = { status: "FAIL", details: `Mismatch in training matches: result=${resTrain}, metrics=${metTrain}`, expected: 60, actual: metTrain };
-      errors.push("Training match count mismatch");
+      trainingMatchesVerif = {
+        status: "FAIL",
+        details: `Mismatch in training matches: resA=${resTrainA}, resB=${resTrainB}, metA=${metTrainA}, metB=${metTrainB}`,
+        expected: 60,
+        actual: metTrainA,
+      };
+      errors.push("Training match count mismatch across runs, results, or metrics");
     }
+  } else {
+    errors.push("Training match data missing for verification");
   }
 
-  // 照合B: Validation試合数 (Result vs Metrics vs Evidence)
+  // 照合B: Validation試合数 (Result ValidationResults vs Metrics across Run A and Run B, フォールバック廃止)
   let validationMatchesVerif: ItemVerification<number> = { status: "UNVERIFIED", details: "Data missing" };
-  if (runAResult && runAMetrics && evidence) {
-    const resVal = (runAResult as any).runtimeMetrics?.totalValidationMatches ?? 40;
-    const metVal = runAMetrics.validationMatchesExecuted;
-    if (resVal === 40 && metVal === 40) {
-      validationMatchesVerif = { status: "PASS", details: "Validation matches match exact plan of 40", expected: 40, actual: metVal };
+  if (runAResult && runBResult && runAMetrics && runBMetrics) {
+    const resValA = runAResult.history
+      ? runAResult.history.reduce((acc, h) => acc + (h.validationResult?.totalMatches ?? 0), 0)
+      : undefined;
+    const resValB = runBResult.history
+      ? runBResult.history.reduce((acc, h) => acc + (h.validationResult?.totalMatches ?? 0), 0)
+      : undefined;
+    const metValA = runAMetrics.validationMatchesExecuted;
+    const metValB = runBMetrics.validationMatchesExecuted;
+
+    if (
+      resValA === 40 &&
+      resValB === 40 &&
+      metValA === 40 &&
+      metValB === 40
+    ) {
+      validationMatchesVerif = {
+        status: "PASS",
+        details: "Validation matches match exact plan of 40 across Run A and Run B (Result ValidationResults & Metrics)",
+        expected: 40,
+        actual: metValA,
+      };
     } else {
-      validationMatchesVerif = { status: "FAIL", details: `Mismatch in validation matches: result=${resVal}, metrics=${metVal}`, expected: 40, actual: metVal };
-      errors.push("Validation match count mismatch");
+      validationMatchesVerif = {
+        status: "FAIL",
+        details: `Mismatch in validation matches: resA=${resValA}, resB=${resValB}, metA=${metValA}, metB=${metValB}`,
+        expected: 40,
+        actual: metValA,
+      };
+      errors.push("Validation match count mismatch across runs, results, or metrics");
     }
+  } else {
+    errors.push("Validation match data missing for verification");
   }
 
   // 照合C: 完了ステータス
   let completionStatusVerif: ItemVerification<string> = { status: "UNVERIFIED", details: "Data missing" };
   if (runAResult && runBResult && evidence) {
-    if (runAResult.status === "COMPLETED" && runBResult.status === "COMPLETED" && evidence.status === "SUCCESS") {
-      completionStatusVerif = { status: "PASS", details: "All runs completed successfully (Result: COMPLETED, Evidence: SUCCESS)", expected: "COMPLETED/SUCCESS", actual: `${runAResult.status}/${evidence.status}` };
+    if (
+      runAResult.status === "COMPLETED" &&
+      runBResult.status === "COMPLETED" &&
+      runAResult.stopReason === "COMPLETED_NORMALLY" &&
+      runBResult.stopReason === "COMPLETED_NORMALLY" &&
+      evidence.status === "SUCCESS"
+    ) {
+      completionStatusVerif = {
+        status: "PASS",
+        details: "All runs completed successfully (Result: COMPLETED/COMPLETED_NORMALLY, Evidence: SUCCESS)",
+        expected: "COMPLETED/SUCCESS",
+        actual: `${runAResult.status}/${evidence.status}`,
+      };
     } else {
-      completionStatusVerif = { status: "FAIL", details: `Status mismatch: runA=${runAResult.status}, runB=${runBResult.status}, evidence=${evidence.status}` };
+      completionStatusVerif = {
+        status: "FAIL",
+        details: `Status mismatch: runA=${runAResult.status}, runB=${runBResult.status}, evidence=${evidence.status}`,
+      };
       errors.push("Completion status mismatch");
     }
+  } else {
+    errors.push("Completion status data missing for verification");
   }
 
   // 照合D: 異常試合数 (FAILED=0, INCOMPLETE=0)
@@ -1237,65 +1321,131 @@ export function auditExistingPilotArtifacts(artifactsDir: string): ArtifactAudit
   if (runAMetrics && runBMetrics && evidence) {
     const failed = runAMetrics.failedMatches + runBMetrics.failedMatches;
     const incomplete = runAMetrics.incompleteMatches + runBMetrics.incompleteMatches;
-    if (failed === 0 && incomplete === 0 && evidence.measurements?.runA?.failedMatches === 0) {
-      abnormalMatchesVerif = { status: "PASS", details: "Zero failed and zero incomplete matches across all runs", expected: { failed: 0, incomplete: 0 }, actual: { failed, incomplete } };
+    const evFailedA = evidence.measurements?.runA?.failedMatches ?? -1;
+    const evFailedB = evidence.measurements?.runB?.failedMatches ?? -1;
+    const evIncompleteA = evidence.measurements?.runA?.incompleteMatches ?? -1;
+    const evIncompleteB = evidence.measurements?.runB?.incompleteMatches ?? -1;
+
+    if (
+      failed === 0 &&
+      incomplete === 0 &&
+      evFailedA === 0 &&
+      evFailedB === 0 &&
+      evIncompleteA === 0 &&
+      evIncompleteB === 0
+    ) {
+      abnormalMatchesVerif = {
+        status: "PASS",
+        details: "Zero failed and zero incomplete matches across all runs and evidence",
+        expected: { failed: 0, incomplete: 0 },
+        actual: { failed, incomplete },
+      };
     } else {
-      abnormalMatchesVerif = { status: "FAIL", details: `Abnormal matches found: failed=${failed}, incomplete=${incomplete}` };
-      errors.push("Abnormal matches detected in metrics");
+      abnormalMatchesVerif = {
+        status: "FAIL",
+        details: `Abnormal matches found: failed=${failed}, incomplete=${incomplete}`,
+      };
+      errors.push("Abnormal matches detected in metrics or evidence");
     }
+  } else {
+    errors.push("Abnormal matches data missing for verification");
   }
 
-  // 照合E: 総意思決定数
+  // 照合E: 総意思決定数 (Run A & Run B 両方)
   let totalDecisionsVerif: ItemVerification<number> = { status: "UNVERIFIED", details: "Data missing" };
-  if (runAMetrics && evidence) {
-    const metDec = runAMetrics.totalDecisions;
-    const evDec = evidence.measurements?.runA?.totalDecisions;
-    if (metDec === evDec && metDec > 0) {
-      totalDecisionsVerif = { status: "PASS", details: `Total decisions verified between metrics and evidence (${metDec})`, expected: metDec, actual: evDec };
+  if (runAMetrics && runBMetrics && evidence) {
+    const metDecA = runAMetrics.totalDecisions;
+    const metDecB = runBMetrics.totalDecisions;
+    const evDecA = evidence.measurements?.runA?.totalDecisions;
+    const evDecB = evidence.measurements?.runB?.totalDecisions;
+
+    if (metDecA === undefined || metDecB === undefined || evDecA === undefined || evDecB === undefined) {
+      totalDecisionsVerif = {
+        status: "UNVERIFIED",
+        details: "Total decisions data missing in metrics or evidence",
+      };
+      errors.push("Total decisions data missing in metrics or evidence");
+    } else if (
+      metDecA === evDecA &&
+      metDecB === evDecB &&
+      metDecA === metDecB &&
+      metDecA > 0
+    ) {
+      totalDecisionsVerif = {
+        status: "PASS",
+        details: `Total decisions verified between metrics and evidence across Run A and Run B (${metDecA})`,
+        expected: metDecA,
+        actual: evDecA,
+      };
     } else {
-      totalDecisionsVerif = { status: "FAIL", details: `Decision count mismatch: metrics=${metDec}, evidence=${evDec}` };
-      errors.push("Total decisions mismatch");
+      totalDecisionsVerif = {
+        status: "FAIL",
+        details: `Decision count mismatch: metricsA=${metDecA}, metricsB=${metDecB}, evidenceA=${evDecA}, evidenceB=${evDecB}`,
+      };
+      errors.push("Total decisions mismatch across metrics, evidence, or runs");
     }
+  } else {
+    errors.push("Total decisions data missing for verification");
   }
 
-  // 照合F: 世代別 Fitness
+  // 照合F: 世代別 Fitness (Run A, Run B, Evidence)
   let generationFitnessVerif: ItemVerification<readonly number[]> = { status: "UNVERIFIED", details: "Data missing" };
-  if (runAResult && evidence?.generationDetails) {
-    const resFit = runAResult.history.map((h) => h.candidateFitnessScore);
+  if (runAResult && runBResult && evidence?.generationDetails) {
+    const resFitA = runAResult.history.map((h) => h.candidateFitnessScore);
+    const resFitB = runBResult.history.map((h) => h.candidateFitnessScore);
     const evFit = evidence.generationDetails.map((h: any) => h.candidateFitnessScore);
-    if (canonicalJsonStringify(resFit) === canonicalJsonStringify(evFit)) {
-      generationFitnessVerif = { status: "PASS", details: "Generation candidate fitness scores match exactly between Result and Evidence", expected: resFit, actual: evFit };
+    if (
+      canonicalJsonStringify(resFitA) === canonicalJsonStringify(resFitB) &&
+      canonicalJsonStringify(resFitA) === canonicalJsonStringify(evFit)
+    ) {
+      generationFitnessVerif = {
+        status: "PASS",
+        details: "Generation candidate fitness scores match exactly across Run A, Run B, and Evidence",
+        expected: resFitA,
+        actual: evFit,
+      };
     } else {
       generationFitnessVerif = { status: "FAIL", details: "Generation candidate fitness mismatch" };
-      errors.push("Generation fitness mismatch");
+      errors.push("Generation fitness mismatch across runs or evidence");
     }
+  } else {
+    errors.push("Generation fitness data missing for verification");
   }
 
-  // 照合G: Validation スコア
+  // 照合G: Validation スコア (Run A, Run B, Evidence)
   let validationScoresVerif: ItemVerification<readonly number[]> = { status: "UNVERIFIED", details: "Data missing" };
-  if (runAResult && evidence?.generationDetails) {
+  if (runAResult && runBResult && evidence?.generationDetails) {
     let valMatch = true;
     for (let g = 0; g < runAResult.history.length; g++) {
-      const valRes = runAResult.history[g]?.validationResult;
+      const valResA = runAResult.history[g]?.validationResult;
+      const valResB = runBResult.history[g]?.validationResult;
       const evValGen = evidence.generationDetails[g];
-      if (!valRes || !evValGen || !evValGen.validationOpponents) {
+      if (!valResA || !valResB || !evValGen || !evValGen.validationOpponents) {
         valMatch = false;
         break;
       }
-      for (const [oppId, summary] of Object.entries(valRes.opponents)) {
+      for (const [oppId, summaryA] of Object.entries(valResA.opponents)) {
+        const summaryB = valResB.opponents[oppId];
         const evOpp = evValGen.validationOpponents[oppId];
-        if (!evOpp || evOpp.meanPairScore !== summary.meanPairScore) {
+        if (
+          !summaryB ||
+          !evOpp ||
+          summaryA.meanPairScore !== summaryB.meanPairScore ||
+          summaryA.meanPairScore !== evOpp.meanPairScore
+        ) {
           valMatch = false;
           break;
         }
       }
     }
     if (valMatch) {
-      validationScoresVerif = { status: "PASS", details: "Validation scores verified across generations and opponents" };
+      validationScoresVerif = { status: "PASS", details: "Validation scores verified across generations, opponents, and runs" };
     } else {
-      validationScoresVerif = { status: "FAIL", details: "Validation scores mismatch" };
-      errors.push("Validation scores mismatch");
+      validationScoresVerif = { status: "FAIL", details: "Validation scores mismatch across runs or evidence" };
+      errors.push("Validation scores mismatch across runs or evidence");
     }
+  } else {
+    errors.push("Validation scores data missing for verification");
   }
 
   // 照合H: Champion DNA & Digest
@@ -1334,27 +1484,38 @@ export function auditExistingPilotArtifacts(artifactsDir: string): ArtifactAudit
       championDnaAndDigestVerif = { status: "FAIL", details: "ProvisionalBestChampion is missing in logical results" };
       errors.push("ProvisionalBestChampion is missing in logical results");
     }
+  } else {
+    errors.push("Champion DNA verification data missing");
   }
 
-  // 照合I: Checkpoint 保存世代
+  // 照合I: Checkpoint 保存世代 (Run A, Run B, Result)
   let checkpointCompletedGenerationsVerif: ItemVerification<number> = { status: "UNVERIFIED", details: "Data missing" };
-  if (runACheckpointInteg.state && runAResult) {
-    const chkGen = runACheckpointInteg.state.completedGenerations;
-    const resGen = runAResult.completedGenerations;
-    if (chkGen === resGen && chkGen === TOTAL_GENERATIONS) {
+  if (runACheckpointInteg.state && runBCheckpointInteg.state && runAResult && runBResult) {
+    const chkGenA = runACheckpointInteg.state.completedGenerations;
+    const chkGenB = runBCheckpointInteg.state.completedGenerations;
+    const resGenA = runAResult.completedGenerations;
+    const resGenB = runBResult.completedGenerations;
+    if (
+      chkGenA === TOTAL_GENERATIONS &&
+      chkGenB === TOTAL_GENERATIONS &&
+      resGenA === TOTAL_GENERATIONS &&
+      resGenB === TOTAL_GENERATIONS
+    ) {
       checkpointCompletedGenerationsVerif = {
         status: "PASS",
-        details: `Checkpoint completed generations match Result (${chkGen}/${TOTAL_GENERATIONS})`,
+        details: `Checkpoint completed generations match Result across Run A and Run B (${chkGenA}/${TOTAL_GENERATIONS})`,
         expected: TOTAL_GENERATIONS,
-        actual: chkGen,
+        actual: chkGenA,
       };
     } else {
       checkpointCompletedGenerationsVerif = {
         status: "FAIL",
-        details: `Checkpoint completed generations mismatch: checkpoint=${chkGen}, result=${resGen}`,
+        details: `Checkpoint completed generations mismatch: chkA=${chkGenA}, chkB=${chkGenB}, resA=${resGenA}, resB=${resGenB}`,
       };
-      errors.push("Checkpoint completed generations mismatch");
+      errors.push("Checkpoint completed generations mismatch across runs");
     }
+  } else {
+    errors.push("Checkpoint state data missing for verification");
   }
 
   // 照合J: 再現性判定
@@ -1376,16 +1537,62 @@ export function auditExistingPilotArtifacts(artifactsDir: string): ArtifactAudit
       };
       errors.push("Campaign logical results between Run A and Run B do not match");
     }
+  } else {
+    errors.push("Reproducibility verification data missing");
   }
 
-  // 出自メモの確認
+  // 出自メモの確認 (Fail-Closed: 欠落時は FAIL)
   const provenanceNotePresent = fs.existsSync(provenanceNotePath);
   if (!provenanceNotePresent) {
     warnings.push("AUDIT_PROVENANCE_NOTE.md is not found in artifacts directory");
+    errors.push("AUDIT_PROVENANCE_NOTE.md is required for complete audit provenance");
   }
 
+  const verifications = {
+    trainingMatches: trainingMatchesVerif,
+    validationMatches: validationMatchesVerif,
+    completionStatus: completionStatusVerif,
+    abnormalMatches: abnormalMatchesVerif,
+    totalDecisions: totalDecisionsVerif,
+    generationFitness: generationFitnessVerif,
+    validationScores: validationScoresVerif,
+    championDnaAndDigest: championDnaAndDigestVerif,
+    checkpointCompletedGenerations: checkpointCompletedGenerationsVerif,
+    reproducibilityVerdict: reproducibilityVerdictVerif,
+  };
+
+  const verifValues = Object.values(verifications);
+  const anyVerifFail = verifValues.some((v) => v.status === "FAIL");
+  const anyVerifUnverified = verifValues.some((v) => v.status === "UNVERIFIED");
+
+  if (anyVerifUnverified) {
+    errors.push("One or more required audit items are UNVERIFIED (Fail-Closed violated)");
+  }
+  if (anyVerifFail) {
+    errors.push("One or more required audit items FAILED");
+  }
+
+  const manifestValid =
+    hasManifestShaFile &&
+    shaMismatches.length === 0 &&
+    missingRequiredFiles.length === 0 &&
+    matchedFilesCount > 0;
+
+  const checkpointsValid = runACheckpointInteg.isValid && runBCheckpointInteg.isValid;
+  const seedsValid = seedAuditRunA?.status === "PASS" && seedAuditRunB?.status === "PASS";
+  const provenanceValid = provenanceNotePresent;
+
+  const isValid =
+    errors.length === 0 &&
+    !anyVerifFail &&
+    !anyVerifUnverified &&
+    manifestValid &&
+    checkpointsValid &&
+    seedsValid &&
+    provenanceValid;
+
   return {
-    isValid: errors.length === 0,
+    isValid,
     errors,
     warnings,
     runAManifest,
@@ -1402,23 +1609,13 @@ export function auditExistingPilotArtifacts(artifactsDir: string): ArtifactAudit
       totalFilesChecked,
       matchedFilesCount,
       mismatches: shaMismatches,
+      missingRequiredFiles,
     },
     checkpointIntegrity: {
       runA: runACheckpointInteg,
       runB: runBCheckpointInteg,
     },
-    verifications: {
-      trainingMatches: trainingMatchesVerif,
-      validationMatches: validationMatchesVerif,
-      completionStatus: completionStatusVerif,
-      abnormalMatches: abnormalMatchesVerif,
-      totalDecisions: totalDecisionsVerif,
-      generationFitness: generationFitnessVerif,
-      validationScores: validationScoresVerif,
-      championDnaAndDigest: championDnaAndDigestVerif,
-      checkpointCompletedGenerations: checkpointCompletedGenerationsVerif,
-      reproducibilityVerdict: reproducibilityVerdictVerif,
-    },
+    verifications,
     seedAudit: {
       runA: seedAuditRunA,
       runB: seedAuditRunB,
