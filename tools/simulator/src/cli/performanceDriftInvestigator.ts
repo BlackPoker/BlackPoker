@@ -1,5 +1,6 @@
 import * as path from "path";
 import * as fs from "fs";
+import * as os from "os";
 import { fileURLToPath } from "url";
 import { PerformanceObserver } from "perf_hooks";
 import { loadRegulationCatalog } from "../engine/regulation/RegulationLoader.js";
@@ -83,6 +84,18 @@ function formatBytes(bytes: number): string {
 
 function formatMs(ms: number): string {
   return `${ms.toFixed(2)} ms`;
+}
+
+function getHostCpuInfo(): string {
+  try {
+    const cpus = os.cpus();
+    if (cpus && cpus.length > 0) {
+      return `${cpus[0].model} (${cpus.length} logical cores)`;
+    }
+  } catch {
+    // ignore
+  }
+  return "Unknown CPU";
 }
 
 async function main() {
@@ -308,7 +321,7 @@ async function main() {
     mode,
     modeDescription,
     timestamp: new Date().toISOString(),
-    cpuInfo: "Intel(R) Core(TM) Ultra 7 155U (14 logical cores)",
+    cpuInfo: getHostCpuInfo(),
     totalMatches: MATCH_COUNT,
     wallClockElapsedMs: totalElapsedMs,
     overallMatchesPerSecond: (MATCH_COUNT / totalElapsedMs) * 1000,
