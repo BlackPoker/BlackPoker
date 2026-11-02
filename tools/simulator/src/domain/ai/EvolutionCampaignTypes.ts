@@ -146,6 +146,59 @@ export interface CampaignEarlyStoppingState {
 }
 
 // =============================================================================
+// Campaign 設定スナップショット (Resume 時の設定同一性検証用)
+// =============================================================================
+
+export interface CampaignConfigSnapshot {
+  readonly campaignId: string;
+  readonly campaignSeed: number;
+  readonly regulationId: string;
+  readonly frameId: string;
+  readonly rulePackageVersion: string;
+  readonly featureSchemaVersion: number;
+  readonly totalTargetGenerations: number;
+  readonly initialPopulationDigest: {
+    readonly generation: number;
+    readonly individuals: readonly { readonly genomeId: string; readonly dnaDigest: string }[];
+  };
+  readonly validationOpponents: readonly {
+    readonly opponentId: string;
+    readonly name: string;
+    readonly role: string;
+    readonly targetWinRate: number;
+    readonly referenceDnaDigest?: string;
+  }[];
+  readonly validationSeeds: readonly number[];
+  readonly runnerConfigSnapshot?: {
+    readonly maxDecisionsPerMatch?: number;
+    readonly pairRepetitions?: number;
+    readonly fitnessConfig?: {
+      readonly minimumCompletedMatches?: number;
+      readonly minimumCompletionRate?: number;
+    };
+    readonly selectionConfig?: {
+      readonly minimumValidPopulationCount?: number;
+      readonly tournamentSize?: number;
+      readonly eliteCount?: number;
+    };
+    readonly geneticOperatorConfig?: {
+      readonly mutationRate?: number;
+      readonly mutationSigma?: number;
+      readonly mutationClampMin?: number;
+      readonly mutationClampMax?: number;
+      readonly maxSelfMatingRetries?: number;
+    };
+  };
+  readonly earlyStopping?: {
+    readonly patience: number;
+    readonly minGenerations?: number;
+  };
+  readonly significanceLevelAlpha: number;
+  readonly minimumCompletedPairs: number;
+  readonly maxDecisionsPerMatch: number;
+}
+
+// =============================================================================
 // Checkpoint 状態 (世代間の中断・再開用)
 // =============================================================================
 
@@ -172,9 +225,14 @@ export interface CampaignCheckpointState {
   readonly seedRegistry: CampaignSeedRegistry;
   /** Early Stopping 状態 */
   readonly earlyStoppingState: CampaignEarlyStoppingState;
+  /** 設定同一性検証用スナップショット */
+  readonly configSnapshot: CampaignConfigSnapshot;
   /** チェックポイント作成タイムスタンプ */
   readonly timestamp: string;
-  /** 完全性検証用 SHA-256 チェックサム (checksum プロパティを除く内容のハッシュ) */
+  /**
+   * 完全性検証用 SHA-256 チェックサム
+   * （checksum および timestamp プロパティを除く全論理プロパティを正規化シリアライズしたハッシュ）
+   */
   readonly checksum: string;
 }
 
@@ -267,6 +325,41 @@ export interface EvolutionCampaignConfig {
   readonly maxDecisionsPerMatch?: number;
   /** 再開用チェックポイントファイルパス (指定時はロードして再開) */
   readonly resumeFromCheckpointPath?: string;
+  /**
+   * 目標世代数の延長を許可するか (default: false)。
+   * false の場合、チェックポイントの totalTargetGenerations との一致を要求 (同一Campaign再開契約)。
+   * true の場合、現在の totalGenerations >= チェックポイント totalTargetGenerations を許容 (Campaign延長契約)。
+   */
+  readonly allowCampaignExtension?: boolean;
+}
+
+// =============================================================================
+// 異常終了時の診断 Evidence (Diagnostic Info)
+// =============================================================================
+
+export interface CampaignDiagnosticInfo {
+  /** 停止または失敗が発生した世代番号 */
+  readonly failedGeneration: number;
+  /** 停止・異常終了の理由テキスト */
+  readonly stopReason: string;
+  /** 失敗時の CampaignStatus ("REEVALUATION_REQUIRED" または "FAILED") */
+  readonly status: "REEVALUATION_REQUIRED" | "FAILED";
+  /** 自己対戦 (Training) 段階の状況 */
+  readonly trainingStatus: {
+    readonly scheduledMatches: number;
+    readonly isCompleted: boolean;
+    readonly reason?: string;
+  };
+  /** Validation 評価段階の状況 (実施された場合) */
+  readonly validationStatus?: {
+    readonly attempted: boolean;
+    readonly evidenceStatus?: string;
+    readonly reason?: string;
+  };
+  /** 最後に正常完了・保存されたチェックポイントの世代番号 (存在する場合) */
+  readonly lastValidCheckpointGeneration?: number;
+  /** 中断箇所から再開可能か (Fail-Closed ガイド) */
+  readonly canResume: boolean;
 }
 
 // =============================================================================
@@ -299,6 +392,8 @@ export interface CampaignLogicalResult {
   readonly finalPopulation: PopulationSnapshot;
   /** Campaign 全体で使用された Seed Registry */
   readonly seedRegistry: CampaignSeedRegistry;
+  /** 異常終了または停止時の診断 Evidence (正常 COMPLETED 時は undefined) */
+  readonly diagnosticInfo?: CampaignDiagnosticInfo;
   /** 人間可読なサマリーテキスト */
   readonly summaryText: string;
 }
@@ -315,4 +410,99 @@ export interface CampaignExecutionResult extends CampaignLogicalResult {
   readonly logicalResult: CampaignLogicalResult;
   readonly runtimeMetrics: CampaignRuntimeMetrics;
   readonly timestamp: string;
+}
+
+// =============================================================================
+// 決定論的シリアライズおよび論理結果比較ユーティリティ
+// =============================================================================
+
+/**
+ * オブジェクトのキーを決定論的（アルファベット昇順）にソートして再帰的に JSON シリアライズ
+ */
+export function canonicalJsonStringify(obj: any): string {
+  if (obj === null || typeof obj !== "object") {
+    return JSON.stringify(obj);
+  }
+  if (Array.isArray(obj)) {
+    return `[${obj.map((item) => (item === undefined ? "null" : canonicalJsonStringify(item))).join(",")}]`;
+  }
+  const keys = Object.keys(obj)
+    .filter((k) => obj[k] !== undefined)
+    .sort();
+  const entries = keys.map((k) => `${JSON.stringify(k)}:${canonicalJsonStringify(obj[k])}`);
+  return `{${entries.join(",")}}`;
+}
+
+/**
+ * 2つの CampaignLogicalResult の完全論理一致を検証（タイムスタンプ等の一時的フィールドを除く）
+ */
+export function isEqualCampaignLogicalResult(a: CampaignLogicalResult, b: CampaignLogicalResult): boolean {
+  if (a === b) return true;
+  if (!a || !b) return false;
+
+  // 基本プロパティ
+  if (
+    a.campaignVersion !== b.campaignVersion ||
+    a.campaignId !== b.campaignId ||
+    a.campaignSeed !== b.campaignSeed ||
+    a.regulationId !== b.regulationId ||
+    a.frameId !== b.frameId ||
+    a.rulePackageVersion !== b.rulePackageVersion ||
+    a.featureSchemaVersion !== b.featureSchemaVersion ||
+    a.totalTargetGenerations !== b.totalTargetGenerations ||
+    a.completedGenerations !== b.completedGenerations ||
+    a.status !== b.status
+  ) {
+    return false;
+  }
+
+  // Provisional Best Champion
+  if ((a.provisionalBestChampion === null) !== (b.provisionalBestChampion === null)) return false;
+  if (a.provisionalBestChampion && b.provisionalBestChampion) {
+    if (
+      a.provisionalBestChampion.generation !== b.provisionalBestChampion.generation ||
+      a.provisionalBestChampion.genomeId !== b.provisionalBestChampion.genomeId ||
+      a.provisionalBestChampion.dnaDigest !== b.provisionalBestChampion.dnaDigest ||
+      a.provisionalBestChampion.fitnessScore !== b.provisionalBestChampion.fitnessScore ||
+      a.provisionalBestChampion.validationMeanWinRate !== b.provisionalBestChampion.validationMeanWinRate
+    ) {
+      return false;
+    }
+  }
+
+  // History (世代数、候補者、結果)
+  if (a.history.length !== b.history.length) return false;
+  for (let i = 0; i < a.history.length; i++) {
+    const hA = a.history[i];
+    const hB = b.history[i];
+    if (
+      hA.generation !== hB.generation ||
+      hA.generationSeed !== hB.generationSeed ||
+      hA.trainingMatchCount !== hB.trainingMatchCount ||
+      hA.candidateGenomeId !== hB.candidateGenomeId ||
+      hA.candidateDnaDigest !== hB.candidateDnaDigest ||
+      hA.candidateFitnessScore !== hB.candidateFitnessScore ||
+      hA.isBestChampionUpdated !== hB.isBestChampionUpdated ||
+      hA.validationResult.evidenceStatus !== hB.validationResult.evidenceStatus ||
+      hA.validationResult.improvementStatus !== hB.validationResult.improvementStatus
+    ) {
+      return false;
+    }
+  }
+
+  // Seed Registry
+  if (
+    canonicalJsonStringify(a.seedRegistry.trainingSeedsByGeneration) !==
+    canonicalJsonStringify(b.seedRegistry.trainingSeedsByGeneration)
+  ) {
+    return false;
+  }
+  if (
+    a.seedRegistry.validationSeeds.length !== b.seedRegistry.validationSeeds.length ||
+    !a.seedRegistry.validationSeeds.every((s, i) => s === b.seedRegistry.validationSeeds[i])
+  ) {
+    return false;
+  }
+
+  return true;
 }

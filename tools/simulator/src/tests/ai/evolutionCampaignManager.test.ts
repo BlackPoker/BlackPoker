@@ -23,17 +23,22 @@ import {
   EvolutionCampaignExecutionError,
   EvolutionCampaignIntegrityError,
   InMemoryCampaignCheckpointStorage,
+  isEqualCampaignLogicalResult,
 } from "../../domain/ai/EvolutionCampaignTypes";
 import { EvolutionCampaignManager } from "../../engine/ai/EvolutionCampaignManager";
 import { FileCampaignCheckpointStorage } from "../../engine/simulation/FileCampaignCheckpointStorage";
 import {
   EvaluationOpponentDefinition,
+  EvaluationSeedCollisionError,
   IndependentEvaluationLogicalResult,
   IndependentEvaluationResult,
   OpponentEvaluationSummary,
 } from "../../domain/ai/EvolutionEvaluationTypes";
 import { EvolutionLoop } from "../../engine/ai/EvolutionLoop";
 import { EvolutionIndependentEvaluator } from "../../engine/ai/EvolutionIndependentEvaluator";
+import { GenerationRunner } from "../../engine/ai/GenerationRunner";
+import { deriveSeed } from "../../engine/random/DeterministicShuffle";
+import { canonicalGenerationStreamKey } from "../../domain/ai/EvolutionLoopTypes";
 import {
   EvolutionGenerationRecord,
   EvolutionLoopExecutionResult,
@@ -783,6 +788,7 @@ describe("Evolution Campaign Orchestrator Foundation (Work 3-2)", () => {
       ...configRunA,
       totalGenerations: 2,
       resumeFromCheckpointPath: checkpointPath,
+      allowCampaignExtension: true,
     };
     const resultResumed = EvolutionCampaignManager.run(configRunB);
     expect(resultResumed.completedGenerations).toBe(2);
@@ -798,25 +804,8 @@ describe("Evolution Campaign Orchestrator Foundation (Work 3-2)", () => {
     const resultContinuous = EvolutionCampaignManager.run(configRunC);
     expect(resultContinuous.completedGenerations).toBe(2);
 
-    // 世代 0 と 世代 1 の論理結果が完全一致すること
-    expect(resultResumed.history[0].candidateGenomeId).toBe(
-      resultContinuous.history[0].candidateGenomeId
-    );
-    expect(resultResumed.history[0].candidateDnaDigest).toBe(
-      resultContinuous.history[0].candidateDnaDigest
-    );
-    expect(resultResumed.history[1].candidateGenomeId).toBe(
-      resultContinuous.history[1].candidateGenomeId
-    );
-    expect(resultResumed.history[1].candidateDnaDigest).toBe(
-      resultContinuous.history[1].candidateDnaDigest
-    );
-    expect(resultResumed.provisionalBestChampion?.genomeId).toBe(
-      resultContinuous.provisionalBestChampion?.genomeId
-    );
-    expect(resultResumed.provisionalBestChampion?.dnaDigest).toBe(
-      resultContinuous.provisionalBestChampion?.dnaDigest
-    );
+    // 世代 0 と 世代 1 の論理結果が完全一致すること (isEqualCampaignLogicalResult による厳格ディープ照合)
+    expect(isEqualCampaignLogicalResult(resultResumed.logicalResult, resultContinuous.logicalResult)).toBe(true);
 
     // 完了済みの totalGenerations: 2 のまま再開した場合、追加実行されないこと (Double Execution Guard)
     const resumedAgain = EvolutionCampaignManager.run({
@@ -863,5 +852,489 @@ describe("Evolution Campaign Orchestrator Foundation (Work 3-2)", () => {
     expect(result.provisionalBestChampion).not.toBeNull();
     expect(result.provisionalBestChampion?.isHoldoutVerified).toBe(false);
     expect(memoryStorage.exists("live-checkpoints/campaign-live-e2e-v1-checkpoint.json")).toBe(true);
+  });
+
+  // ===========================================================================
+  // Test 12: 実対戦した Training Seed が空にならず正本スケジュール件数と一致する
+  // ===========================================================================
+  it("Test 12: records non-empty training seeds from authoritative schedule", () => {
+    vi.spyOn(EvolutionLoop, "run").mockImplementation((p) => {
+      return createMockLoopResult(p.initialPopulation.generation, p.campaignSeed, 4);
+    });
+    vi.spyOn(EvolutionIndependentEvaluator, "evaluate").mockImplementation((p) => {
+      return createMockValResult(p.candidateDNA, 0.6);
+    });
+
+    const config: EvolutionCampaignConfig = {
+      campaignId: "campaign-training-seeds-v1",
+      campaignSeed: 44001,
+      totalGenerations: 1,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [80001, 80002],
+      sessionFactory: testSessionFactory,
+      checkpointStorage: new InMemoryCampaignCheckpointStorage(),
+      minimumCompletedPairs: 2,
+    };
+
+    const result = EvolutionCampaignManager.run(config);
+    expect(result.status).toBe("COMPLETED");
+
+    // 第0世代の Training Seeds が正本スケジュール件数 (N*(N-1)*R = 4*3*1 = 12) と一致すること
+    const gen0TrainingSeeds = result.seedRegistry.trainingSeedsByGeneration[0];
+    expect(gen0TrainingSeeds).toBeDefined();
+    expect(gen0TrainingSeeds.length).toBe(12);
+    for (const seed of gen0TrainingSeeds) {
+      expect(typeof seed).toBe("number");
+      expect(Number.isFinite(seed)).toBe(true);
+    }
+  });
+
+  // ===========================================================================
+  // Test 13: Training match count が実スケジュール件数と一致する
+  // ===========================================================================
+  it("Test 13: trainingMatchCount matches planned schedule length", () => {
+    vi.spyOn(EvolutionLoop, "run").mockImplementation((p) => {
+      return createMockLoopResult(p.initialPopulation.generation, p.campaignSeed, 4);
+    });
+    vi.spyOn(EvolutionIndependentEvaluator, "evaluate").mockImplementation((p) => {
+      return createMockValResult(p.candidateDNA, 0.6);
+    });
+
+    const pop = createTestPopulation(4, 0);
+    const config: EvolutionCampaignConfig = {
+      campaignId: "campaign-match-count-v1",
+      campaignSeed: 55001,
+      totalGenerations: 1,
+      initialPopulation: pop,
+      validationOpponents: testOpponents,
+      validationSeeds: [90001, 90002],
+      sessionFactory: testSessionFactory,
+      checkpointStorage: new InMemoryCampaignCheckpointStorage(),
+      minimumCompletedPairs: 2,
+    };
+
+    const result = EvolutionCampaignManager.run(config);
+    const expectedSchedule = GenerationRunner.planSchedule(
+      pop,
+      deriveSeed(config.campaignSeed, canonicalGenerationStreamKey(0)),
+      1
+    );
+
+    expect(result.history[0].trainingMatchCount).toBe(expectedSchedule.length);
+    expect(result.runtimeMetrics.totalTrainingMatches).toBe(expectedSchedule.length);
+  });
+
+  // ===========================================================================
+  // Test 14: Training / Validation の Seed 衝突で Fail-Closed 拒絶する
+  // ===========================================================================
+  it("Test 14: rejects training and validation seed collision fail-closed", () => {
+    const pop = createTestPopulation(4, 0);
+    const campaignSeed = 66001;
+    const g0Seed = deriveSeed(campaignSeed, canonicalGenerationStreamKey(0));
+    const plannedSchedule = GenerationRunner.planSchedule(pop, g0Seed, 1);
+    const collidingSeed = plannedSchedule[0].matchSeed;
+
+    const config: EvolutionCampaignConfig = {
+      campaignId: "campaign-seed-collision-v1",
+      campaignSeed,
+      totalGenerations: 1,
+      initialPopulation: pop,
+      validationOpponents: testOpponents,
+      validationSeeds: [collidingSeed, 99999], // Training seed と衝突させる
+      sessionFactory: testSessionFactory,
+      checkpointStorage: new InMemoryCampaignCheckpointStorage(),
+      minimumCompletedPairs: 2,
+    };
+
+    expect(() => {
+      EvolutionCampaignManager.run(config);
+    }).toThrow(EvaluationSeedCollisionError);
+  });
+
+  // ===========================================================================
+  // Test 15: Checkpoint 内の Validation 履歴改変を検知して拒絶する
+  // ===========================================================================
+  it("Test 15: rejects tampered validation history in checkpoint", () => {
+    vi.spyOn(EvolutionLoop, "run").mockImplementation((p) => {
+      return createMockLoopResult(p.initialPopulation.generation, p.campaignSeed, 4);
+    });
+    vi.spyOn(EvolutionIndependentEvaluator, "evaluate").mockImplementation((p) => {
+      return createMockValResult(p.candidateDNA, 0.6);
+    });
+
+    const memoryStorage = new InMemoryCampaignCheckpointStorage();
+    const config: EvolutionCampaignConfig = {
+      campaignId: "campaign-tamper-val-history-v1",
+      campaignSeed: 77001,
+      totalGenerations: 1,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [110001, 110002],
+      sessionFactory: testSessionFactory,
+      checkpointDir: "test-dir",
+      checkpointStorage: memoryStorage,
+      minimumCompletedPairs: 2,
+    };
+
+    EvolutionCampaignManager.run(config);
+    const checkpointPath = "test-dir/campaign-tamper-val-history-v1-checkpoint.json";
+    const originalJson = memoryStorage.load(checkpointPath)!;
+    const parsed = JSON.parse(originalJson);
+
+    // history 内の candidateFitnessScore を改ざん
+    parsed.history[0].candidateFitnessScore = 999.9;
+    memoryStorage.save(checkpointPath, JSON.stringify(parsed));
+
+    expect(() => {
+      EvolutionCampaignManager.loadCheckpoint(checkpointPath, config, memoryStorage);
+    }).toThrow(EvolutionCampaignIntegrityError);
+  });
+
+  // ===========================================================================
+  // Test 16: Checkpoint 内の Seed Registry 配列改変を検知して拒絶する
+  // ===========================================================================
+  it("Test 16: rejects tampered seed registry in checkpoint", () => {
+    vi.spyOn(EvolutionLoop, "run").mockImplementation((p) => {
+      return createMockLoopResult(p.initialPopulation.generation, p.campaignSeed, 4);
+    });
+    vi.spyOn(EvolutionIndependentEvaluator, "evaluate").mockImplementation((p) => {
+      return createMockValResult(p.candidateDNA, 0.6);
+    });
+
+    const memoryStorage = new InMemoryCampaignCheckpointStorage();
+    const config: EvolutionCampaignConfig = {
+      campaignId: "campaign-tamper-seeds-v1",
+      campaignSeed: 88001,
+      totalGenerations: 1,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [120001, 120002],
+      sessionFactory: testSessionFactory,
+      checkpointDir: "test-dir",
+      checkpointStorage: memoryStorage,
+      minimumCompletedPairs: 2,
+    };
+
+    EvolutionCampaignManager.run(config);
+    const checkpointPath = "test-dir/campaign-tamper-seeds-v1-checkpoint.json";
+    const originalJson = memoryStorage.load(checkpointPath)!;
+    const parsed = JSON.parse(originalJson);
+
+    // seedRegistry 内の配列要素を改ざん
+    parsed.seedRegistry.trainingSeedsByGeneration[0][0] = 9999999;
+    memoryStorage.save(checkpointPath, JSON.stringify(parsed));
+
+    expect(() => {
+      EvolutionCampaignManager.loadCheckpoint(checkpointPath, config, memoryStorage);
+    }).toThrow(EvolutionCampaignIntegrityError);
+  });
+
+  // ===========================================================================
+  // Test 17: Champion DNA 本体と Digest 不一致を検知して拒絶する
+  // ===========================================================================
+  it("Test 17: rejects mismatched champion DNA and dnaDigest even if checksum recomputed", () => {
+    vi.spyOn(EvolutionLoop, "run").mockImplementation((p) => {
+      return createMockLoopResult(p.initialPopulation.generation, p.campaignSeed, 4);
+    });
+    vi.spyOn(EvolutionIndependentEvaluator, "evaluate").mockImplementation((p) => {
+      return createMockValResult(p.candidateDNA, 0.6);
+    });
+
+    const memoryStorage = new InMemoryCampaignCheckpointStorage();
+    const config: EvolutionCampaignConfig = {
+      campaignId: "campaign-dna-digest-mismatch-v1",
+      campaignSeed: 99002,
+      totalGenerations: 1,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [130001, 130002],
+      sessionFactory: testSessionFactory,
+      checkpointDir: "test-dir",
+      checkpointStorage: memoryStorage,
+      minimumCompletedPairs: 2,
+    };
+
+    EvolutionCampaignManager.run(config);
+    const checkpointPath = "test-dir/campaign-dna-digest-mismatch-v1-checkpoint.json";
+    const originalJson = memoryStorage.load(checkpointPath)!;
+    const parsed = JSON.parse(originalJson);
+
+    // provisionalBestChampion.dna の重みを改ざんし、dnaDigest と不一致にする
+    parsed.provisionalBestChampion.dna.patternWeights = [...parsed.provisionalBestChampion.dna.patternWeights];
+    parsed.provisionalBestChampion.dna.patternWeights[0] = 999.0;
+    // チェックサムを再計算してチェックサム検証をすり抜けさせようとする
+    const { checksum: _discard, ...withoutChecksum } = parsed;
+    parsed.checksum = EvolutionCampaignManager.computeCheckpointChecksum(withoutChecksum);
+    memoryStorage.save(checkpointPath, JSON.stringify(parsed));
+
+    // DNA Digest 不一致により拒絶されること
+    expect(() => {
+      EvolutionCampaignManager.loadCheckpoint(checkpointPath, config, memoryStorage);
+    }).toThrow(EvolutionCampaignIntegrityError);
+  });
+
+  // ===========================================================================
+  // Test 18: Runner 設定変更で Resume を Fail-Closed 拒絶する
+  // ===========================================================================
+  it("Test 18: rejects resume when runnerConfig differs from checkpoint", () => {
+    vi.spyOn(EvolutionLoop, "run").mockImplementation((p) => {
+      return createMockLoopResult(p.initialPopulation.generation, p.campaignSeed, 4);
+    });
+    vi.spyOn(EvolutionIndependentEvaluator, "evaluate").mockImplementation((p) => {
+      return createMockValResult(p.candidateDNA, 0.6);
+    });
+
+    const memoryStorage = new InMemoryCampaignCheckpointStorage();
+    const config: EvolutionCampaignConfig = {
+      campaignId: "campaign-runner-change-v1",
+      campaignSeed: 101001,
+      totalGenerations: 1,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [140001, 140002],
+      sessionFactory: testSessionFactory,
+      checkpointDir: "test-dir",
+      checkpointStorage: memoryStorage,
+      minimumCompletedPairs: 2,
+      runnerConfig: {
+        pairRepetitions: 1,
+      },
+    };
+
+    EvolutionCampaignManager.run(config);
+    const checkpointPath = "test-dir/campaign-runner-change-v1-checkpoint.json";
+
+    // 異なる runnerConfig で resume を試みる
+    const resumeConfig: EvolutionCampaignConfig = {
+      ...config,
+      totalGenerations: 2,
+      runnerConfig: {
+        pairRepetitions: 2, // 変更
+      },
+      resumeFromCheckpointPath: checkpointPath,
+      allowCampaignExtension: true,
+    };
+
+    expect(() => {
+      EvolutionCampaignManager.run(resumeConfig);
+    }).toThrow(EvolutionCampaignIntegrityError);
+  });
+
+  // ===========================================================================
+  // Test 19: Validation 設定変更で Resume を Fail-Closed 拒絶する
+  // ===========================================================================
+  it("Test 19: rejects resume when validation settings differ from checkpoint", () => {
+    vi.spyOn(EvolutionLoop, "run").mockImplementation((p) => {
+      return createMockLoopResult(p.initialPopulation.generation, p.campaignSeed, 4);
+    });
+    vi.spyOn(EvolutionIndependentEvaluator, "evaluate").mockImplementation((p) => {
+      return createMockValResult(p.candidateDNA, 0.6);
+    });
+
+    const memoryStorage = new InMemoryCampaignCheckpointStorage();
+    const config: EvolutionCampaignConfig = {
+      campaignId: "campaign-val-change-v1",
+      campaignSeed: 102001,
+      totalGenerations: 1,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [150001, 150002],
+      sessionFactory: testSessionFactory,
+      checkpointDir: "test-dir",
+      checkpointStorage: memoryStorage,
+      minimumCompletedPairs: 2,
+      significanceLevelAlpha: 0.05,
+    };
+
+    EvolutionCampaignManager.run(config);
+    const checkpointPath = "test-dir/campaign-val-change-v1-checkpoint.json";
+
+    // 異なる validationSeeds で resume を試みる
+    const resumeConfigDiffSeeds: EvolutionCampaignConfig = {
+      ...config,
+      totalGenerations: 2,
+      validationSeeds: [150001, 999999], // 変更
+      resumeFromCheckpointPath: checkpointPath,
+      allowCampaignExtension: true,
+    };
+    expect(() => {
+      EvolutionCampaignManager.run(resumeConfigDiffSeeds);
+    }).toThrow(EvolutionCampaignIntegrityError);
+
+    // 異なる significanceLevelAlpha で resume を試みる
+    const resumeConfigDiffAlpha: EvolutionCampaignConfig = {
+      ...config,
+      totalGenerations: 2,
+      significanceLevelAlpha: 0.01, // 変更
+      resumeFromCheckpointPath: checkpointPath,
+      allowCampaignExtension: true,
+    };
+    expect(() => {
+      EvolutionCampaignManager.run(resumeConfigDiffAlpha);
+    }).toThrow(EvolutionCampaignIntegrityError);
+  });
+
+  // ===========================================================================
+  // Test 20: 永続 Storage 設定不足で Fail-Fast 拒絶する
+  // ===========================================================================
+  it("Test 20: fails fast when checkpointDir or resume path is set without storage adapter", () => {
+    const configWithDirOnly: EvolutionCampaignConfig = {
+      campaignId: "campaign-storage-missing-v1",
+      campaignSeed: 103001,
+      totalGenerations: 1,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [160001, 160002],
+      sessionFactory: testSessionFactory,
+      checkpointDir: "/some/path",
+      checkpointStorage: undefined, // 未指定
+      minimumCompletedPairs: 2,
+    };
+
+    expect(() => {
+      EvolutionCampaignManager.run(configWithDirOnly);
+    }).toThrow(EvolutionCampaignConfigurationError);
+
+    const configWithResumeOnly: EvolutionCampaignConfig = {
+      campaignId: "campaign-storage-missing-v2",
+      campaignSeed: 103002,
+      totalGenerations: 1,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [160001, 160002],
+      sessionFactory: testSessionFactory,
+      resumeFromCheckpointPath: "/some/checkpoint.json",
+      checkpointStorage: undefined, // 未指定
+      minimumCompletedPairs: 2,
+    };
+
+    expect(() => {
+      EvolutionCampaignManager.run(configWithResumeOnly);
+    }).toThrow(EvolutionCampaignConfigurationError);
+  });
+
+  // ===========================================================================
+  // Test 21: 同一 Campaign の中断再開と連続実行の論理結果一致（allowCampaignExtension 契約）
+  // ===========================================================================
+  it("Test 21: validates allowCampaignExtension contract and logical result identity", () => {
+    vi.spyOn(EvolutionLoop, "run").mockImplementation((p) => {
+      return createMockLoopResult(p.initialPopulation.generation, p.campaignSeed, 4);
+    });
+    vi.spyOn(EvolutionIndependentEvaluator, "evaluate").mockImplementation((p) => {
+      return createMockValResult(p.candidateDNA, 0.6);
+    });
+
+    const memoryStorage = new InMemoryCampaignCheckpointStorage();
+    const configBase: EvolutionCampaignConfig = {
+      campaignId: "campaign-extension-test-v1",
+      campaignSeed: 104001,
+      totalGenerations: 1,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [170001, 170002],
+      sessionFactory: testSessionFactory,
+      checkpointDir: "test-dir",
+      checkpointStorage: memoryStorage,
+      minimumCompletedPairs: 2,
+    };
+
+    // 1世代実行して保存
+    EvolutionCampaignManager.run(configBase);
+    const checkpointPath = "test-dir/campaign-extension-test-v1-checkpoint.json";
+
+    // allowCampaignExtension なしで 2世代への延長を試みると拒絶されること
+    const resumeWithoutExtensionFlag: EvolutionCampaignConfig = {
+      ...configBase,
+      totalGenerations: 2,
+      resumeFromCheckpointPath: checkpointPath,
+      allowCampaignExtension: false,
+    };
+    expect(() => {
+      EvolutionCampaignManager.run(resumeWithoutExtensionFlag);
+    }).toThrow(EvolutionCampaignIntegrityError);
+
+    // allowCampaignExtension: true で再開
+    const resumeWithExtension: EvolutionCampaignConfig = {
+      ...configBase,
+      totalGenerations: 2,
+      resumeFromCheckpointPath: checkpointPath,
+      allowCampaignExtension: true,
+    };
+    const resultResumed = EvolutionCampaignManager.run(resumeWithExtension);
+
+    // 最初から 2世代連続実行
+    const memoryStorageCont = new InMemoryCampaignCheckpointStorage();
+    const resultContinuous = EvolutionCampaignManager.run({
+      ...configBase,
+      totalGenerations: 2,
+      checkpointStorage: memoryStorageCont,
+    });
+
+    expect(isEqualCampaignLogicalResult(resultResumed.logicalResult, resultContinuous.logicalResult)).toBe(true);
+  });
+
+  // ===========================================================================
+  // Test 22: 異常終了時の診断 Evidence（FAIL-SAFE）と世代非前進の保証
+  // ===========================================================================
+  it("Test 22: records diagnosticInfo and preserves completedGenerations on abort", () => {
+    const memoryStorage = new InMemoryCampaignCheckpointStorage();
+    const config: EvolutionCampaignConfig = {
+      campaignId: "campaign-diagnostic-test-v1",
+      campaignSeed: 105001,
+      totalGenerations: 2,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [180001, 180002],
+      sessionFactory: testSessionFactory,
+      checkpointDir: "test-dir",
+      checkpointStorage: memoryStorage,
+      minimumCompletedPairs: 2,
+    };
+
+    // Case A: EvolutionLoop が REEVALUATION_REQUIRED で停止した場合
+    vi.spyOn(EvolutionLoop, "run").mockReturnValueOnce({
+      logicalResult: {
+        status: "REEVALUATION_REQUIRED",
+        reason: "Insufficient completed matches across population",
+        generations: [],
+      } as any,
+      runtimeMetrics: { totalExecutionTimeMs: 10, generations: [] },
+    });
+
+    const resultReeval = EvolutionCampaignManager.run(config);
+    expect(resultReeval.status).toBe("REEVALUATION_REQUIRED");
+    expect(resultReeval.completedGenerations).toBe(0); // 世代が進んでいないこと
+    expect(resultReeval.diagnosticInfo).toBeDefined();
+    expect(resultReeval.diagnosticInfo?.failedGeneration).toBe(0);
+    expect(resultReeval.diagnosticInfo?.status).toBe("REEVALUATION_REQUIRED");
+    expect(resultReeval.diagnosticInfo?.trainingStatus.isCompleted).toBe(false);
+    expect(resultReeval.diagnosticInfo?.canResume).toBe(false);
+
+    // Case B: Validation 評価が INVALID_EVIDENCE で失敗した場合
+    vi.spyOn(EvolutionLoop, "run").mockImplementation((p) => {
+      return createMockLoopResult(p.initialPopulation.generation, p.campaignSeed, 4);
+    });
+    vi.spyOn(EvolutionIndependentEvaluator, "evaluate").mockReturnValueOnce({
+      candidateGenomeId: "mock-cand",
+      candidateDnaDigest: "mock-digest",
+      seeds: [180001, 180002],
+      seedCategory: "VALIDATION",
+      opponents: {},
+      evidenceStatus: "INVALID_EVIDENCE",
+      improvementStatus: "IMPROVEMENT_UNVERIFIED",
+      totalMatches: 4,
+      completedMatches: 0,
+      summaryText: "Validation failed: insufficient matches",
+    } as any);
+
+    const resultValFail = EvolutionCampaignManager.run(config);
+    expect(resultValFail.status).toBe("FAILED");
+    expect(resultValFail.completedGenerations).toBe(0); // 世代が進んでいないこと
+    expect(resultValFail.diagnosticInfo).toBeDefined();
+    expect(resultValFail.diagnosticInfo?.failedGeneration).toBe(0);
+    expect(resultValFail.diagnosticInfo?.status).toBe("FAILED");
+    expect(resultValFail.diagnosticInfo?.trainingStatus.isCompleted).toBe(true);
+    expect(resultValFail.diagnosticInfo?.validationStatus?.evidenceStatus).toBe("INVALID_EVIDENCE");
   });
 });

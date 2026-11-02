@@ -2,9 +2,14 @@
  * FileCampaignCheckpointStorage.ts
  *
  * Node.js 環境向けファイルベースの CampaignCheckpointStorage 実装。
- * - 一時ファイルへの先行書き込みと fs.renameSync による原子的置換 (Atomic Save)
- * - ディレクトリが存在しない場合の自動作成
- * - 不正ファイル読み込み時の安全なエラーハンドリング
+ *
+ * 原子的置換 (Atomic Save) の保証条件:
+ * 1. 同一ファイルシステム（同一ドライブ/マウントポイント）内において、一時ファイル（tmpFile）から
+ *    目的ファイル（filePath）への不可分な置換 (fs.renameSync) を行います。
+ * 2. 書き込み失敗時または rename 失敗時は、一時ファイルを安全に削除 (unlinkSync) し、
+ *    不完全なファイルが残留して次回ロードを妨害することを防止します。
+ * 3. 呼び出し元がプロセス強制終了（SIGKILL / 物理電源断等）された場合でも、
+ *    以前の checkpoint ファイルが上書き破壊されることなく完全に維持されます。
  */
 
 import * as fs from "fs";
@@ -19,8 +24,19 @@ export class FileCampaignCheckpointStorage implements CampaignCheckpointStorage 
     }
 
     const tmpFile = `${filePath}.tmp.${Date.now()}.${Math.random().toString(36).slice(2, 8)}`;
-    fs.writeFileSync(tmpFile, content, "utf-8");
-    fs.renameSync(tmpFile, filePath);
+    try {
+      fs.writeFileSync(tmpFile, content, "utf-8");
+      fs.renameSync(tmpFile, filePath);
+    } catch (err) {
+      if (fs.existsSync(tmpFile)) {
+        try {
+          fs.unlinkSync(tmpFile);
+        } catch {
+          // 一時ファイル削除失敗は破棄
+        }
+      }
+      throw err;
+    }
   }
 
   public load(filePath: string): string | null {

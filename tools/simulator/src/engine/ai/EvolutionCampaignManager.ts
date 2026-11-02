@@ -19,6 +19,8 @@ import {
   CampaignChampionInfo,
   CampaignCheckpointState,
   CampaignCheckpointStorage,
+  CampaignConfigSnapshot,
+  CampaignDiagnosticInfo,
   CampaignEarlyStoppingState,
   CampaignExecutionResult,
   CampaignGenerationRecord,
@@ -31,10 +33,17 @@ import {
   EvolutionCampaignExecutionError,
   EvolutionCampaignIntegrityError,
   InMemoryCampaignCheckpointStorage,
+  canonicalJsonStringify,
 } from "../../domain/ai/EvolutionCampaignTypes";
 import {
   EvolutionLoop,
 } from "./EvolutionLoop";
+import {
+  GenerationRunner,
+} from "./GenerationRunner";
+import {
+  deriveSeed,
+} from "../random/DeterministicShuffle";
 import {
   canonicalGenerationStreamKey,
   canonicalLoopSeedScheduleIdentity,
@@ -235,51 +244,86 @@ export class EvolutionCampaignManager {
         `checkpointIntervalGenerations must be an integer >= 1, received ${checkpointIntervalGenerations}`
       );
     }
+
+    // 永続ストレージ Fail-Fast 検証: checkpointDir や resumeFromCheckpointPath 指定時に storage 未定義は拒絶
+    if (config.checkpointDir !== undefined && config.checkpointStorage === undefined) {
+      throw new EvolutionCampaignConfigurationError(
+        "checkpointDir is specified but checkpointStorage is undefined. A persistent storage adapter (e.g. FileCampaignCheckpointStorage) must be provided."
+      );
+    }
+    if (config.resumeFromCheckpointPath !== undefined && config.checkpointStorage === undefined) {
+      throw new EvolutionCampaignConfigurationError(
+        "resumeFromCheckpointPath is specified but checkpointStorage is undefined. A persistent storage adapter must be provided to load checkpoints."
+      );
+    }
+  }
+
+  /**
+   * 設定同一性検証用の完全な設定スナップショットを生成
+   */
+  public static createConfigSnapshot(config: EvolutionCampaignConfig): CampaignConfigSnapshot {
+    return {
+      campaignId: config.campaignId,
+      campaignSeed: config.campaignSeed,
+      regulationId: config.regulationId ?? "standard-pack",
+      frameId: config.frameId ?? "entry16",
+      rulePackageVersion: config.rulePackageVersion ?? "1.0.0",
+      featureSchemaVersion: config.featureSchemaVersion ?? 6,
+      totalTargetGenerations: config.totalGenerations,
+      initialPopulationDigest: {
+        generation: config.initialPopulation.generation,
+        individuals: config.initialPopulation.entries.map((e) => ({
+          genomeId: e.genomeId,
+          dnaDigest: EvolutionIndependentEvaluator.computeDnaDigest(e.dna),
+        })),
+      },
+      validationOpponents: config.validationOpponents.map((o) => ({
+        opponentId: o.opponentId,
+        name: o.name,
+        role: o.role ?? "BASELINE",
+        targetWinRate: o.targetWinRate,
+        referenceDnaDigest:
+          o.role === "REFERENCE_CHAMPION"
+            ? EvolutionIndependentEvaluator.computeDnaDigest(o.referenceDNA)
+            : undefined,
+      })),
+      validationSeeds: [...config.validationSeeds],
+      runnerConfigSnapshot: config.runnerConfig
+        ? {
+            pairRepetitions: config.runnerConfig.pairRepetitions,
+            maxDecisionsPerMatch: config.runnerConfig.maxDecisionsPerMatch,
+            fitnessConfig: config.runnerConfig.fitnessConfig
+              ? {
+                  minimumCompletedMatches: config.runnerConfig.fitnessConfig.minimumCompletedMatches,
+                  minimumCompletionRate: config.runnerConfig.fitnessConfig.minimumCompletionRate,
+                }
+              : undefined,
+            selectionConfig: config.runnerConfig.builderConfig?.selectionConfig,
+            geneticOperatorConfig: config.runnerConfig.builderConfig?.geneticOperatorConfig,
+          }
+        : undefined,
+      earlyStopping: config.earlyStopping
+        ? {
+            patience: config.earlyStopping.patience,
+            minGenerations: config.earlyStopping.minGenerations,
+          }
+        : undefined,
+      significanceLevelAlpha: config.significanceLevelAlpha ?? 0.05,
+      minimumCompletedPairs: config.minimumCompletedPairs ?? 5,
+      maxDecisionsPerMatch: config.maxDecisionsPerMatch ?? 500,
+    };
   }
 
   /**
    * チェックポイント状態のチェックサム (SHA-256) を計算
+   *
+   * チェックポイント内の全論理状態（configSnapshot, nextPopulation, provisionalBestChampion,
+   * history, seedRegistry, earlyStoppingState など）をキー順決定論的にシリアライズし、
+   * 改ざんや偶発的破損を確実に検出する。
    */
   public static computeCheckpointChecksum(state: Omit<CampaignCheckpointState, "checksum">): string {
-    const serialized = JSON.stringify({
-      checkpointVersion: state.checkpointVersion,
-      campaignId: state.campaignId,
-      campaignSeed: state.campaignSeed,
-      regulationId: state.regulationId,
-      frameId: state.frameId,
-      rulePackageVersion: state.rulePackageVersion,
-      featureSchemaVersion: state.featureSchemaVersion,
-      totalTargetGenerations: state.totalTargetGenerations,
-      completedGenerations: state.completedGenerations,
-      nextGenerationToProcess: state.nextGenerationToProcess,
-      nextPopulation: {
-        generation: state.nextPopulation.generation,
-        entries: state.nextPopulation.entries.map((entry) => ({
-          genomeId: entry.genomeId,
-          dnaDigest: EvolutionIndependentEvaluator.computeDnaDigest(entry.dna),
-        })),
-      },
-      provisionalBestChampion: state.provisionalBestChampion
-        ? {
-            generation: state.provisionalBestChampion.generation,
-            genomeId: state.provisionalBestChampion.genomeId,
-            dnaDigest: state.provisionalBestChampion.dnaDigest,
-            validationMeanWinRate: state.provisionalBestChampion.validationMeanWinRate,
-          }
-        : null,
-      historyLength: state.history.length,
-      historySummary: state.history.map((h) => ({
-        generation: h.generation,
-        candidateGenomeId: h.candidateGenomeId,
-        candidateDnaDigest: h.candidateDnaDigest,
-        isBestChampionUpdated: h.isBestChampionUpdated,
-      })),
-      seedRegistry: {
-        trainingSeedsCount: Object.keys(state.seedRegistry.trainingSeedsByGeneration).length,
-        validationSeeds: state.seedRegistry.validationSeeds,
-      },
-      earlyStoppingState: state.earlyStoppingState,
-    });
+    const { timestamp: _ts, ...logicalState } = state as any;
+    const serialized = canonicalJsonStringify(logicalState);
     return sha256(serialized);
   }
 
@@ -306,10 +350,16 @@ export class EvolutionCampaignManager {
 
   /**
    * チェックポイントをストレージアダプタ経由で読み込み、完全性を検証して復元 (Fail-Closed)
+   *
+   * 検証項目:
+   * 1. チェックサム完全一致 (全論理状態の完全性)
+   * 2. DNA Digest 整合性 (Champion DNA 本体と digest の整合性)
+   * 3. 全設定同一性検証 (Runner設定, Validation設定, Alpha, Threshold, 初期集団等の完全一致)
+   * 4. 世代整合性検証 (completedGenerations, history length, nextPopulation.generation)
    */
   public static loadCheckpoint(
     filePath: string,
-    expectedConfig: Pick<
+    expectedConfig: EvolutionCampaignConfig | Pick<
       EvolutionCampaignConfig,
       "campaignId" | "campaignSeed" | "regulationId" | "frameId" | "rulePackageVersion" | "featureSchemaVersion"
     >,
@@ -348,7 +398,7 @@ export class EvolutionCampaignManager {
       );
     }
 
-    // 設定照合
+    // 1. 基本プロパティ照合
     if (parsed.campaignId !== expectedConfig.campaignId) {
       throw new EvolutionCampaignIntegrityError(
         `Checkpoint campaignId mismatch: expected "${expectedConfig.campaignId}", found "${parsed.campaignId}"`
@@ -384,7 +434,101 @@ export class EvolutionCampaignManager {
       );
     }
 
-    // 世代整合性検証
+    // 2. configSnapshot による全設定同一性検証 (完全な EvolutionCampaignConfig が渡された場合)
+    const fullExpectedConfig = expectedConfig as Partial<EvolutionCampaignConfig>;
+    if (fullExpectedConfig.initialPopulation && fullExpectedConfig.validationOpponents) {
+      const savedSnapshot = parsed.configSnapshot as CampaignConfigSnapshot | undefined;
+      if (!savedSnapshot || typeof savedSnapshot !== "object") {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint missing configSnapshot in "${filePath}": cannot verify configuration identity`
+        );
+      }
+      const expectedSnapshot = this.createConfigSnapshot(fullExpectedConfig as EvolutionCampaignConfig);
+
+      // Runner 設定の同一性
+      if (
+        canonicalJsonStringify(savedSnapshot.runnerConfigSnapshot) !==
+        canonicalJsonStringify(expectedSnapshot.runnerConfigSnapshot)
+      ) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint runnerConfig mismatch: saved configuration does not match current execution configuration`
+        );
+      }
+
+      // Validation Seeds の同一性
+      if (
+        savedSnapshot.validationSeeds.length !== expectedSnapshot.validationSeeds.length ||
+        !savedSnapshot.validationSeeds.every((s, i) => s === expectedSnapshot.validationSeeds[i])
+      ) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint validationSeeds mismatch: saved validation seeds do not match current configuration`
+        );
+      }
+
+      // Validation Opponents の同一性
+      if (
+        canonicalJsonStringify(savedSnapshot.validationOpponents) !==
+        canonicalJsonStringify(expectedSnapshot.validationOpponents)
+      ) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint validationOpponents mismatch: saved validation opponents do not match current configuration`
+        );
+      }
+
+      // 統計・決定パラメータの同一性
+      if (savedSnapshot.significanceLevelAlpha !== expectedSnapshot.significanceLevelAlpha) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint significanceLevelAlpha mismatch: saved ${savedSnapshot.significanceLevelAlpha}, expected ${expectedSnapshot.significanceLevelAlpha}`
+        );
+      }
+      if (savedSnapshot.minimumCompletedPairs !== expectedSnapshot.minimumCompletedPairs) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint minimumCompletedPairs mismatch: saved ${savedSnapshot.minimumCompletedPairs}, expected ${expectedSnapshot.minimumCompletedPairs}`
+        );
+      }
+      if (savedSnapshot.maxDecisionsPerMatch !== expectedSnapshot.maxDecisionsPerMatch) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint maxDecisionsPerMatch mismatch: saved ${savedSnapshot.maxDecisionsPerMatch}, expected ${expectedSnapshot.maxDecisionsPerMatch}`
+        );
+      }
+
+      // Early Stopping 設定の同一性
+      if (
+        canonicalJsonStringify(savedSnapshot.earlyStopping) !==
+        canonicalJsonStringify(expectedSnapshot.earlyStopping)
+      ) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint earlyStopping mismatch: saved configuration does not match current execution configuration`
+        );
+      }
+
+      // 初期集団エントリ (genomeId & DNA Digest) の同一性
+      if (
+        canonicalJsonStringify(savedSnapshot.initialPopulationDigest) !==
+        canonicalJsonStringify(expectedSnapshot.initialPopulationDigest)
+      ) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint initialPopulation mismatch: initial population entries do not match current execution configuration`
+        );
+      }
+
+      // 目標世代数: allowCampaignExtension フラグに基づく契約検証
+      if (fullExpectedConfig.allowCampaignExtension === true) {
+        if (fullExpectedConfig.totalGenerations! < parsed.completedGenerations) {
+          throw new EvolutionCampaignIntegrityError(
+            `Checkpoint totalGenerations extension error: requested ${fullExpectedConfig.totalGenerations} is less than already completed generations ${parsed.completedGenerations}`
+          );
+        }
+      } else {
+        if (fullExpectedConfig.totalGenerations !== parsed.totalTargetGenerations) {
+          throw new EvolutionCampaignIntegrityError(
+            `Checkpoint totalTargetGenerations mismatch: saved ${parsed.totalTargetGenerations}, current config ${fullExpectedConfig.totalGenerations}. Set allowCampaignExtension: true to extend campaign generations.`
+          );
+        }
+      }
+    }
+
+    // 3. 世代整合性検証
     if (parsed.completedGenerations !== parsed.history.length) {
       throw new EvolutionCampaignIntegrityError(
         `Checkpoint generation inconsistency: completedGenerations (${parsed.completedGenerations}) does not match history length (${parsed.history.length})`
@@ -399,6 +543,23 @@ export class EvolutionCampaignManager {
       throw new EvolutionCampaignIntegrityError(
         `Checkpoint nextPopulation generation (${parsed.nextPopulation.generation}) does not match completedGenerations (${parsed.completedGenerations})`
       );
+    }
+
+    // 4. DNA Digest 真正性検証
+    if (parsed.provisionalBestChampion) {
+      DecisionDNACodec.validate(parsed.provisionalBestChampion.dna);
+      const computedChampionDigest = EvolutionIndependentEvaluator.computeDnaDigest(
+        parsed.provisionalBestChampion.dna
+      );
+      if (computedChampionDigest !== parsed.provisionalBestChampion.dnaDigest) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint provisionalBestChampion dnaDigest mismatch: expected "${computedChampionDigest}", found "${parsed.provisionalBestChampion.dnaDigest}"`
+        );
+      }
+    }
+
+    for (const entry of parsed.nextPopulation.entries) {
+      DecisionDNACodec.validate(entry.dna);
     }
 
     return parsed as CampaignCheckpointState;
@@ -519,14 +680,7 @@ export class EvolutionCampaignManager {
     if (resumeFromCheckpointPath) {
       const restored = this.loadCheckpoint(
         resumeFromCheckpointPath,
-        {
-          campaignId,
-          campaignSeed,
-          regulationId,
-          frameId,
-          rulePackageVersion,
-          featureSchemaVersion,
-        },
+        config,
         storage
       );
 
@@ -552,11 +706,34 @@ export class EvolutionCampaignManager {
     let stopReason = `All target generations (${totalGenerations}) completed successfully`;
     let totalTrainingMatches = 0;
     let totalValidationMatches = 0;
+    let diagnosticInfo: CampaignDiagnosticInfo | undefined = undefined;
 
     // 4. 多世代ステップ駆動ループ (g = completedGenerations .. totalGenerations - 1)
     for (let g = completedGenerations; g < totalGenerations; g++) {
       const genStreamKey = canonicalGenerationStreamKey(g);
       const generationSeedScheduleIdentity = canonicalLoopSeedScheduleIdentity(campaignSeed);
+      const generationSeed = deriveSeed(campaignSeed, genStreamKey);
+      const pairRepetitions = runnerConfig?.pairRepetitions ?? 1;
+
+      // 4.0 世代 g の Training 対戦スケジュールを正本から決定論的に生成
+      const plannedSchedule = GenerationRunner.planSchedule(currentPopulation, generationSeed, pairRepetitions);
+      const scheduledMatchSeeds = plannedSchedule.map((m) => m.matchSeed);
+      const uniqueScheduledSeeds = Array.from(new Set(scheduledMatchSeeds));
+
+      // 4.0.1 衝突事前検証: 今回の Training Seeds と Validation Seeds の重複、および過去世代 Training Seeds との重複を拒絶
+      const currentTrainingSeedSet: EvaluationSeedSet = {
+        category: "TRAINING",
+        seeds: uniqueScheduledSeeds,
+      };
+      const priorSeedSets: EvaluationSeedSet[] = [];
+      for (const [genStr, sArr] of Object.entries(trainingSeedsByGeneration)) {
+        priorSeedSets.push({ category: "TRAINING", seeds: Array.from(new Set(sArr)) });
+      }
+      EvolutionIndependentEvaluator.assertNoSeedCollision([
+        { category: "VALIDATION", seeds: validationSeeds },
+        currentTrainingSeedSet,
+        ...priorSeedSets,
+      ]);
 
       // 4.1 世代 g の進化処理を一括委譲 (EvolutionLoop.run with generationCount: 1)
       const loopResult = EvolutionLoop.run({
@@ -570,10 +747,26 @@ export class EvolutionCampaignManager {
         },
       });
 
-      // 4.2 戻り値ステータス分岐契約
+      // 4.2 戻り値ステータス分岐契約 (REEVALUATION_REQUIRED 時の安全停止と診断情報)
       if (loopResult.logicalResult.status === "REEVALUATION_REQUIRED") {
         campaignStatus = "REEVALUATION_REQUIRED";
         stopReason = `Evolution loop aborted at generation ${g}: REEVALUATION_REQUIRED (${loopResult.logicalResult.reason})`;
+        diagnosticInfo = {
+          failedGeneration: g,
+          stopReason,
+          status: "REEVALUATION_REQUIRED",
+          trainingStatus: {
+            scheduledMatches: plannedSchedule.length,
+            isCompleted: false,
+            reason: loopResult.logicalResult.reason,
+          },
+          validationStatus: {
+            attempted: false,
+            reason: "Skipped due to training reevaluation requirement",
+          },
+          lastValidCheckpointGeneration: completedGenerations > 0 ? completedGenerations - 1 : undefined,
+          canResume: completedGenerations > 0,
+        };
         break;
       }
 
@@ -582,18 +775,18 @@ export class EvolutionCampaignManager {
       const fitnessSnapshot = genAdvancedRecord.fitnessSnapshot;
       const nextPopulation = completedLoop.finalPopulation; // 未対戦オフスプリング P_(g+1)
 
-      // 4.3 Training match seeds の収集と Seed Registry への登録
-      const matchSeeds: number[] = [];
-      if ((genAdvancedRecord as any).schedule?.matches) {
-        for (const m of (genAdvancedRecord as any).schedule.matches) {
-          matchSeeds.push(m.matchSeed);
-        }
+      // 4.3 Training match 件数照合と正本 Match Seeds の登録
+      if (genAdvancedRecord.manifest.totalMatches !== plannedSchedule.length) {
+        throw new EvolutionCampaignIntegrityError(
+          `Generation ${g} match count mismatch: planned ${plannedSchedule.length}, executed ${genAdvancedRecord.manifest.totalMatches}`
+        );
       }
-      trainingSeedsByGeneration[g] = matchSeeds;
-      for (const s of matchSeeds) {
+
+      trainingSeedsByGeneration[g] = scheduledMatchSeeds;
+      for (const s of scheduledMatchSeeds) {
         allUsedSeedsSet.add(s);
       }
-      totalTrainingMatches += matchSeeds.length;
+      totalTrainingMatches += scheduledMatchSeeds.length;
 
       // 4.4 世代 g の Champion 候補を特定 (P_g のみから選定)
       const candidateInfo = EvolutionCampaignManager.selectGenerationChampionCandidate(
@@ -603,17 +796,14 @@ export class EvolutionCampaignManager {
       const candidateDnaDigest = EvolutionIndependentEvaluator.computeDnaDigest(candidateInfo.dna);
 
       // 4.5 独立 Validation 評価の実行
-      // 過去世代の Training seeds を集約して seedRegistry を構築
-      const priorSeedSets: EvaluationSeedSet[] = [];
-      for (const [genStr, sArr] of Object.entries(trainingSeedsByGeneration)) {
-        priorSeedSets.push({ category: "TRAINING", seeds: sArr });
-      }
-
       const valResult = EvolutionIndependentEvaluator.evaluate({
         candidateDNA: candidateInfo.dna,
         seeds: validationSeeds,
         seedCategory: "VALIDATION",
-        seedRegistry: priorSeedSets,
+        seedRegistry: [
+          ...priorSeedSets,
+          currentTrainingSeedSet,
+        ],
         opponents: validationOpponents,
         sessionFactory,
         significanceLevelAlpha,
@@ -626,10 +816,26 @@ export class EvolutionCampaignManager {
 
       totalValidationMatches += valResult.totalMatches;
 
-      // 4.6 Validation Evidence の妥当性検証 (無効 Evidence は Fail-Closed 停止)
+      // 4.6 Validation Evidence の妥当性検証 (無効 Evidence は Fail-Closed 停止と診断情報)
       if (valResult.evidenceStatus !== "VALID") {
         campaignStatus = "FAILED";
         stopReason = `Validation evaluation failed for generation ${g} champion candidate: evidenceStatus="${valResult.evidenceStatus}"`;
+        diagnosticInfo = {
+          failedGeneration: g,
+          stopReason,
+          status: "FAILED",
+          trainingStatus: {
+            scheduledMatches: plannedSchedule.length,
+            isCompleted: true,
+          },
+          validationStatus: {
+            attempted: true,
+            evidenceStatus: valResult.evidenceStatus,
+            reason: `Validation evaluation failed with evidenceStatus="${valResult.evidenceStatus}"`,
+          },
+          lastValidCheckpointGeneration: completedGenerations > 0 ? completedGenerations - 1 : undefined,
+          canResume: completedGenerations > 0,
+        };
         break;
       }
 
@@ -693,7 +899,7 @@ export class EvolutionCampaignManager {
         generation: g,
         generationSeed: genAdvancedRecord.generationSeed,
         trainingSeedScheduleIdentity: generationSeedScheduleIdentity,
-        trainingMatchCount: matchSeeds.length,
+        trainingMatchCount: scheduledMatchSeeds.length,
         candidateGenomeId: candidateInfo.genomeId,
         candidateDnaDigest,
         candidateFitnessScore: candidateInfo.fitnessScore,
@@ -731,6 +937,7 @@ export class EvolutionCampaignManager {
               frameId,
               rulePackageVersion,
               featureSchemaVersion,
+              configSnapshot: this.createConfigSnapshot(config),
               totalTargetGenerations: totalGenerations,
               completedGenerations,
               nextGenerationToProcess: completedGenerations,
@@ -765,6 +972,7 @@ export class EvolutionCampaignManager {
             frameId,
             rulePackageVersion,
             featureSchemaVersion,
+            configSnapshot: this.createConfigSnapshot(config),
             totalTargetGenerations: totalGenerations,
             completedGenerations,
             nextGenerationToProcess: completedGenerations,
@@ -814,6 +1022,7 @@ export class EvolutionCampaignManager {
       finalPopulation: currentPopulation,
       seedRegistry,
       summaryText,
+      diagnosticInfo,
     };
 
     const runtimeMetrics: CampaignRuntimeMetrics = {
