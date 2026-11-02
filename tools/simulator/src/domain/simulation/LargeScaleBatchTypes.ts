@@ -86,6 +86,16 @@ export interface MemorySample {
 }
 
 /**
+ * 強制 GC 診断情報 (通常計測完了後にオプショナルで収集)
+ */
+export interface GcDiagnostics {
+  readonly gcAvailable: boolean;
+  readonly postGcHeapUsedBytes?: number;
+  readonly postGcRssBytes?: number;
+  readonly reclaimedHeapBytes?: number;
+}
+
+/**
  * メモリ使用量テレメトリ
  */
 export interface MemoryTelemetry {
@@ -98,6 +108,7 @@ export interface MemoryTelemetry {
   readonly heapGrowthBytes: number;
   readonly rssGrowthBytes: number;
   readonly samples: readonly MemorySample[];
+  readonly gcDiagnostics?: GcDiagnostics;
 }
 
 /**
@@ -209,6 +220,35 @@ export interface LargeScaleBatchConfig {
 }
 
 /**
+ * 前半・後半区間の性能・メモリ指標
+ */
+export interface HalfwaySegmentMetrics {
+  readonly matchCount: number;
+  readonly startMatchIndex: number;
+  readonly endMatchIndex: number;
+  readonly elapsedMs: number;
+  readonly matchesPerSecond: number;
+  readonly meanLatencyMs: number;
+  readonly medianLatencyMs: number;
+  readonly startHeapUsedBytes: number;
+  readonly endHeapUsedBytes: number;
+  readonly heapGrowthBytes: number;
+  readonly startRssBytes: number;
+  readonly endRssBytes: number;
+  readonly rssGrowthBytes: number;
+}
+
+/**
+ * 連続実行の前半・後半比較メトリクス
+ */
+export interface HalfwayComparisonMetrics {
+  readonly firstHalf: HalfwaySegmentMetrics;
+  readonly secondHalf: HalfwaySegmentMetrics;
+  readonly throughputRetentionRatio: number;
+  readonly heapGrowthDecelerationRatio: number;
+}
+
+/**
  * 大規模バッチ正式 Evidence ペイロード
  */
 export interface LargeScaleBatchEvidence {
@@ -232,4 +272,5 @@ export interface LargeScaleBatchEvidence {
     readonly baseSeed: number;
     readonly sampleIndices: readonly number[];
   };
+  readonly halfwayComparison?: HalfwayComparisonMetrics;
 }

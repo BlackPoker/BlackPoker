@@ -69,7 +69,7 @@ describe("LargeScaleBatchBenchmark Stage 1 Evidence Gate", () => {
     expect(perf.estimated10kMatchesDurationHours).toBeLessThan(1.0); // 1時間以内
   });
 
-  it("Test 5: メモリ保護とリークフリーが実証されていること (500試合ヒープ増加 < 5MB)", () => {
+  it("Test 5: 500試合のヒープ増加が許容上限内に収まりメモリ保護されていること (500試合ヒープ増加 < 5MB)", () => {
     const raw = fs.readFileSync(evidencePath, "utf-8");
     const evidence: LargeScaleBatchEvidence = JSON.parse(raw);
 

@@ -33,6 +33,9 @@ import {
   MemoryTelemetry,
   CpuTelemetry,
   BatchCheckpointState,
+  GcDiagnostics,
+  HalfwayComparisonMetrics,
+  HalfwaySegmentMetrics,
 } from "../../domain/simulation/LargeScaleBatchTypes";
 
 /**
@@ -258,6 +261,91 @@ export interface LargeScaleMatchContext {
 }
 
 /**
+ * 連続対戦の前半・後半の性能およびメモリ推移を比較計算
+ */
+export function computeHalfwayComparison(params: {
+  readonly matches: readonly LargeScaleMatchResult[];
+  readonly memorySamples: readonly MemorySample[];
+}): HalfwayComparisonMetrics | undefined {
+  const { matches, memorySamples } = params;
+  if (matches.length < 2) return undefined;
+
+  const halfIndex = Math.floor(matches.length / 2);
+  const firstHalfMatches = matches.slice(0, halfIndex);
+  const secondHalfMatches = matches.slice(halfIndex);
+
+  const calcSegment = (
+    segMatches: readonly LargeScaleMatchResult[],
+    startIndex: number,
+    endIndex: number
+  ): HalfwaySegmentMetrics => {
+    const durations = segMatches.map((m) => m.durationMs).sort((a, b) => a - b);
+    const totalElapsed = durations.reduce((a, b) => a + b, 0);
+    const mps = totalElapsed > 0 ? (segMatches.length / totalElapsed) * 1000 : 0;
+    const mean = durations.length > 0 ? totalElapsed / durations.length : 0;
+    const median =
+      durations.length > 0
+        ? durations.length % 2 === 1
+          ? durations[Math.floor(durations.length / 2)]
+          : (durations[durations.length / 2 - 1] + durations[durations.length / 2]) / 2
+        : 0;
+
+    const findClosestSample = (targetIdx: number) => {
+      if (memorySamples.length === 0) return { heapUsedBytes: 0, rssBytes: 0 };
+      let best = memorySamples[0];
+      let bestDiff = Math.abs(best.matchIndex - targetIdx);
+      for (const s of memorySamples) {
+        const diff = Math.abs(s.matchIndex - targetIdx);
+        if (diff < bestDiff) {
+          best = s;
+          bestDiff = diff;
+        }
+      }
+      return best;
+    };
+
+    const startMem = findClosestSample(startIndex);
+    const endMem = findClosestSample(endIndex);
+
+    return {
+      matchCount: segMatches.length,
+      startMatchIndex: startIndex,
+      endMatchIndex: endIndex,
+      elapsedMs: totalElapsed,
+      matchesPerSecond: mps,
+      meanLatencyMs: mean,
+      medianLatencyMs: median,
+      startHeapUsedBytes: startMem.heapUsedBytes,
+      endHeapUsedBytes: endMem.heapUsedBytes,
+      heapGrowthBytes: endMem.heapUsedBytes - startMem.heapUsedBytes,
+      startRssBytes: startMem.rssBytes,
+      endRssBytes: endMem.rssBytes,
+      rssGrowthBytes: endMem.rssBytes - startMem.rssBytes,
+    };
+  };
+
+  const firstHalf = calcSegment(firstHalfMatches, 0, halfIndex - 1);
+  const secondHalf = calcSegment(secondHalfMatches, halfIndex, matches.length - 1);
+
+  const throughputRetentionRatio =
+    firstHalf.matchesPerSecond > 0
+      ? secondHalf.matchesPerSecond / firstHalf.matchesPerSecond
+      : 1.0;
+
+  const heapGrowthDecelerationRatio =
+    firstHalf.heapGrowthBytes !== 0
+      ? secondHalf.heapGrowthBytes / firstHalf.heapGrowthBytes
+      : 1.0;
+
+  return {
+    firstHalf,
+    secondHalf,
+    throughputRetentionRatio,
+    heapGrowthDecelerationRatio,
+  };
+}
+
+/**
  * 正式バッチ実行結果
  * (正式 Evidence 保存インターフェースのみを提供し、テスト用保存経路は一切露出しない)
  */
@@ -269,7 +357,10 @@ export interface OfficialBatchExecutionResult {
   readonly initialManifest: ExecutionManifest;
   readonly postManifest: ExecutionManifest;
   readonly newlyExecutedMatches: number;
-  readonly saveEvidence: (outputFilePath: string) => void;
+  readonly saveEvidence: (
+    outputFilePath: string,
+    options?: { readonly halfwayComparison?: HalfwayComparisonMetrics }
+  ) => void;
 }
 
 /**
@@ -286,7 +377,10 @@ export interface TestBatchExecutionResult {
   readonly newlyExecutedMatches: number;
   readonly saveEvidenceForTesting: (
     outputFilePath: string,
-    options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
+    options?: {
+      readonly preSaveGitMetadata?: GitExecutionMetadata;
+      readonly halfwayComparison?: HalfwayComparisonMetrics;
+    }
   ) => void;
 }
 
@@ -301,10 +395,16 @@ export interface RunBatchExecutionResult {
   readonly initialManifest: ExecutionManifest;
   readonly postManifest: ExecutionManifest;
   readonly newlyExecutedMatches: number;
-  readonly saveEvidence?: (outputFilePath: string) => void;
+  readonly saveEvidence?: (
+    outputFilePath: string,
+    options?: { readonly halfwayComparison?: HalfwayComparisonMetrics }
+  ) => void;
   readonly saveEvidenceForTesting?: (
     outputFilePath: string,
-    options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
+    options?: {
+      readonly preSaveGitMetadata?: GitExecutionMetadata;
+      readonly halfwayComparison?: HalfwayComparisonMetrics;
+    }
   ) => void;
 }
 
@@ -803,7 +903,23 @@ export class LargeScaleBatchRunner {
       cpuUtilizationPercent,
     };
 
-    // メモリテレメトリ
+    // メモリテレメトリ (通常の性能計測値に影響を与えないよう、finalMem 確定後に独立して GC 診断を収集)
+    let gcDiagnostics: GcDiagnostics | undefined = undefined;
+    if (typeof (globalThis as any).gc === "function") {
+      try {
+        (globalThis as any).gc();
+        const postGcMem = process.memoryUsage();
+        gcDiagnostics = {
+          gcAvailable: true,
+          postGcHeapUsedBytes: postGcMem.heapUsed,
+          postGcRssBytes: postGcMem.rss,
+          reclaimedHeapBytes: Math.max(0, finalMem.heapUsed - postGcMem.heapUsed),
+        };
+      } catch {
+        gcDiagnostics = { gcAvailable: false };
+      }
+    }
+
     const memoryTelemetry: MemoryTelemetry = {
       baselineRssBytes: initialMem.rss,
       baselineHeapUsedBytes: initialMem.heapUsed,
@@ -814,6 +930,7 @@ export class LargeScaleBatchRunner {
       heapGrowthBytes: finalMem.heapUsed - initialMem.heapUsed,
       rssGrowthBytes: finalMem.rss - initialMem.rss,
       samples: memorySamples,
+      gcDiagnostics,
     };
 
     // レイテンシ分布算出 (今回実際に実行された試合の計測時間に基づく)
@@ -958,16 +1075,27 @@ export class LargeScaleBatchRunner {
     }
 
     // 7. 正式 Evidence 保存クロージャ (保存直前のリアルタイム検証)
-    let saveEvidence: ((outputFilePath: string) => void) | undefined = undefined;
+    let saveEvidence:
+      | ((
+          outputFilePath: string,
+          options?: { readonly halfwayComparison?: HalfwayComparisonMetrics }
+        ) => void)
+      | undefined = undefined;
     let saveEvidenceForTesting:
       | ((
           outputFilePath: string,
-          options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
+          options?: {
+            readonly preSaveGitMetadata?: GitExecutionMetadata;
+            readonly halfwayComparison?: HalfwayComparisonMetrics;
+          }
         ) => void)
       | undefined = undefined;
 
     if (!injectedGitMetadata) {
-      saveEvidence = (outputFilePath: string): void => {
+      saveEvidence = (
+        outputFilePath: string,
+        options?: { readonly halfwayComparison?: HalfwayComparisonMetrics }
+      ): void => {
         // 保存直前のリアルタイム Git 状態・主要サブシステム再検証
         const preSaveManifest = createExecutionManifest({
           workId: config.workId,
@@ -1012,6 +1140,7 @@ export class LargeScaleBatchRunner {
             baseSeed: config.baseSeed,
             sampleIndices: [0, Math.floor(config.matchCount / 2), config.matchCount - 1],
           },
+          halfwayComparison: options?.halfwayComparison,
         };
 
         saveOfficialEvidenceWithManifest({
@@ -1024,7 +1153,10 @@ export class LargeScaleBatchRunner {
       // テスト専用保存クロージャ (単体テストでのみ使用)
       saveEvidenceForTesting = (
         outputFilePath: string,
-        options?: { readonly preSaveGitMetadata?: GitExecutionMetadata }
+        options?: {
+          readonly preSaveGitMetadata?: GitExecutionMetadata;
+          readonly halfwayComparison?: HalfwayComparisonMetrics;
+        }
       ): void => {
         const manifestToValidate: ExecutionManifest = options?.preSaveGitMetadata
           ? {
@@ -1065,6 +1197,7 @@ export class LargeScaleBatchRunner {
             baseSeed: config.baseSeed,
             sampleIndices: [0, Math.floor(config.matchCount / 2), config.matchCount - 1],
           },
+          halfwayComparison: options?.halfwayComparison,
         };
 
         saveTestEvidenceWithManifest({
