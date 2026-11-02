@@ -12,6 +12,14 @@
  * 5. Checkpoint / Resume: SHA-256 チェックサム完全性保証、一時ファイルからのアトミック置換、二重実行防止
  * 6. Seed Registry 履歴管理: Training / Validation / Holdout の厳格分離と非重複保証
  * 7. Early Stopping: 未改善 (正常早期終了) と無効 Evidence (異常停止) の明確な区別
+ *
+ * 設定同一性と Resume 保証範囲の境界 (Scope & Limitation):
+ * - 本エンジンは、シリアライズ可能な設定パラメータ（環境識別子 environmentRef, regulationId, frameId,
+ *   rulePackageVersion, featureSchemaVersion, runnerConfig, populationSize, validationOpponents の
+ *   DNA ダイジェスト、validationSeeds 等）の完全一致をチェックサムおよびスナップショット照合で保証します。
+ * - 一方で、JavaScript の policyFactory や sessionFactory の関数クロージャ内部のバイトコード同一性は
+ *   シリアライズ不能であるため直接検証の対象外です。これらは環境識別子・Regulation・RulePackage および
+ *   DNA による論理的同一性の保証契約に基づきます。
  */
 
 import {
@@ -265,6 +273,7 @@ export class EvolutionCampaignManager {
     return {
       campaignId: config.campaignId,
       campaignSeed: config.campaignSeed,
+      environmentRef: config.environmentRef,
       regulationId: config.regulationId ?? "standard-pack",
       frameId: config.frameId ?? "entry16",
       rulePackageVersion: config.rulePackageVersion ?? "1.0.0",
@@ -292,6 +301,7 @@ export class EvolutionCampaignManager {
         ? {
             pairRepetitions: config.runnerConfig.pairRepetitions,
             maxDecisionsPerMatch: config.runnerConfig.maxDecisionsPerMatch,
+            populationSize: config.runnerConfig.builderConfig?.populationSize,
             fitnessConfig: config.runnerConfig.fitnessConfig
               ? {
                   minimumCompletedMatches: config.runnerConfig.fitnessConfig.minimumCompletedMatches,
@@ -361,7 +371,7 @@ export class EvolutionCampaignManager {
     filePath: string,
     expectedConfig: EvolutionCampaignConfig | Pick<
       EvolutionCampaignConfig,
-      "campaignId" | "campaignSeed" | "regulationId" | "frameId" | "rulePackageVersion" | "featureSchemaVersion"
+      "campaignId" | "campaignSeed" | "environmentRef" | "regulationId" | "frameId" | "rulePackageVersion" | "featureSchemaVersion"
     >,
     storage: CampaignCheckpointStorage = new InMemoryCampaignCheckpointStorage()
   ): CampaignCheckpointState {
@@ -409,6 +419,11 @@ export class EvolutionCampaignManager {
         `Checkpoint campaignSeed mismatch: expected ${expectedConfig.campaignSeed}, found ${parsed.campaignSeed}`
       );
     }
+    if (parsed.environmentRef !== expectedConfig.environmentRef) {
+      throw new EvolutionCampaignIntegrityError(
+        `Checkpoint environmentRef mismatch: expected "${expectedConfig.environmentRef}", found "${parsed.environmentRef}"`
+      );
+    }
     const expectedReg = expectedConfig.regulationId ?? "standard-pack";
     if (parsed.regulationId !== expectedReg) {
       throw new EvolutionCampaignIntegrityError(
@@ -444,6 +459,13 @@ export class EvolutionCampaignManager {
         );
       }
       const expectedSnapshot = this.createConfigSnapshot(fullExpectedConfig as EvolutionCampaignConfig);
+
+      // 環境識別子の同一性
+      if (savedSnapshot.environmentRef !== expectedSnapshot.environmentRef) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint environmentRef mismatch in snapshot: saved "${savedSnapshot.environmentRef}", expected "${expectedSnapshot.environmentRef}"`
+        );
+      }
 
       // Runner 設定の同一性
       if (
@@ -513,10 +535,15 @@ export class EvolutionCampaignManager {
       }
 
       // 目標世代数: allowCampaignExtension フラグに基づく契約検証
+      if (fullExpectedConfig.totalGenerations! < parsed.completedGenerations) {
+        throw new EvolutionCampaignIntegrityError(
+          `Checkpoint totalGenerations extension error: requested ${fullExpectedConfig.totalGenerations} is less than already completed generations ${parsed.completedGenerations}`
+        );
+      }
       if (fullExpectedConfig.allowCampaignExtension === true) {
-        if (fullExpectedConfig.totalGenerations! < parsed.completedGenerations) {
+        if (fullExpectedConfig.totalGenerations! < parsed.totalTargetGenerations) {
           throw new EvolutionCampaignIntegrityError(
-            `Checkpoint totalGenerations extension error: requested ${fullExpectedConfig.totalGenerations} is less than already completed generations ${parsed.completedGenerations}`
+            `Checkpoint totalGenerations extension error: requested ${fullExpectedConfig.totalGenerations} is less than saved target generations ${parsed.totalTargetGenerations}`
           );
         }
       } else {
@@ -633,6 +660,7 @@ export class EvolutionCampaignManager {
     const {
       campaignId,
       campaignSeed,
+      environmentRef,
       totalGenerations,
       initialPopulation,
       validationOpponents,
@@ -677,6 +705,9 @@ export class EvolutionCampaignManager {
     const storage: CampaignCheckpointStorage =
       config.checkpointStorage ?? new InMemoryCampaignCheckpointStorage();
 
+    let lastSavedCheckpointGeneration: number | null = resumeFromCheckpointPath ? null : null;
+    let lastSavedCheckpointPath: string | null = resumeFromCheckpointPath ?? null;
+
     if (resumeFromCheckpointPath) {
       const restored = this.loadCheckpoint(
         resumeFromCheckpointPath,
@@ -685,6 +716,7 @@ export class EvolutionCampaignManager {
       );
 
       completedGenerations = restored.completedGenerations;
+      lastSavedCheckpointGeneration = completedGenerations;
       currentPopulation = restored.nextPopulation;
       provisionalBestChampion = restored.provisionalBestChampion;
       history.push(...restored.history);
@@ -696,7 +728,7 @@ export class EvolutionCampaignManager {
     }
 
     const environment: GenerationRunnerEnvironmentContext = {
-      environmentRef: `campaign:${campaignId}`,
+      environmentRef: environmentRef ?? `campaign:${campaignId}`,
       regulationId,
       frameId,
       rulePackageVersion,
@@ -751,21 +783,29 @@ export class EvolutionCampaignManager {
       if (loopResult.logicalResult.status === "REEVALUATION_REQUIRED") {
         campaignStatus = "REEVALUATION_REQUIRED";
         stopReason = `Evolution loop aborted at generation ${g}: REEVALUATION_REQUIRED (${loopResult.logicalResult.reason})`;
+        const totalMatchesExecuted = loopResult.logicalResult.generations[0]?.manifest.totalMatches ?? 0;
+        const canResume =
+          lastSavedCheckpointGeneration !== null &&
+          lastSavedCheckpointPath !== null &&
+          storage.exists(lastSavedCheckpointPath);
+
         diagnosticInfo = {
           failedGeneration: g,
           stopReason,
           status: "REEVALUATION_REQUIRED",
           trainingStatus: {
             scheduledMatches: plannedSchedule.length,
-            isCompleted: false,
+            totalMatchesExecuted,
+            isCompleted: totalMatchesExecuted === plannedSchedule.length,
+            isSelectionReady: loopResult.logicalResult.readiness.status === "READY",
             reason: loopResult.logicalResult.reason,
           },
           validationStatus: {
             attempted: false,
             reason: "Skipped due to training reevaluation requirement",
           },
-          lastValidCheckpointGeneration: completedGenerations > 0 ? completedGenerations - 1 : undefined,
-          canResume: completedGenerations > 0,
+          lastValidCheckpointGeneration: lastSavedCheckpointGeneration ?? undefined,
+          canResume,
         };
         break;
       }
@@ -820,21 +860,28 @@ export class EvolutionCampaignManager {
       if (valResult.evidenceStatus !== "VALID") {
         campaignStatus = "FAILED";
         stopReason = `Validation evaluation failed for generation ${g} champion candidate: evidenceStatus="${valResult.evidenceStatus}"`;
+        const canResume =
+          lastSavedCheckpointGeneration !== null &&
+          lastSavedCheckpointPath !== null &&
+          storage.exists(lastSavedCheckpointPath);
+
         diagnosticInfo = {
           failedGeneration: g,
           stopReason,
           status: "FAILED",
           trainingStatus: {
             scheduledMatches: plannedSchedule.length,
+            totalMatchesExecuted: plannedSchedule.length,
             isCompleted: true,
+            isSelectionReady: true,
           },
           validationStatus: {
             attempted: true,
             evidenceStatus: valResult.evidenceStatus,
             reason: `Validation evaluation failed with evidenceStatus="${valResult.evidenceStatus}"`,
           },
-          lastValidCheckpointGeneration: completedGenerations > 0 ? completedGenerations - 1 : undefined,
-          canResume: completedGenerations > 0,
+          lastValidCheckpointGeneration: lastSavedCheckpointGeneration ?? undefined,
+          canResume,
         };
         break;
       }
@@ -903,7 +950,7 @@ export class EvolutionCampaignManager {
         candidateGenomeId: candidateInfo.genomeId,
         candidateDnaDigest,
         candidateFitnessScore: candidateInfo.fitnessScore,
-        validationResult: valResult,
+        validationResult: (valResult as any).logicalResult ?? valResult,
         isBestChampionUpdated,
         timestamp: new Date().toISOString(),
       };
@@ -927,12 +974,13 @@ export class EvolutionCampaignManager {
 
         // Checkpoint 保存 (指定時)
         if (checkpointDir) {
-          this.saveCheckpoint(
+          const savedPath = this.saveCheckpoint(
             checkpointDir,
             {
               checkpointVersion: CAMPAIGN_VERSION,
               campaignId,
               campaignSeed,
+              environmentRef,
               regulationId,
               frameId,
               rulePackageVersion,
@@ -955,6 +1003,8 @@ export class EvolutionCampaignManager {
             },
             storage
           );
+          lastSavedCheckpointGeneration = completedGenerations;
+          lastSavedCheckpointPath = savedPath;
         }
 
         break;
@@ -962,12 +1012,13 @@ export class EvolutionCampaignManager {
 
       // 4.10 Checkpoint 定期保存
       if (checkpointDir && completedGenerations % checkpointIntervalGenerations === 0) {
-        this.saveCheckpoint(
+        const savedPath = this.saveCheckpoint(
           checkpointDir,
           {
             checkpointVersion: CAMPAIGN_VERSION,
             campaignId,
             campaignSeed,
+            environmentRef,
             regulationId,
             frameId,
             rulePackageVersion,
@@ -990,11 +1041,40 @@ export class EvolutionCampaignManager {
           },
           storage
         );
+        lastSavedCheckpointGeneration = completedGenerations;
+        lastSavedCheckpointPath = savedPath;
       }
     }
 
     const endTime = performance.now();
     const timestamp = new Date().toISOString();
+
+    // 異常終了時の診断 Evidence ファイル安全保存 (正常 checkpoint ファイルは上書きせず別名保存)
+    if (diagnosticInfo && checkpointDir) {
+      const diagFilePath = joinPath(checkpointDir, `${campaignId}-diagnostic.json`);
+      const diagPayload = {
+        campaignId,
+        campaignSeed,
+        environmentRef,
+        regulationId,
+        frameId,
+        rulePackageVersion,
+        featureSchemaVersion,
+        failedGeneration: diagnosticInfo.failedGeneration,
+        status: diagnosticInfo.status,
+        stopReason: diagnosticInfo.stopReason,
+        trainingStatus: diagnosticInfo.trainingStatus,
+        validationStatus: diagnosticInfo.validationStatus,
+        lastValidCheckpointGeneration: diagnosticInfo.lastValidCheckpointGeneration,
+        canResume: diagnosticInfo.canResume,
+        timestamp,
+      };
+      storage.save(diagFilePath, JSON.stringify(diagPayload, null, 2));
+      diagnosticInfo = {
+        ...diagnosticInfo,
+        diagnosticFilePath: diagFilePath,
+      };
+    }
 
     const seedRegistry: CampaignSeedRegistry = {
       trainingSeedsByGeneration,

@@ -152,6 +152,7 @@ export interface CampaignEarlyStoppingState {
 export interface CampaignConfigSnapshot {
   readonly campaignId: string;
   readonly campaignSeed: number;
+  readonly environmentRef?: string;
   readonly regulationId: string;
   readonly frameId: string;
   readonly rulePackageVersion: string;
@@ -172,6 +173,7 @@ export interface CampaignConfigSnapshot {
   readonly runnerConfigSnapshot?: {
     readonly maxDecisionsPerMatch?: number;
     readonly pairRepetitions?: number;
+    readonly populationSize?: number;
     readonly fitnessConfig?: {
       readonly minimumCompletedMatches?: number;
       readonly minimumCompletionRate?: number;
@@ -206,6 +208,7 @@ export interface CampaignCheckpointState {
   readonly checkpointVersion: number;
   readonly campaignId: string;
   readonly campaignSeed: number;
+  readonly environmentRef?: string;
   readonly regulationId: string;
   readonly frameId: string;
   readonly rulePackageVersion: string;
@@ -294,6 +297,8 @@ export interface EvolutionCampaignConfig {
   readonly featureSchemaVersion?: number;
   /** キャンペーン全体の基準シード */
   readonly campaignSeed: number;
+  /** 実行環境識別子 (default: "campaign:<campaignId>") */
+  readonly environmentRef?: string;
   /** 目標総世代遷移数 G (1 以上) */
   readonly totalGenerations: number;
   /** 初期母集団スナップショット P_0 (generation = 0) */
@@ -347,7 +352,9 @@ export interface CampaignDiagnosticInfo {
   /** 自己対戦 (Training) 段階の状況 */
   readonly trainingStatus: {
     readonly scheduledMatches: number;
+    readonly totalMatchesExecuted?: number;
     readonly isCompleted: boolean;
+    readonly isSelectionReady?: boolean;
     readonly reason?: string;
   };
   /** Validation 評価段階の状況 (実施された場合) */
@@ -360,6 +367,8 @@ export interface CampaignDiagnosticInfo {
   readonly lastValidCheckpointGeneration?: number;
   /** 中断箇所から再開可能か (Fail-Closed ガイド) */
   readonly canResume: boolean;
+  /** 異常終了時の診断 Evidence ファイルパス (checkpointDir 指定時に保存) */
+  readonly diagnosticFilePath?: string;
 }
 
 // =============================================================================
@@ -434,75 +443,61 @@ export function canonicalJsonStringify(obj: any): string {
 }
 
 /**
- * 2つの CampaignLogicalResult の完全論理一致を検証（タイムスタンプ等の一時的フィールドを除く）
+ * CampaignLogicalResult から非決定論的実行時情報（各世代レコードの timestamp 等）のみを除外した
+ * 純粋な全論理状態を再帰的に抽出・正規化
+ */
+export function normalizeCampaignLogicalResult(result: CampaignLogicalResult): any {
+  if (!result || typeof result !== "object") return result;
+
+  return {
+    campaignVersion: result.campaignVersion,
+    campaignId: result.campaignId,
+    campaignSeed: result.campaignSeed,
+    regulationId: result.regulationId,
+    frameId: result.frameId,
+    rulePackageVersion: result.rulePackageVersion,
+    featureSchemaVersion: result.featureSchemaVersion,
+    totalTargetGenerations: result.totalTargetGenerations,
+    completedGenerations: result.completedGenerations,
+    status: result.status,
+    stopReason: result.stopReason,
+    provisionalBestChampion: result.provisionalBestChampion,
+    history: Array.isArray(result.history)
+      ? result.history.map((h) => {
+          const { timestamp: _ts, validationResult, ...rest } = h as any;
+          let normValidationResult = validationResult;
+          if (validationResult && typeof validationResult === "object") {
+            const { runtimeMetrics: _rm, timestamp: _vts, ...valRest } = validationResult;
+            normValidationResult = valRest;
+          }
+          return {
+            ...rest,
+            validationResult: normValidationResult,
+          };
+        })
+      : result.history,
+    finalPopulation: result.finalPopulation,
+    seedRegistry: result.seedRegistry,
+    diagnosticInfo: result.diagnosticInfo,
+    summaryText: result.summaryText,
+  };
+}
+
+/**
+ * 2つの CampaignLogicalResult の完全論理一致を検証
+ *
+ * 保証原則:
+ * - 各世代レコードの非決定論的 timestamp 以外、すべての論理プロパティ（finalPopulation の全個体 DNA、
+ *   validationResult の全対戦結果・スコア・検定値、provisionalBestChampion の全情報、
+ *   seedRegistry の全シード配列、stopReason、diagnosticInfo、summaryText 等）を
+ *   canonicalJsonStringify によりキー順ソートした上で完全一致比較します。
  */
 export function isEqualCampaignLogicalResult(a: CampaignLogicalResult, b: CampaignLogicalResult): boolean {
   if (a === b) return true;
   if (!a || !b) return false;
 
-  // 基本プロパティ
-  if (
-    a.campaignVersion !== b.campaignVersion ||
-    a.campaignId !== b.campaignId ||
-    a.campaignSeed !== b.campaignSeed ||
-    a.regulationId !== b.regulationId ||
-    a.frameId !== b.frameId ||
-    a.rulePackageVersion !== b.rulePackageVersion ||
-    a.featureSchemaVersion !== b.featureSchemaVersion ||
-    a.totalTargetGenerations !== b.totalTargetGenerations ||
-    a.completedGenerations !== b.completedGenerations ||
-    a.status !== b.status
-  ) {
-    return false;
-  }
+  const normA = normalizeCampaignLogicalResult(a);
+  const normB = normalizeCampaignLogicalResult(b);
 
-  // Provisional Best Champion
-  if ((a.provisionalBestChampion === null) !== (b.provisionalBestChampion === null)) return false;
-  if (a.provisionalBestChampion && b.provisionalBestChampion) {
-    if (
-      a.provisionalBestChampion.generation !== b.provisionalBestChampion.generation ||
-      a.provisionalBestChampion.genomeId !== b.provisionalBestChampion.genomeId ||
-      a.provisionalBestChampion.dnaDigest !== b.provisionalBestChampion.dnaDigest ||
-      a.provisionalBestChampion.fitnessScore !== b.provisionalBestChampion.fitnessScore ||
-      a.provisionalBestChampion.validationMeanWinRate !== b.provisionalBestChampion.validationMeanWinRate
-    ) {
-      return false;
-    }
-  }
-
-  // History (世代数、候補者、結果)
-  if (a.history.length !== b.history.length) return false;
-  for (let i = 0; i < a.history.length; i++) {
-    const hA = a.history[i];
-    const hB = b.history[i];
-    if (
-      hA.generation !== hB.generation ||
-      hA.generationSeed !== hB.generationSeed ||
-      hA.trainingMatchCount !== hB.trainingMatchCount ||
-      hA.candidateGenomeId !== hB.candidateGenomeId ||
-      hA.candidateDnaDigest !== hB.candidateDnaDigest ||
-      hA.candidateFitnessScore !== hB.candidateFitnessScore ||
-      hA.isBestChampionUpdated !== hB.isBestChampionUpdated ||
-      hA.validationResult.evidenceStatus !== hB.validationResult.evidenceStatus ||
-      hA.validationResult.improvementStatus !== hB.validationResult.improvementStatus
-    ) {
-      return false;
-    }
-  }
-
-  // Seed Registry
-  if (
-    canonicalJsonStringify(a.seedRegistry.trainingSeedsByGeneration) !==
-    canonicalJsonStringify(b.seedRegistry.trainingSeedsByGeneration)
-  ) {
-    return false;
-  }
-  if (
-    a.seedRegistry.validationSeeds.length !== b.seedRegistry.validationSeeds.length ||
-    !a.seedRegistry.validationSeeds.every((s, i) => s === b.seedRegistry.validationSeeds[i])
-  ) {
-    return false;
-  }
-
-  return true;
+  return canonicalJsonStringify(normA) === canonicalJsonStringify(normB);
 }
