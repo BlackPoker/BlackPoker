@@ -1272,4 +1272,160 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const crit95 = studentTOneTailedCritical(0.95, 10);
     expect(crit95).toBeCloseTo(-crit05, 6);
   });
+
+  // ===========================================================================
+  // Test 30 (R4): 無効 Evidence (FAILED 混入) 時の総合改善判定は常に未認定 (IMPROVEMENT_UNVERIFIED)
+  // ===========================================================================
+  it("Test 30 (R4): 対戦相手Aで有効な有意敗北 (CONFIRMED_REGRESSION) があっても、対戦相手Bで FAILED が発生して全体が INVALID_EVIDENCE の場合、総合判定は IMPROVEMENT_UNVERIFIED となり、個別Aの敗北診断情報は維持されること", () => {
+    const candidateDna = createManualGenericGenomeDNA();
+
+    const opponentA: EvaluationOpponentDefinition = {
+      opponentId: "opp-a-loss",
+      name: "Opponent A",
+      role: "BASELINE",
+      policyFactory: () => new FirstLegalPolicy(false),
+      targetWinRate: 0.5,
+    };
+
+    const opponentB: EvaluationOpponentDefinition = {
+      opponentId: "opp-b-fault",
+      name: "Opponent B",
+      role: "BASELINE",
+      policyFactory: () => new FirstLegalPolicy(false),
+      targetWinRate: 0.5,
+    };
+
+    const mixedSessionFactory = (ctx: BatchMatchContext) => {
+      if (ctx.matchId.includes("opp-a-loss")) {
+        // 対戦相手Aとの対戦: 相手側が即時勝利するセッションを返し、全ペア 0.0 (Candidate 全敗) とする
+        return {
+          advance: () => ({
+            type: "FINISHED",
+            result: {
+              // leg0 では Candidate=p1, Opponent=p2 -> winner: "p2" (Candidate 敗北)
+              // leg1 では Candidate=p2, Opponent=p1 -> winner: "p1" (Candidate 敗北)
+              winner: ctx.matchId.includes("cand-vs") ? "p2" : "p1",
+              reason: "Opponent A clear win",
+            },
+          }),
+          state: { turnCount: 1 },
+        } as any;
+      }
+      if (ctx.matchId.includes("opp-b-fault") && ctx.matchSeed === 93011) {
+        // 対戦相手Bで特定シード時に FAILED を発生させる
+        throw new Error("Simulated engine crash for Opponent B");
+      }
+      return standardPackSessionCreator(ctx.matchSeed);
+    };
+
+    // 7ペア全敗: p = (0.5)^7 = 0.0078125 < 0.025 (Bonferroni 補正後 alpha = 0.05 / 2 = 0.025 で有意)
+    const result = EvolutionIndependentEvaluator.evaluate({
+      candidateDNA: candidateDna,
+      seeds: [93010, 93011, 93012, 93013, 93014, 93015, 93016], // 7ペア
+      seedCategory: "VALIDATION",
+      opponents: [opponentA, opponentB],
+      sessionFactory: mixedSessionFactory,
+      maxDecisionsPerMatch: 500,
+      minimumCompletedPairs: 5,
+    });
+
+    // 1. 全体 Evidence は INVALID_EVIDENCE
+    expect(result.evidenceStatus).toBe("INVALID_EVIDENCE");
+
+    // 2. 総合判定は CONFIRMED_REGRESSION ではなく、未認定 IMPROVEMENT_UNVERIFIED
+    expect(result.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
+
+    // 3. Fail-Closed 契約の確認
+    expect(result.allTargetsMet).toBe(false);
+    expect(result.baselineSuperior).toBe(false);
+    expect(result.championImproved).toBe(false);
+
+    // 4. 対戦相手Aの個別診断情報は VALID かつ CONFIRMED_REGRESSION を維持
+    const summaryA = result.opponents["opp-a-loss"];
+    expect(summaryA.evidenceStatus).toBe("VALID");
+    expect(summaryA.completedPairs).toBe(7);
+    expect(summaryA.meanPairScore).toBe(0.0);
+    expect(summaryA.improvementStatus).toBe("CONFIRMED_REGRESSION");
+
+    // 5. 対戦相手Bの個別サマリは FAILED を反映
+    const summaryB = result.opponents["opp-b-fault"];
+    expect(summaryB.evidenceStatus).toBe("INVALID_EVIDENCE");
+    expect(summaryB.failedPairs).toBeGreaterThanOrEqual(1);
+  });
+
+  // ===========================================================================
+  // Test 31 (R4): 無効 Evidence (INCOMPLETE 混入) 時の総合改善判定も常に未認定 (IMPROVEMENT_UNVERIFIED)
+  // ===========================================================================
+  it("Test 31 (R4): 対戦相手Aで有効な有意敗北 (CONFIRMED_REGRESSION) があっても、対戦相手Bで INCOMPLETE が発生して全体が INSUFFICIENT_EVIDENCE の場合、総合判定は IMPROVEMENT_UNVERIFIED となり、個別Aの敗北診断情報は維持されること", () => {
+    const candidateDna = createManualGenericGenomeDNA();
+
+    const opponentA: EvaluationOpponentDefinition = {
+      opponentId: "opp-a-loss",
+      name: "Opponent A",
+      role: "BASELINE",
+      policyFactory: () => new FirstLegalPolicy(false),
+      targetWinRate: 0.5,
+    };
+
+    const opponentB: EvaluationOpponentDefinition = {
+      opponentId: "opp-b-incomplete",
+      name: "Opponent B",
+      role: "BASELINE",
+      policyFactory: () => new FirstLegalPolicy(false),
+      targetWinRate: 0.5,
+    };
+
+    const incompleteSessionFactory = (ctx: BatchMatchContext) => {
+      if (ctx.matchId.includes("opp-a-loss")) {
+        // 対戦相手A: 即時終了で全敗
+        return {
+          advance: () => ({
+            type: "FINISHED",
+            result: {
+              winner: ctx.matchId.includes("cand-vs") ? "p2" : "p1",
+              reason: "Opponent A clear win",
+            },
+          }),
+          state: { turnCount: 1 },
+        } as any;
+      }
+      // 対戦相手B: 通常セッションだが maxDecisionsPerMatch=5 で打ち切られ INCOMPLETE になる
+      return standardPackSessionCreator(ctx.matchSeed);
+    };
+
+    // 7ペア全敗: p = (0.5)^7 = 0.0078125 < 0.025 (Bonferroni 補正後 alpha = 0.025 で有意)
+    const result = EvolutionIndependentEvaluator.evaluate({
+      candidateDNA: candidateDna,
+      seeds: [93020, 93021, 93022, 93023, 93024, 93025, 93026], // 7ペア
+      seedCategory: "VALIDATION",
+      opponents: [opponentA, opponentB],
+      sessionFactory: incompleteSessionFactory,
+      maxDecisionsPerMatch: 5, // 対戦相手Aは0手で完了、対戦相手Bは5手で打ち切り(INCOMPLETE)
+      minimumCompletedPairs: 5,
+    });
+
+    // 1. 全体 Evidence は INSUFFICIENT_EVIDENCE
+    expect(result.evidenceStatus).toBe("INSUFFICIENT_EVIDENCE");
+
+    // 2. 総合判定は CONFIRMED_REGRESSION ではなく、未認定 IMPROVEMENT_UNVERIFIED
+    expect(result.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
+
+    // 3. Fail-Closed 契約の確認
+    expect(result.allTargetsMet).toBe(false);
+    expect(result.baselineSuperior).toBe(false);
+    expect(result.championImproved).toBe(false);
+
+    // 4. 対戦相手Aの個別診断情報は VALID かつ CONFIRMED_REGRESSION を維持
+    const summaryA = result.opponents["opp-a-loss"];
+    expect(summaryA.evidenceStatus).toBe("VALID");
+    expect(summaryA.completedPairs).toBe(7);
+    expect(summaryA.meanPairScore).toBe(0.0);
+    expect(summaryA.improvementStatus).toBe("CONFIRMED_REGRESSION");
+
+    // 5. 対戦相手Bの個別サマリは INCOMPLETE を反映
+    const summaryB = result.opponents["opp-b-incomplete"];
+    expect(summaryB.evidenceStatus).toBe("INSUFFICIENT_EVIDENCE");
+    expect(summaryB.incompletePairs).toBeGreaterThanOrEqual(1);
+    expect(summaryB.failedPairs).toBe(0);
+  });
 });

@@ -1124,7 +1124,7 @@ export class EvolutionIndependentEvaluator {
         }
       );
 
-    // 総合改善判定 (契約: Champion 比較証拠が存在しない場合は進化改善を認定しない)
+    // 総合改善判定 (契約: Evidence が VALID の場合のみ正式認定可能。無効時は常に未認定)
     let overallImprovementStatus: ImprovementStatus = "IMPROVEMENT_UNVERIFIED";
 
     if (isEvidenceValid) {
@@ -1140,11 +1140,9 @@ export class EvolutionIndependentEvaluator {
         overallImprovementStatus = "IMPROVEMENT_UNVERIFIED";
       }
     } else {
-      if (hasRegression) {
-        overallImprovementStatus = "CONFIRMED_REGRESSION";
-      } else {
-        overallImprovementStatus = "IMPROVEMENT_UNVERIFIED";
-      }
+      // Evidence が INVALID または INSUFFICIENT の場合、総合判定は常に未認定 (IMPROVEMENT_UNVERIFIED)
+      // (個別の対戦相手サマリにおける局所的敗北傾向などは診断情報としてそのまま維持される)
+      overallImprovementStatus = "IMPROVEMENT_UNVERIFIED";
     }
 
     const totalPairs = allPairs.length;
