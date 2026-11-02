@@ -3,14 +3,19 @@
  *
  * Standard＋Pack における Decision DNA の強さを客観的・統計的・決定論的に評価する独立評価エンジン。
  *
- * 設計原則:
- * 1. 2大評価軸の分離 (絶対的能力水準 vs 進化的向上度)
- * 2. 座席反転ペア対戦 (Leg 0: Candidate=P1, Leg 1: Candidate=P2) による先後手バイアスの相殺・緩和
+ * 最重要設計原則:
+ * 1. 2大評価軸の分離 (Baseline 絶対的能力水準 vs 過去Champion進化的向上度)
+ *    - Baseline 対戦相手のみの評価では進化的改善 (IMPROVEMENT_VERIFIED) を認定しない。
+ *    - REFERENCE_CHAMPION に対する統計的改善が確認されて初めて進化的改善を認定する。
+ * 2. 座席反転ペア対戦 (Leg 0: Candidate=P1, Leg 1: Candidate=P2) による先後手バイアスの緩和
  * 3. ペア単位スコアリング (Xi in {0.0, 0.25, 0.5, 0.75, 1.0})
  * 4. 2層ステータス判定 (Evidence Status と Improvement Status の分離)
- * 5. 小標本・分散ゼロに対応した厳格な統計検定 (Student t + Hoeffding / Exact Binomial + Bonferroni 補正)
+ * 5. 厳格な統計契約:
+ *    - 両側 95% 信頼区間 (confidenceInterval95, 両側 alpha=0.05, 各側 0.025) と片側信頼下限 (oneSidedLowerBound, 片側 alphaUsed) を明確に分離
+ *    - 分散ゼロ時: 全勝・全敗は EXACT_BINOMIAL、全ペア 0.75 等の分数固定値は HOEFFDING_BOUND (pValue: null) として仮説と下限を完全整合
+ *    - Student-t 近似推論の統計的仮定と限界: 5段階離散スコアに対する中心極限定理に基づく近似であり、極小標本での厳密正規性を仮定しない (n >= 5 推奨)
  * 6. 事前 Fail-Fast 入力検証 (パラメータ、DNAスキーマ、対戦相手ID一意性)
- * 7. 横断的 Seed 衝突検証 (Train / Val / Holdout の厳格分離)
+ * 7. 横断的 Seed 衝突検証 (Train / Val / Holdout の厳格分離、特に Holdout は seedRegistry 必須の Fail-Closed 契約)
  * 8. 決定論的論理結果 (logicalResult) と実行時メトリクス (runtimeMetrics) の Sidecar 分離
  * 9. 作業メモリ有界性 (戻り値から生 DecisionTrace を破棄しペアサマリのみ保持)
  */
@@ -23,6 +28,7 @@ import {
   EvaluationConfigurationError,
   EvaluationIntegrityError,
   EvaluationOpponentDefinition,
+  EvaluationOpponentRole,
   EvaluationSeedCategory,
   EvaluationSeedCollisionError,
   EvaluationSeedSet,
@@ -136,7 +142,7 @@ export function regularizedIncompleteBeta(a: number, b: number, x: number): numb
 
 /**
  * Student-t 分布の片側 p 値 (One-tailed p-value: P(T_df >= t))
- * H0: mu <= 0.5, H1: mu > 0.5
+ * H0: mu <= 0.5 vs H1: mu > 0.5
  */
 export function studentTOneTailedPValue(t: number, df: number): number {
   if (df <= 0 || !Number.isFinite(df)) return 1.0;
@@ -166,7 +172,6 @@ export function studentTOneTailedCritical(alpha: number, df: number): number {
   let low = 0.0;
   let high = 1000.0; // 自由度1でも alpha=1e-6 で t ~ 636 なので 1000 で十分
 
-  // high が不足している場合の安全策
   while (studentTOneTailedPValue(high, df) > alpha && high < 1e8) {
     high *= 2;
   }
@@ -185,7 +190,7 @@ export function studentTOneTailedCritical(alpha: number, df: number): number {
 }
 
 /**
- * 後方互換用: 両側 95% (片側 alpha = 0.025) の Student-t 臨界値を返す
+ * 両側 95% (各側 alpha = 0.025) の Student-t 臨界値を返す
  */
 export function getStudentTCritical95(df: number): number {
   return studentTOneTailedCritical(0.025, df);
@@ -460,12 +465,13 @@ export class EvolutionIndependentEvaluator {
   /**
    * ペアスコア配列から統計指標および検定を計算
    *
-   * @param params.pairScores COMPLETED なペアのスコア配列 (無効ペアは含まない)
-   * @param params.failedCount 失敗ペア数
-   * @param params.incompleteCount 未完了ペア数
-   * @param params.targetWinRate 目標勝率
-   * @param params.alpha 有意水準 (多重比較時は Bonferroni 補正後の有意水準)
-   * @param params.minCompletedPairs 最小完了ペア数
+   * 統計契約:
+   * 1. 両側 95% 信頼区間 (confidenceInterval95) と片側 (1 - alpha) 信頼下限 (oneSidedLowerBound) を明確に区別。
+   * 2. 分散ゼロ時 (s^2 = 0):
+   *    - 全勝/全敗: EXACT_BINOMIAL 検定と厳密二項片側限界
+   *    - 全ペア 0.75 等の分数固定値: HOEFFDING_BOUND 検定 (帰無仮説 H0: mu <= 0.5、二項 p 値は混在させず pValue: null)
+   * 3. Student-t 検定の前提と限界:
+   *    5段階離散スコア Xi in {0, 0.25, 0.5, 0.75, 1} に対する近似的推論であり、極小標本での厳密正規性を仮定しない。
    */
   public static computeStatistics(params: {
     pairScores: readonly number[];
@@ -501,12 +507,13 @@ export class EvolutionIndependentEvaluator {
         meanPairScore: 0.0,
         sampleVariance: 0.0,
         standardError: 0.0,
-        confidenceInterval95: { lower: 0.0, upper: 1.0, confidenceLevel: 1.0 - alpha },
+        confidenceInterval95: { lower: 0.0, upper: 1.0, confidenceLevel: 0.95 },
         statisticalTest: {
           method: "UNDEFINED",
           pValue: null,
           alphaUsed: alpha,
           isStatisticallySignificant: false,
+          oneSidedLowerBound: 0.0,
           testNotes: "n = 0: No completed pairs",
         },
         evidenceStatus,
@@ -525,9 +532,10 @@ export class EvolutionIndependentEvaluator {
     }
     const standardError = n > 0 ? Math.sqrt(sampleVariance / n) : 0.0;
 
-    // 3. 信頼区間と検定の計算
-    let lowerCI = 0.0;
-    let upperCI = 1.0;
+    // 3. 信頼区間 (両側 95%) と片側検定の計算
+    let lowerCI95 = 0.0;
+    let upperCI95 = 1.0;
+    let oneSidedLowerBound = 0.0;
     let statisticalTest: StatisticalTestResult;
 
     const pairWins = pairScores.filter((s) => s > 0.5).length;
@@ -535,90 +543,114 @@ export class EvolutionIndependentEvaluator {
     const exactPValue = exactBinomialOneTailedPValue(pairWins, n);
 
     if (n < 2) {
-      // n=1: Student-t 分散定義不能
-      lowerCI = 0.0;
-      upperCI = 1.0;
+      // n=1: Student-t 分散未定義
+      lowerCI95 = 0.0;
+      upperCI95 = 1.0;
+      oneSidedLowerBound = 0.0;
       statisticalTest = {
         method: "UNDEFINED",
         pValue: null,
         alphaUsed: alpha,
         isStatisticallySignificant: false,
+        oneSidedLowerBound: 0.0,
         testNotes: "n < 2: Student-t undefined. Insufficient sample size for statistical inference.",
       };
     } else if (sampleVariance === 0.0) {
       // =======================================================================
-      // 分散ゼロ (全勝、全敗、全同点など)
+      // 分散ゼロ (全勝、全敗、全同点、全0.75など)
       // =======================================================================
       if (meanPairScore === 1.0) {
-        // 全勝: 厳密二項片側 (1 - alpha) 信頼下限 L = alpha^(1/n)
-        // 数学的に L > 0.5 <=> alpha^(1/n) > 0.5 <=> (0.5)^n < alpha <=> exactPValue < alpha が完全一致
-        const binomialLower = Math.pow(alpha, 1.0 / n);
-        lowerCI = Math.max(0.0, binomialLower);
-        upperCI = 1.0;
+        // 全勝 (ベルヌーイ試行): H0: p <= 0.5 vs H1: p > 0.5
+        // 片側 (1 - alpha) 信頼下限: L = alpha^(1/n)
+        oneSidedLowerBound = Math.pow(alpha, 1.0 / n);
+        // 両側 95% 信頼区間: [0.025^(1/n), 1.0]
+        lowerCI95 = Math.pow(0.025, 1.0 / n);
+        upperCI95 = 1.0;
 
-        const isSignificant = exactPValue < alpha && lowerCI > 0.5;
+        const isSignificant = exactPValue < alpha && oneSidedLowerBound > 0.5;
         statisticalTest = {
           method: "EXACT_BINOMIAL",
           pValue: exactPValue,
           alphaUsed: alpha,
           isStatisticallySignificant: isSignificant,
-          testNotes: `Zero variance (All Wins, mean=1.0). Exact Binomial p=${exactPValue.toFixed(6)}, Exact Lower Bound=${lowerCI.toFixed(4)}, alpha=${alpha.toFixed(6)}`,
+          oneSidedLowerBound,
+          testNotes: `Zero variance (All Wins, mean=1.0). Exact Binomial p=${exactPValue.toFixed(6)}, One-sided Lower Bound (${((1 - alpha) * 100).toFixed(1)}%)=${oneSidedLowerBound.toFixed(4)}, alphaUsed=${alpha.toFixed(6)}`,
         };
       } else if (meanPairScore === 0.0) {
-        // 全敗: 厳密二項片側 (1 - alpha) 信頼上限 U = 1 - alpha^(1/n)
-        const binomialUpper = 1.0 - Math.pow(alpha, 1.0 / n);
-        lowerCI = 0.0;
-        upperCI = Math.min(1.0, binomialUpper);
+        // 全敗: H0: mu <= 0.5 (棄却不能)
+        oneSidedLowerBound = 0.0;
+        // 両側 95% 信頼区間: [0.0, 1 - 0.025^(1/n)]
+        lowerCI95 = 0.0;
+        upperCI95 = 1.0 - Math.pow(0.025, 1.0 / n);
 
-        const isSignificant = exactPValue < alpha; // pValue for pairWins=0 is 1.0, for pairLosses is (0.5)^n
         const regressionP = exactBinomialOneTailedPValue(pairLosses, n);
+        const oneSidedUpperBound = 1.0 - Math.pow(alpha, 1.0 / n);
 
         statisticalTest = {
           method: "EXACT_BINOMIAL",
-          pValue: 1.0, // H1: mean > 0.5 の検定としては p = 1.0
+          pValue: 1.0, // H1: mu > 0.5 の検定としては p = 1.0
           alphaUsed: alpha,
           isStatisticallySignificant: false,
-          testNotes: `Zero variance (All Losses, mean=0.0). Exact Binomial Upper Bound=${upperCI.toFixed(4)}, regressionP=${regressionP.toFixed(6)}, alpha=${alpha.toFixed(6)}`,
+          oneSidedLowerBound: 0.0,
+          testNotes: `Zero variance (All Losses, mean=0.0). One-sided Upper Bound=${oneSidedUpperBound.toFixed(4)}, regressionP=${regressionP.toFixed(6)}, alphaUsed=${alpha.toFixed(6)}`,
+        };
+      } else if (meanPairScore === 0.5) {
+        // 全同点 (mean=0.5): H0: mu <= 0.5 を棄却しない
+        const hoeffdingMarginAlpha = Math.sqrt(Math.log(1.0 / alpha) / (2.0 * n));
+        const hoeffdingMargin95 = Math.sqrt(Math.log(1.0 / 0.025) / (2.0 * n));
+        oneSidedLowerBound = Math.max(0.0, 0.5 - hoeffdingMarginAlpha);
+        lowerCI95 = Math.max(0.0, 0.5 - hoeffdingMargin95);
+        upperCI95 = Math.min(1.0, 0.5 + hoeffdingMargin95);
+
+        statisticalTest = {
+          method: "HOEFFDING_BOUND",
+          pValue: null, // 非二項分散ゼロのため二項検定を混在させず pValue は null
+          alphaUsed: alpha,
+          isStatisticallySignificant: false,
+          oneSidedLowerBound,
+          testNotes: `Zero variance (All Draws, mean=0.5). Hoeffding bound applied for bounded mean (H0: mu <= 0.5 vs H1: mu > 0.5). Lower bound=${oneSidedLowerBound.toFixed(4)}`,
         };
       } else {
-        // 全同点 (mean=0.5) や全勝分 (mean=0.75) 等: 有界変数に対する Hoeffding 保守的信頼限界
-        const hoeffdingMargin = Math.sqrt(Math.log(1.0 / alpha) / (2.0 * n));
-        lowerCI = Math.max(0.0, meanPairScore - hoeffdingMargin);
-        upperCI = Math.min(1.0, meanPairScore + hoeffdingMargin);
+        // 全ペア 0.75 等の分数固定値: 有界変数 Xi in [0, 1] に対する Hoeffding 保守的信頼限界
+        // 帰無仮説 H0: mu <= 0.5 vs H1: mu > 0.5
+        // 二項符号検定の p 値は別仮説のため混在させず、pValue は null とする
+        const hoeffdingMarginAlpha = Math.sqrt(Math.log(1.0 / alpha) / (2.0 * n));
+        const hoeffdingMargin95 = Math.sqrt(Math.log(1.0 / 0.025) / (2.0 * n));
 
-        if (meanPairScore <= 0.5) {
-          statisticalTest = {
-            method: "EXACT_BINOMIAL",
-            pValue: 1.0,
-            alphaUsed: alpha,
-            isStatisticallySignificant: false,
-            testNotes: `Zero variance (s^2=0, mean=${meanPairScore.toFixed(3)} <= 0.5). No statistical improvement.`,
-          };
-        } else {
-          const isSignificant = exactPValue < alpha && lowerCI > 0.5;
-          statisticalTest = {
-            method: "EXACT_BINOMIAL",
-            pValue: exactPValue,
-            alphaUsed: alpha,
-            isStatisticallySignificant: isSignificant,
-            testNotes: `Zero variance (s^2=0). Exact Binomial p=${exactPValue.toFixed(6)}, Hoeffding CI=[${lowerCI.toFixed(3)}, ${upperCI.toFixed(3)}], alpha=${alpha.toFixed(6)}`,
-          };
-        }
+        oneSidedLowerBound = Math.max(0.0, meanPairScore - hoeffdingMarginAlpha);
+        lowerCI95 = Math.max(0.0, meanPairScore - hoeffdingMargin95);
+        upperCI95 = Math.min(1.0, meanPairScore + hoeffdingMargin95);
+
+        const isSignificant = meanPairScore > 0.5 && oneSidedLowerBound > 0.5;
+
+        statisticalTest = {
+          method: "HOEFFDING_BOUND",
+          pValue: null, // 二項検定 p 値を混在させず null
+          alphaUsed: alpha,
+          isStatisticallySignificant: isSignificant,
+          oneSidedLowerBound,
+          testNotes: `Zero variance (s^2=0, mean=${meanPairScore.toFixed(3)}). Hoeffding bound applied for bounded mean (H0: mu <= 0.5 vs H1: mu > 0.5). One-sided Lower Bound (${((1 - alpha) * 100).toFixed(1)}%)=${oneSidedLowerBound.toFixed(4)}, Two-sided 95% CI=[${lowerCI95.toFixed(3)}, ${upperCI95.toFixed(3)}]`,
+        };
       }
     } else {
       // =======================================================================
-      // 通常時 (s^2 > 0): Student-t 検定と信頼下限の厳格適用
+      // 通常時 (s^2 > 0): Student-t 検定と信頼限界
+      // 統計的仮定: 5段階離散スコアに対する中心極限定理に基づく近似的推論
       // =======================================================================
       const df = n - 1;
       const tStat = (meanPairScore - 0.5) / standardError;
       const pT = studentTOneTailedPValue(tStat, df);
-      const tCrit = studentTOneTailedCritical(alpha, df);
 
-      // 片側 (1 - alpha) 信頼下限: L = mean - tCrit * SE
-      // 数学的に L > 0.5 <=> tStat > tCrit <=> pT < alpha が完全に成立する
-      lowerCI = Math.max(0.0, meanPairScore - tCrit * standardError);
-      upperCI = Math.min(1.0, meanPairScore + tCrit * standardError);
+      // 片側 (1 - alpha) 臨界値 t_{alpha, df}
+      const tCritAlpha = studentTOneTailedCritical(alpha, df);
+      oneSidedLowerBound = Math.max(0.0, meanPairScore - tCritAlpha * standardError);
 
+      // 両側 95% 信頼区間 (各側 alpha = 0.025)
+      const tCrit95 = getStudentTCritical95(df);
+      lowerCI95 = Math.max(0.0, meanPairScore - tCrit95 * standardError);
+      upperCI95 = Math.min(1.0, meanPairScore + tCrit95 * standardError);
+
+      // 数学的に oneSidedLowerBound > 0.5 <=> tStat > tCritAlpha <=> pT < alpha が完全一致
       const isSignificant = pT < alpha && meanPairScore > 0.5;
 
       statisticalTest = {
@@ -626,28 +658,29 @@ export class EvolutionIndependentEvaluator {
         statistic: tStat,
         pValue: pT,
         degreesOfFreedom: df,
-        criticalValue: tCrit,
+        criticalValue: tCritAlpha,
         alphaUsed: alpha,
         isStatisticallySignificant: isSignificant,
-        testNotes: `One-tailed Student-t: t=${tStat.toFixed(4)}, df=${df}, p=${pT.toFixed(6)}, critical_t=${tCrit.toFixed(4)}, alpha=${alpha.toFixed(6)}`,
+        oneSidedLowerBound,
+        testNotes: `Student-t applied (bounded 5-level score approximation): t=${tStat.toFixed(4)}, df=${df}, p=${pT.toFixed(6)}, critical_t=${tCritAlpha.toFixed(4)}, alphaUsed=${alpha.toFixed(6)}, One-sided Lower Bound=${oneSidedLowerBound.toFixed(4)}, Two-sided 95% CI=[${lowerCI95.toFixed(4)}, ${upperCI95.toFixed(4)}]`,
       };
     }
 
     const targetMet = meanPairScore >= targetWinRate;
 
-    // 4. Improvement Status 判定 (Evidence が VALID の場合のみ判定可能)
+    // 4. 単一対戦相手に対する Improvement Status 判定 (Evidence が VALID の場合のみ判定)
     let improvementStatus: ImprovementStatus = "IMPROVEMENT_UNVERIFIED";
 
     if (evidenceStatus === "VALID") {
-      if (statisticalTest.isStatisticallySignificant && targetMet && lowerCI > 0.5) {
+      if (statisticalTest.isStatisticallySignificant && targetMet && oneSidedLowerBound > 0.5) {
         improvementStatus = "IMPROVEMENT_VERIFIED";
-      } else if (meanPairScore < 0.5 && upperCI < 0.5) {
+      } else if (meanPairScore < 0.5) {
         // 明確な性能低下 (Regression) の判定
         if (sampleVariance > 0.0) {
           const df = n - 1;
           const tStat = (meanPairScore - 0.5) / standardError;
-          const tCrit = studentTOneTailedCritical(alpha, df);
-          if (tStat < -tCrit) {
+          const tCritAlpha = studentTOneTailedCritical(alpha, df);
+          if (tStat < -tCritAlpha) {
             improvementStatus = "CONFIRMED_REGRESSION";
           } else {
             improvementStatus = "IMPROVEMENT_UNVERIFIED";
@@ -669,7 +702,7 @@ export class EvolutionIndependentEvaluator {
       meanPairScore,
       sampleVariance,
       standardError,
-      confidenceInterval95: { lower: lowerCI, upper: upperCI, confidenceLevel: 1.0 - alpha },
+      confidenceInterval95: { lower: lowerCI95, upper: upperCI95, confidenceLevel: 0.95 },
       statisticalTest,
       evidenceStatus,
       improvementStatus,
@@ -689,6 +722,7 @@ export class EvolutionIndependentEvaluator {
       candidateDNA,
       seeds,
       seedCategory,
+      seedRegistry,
       opponents,
       sessionFactory,
       maxDecisionsPerMatch = 500,
@@ -751,12 +785,31 @@ export class EvolutionIndependentEvaluator {
       throw new EvaluationConfigurationError(`Invalid seedCategory: ${seedCategory}`);
     }
 
-    // opponents の検証 (非空、ID一意性、targetWinRate 0..1)
+    // Holdout 評価における seedRegistry 必須 Fail-Closed 契約
+    if (seedCategory === "HOLDOUT") {
+      if (!seedRegistry || !Array.isArray(seedRegistry) || seedRegistry.length === 0) {
+        throw new EvaluationConfigurationError(
+          "Fail-Closed: Holdout evaluation requires a validated seedRegistry containing prior TRAINING and/or VALIDATION seed sets to guarantee non-overlap"
+        );
+      }
+      const hasPriorCategories = seedRegistry.some(
+        (s) => s && (s.category === "TRAINING" || s.category === "VALIDATION")
+      );
+      if (!hasPriorCategories) {
+        throw new EvaluationConfigurationError(
+          "Fail-Closed: Holdout seedRegistry must contain prior TRAINING and/or VALIDATION seed sets for cross-set collision verification"
+        );
+      }
+    }
+
+    // opponents の検証 (非空、ID一意性、targetWinRate 0..1, role 有効性)
     if (!Array.isArray(opponents) || opponents.length === 0) {
       throw new EvaluationConfigurationError("opponents must be a non-empty array");
     }
 
     const seenOpponentIds = new Set<string>();
+    const validRoles: Set<EvaluationOpponentRole> = new Set(["BASELINE", "REFERENCE_CHAMPION"]);
+
     for (const opp of opponents) {
       if (!opp || typeof opp !== "object") {
         throw new EvaluationConfigurationError("Each opponent in opponents array must be a valid object");
@@ -768,6 +821,12 @@ export class EvolutionIndependentEvaluator {
         throw new EvaluationConfigurationError(`Duplicate opponentId found: "${opp.opponentId}"`);
       }
       seenOpponentIds.add(opp.opponentId);
+
+      if (opp.role !== undefined && !validRoles.has(opp.role)) {
+        throw new EvaluationConfigurationError(
+          `Invalid opponent role for "${opp.opponentId}": must be "BASELINE" or "REFERENCE_CHAMPION", got ${opp.role}`
+        );
+      }
 
       if (
         typeof opp.targetWinRate !== "number" ||
@@ -792,7 +851,7 @@ export class EvolutionIndependentEvaluator {
       throw new EvaluationConfigurationError("sessionFactory must be a function");
     }
 
-    // regulationId, rulePackageVersion の検証
+    // regulationId, rulePackageVersion の非空構文検証
     if (typeof regulationId !== "string" || regulationId.trim() === "") {
       throw new EvaluationConfigurationError("regulationId must be a non-empty string");
     }
@@ -868,6 +927,7 @@ export class EvolutionIndependentEvaluator {
     let pairCounter = 0;
 
     for (const opponent of opponents) {
+      const oppRole: EvaluationOpponentRole = opponent.role ?? "BASELINE";
       const opponentPairs: PairedMatchResult[] = [];
       const completedPairScores: number[] = [];
       let completedPairs = 0;
@@ -912,6 +972,7 @@ export class EvolutionIndependentEvaluator {
       opponentSummaries[opponent.opponentId] = {
         opponentId: opponent.opponentId,
         opponentName: opponent.name,
+        role: oppRole,
         totalPairs: opponentPairs.length,
         completedPairs,
         incompletePairs,
@@ -929,10 +990,9 @@ export class EvolutionIndependentEvaluator {
       };
     }
 
-    // 5. 総合ステータス集計
+    // 5. 総合ステータス集計 (Baseline 優位性と進化的改善の分離)
     let overallEvidenceStatus: EvidenceStatus = "VALID";
     let hasRegression = false;
-    let allVerified = true;
     let allTargetsMet = true;
 
     for (const summary of Object.values(opponentSummaries)) {
@@ -945,19 +1005,43 @@ export class EvolutionIndependentEvaluator {
       if (summary.improvementStatus === "CONFIRMED_REGRESSION") {
         hasRegression = true;
       }
-      if (summary.improvementStatus !== "IMPROVEMENT_VERIFIED") {
-        allVerified = false;
-      }
       if (!summary.targetMet) {
         allTargetsMet = false;
       }
     }
 
+    // Baseline と Reference Champion の分離集計
+    const baselineSummaries = Object.values(opponentSummaries).filter((s) => s.role === "BASELINE");
+    const championSummaries = Object.values(opponentSummaries).filter((s) => s.role === "REFERENCE_CHAMPION");
+
+    const baselineSuperior =
+      baselineSummaries.length > 0 &&
+      baselineSummaries.every(
+        (s) =>
+          s.targetMet &&
+          s.statisticalTest.isStatisticallySignificant &&
+          s.statisticalTest.oneSidedLowerBound > 0.5
+      );
+
+    const championImproved =
+      championSummaries.length > 0 &&
+      championSummaries.every(
+        (s) =>
+          s.statisticalTest.isStatisticallySignificant &&
+          s.statisticalTest.oneSidedLowerBound > 0.5
+      );
+
+    // 総合改善判定 (契約: Champion 比較証拠が存在しない場合は進化改善を認定しない)
     let overallImprovementStatus: ImprovementStatus = "IMPROVEMENT_UNVERIFIED";
+
     if (overallEvidenceStatus === "VALID") {
       if (hasRegression) {
         overallImprovementStatus = "CONFIRMED_REGRESSION";
-      } else if (allVerified && allTargetsMet) {
+      } else if (championSummaries.length === 0) {
+        // 固定 Baseline との対戦のみの場合: たとえ Baseline に勝利しても進化改善 (IMPROVEMENT_VERIFIED) は未認定
+        overallImprovementStatus = "IMPROVEMENT_UNVERIFIED";
+      } else if (championImproved && (baselineSummaries.length === 0 || baselineSuperior) && allTargetsMet) {
+        // Reference Champion に対して統計的有意に改善し、かつ Baseline の目標水準も維持
         overallImprovementStatus = "IMPROVEMENT_VERIFIED";
       } else {
         overallImprovementStatus = "IMPROVEMENT_UNVERIFIED";
@@ -967,7 +1051,7 @@ export class EvolutionIndependentEvaluator {
     const totalPairs = allPairs.length;
     const totalMatches = totalPairs * 2;
 
-    const summaryText = `[Evaluation ${candidateGenomeId}] Evidence: ${overallEvidenceStatus}, Improvement: ${overallImprovementStatus}, Opponents: ${K}, Total Pairs: ${totalPairs} (${totalMatches} matches), All Targets Met: ${allTargetsMet}`;
+    const summaryText = `[Evaluation ${candidateGenomeId}] Evidence: ${overallEvidenceStatus}, Improvement: ${overallImprovementStatus}, Opponents: ${K} (Baselines: ${baselineSummaries.length}, Champions: ${championSummaries.length}), Baseline Superior: ${baselineSuperior}, Champion Improved: ${championImproved}, All Targets Met: ${allTargetsMet}`;
 
     const endTime = performance.now();
     const timestamp = new Date().toISOString();
@@ -987,6 +1071,8 @@ export class EvolutionIndependentEvaluator {
       totalPairs,
       totalMatches,
       allTargetsMet,
+      baselineSuperior,
+      championImproved,
       evidenceStatus: overallEvidenceStatus,
       improvementStatus: overallImprovementStatus,
       summaryText,

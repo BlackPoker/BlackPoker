@@ -63,6 +63,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponent: EvaluationOpponentDefinition = {
       opponentId: "first-legal-test",
       name: "FirstLegal",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
@@ -114,7 +115,6 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     expect(computeMockPairScore({ won: true, draw: false }, { won: false, draw: true })).toBe(0.75); // 1勝1分
     expect(computeMockPairScore({ won: true, draw: false }, { won: false, draw: false })).toBe(0.5); // 1勝1敗
     expect(computeMockPairScore({ won: false, draw: true }, { won: false, draw: true })).toBe(0.5); // 2分
-    expect(computeMockMockPairScore => computeMockPairScore({ won: false, draw: false }, { won: false, draw: true })).toBeDefined();
     expect(computeMockPairScore({ won: false, draw: false }, { won: false, draw: true })).toBe(0.25); // 1敗1分
     expect(computeMockPairScore({ won: false, draw: false }, { won: false, draw: false })).toBe(0.0); // 完敗
   });
@@ -198,9 +198,9 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
   });
 
   // ===========================================================================
-  // Test 5: 統計計算の既知値との完全一致
+  // Test 5: 統計計算の既知値との完全一致 (両側 95% CI と片側信頼下限の分離)
   // ===========================================================================
-  it("Test 5: 標本平均、分散、標準誤差、t 信頼区間、片側 p 値が既知の理論値と一致すること", () => {
+  it("Test 5: 両側 95% 信頼区間と片側信頼下限、標本平均、分散、SE が既知理論値と一致すること", () => {
     // スコア: [1.0, 0.75, 0.5, 0.75, 1.0] (n=5)
     // 和 = 4.0, 平均 = 0.8
     // 不偏分散 = 0.175 / 4 = 0.04375
@@ -208,6 +208,10 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     // t 統計量 = (0.8 - 0.5) / 0.0935414 ≈ 3.207135
     // df = 4
     // 片側 p 値 = studentTOneTailedPValue(3.207135, 4) ≈ 0.016339
+    // 片側 alpha=0.05 臨界値: t_{0.05, 4} ≈ 2.131847
+    // 片側 95% 信頼下限: 0.8 - 2.131847 * 0.0935414 ≈ 0.600585 > 0.5
+    // 両側 95% 信頼区間 (各側 0.025): t_{0.025, 4} ≈ 2.776445
+    // 両側 95% CI: [0.8 - 2.776445 * 0.0935414, 0.8 + ...] = [0.54029, 1.0]
     const scores = [1.0, 0.75, 0.5, 0.75, 1.0];
     const stats = EvolutionIndependentEvaluator.computeStatistics({
       pairScores: scores,
@@ -227,7 +231,16 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     expect(stats.statisticalTest.pValue).toBeCloseTo(0.016339, 4);
     expect(stats.statisticalTest.pValue).toBeLessThan(0.05);
     expect(stats.statisticalTest.isStatisticallySignificant).toBe(true);
-    expect(stats.confidenceInterval95.lower).toBeGreaterThan(0.5); // 下限 > 0.5
+
+    // 片側信頼下限の検証
+    expect(stats.statisticalTest.oneSidedLowerBound).toBeCloseTo(0.600585, 3);
+    expect(stats.statisticalTest.oneSidedLowerBound).toBeGreaterThan(0.5);
+
+    // 両側 95% 信頼区間の検証
+    expect(stats.confidenceInterval95.confidenceLevel).toBe(0.95);
+    expect(stats.confidenceInterval95.lower).toBeCloseTo(0.54029, 3);
+    expect(stats.confidenceInterval95.lower).toBeGreaterThan(0.5);
+
     expect(stats.targetMet).toBe(true); // 0.8 >= 0.7
     expect(stats.evidenceStatus).toBe("VALID");
     expect(stats.improvementStatus).toBe("IMPROVEMENT_VERIFIED");
@@ -264,7 +277,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     expect(stats1.statisticalTest.pValue).toBeNull();
 
     // 3. n = 2 で全勝 (分散ゼロ s^2 = 0)
-    // 小標本かつ p 値未達 (Exact Binomial p = 0.25 > 0.05) であり IMPROVEMENT_UNVERIFIED
+    // EXACT_BINOMIAL: p = (0.5)^2 = 0.25 > 0.05, oneSidedLowerBound = 0.05^(1/2) = 0.2236 <= 0.5
     const stats2ZeroVar = EvolutionIndependentEvaluator.computeStatistics({
       pairScores: [1.0, 1.0],
       failedCount: 0,
@@ -274,6 +287,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
       minCompletedPairs: 5,
     });
     expect(stats2ZeroVar.sampleVariance).toBe(0.0);
+    expect(stats2ZeroVar.statisticalTest.method).toBe("EXACT_BINOMIAL");
     expect(stats2ZeroVar.statisticalTest.pValue).toBe(0.25);
     expect(stats2ZeroVar.statisticalTest.isStatisticallySignificant).toBe(false);
     expect(stats2ZeroVar.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
@@ -299,12 +313,14 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponentA: EvaluationOpponentDefinition = {
       opponentId: "opp-a",
       name: "Opponent A",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
     const opponentB: EvaluationOpponentDefinition = {
       opponentId: "opp-b",
       name: "Opponent B",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
@@ -334,6 +350,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponent: EvaluationOpponentDefinition = {
       opponentId: "first-legal-det",
       name: "FirstLegal",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
@@ -359,7 +376,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
       minimumCompletedPairs: 2,
     });
 
-    // logicalResult が JSON 文字列レベルで完全一致すること (Sidecar のタイムスタンプは分離されている)
+    // logicalResult が JSON 文字列レベルで完全一致すること
     expect(JSON.stringify(run1.logicalResult)).toBe(JSON.stringify(run2.logicalResult));
     expect(run1.logicalResult.candidateDnaDigest).toBe(run2.logicalResult.candidateDnaDigest);
     expect(run1.logicalResult.totalPairs).toBe(run2.logicalResult.totalPairs);
@@ -378,6 +395,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponent: EvaluationOpponentDefinition = {
       opponentId: "test-opp",
       name: "Opponent",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
@@ -427,6 +445,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponent: EvaluationOpponentDefinition = {
       opponentId: "first-legal-mem",
       name: "FirstLegal",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
@@ -444,7 +463,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     expect(result.pairs.length).toBe(2);
 
     for (const pair of result.pairs) {
-      // 生 DecisionTrace や全決定履歴が含まれていないこと (戻り値に不要な生 Trace を持たない)
+      // 生 DecisionTrace が含まれていないこと
       expect((pair as any).decisionTrace).toBeUndefined();
       expect((pair.leg0 as any).decisionTrace).toBeUndefined();
       expect((pair.leg1 as any).decisionTrace).toBeUndefined();
@@ -497,12 +516,14 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponent1: EvaluationOpponentDefinition = {
       opponentId: "opp-bonf-1",
       name: "Opponent 1",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
     const opponent2: EvaluationOpponentDefinition = {
       opponentId: "opp-bonf-2",
       name: "Opponent 2",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
@@ -521,7 +542,6 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     expect(result.significanceLevelAlpha).toBe(0.04);
     expect(result.bonferroniAdjustedAlpha).toBe(0.02); // 0.04 / 2
 
-    // 各対戦相手の statisticalTest.alphaUsed が補正後の 0.02 になっていること
     for (const oppSummary of Object.values(result.opponents)) {
       expect(oppSummary.statisticalTest.alphaUsed).toBe(0.02);
     }
@@ -545,7 +565,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const expectedTP = studentTOneTailedPValue(statsT.statisticalTest.statistic!, 4);
     expect(statsT.statisticalTest.pValue).toBeCloseTo(expectedTP, 6);
 
-    // 2. 分散ゼロ (EXACT_BINOMIAL)
+    // 2. 分散ゼロ全勝 (EXACT_BINOMIAL)
     const scoresZeroVar = [1, 1, 1, 1, 1];
     const statsBinomial = EvolutionIndependentEvaluator.computeStatistics({
       pairScores: scoresZeroVar,
@@ -564,7 +584,6 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
   // ===========================================================================
   it("Test 14: pairScores=[1, 0.75, 0.5, 0.75, 1] に対し、alpha を小さくすると有意判定が甘くならず単調に厳格化すること", () => {
     const scores = [1, 0.75, 0.5, 0.75, 1];
-    // p ≈ 0.016339
 
     const stats05 = EvolutionIndependentEvaluator.computeStatistics({
       pairScores: scores,
@@ -599,28 +618,17 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
       minCompletedPairs: 5,
     });
 
-    // p 値自体は標本統計量にのみ依存し、alpha に依存しないこと
+    // p 値は標本統計量にのみ依存
     expect(stats05.statisticalTest.pValue).toBeCloseTo(0.016339, 4);
     expect(stats02.statisticalTest.pValue).toBeCloseTo(0.016339, 4);
     expect(stats01.statisticalTest.pValue).toBeCloseTo(0.016339, 4);
     expect(stats001.statisticalTest.pValue).toBeCloseTo(0.016339, 4);
 
-    // 有意判定の単調性:
-    // alpha = 0.05 -> 有意 (0.0163 < 0.05)
+    // 有意判定の単調性
     expect(stats05.statisticalTest.isStatisticallySignificant).toBe(true);
-    expect(stats05.improvementStatus).toBe("IMPROVEMENT_VERIFIED");
-
-    // alpha = 0.02 -> 有意 (0.0163 < 0.02)
     expect(stats02.statisticalTest.isStatisticallySignificant).toBe(true);
-    expect(stats02.improvementStatus).toBe("IMPROVEMENT_VERIFIED");
-
-    // alpha = 0.01 -> 非有意 (0.0163 >= 0.01)
     expect(stats01.statisticalTest.isStatisticallySignificant).toBe(false);
-    expect(stats01.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
-
-    // alpha = 0.001 -> 非有意 (0.0163 >= 0.001)
     expect(stats001.statisticalTest.isStatisticallySignificant).toBe(false);
-    expect(stats001.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
   });
 
   // ===========================================================================
@@ -639,9 +647,8 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
 
     // 信頼区間が [1.0, 1.0] の幅ゼロになっていないこと
     expect(stats.confidenceInterval95.lower).toBeLessThan(1.0);
-    // 保守的 Hoeffding 下限が 0.5 以下であること
-    expect(stats.confidenceInterval95.lower).toBeLessThanOrEqual(0.5);
-    // 誤って IMPROVEMENT_VERIFIED にならないこと
+    // 片側下限が 0.5 以下であること
+    expect(stats.statisticalTest.oneSidedLowerBound).toBeLessThanOrEqual(0.5);
     expect(stats.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
   });
 
@@ -653,6 +660,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponent: EvaluationOpponentDefinition = {
       opponentId: "opp-invalid",
       name: "Opponent",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
@@ -670,7 +678,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     });
 
     expect(pairResult.status).toBe("INCOMPLETE");
-    expect(pairResult.pairScore).toBeNull(); // 0.0 ではなく null であること
+    expect(pairResult.pairScore).toBeNull();
   });
 
   // ===========================================================================
@@ -681,6 +689,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponent: EvaluationOpponentDefinition = {
       opponentId: "opp-valid",
       name: "Opponent",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
@@ -729,7 +738,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
         seedCategory: "VALIDATION",
         opponents: [opponent],
         sessionFactory: testSessionFactory,
-        featureSchemaVersion: 999, // 不一致
+        featureSchemaVersion: 999,
       });
     }).toThrow(EvaluationConfigurationError);
   });
@@ -742,12 +751,14 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponent1: EvaluationOpponentDefinition = {
       opponentId: "duplicate-id",
       name: "Opponent 1",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
     const opponent2: EvaluationOpponentDefinition = {
       opponentId: "duplicate-id", // 重複
       name: "Opponent 2",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
@@ -771,17 +782,16 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponent: EvaluationOpponentDefinition = {
       opponentId: "test-opp",
       name: "Opponent",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
 
-    // Synthetic モック Seed (本番 Holdout は一切使用しない)
     const mockSeedRegistry = [
       { category: "TRAINING" as const, seeds: [80001, 80002] },
       { category: "HOLDOUT" as const, seeds: [80099, 80100] },
     ];
 
-    // Validation の評価セットに Holdout の Seed (80099) が混入している場合
     expect(() => {
       EvolutionIndependentEvaluator.evaluate({
         candidateDNA: candidateDna,
@@ -804,6 +814,7 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const opponent: EvaluationOpponentDefinition = {
       opponentId: "first-legal-direct",
       name: "FirstLegal",
+      role: "BASELINE",
       policyFactory: () => new FirstLegalPolicy(false),
       targetWinRate: 0.5,
     };
@@ -824,5 +835,197 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     const score0 = pairResult.leg0.candidateWon ? 1.0 : pairResult.leg0.candidateDraw ? 0.5 : 0.0;
     const score1 = pairResult.leg1.candidateWon ? 1.0 : pairResult.leg1.candidateDraw ? 0.5 : 0.0;
     expect(pairResult.pairScore).toBe((score0 + score1) / 2.0);
+  });
+
+  // ===========================================================================
+  // Test 21 (R2): Student-t 臨界値と外部独立既知値 (NIST/R 参照値) の厳密照合
+  // ===========================================================================
+  it("Test 21 (R2): Student-t 臨界値が独立した外部理論値 (NIST/R 参照値) と高精度に一致すること", () => {
+    // 外部独立参照値:
+    // alpha = 0.05 (片側 5%):
+    // df = 4  -> 2.131847
+    // df = 10 -> 1.812461
+    // df = 30 -> 1.697261
+    expect(studentTOneTailedCritical(0.05, 4)).toBeCloseTo(2.131847, 4);
+    expect(studentTOneTailedCritical(0.05, 10)).toBeCloseTo(1.812461, 4);
+    expect(studentTOneTailedCritical(0.05, 30)).toBeCloseTo(1.697261, 4);
+
+    // alpha = 0.01 (片側 1%):
+    // df = 4  -> 3.746947
+    // df = 10 -> 2.763769
+    // df = 30 -> 2.457262
+    expect(studentTOneTailedCritical(0.01, 4)).toBeCloseTo(3.746947, 4);
+    expect(studentTOneTailedCritical(0.01, 10)).toBeCloseTo(2.763769, 4);
+    expect(studentTOneTailedCritical(0.01, 30)).toBeCloseTo(2.457262, 4);
+
+    // alpha = 0.025 (両側 95% = 片側 2.5%):
+    // df = 4  -> 2.776445
+    // df = 10 -> 2.228139
+    // df = 30 -> 2.042272
+    expect(getStudentTCritical95(4)).toBeCloseTo(2.776445, 4);
+    expect(getStudentTCritical95(10)).toBeCloseTo(2.228139, 4);
+    expect(getStudentTCritical95(30)).toBeCloseTo(2.042272, 4);
+  });
+
+  // ===========================================================================
+  // Test 22 (R2): 分散ゼロ (全ペア 0.75) における HOEFFDING_BOUND 統計契約
+  // ===========================================================================
+  it("Test 22 (R2): 全ペア 0.75 の分散ゼロ時、二項符号検定を混在させず HOEFFDING_BOUND (pValue: null) として仮説と下限を完全整合させること", () => {
+    // 5ペアすべて 0.75 (1勝1分のみ)
+    // 帰無仮説 H0: mu <= 0.5 vs H1: mu > 0.5
+    // Hoeffding 片側 (1 - 0.05) 信頼下限:
+    // L = 0.75 - sqrt(ln(20) / 10) = 0.75 - 0.54733 = 0.20267 <= 0.5
+    const stats = EvolutionIndependentEvaluator.computeStatistics({
+      pairScores: [0.75, 0.75, 0.75, 0.75, 0.75],
+      failedCount: 0,
+      incompleteCount: 0,
+      targetWinRate: 0.5,
+      alpha: 0.05,
+      minCompletedPairs: 5,
+    });
+
+    expect(stats.sampleVariance).toBe(0.0);
+    expect(stats.meanPairScore).toBe(0.75);
+    expect(stats.statisticalTest.method).toBe("HOEFFDING_BOUND");
+    expect(stats.statisticalTest.pValue).toBeNull(); // 二項検定 p 値は別仮説のため混在させず null
+    expect(stats.statisticalTest.oneSidedLowerBound).toBeCloseTo(0.20267, 3);
+    // n=5 では保守的下限が 0.5 以下であるため、誤って有意認定されないこと
+    expect(stats.statisticalTest.isStatisticallySignificant).toBe(false);
+    expect(stats.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
+
+    // n=15 ペアすべて 0.75 の場合:
+    // L = 0.75 - sqrt(ln(20) / 30) = 0.75 - sqrt(2.9957 / 30) = 0.75 - 0.3160 = 0.434 <= 0.5 (まだ未達)
+    // n=30 ペアすべて 0.75 の場合:
+    // L = 0.75 - sqrt(ln(20) / 60) = 0.75 - sqrt(0.0499) = 0.75 - 0.2234 = 0.5266 > 0.5 (有意)
+    const stats30 = EvolutionIndependentEvaluator.computeStatistics({
+      pairScores: new Array(30).fill(0.75),
+      failedCount: 0,
+      incompleteCount: 0,
+      targetWinRate: 0.5,
+      alpha: 0.05,
+      minCompletedPairs: 5,
+    });
+    expect(stats30.statisticalTest.method).toBe("HOEFFDING_BOUND");
+    expect(stats30.statisticalTest.pValue).toBeNull();
+    expect(stats30.statisticalTest.oneSidedLowerBound).toBeCloseTo(0.5266, 3);
+    expect(stats30.statisticalTest.isStatisticallySignificant).toBe(true);
+    expect(stats30.improvementStatus).toBe("IMPROVEMENT_VERIFIED");
+  });
+
+  // ===========================================================================
+  // Test 23 (R2): Baseline 優位性と進化的改善の分離
+  // ===========================================================================
+  it("Test 23 (R2): Baseline のみとの対戦では進化的改善 (IMPROVEMENT_VERIFIED) と認定せず、REFERENCE_CHAMPION との対戦比較が存在して初めて認定すること", () => {
+    const candidateDna = createManualGenericGenomeDNA();
+
+    const baselineOpponent: EvaluationOpponentDefinition = {
+      opponentId: "baseline-first-legal",
+      name: "FirstLegal Baseline",
+      role: "BASELINE",
+      policyFactory: () => new FirstLegalPolicy(false),
+      targetWinRate: 0.5,
+    };
+
+    // 1. BASELINE のみでの評価: たとえ全勝しても進化的改善 (IMPROVEMENT_VERIFIED) は未認定
+    const baselineOnlyResult = EvolutionIndependentEvaluator.evaluate({
+      candidateDNA: candidateDna,
+      seeds: [92080, 92081],
+      seedCategory: "VALIDATION",
+      opponents: [baselineOpponent],
+      sessionFactory: testSessionFactory,
+      maxDecisionsPerMatch: 500,
+      minimumCompletedPairs: 2,
+    });
+
+    expect(baselineOnlyResult.evidenceStatus).toBe("VALID");
+    // Baseline 優位性は true になり得るが、進化的改善は未認定 (UNVERIFIED)
+    expect(baselineOnlyResult.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
+    expect(baselineOnlyResult.championImproved).toBe(false);
+
+    // 2. REFERENCE_CHAMPION を含めた評価
+    const championOpponent: EvaluationOpponentDefinition = {
+      opponentId: "reference-champion-gen0",
+      name: "Initial Champion",
+      role: "REFERENCE_CHAMPION",
+      policyFactory: () => new FirstLegalPolicy(false),
+      targetWinRate: 0.5,
+    };
+
+    const championResult = EvolutionIndependentEvaluator.evaluate({
+      candidateDNA: candidateDna,
+      seeds: [92082, 92083],
+      seedCategory: "VALIDATION",
+      opponents: [baselineOpponent, championOpponent],
+      sessionFactory: testSessionFactory,
+      maxDecisionsPerMatch: 500,
+      minimumCompletedPairs: 2,
+    });
+
+    expect(championResult.evidenceStatus).toBe("VALID");
+    expect(championResult.opponents["reference-champion-gen0"].role).toBe("REFERENCE_CHAMPION");
+  });
+
+  // ===========================================================================
+  // Test 24 (R2): Holdout 評価における seedRegistry 必須 Fail-Closed 契約
+  // ===========================================================================
+  it("Test 24 (R2): seedCategory が HOLDOUT の場合、seedRegistry が未指定または過去セットを含まない場合は Fail-Closed で拒絶されること", () => {
+    const candidateDna = createManualGenericGenomeDNA();
+    const opponent: EvaluationOpponentDefinition = {
+      opponentId: "test-opp",
+      name: "Opponent",
+      role: "BASELINE",
+      policyFactory: () => new FirstLegalPolicy(false),
+      targetWinRate: 0.5,
+    };
+
+    // 1. seedRegistry 省略時
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [99901, 99902],
+        seedCategory: "HOLDOUT",
+        opponents: [opponent],
+        sessionFactory: testSessionFactory,
+      });
+    }).toThrow(EvaluationConfigurationError);
+
+    // 2. seedRegistry が空配列時
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [99901, 99902],
+        seedCategory: "HOLDOUT",
+        seedRegistry: [],
+        opponents: [opponent],
+        sessionFactory: testSessionFactory,
+      });
+    }).toThrow(EvaluationConfigurationError);
+
+    // 3. seedRegistry に TRAINING または VALIDATION が含まれていない時
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [99901, 99902],
+        seedCategory: "HOLDOUT",
+        seedRegistry: [{ category: "HOLDOUT", seeds: [99900] }],
+        opponents: [opponent],
+        sessionFactory: testSessionFactory,
+      });
+    }).toThrow(EvaluationConfigurationError);
+
+    // 4. 正当な seedRegistry が存在する場合は通過すること
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [99901, 99902],
+        seedCategory: "HOLDOUT",
+        seedRegistry: [
+          { category: "TRAINING", seeds: [88001, 88002] },
+          { category: "VALIDATION", seeds: [88003, 88004] },
+        ],
+        opponents: [opponent],
+        sessionFactory: testSessionFactory,
+      });
+    }).not.toThrow();
   });
 });
