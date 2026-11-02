@@ -10,10 +10,11 @@
  * 4. 2層ステータス (Evidence Status: VALID/INSUFFICIENT/INVALID, Improvement Status: VERIFIED/UNVERIFIED/REGRESSION)
  * 5. 小標本・分散ゼロに対応した厳格な統計検定 (Student t + Exact Binomial Test + Bonferroni 補正)
  * 6. Seed空間の厳格な分離と重複衝突検知 (Train / Val / Holdout)
+ * 7. 決定論的論理結果 (logicalResult) と実行時メトリクス (runtimeMetrics) の Sidecar 分離
  */
 
 import { DecisionDNA } from "./DecisionDNATypes";
-import { BatchMatchContext, BatchSimulationOptions } from "../simulation/BatchSimulationTypes";
+import { BatchSimulationOptions } from "../simulation/BatchSimulationTypes";
 import { DecisionPolicy } from "../../engine/simulation/DecisionPolicy";
 
 export const EVALUATOR_VERSION = 1 as const;
@@ -103,8 +104,11 @@ export interface PairedMatchResult {
   readonly candidateDnaDigest: string;
   readonly leg0: PairedLegOutcome;
   readonly leg1: PairedLegOutcome;
-  /** ペアスコア: (leg0スコア + leg1スコア) / 2。値域: {0.0, 0.25, 0.5, 0.75, 1.0} */
-  readonly pairScore: number;
+  /**
+   * ペアスコア: (leg0スコア + leg1スコア) / 2。値域: {0.0, 0.25, 0.5, 0.75, 1.0}
+   * FAILED または INCOMPLETE の無効ペアの場合は null となり、集計から除外される。
+   */
+  readonly pairScore: number | null;
   readonly status: "COMPLETED" | "INCOMPLETE" | "FAILED";
 }
 
@@ -115,16 +119,18 @@ export interface PairedMatchResult {
 export interface ConfidenceInterval {
   readonly lower: number;
   readonly upper: number;
-  readonly confidenceLevel: number; // e.g. 0.95
+  readonly confidenceLevel: number; // e.g. 0.95 or 1 - alpha
 }
 
-export type StatisticalTestMethod = "STUDENT_T" | "EXACT_BINOMIAL" | "COMBINED" | "UNDEFINED";
+export type StatisticalTestMethod = "STUDENT_T" | "EXACT_BINOMIAL" | "HOEFFDING_BOUND" | "UNDEFINED";
 
 export interface StatisticalTestResult {
   readonly method: StatisticalTestMethod;
   readonly statistic?: number; // e.g. t-statistic
-  readonly pValue: number; // One-tailed p-value (H1: mean > 0.5 or pairWins > pairLosses)
+  readonly pValue: number | null; // One-tailed p-value (null if undefined)
   readonly degreesOfFreedom?: number;
+  readonly criticalValue?: number;
+  readonly alphaUsed: number;
   readonly isStatisticallySignificant: boolean;
   readonly testNotes?: string;
 }
@@ -156,10 +162,10 @@ export interface OpponentEvaluationSummary {
 }
 
 // =============================================================================
-// 総合評価結果
+// 総合評価結果 (論理結果と実行時 Sidecar の分離)
 // =============================================================================
 
-export interface IndependentEvaluationResult {
+export interface IndependentEvaluationLogicalResult {
   readonly evaluatorVersion: number;
   readonly candidateGenomeId: string;
   readonly candidateDnaDigest: string;
@@ -177,7 +183,17 @@ export interface IndependentEvaluationResult {
   readonly evidenceStatus: EvidenceStatus;
   readonly improvementStatus: ImprovementStatus;
   readonly summaryText: string;
+}
+
+export interface IndependentEvaluationRuntimeMetrics {
   readonly timestamp: string;
+  readonly totalExecutionTimeMs: number;
+}
+
+export interface IndependentEvaluationResult extends IndependentEvaluationLogicalResult {
+  readonly logicalResult: IndependentEvaluationLogicalResult;
+  readonly runtimeMetrics: IndependentEvaluationRuntimeMetrics;
+  readonly timestamp: string; // 后方互換性フィールド (runtimeMetrics.timestamp と同値)
 }
 
 // =============================================================================
@@ -188,6 +204,7 @@ export interface EvaluationConfig {
   readonly candidateDNA: DecisionDNA;
   readonly seeds: readonly number[];
   readonly seedCategory: EvaluationSeedCategory;
+  readonly seedRegistry?: readonly EvaluationSeedSet[];
   readonly opponents: readonly EvaluationOpponentDefinition[];
   readonly sessionFactory: BatchSimulationOptions["sessionFactory"];
   readonly maxDecisionsPerMatch?: number;
