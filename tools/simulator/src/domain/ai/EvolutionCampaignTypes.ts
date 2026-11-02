@@ -367,6 +367,8 @@ export interface CampaignDiagnosticInfo {
   readonly lastValidCheckpointGeneration?: number;
   /** 中断箇所から再開可能か (Fail-Closed ガイド) */
   readonly canResume: boolean;
+  /** 再開検証の失敗理由または詳細 (再開不可時に記録) */
+  readonly resumeValidationReason?: string;
   /** 異常終了時の診断 Evidence ファイルパス (checkpointDir 指定時に保存) */
   readonly diagnosticFilePath?: string;
 }

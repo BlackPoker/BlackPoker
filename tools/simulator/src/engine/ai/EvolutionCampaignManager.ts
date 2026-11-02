@@ -593,6 +593,34 @@ export class EvolutionCampaignManager {
   }
 
   /**
+   * 中断または失敗時に、直近の正常保存チェックポイントから再開可能かを検証する。
+   * 単なるファイル存在チェックにとどまらず、loadCheckpoint() 相当の完全性検証
+   * （JSON 構造、チェックサム、DNA Digest、設定一致）を実行し、
+   * チェックポイントの破壊や上書きを行わずに Fail-Closed に判定する。
+   */
+  public static verifyResumeCapability(
+    checkpointPath: string | null,
+    config: EvolutionCampaignConfig,
+    storage: CampaignCheckpointStorage
+  ): { readonly canResume: boolean; readonly reason?: string } {
+    if (!checkpointPath) {
+      return { canResume: false, reason: "No checkpoint path recorded" };
+    }
+    if (!storage.exists(checkpointPath)) {
+      return { canResume: false, reason: `Checkpoint file does not exist at path: ${checkpointPath}` };
+    }
+    try {
+      this.loadCheckpoint(checkpointPath, config, storage);
+      return { canResume: true };
+    } catch (err: any) {
+      return {
+        canResume: false,
+        reason: err instanceof Error ? err.message : String(err),
+      };
+    }
+  }
+
+  /**
    * 世代内 Fitness Snapshot から決定論的に最上位 Champion 候補を特定
    *
    * 契約:
@@ -784,10 +812,11 @@ export class EvolutionCampaignManager {
         campaignStatus = "REEVALUATION_REQUIRED";
         stopReason = `Evolution loop aborted at generation ${g}: REEVALUATION_REQUIRED (${loopResult.logicalResult.reason})`;
         const totalMatchesExecuted = loopResult.logicalResult.generations[0]?.manifest.totalMatches ?? 0;
-        const canResume =
-          lastSavedCheckpointGeneration !== null &&
-          lastSavedCheckpointPath !== null &&
-          storage.exists(lastSavedCheckpointPath);
+        const resumeCheck = this.verifyResumeCapability(
+          lastSavedCheckpointPath,
+          config,
+          storage
+        );
 
         diagnosticInfo = {
           failedGeneration: g,
@@ -805,7 +834,8 @@ export class EvolutionCampaignManager {
             reason: "Skipped due to training reevaluation requirement",
           },
           lastValidCheckpointGeneration: lastSavedCheckpointGeneration ?? undefined,
-          canResume,
+          canResume: resumeCheck.canResume,
+          resumeValidationReason: resumeCheck.reason,
         };
         break;
       }
@@ -860,10 +890,11 @@ export class EvolutionCampaignManager {
       if (valResult.evidenceStatus !== "VALID") {
         campaignStatus = "FAILED";
         stopReason = `Validation evaluation failed for generation ${g} champion candidate: evidenceStatus="${valResult.evidenceStatus}"`;
-        const canResume =
-          lastSavedCheckpointGeneration !== null &&
-          lastSavedCheckpointPath !== null &&
-          storage.exists(lastSavedCheckpointPath);
+        const resumeCheck = this.verifyResumeCapability(
+          lastSavedCheckpointPath,
+          config,
+          storage
+        );
 
         diagnosticInfo = {
           failedGeneration: g,
@@ -881,7 +912,8 @@ export class EvolutionCampaignManager {
             reason: `Validation evaluation failed with evidenceStatus="${valResult.evidenceStatus}"`,
           },
           lastValidCheckpointGeneration: lastSavedCheckpointGeneration ?? undefined,
-          canResume,
+          canResume: resumeCheck.canResume,
+          resumeValidationReason: resumeCheck.reason,
         };
         break;
       }
@@ -1067,6 +1099,7 @@ export class EvolutionCampaignManager {
         validationStatus: diagnosticInfo.validationStatus,
         lastValidCheckpointGeneration: diagnosticInfo.lastValidCheckpointGeneration,
         canResume: diagnosticInfo.canResume,
+        resumeValidationReason: diagnosticInfo.resumeValidationReason,
         timestamp,
       };
       storage.save(diagFilePath, JSON.stringify(diagPayload, null, 2));

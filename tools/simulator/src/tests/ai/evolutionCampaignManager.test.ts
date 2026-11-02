@@ -1946,4 +1946,201 @@ describe("Evolution Campaign Orchestrator Foundation (Work 3-2)", () => {
     // 中断再開結果と連続実行結果が isEqualCampaignLogicalResult で完全一致すること
     expect(isEqualCampaignLogicalResult(runPart2.logicalResult, runContinuous.logicalResult)).toBe(true);
   });
+
+  // ===========================================================================
+  // Test 35: 同一目標世代数（totalGenerations = 2）での実機中断・再開完全性検証
+  // ===========================================================================
+  it("Test 35: executes live session run interrupted at generation 1 and resumes with identical totalGenerations", () => {
+    const memoryStorage = new InMemoryCampaignCheckpointStorage();
+    const configBase: EvolutionCampaignConfig = {
+      campaignId: "campaign-live-same-target-resume",
+      campaignSeed: 350001,
+      totalGenerations: 2,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [3501],
+      sessionFactory: testSessionFactory,
+      checkpointDir: "test-dir",
+      checkpointStorage: memoryStorage,
+      checkpointIntervalGenerations: 1,
+      minimumCompletedPairs: 1,
+      runnerConfig: {
+        maxDecisionsPerMatch: 500,
+        fitnessConfig: {
+          minimumCompletedMatches: 1,
+          minimumCompletionRate: 0.5,
+        },
+        builderConfig: {
+          populationSize: 4,
+          selectionConfig: {
+            minimumValidPopulationCount: 2,
+            tournamentSize: 2,
+            eliteCount: 1,
+          },
+          geneticOperatorConfig: {
+            mutationRate: 0.1,
+            mutationSigma: 0.05,
+            mutationClampMin: -1.0,
+            mutationClampMax: 1.0,
+            maxSelfMatingRetries: 5,
+          },
+        },
+      },
+      maxDecisionsPerMatch: 500,
+    };
+
+    // Step 1: 第0世代は実機実行し、第1世代でテスト用中断（REEVALUATION_REQUIRED）を注入
+    const realLoopRun = EvolutionLoop.run.bind(EvolutionLoop);
+    let loopCallCount = 0;
+    const spyLoop = vi.spyOn(EvolutionLoop, "run").mockImplementation((params) => {
+      loopCallCount++;
+      if (loopCallCount === 1) {
+        return realLoopRun(params);
+      }
+      return {
+        logicalResult: {
+          status: "REEVALUATION_REQUIRED",
+          reason: "Injected test interruption during generation 1",
+          generations: [],
+          readiness: { status: "REEVALUATION_REQUIRED", validCount: 0, requiredCount: 2 },
+        } as any,
+        runtimeMetrics: { totalExecutionTimeMs: 10, generations: [] },
+      };
+    });
+
+    const runInterrupted = EvolutionCampaignManager.run(configBase);
+    expect(runInterrupted.status).toBe("REEVALUATION_REQUIRED");
+    expect(runInterrupted.completedGenerations).toBe(1);
+    expect(runInterrupted.diagnosticInfo?.canResume).toBe(true);
+    expect(runInterrupted.diagnosticInfo?.lastValidCheckpointGeneration).toBe(1);
+
+    const checkpointPath = "test-dir/campaign-live-same-target-resume-checkpoint.json";
+    expect(memoryStorage.exists(checkpointPath)).toBe(true);
+    spyLoop.mockRestore();
+
+    // Step 2: 同一の totalGenerations: 2 で再開（allowCampaignExtension は未指定 / false 契約）
+    // 中断前に完了した世代0が Resume 時に二重実行されないことも検証
+    let resumedLoopCallCount = 0;
+    const resumedSpy = vi.spyOn(EvolutionLoop, "run").mockImplementation((params) => {
+      resumedLoopCallCount++;
+      // 第0世代はスキップされ、第1世代（P_1）から開始されること
+      expect(params.initialPopulation.generation).toBe(1);
+      return realLoopRun(params);
+    });
+
+    const runResumed = EvolutionCampaignManager.run({
+      ...configBase,
+      totalGenerations: 2,
+      resumeFromCheckpointPath: checkpointPath,
+    });
+    expect(resumedLoopCallCount).toBe(1); // 世代0は再実行されず、世代1のみ1回実機実行されたこと
+    expect(runResumed.status).toBe("COMPLETED");
+    expect(runResumed.completedGenerations).toBe(2);
+    resumedSpy.mockRestore();
+
+    // Step 3: 最初から世代2まで連続実行
+    const memoryStorageCont = new InMemoryCampaignCheckpointStorage();
+    const runContinuous = EvolutionCampaignManager.run({
+      ...configBase,
+      checkpointStorage: memoryStorageCont,
+    });
+    expect(runContinuous.status).toBe("COMPLETED");
+    expect(runContinuous.completedGenerations).toBe(2);
+
+    // Step 4: 初めから連続実行した結果との完全比較
+    // 4.1 最終母集団全DNA
+    expect(runResumed.finalPopulation.entries.length).toBe(runContinuous.finalPopulation.entries.length);
+    for (let i = 0; i < runResumed.finalPopulation.entries.length; i++) {
+      expect(runResumed.finalPopulation.entries[i].genomeId).toBe(runContinuous.finalPopulation.entries[i].genomeId);
+      expect(runResumed.finalPopulation.entries[i].dna).toEqual(runContinuous.finalPopulation.entries[i].dna);
+    }
+    // 4.2 Champion DNA / Digest
+    expect(runResumed.provisionalBestChampion?.dnaDigest).toBe(runContinuous.provisionalBestChampion?.dnaDigest);
+    expect(runResumed.provisionalBestChampion?.dna).toEqual(runContinuous.provisionalBestChampion?.dna);
+    // 4.3 全世代 Validation 結果
+    expect(runResumed.history.length).toBe(runContinuous.history.length);
+    for (let g = 0; g < runResumed.history.length; g++) {
+      expect(runResumed.history[g].candidateDnaDigest).toBe(runContinuous.history[g].candidateDnaDigest);
+      expect(runResumed.history[g].validationResult.summaryText).toBe(runContinuous.history[g].validationResult.summaryText);
+    }
+    // 4.4 Training Seed Registry
+    expect(runResumed.seedRegistry).toEqual(runContinuous.seedRegistry);
+    // 4.5 完了世代数・終了ステータス
+    expect(runResumed.status).toBe(runContinuous.status);
+    expect(runResumed.completedGenerations).toBe(runContinuous.completedGenerations);
+    // 4.6 正規化済み CampaignLogicalResult 全体の一致
+    expect(isEqualCampaignLogicalResult(runResumed.logicalResult, runContinuous.logicalResult)).toBe(true);
+  });
+
+  // ===========================================================================
+  // Test 36: Checkpoint 破損・改ざん時の再開不可判定と診断情報の記録
+  // ===========================================================================
+  it("Test 36: detects corrupted or tampered checkpoint and marks canResume = false with diagnostic reason", () => {
+    const memoryStorage = new InMemoryCampaignCheckpointStorage();
+    const config: EvolutionCampaignConfig = {
+      campaignId: "campaign-corrupted-test",
+      campaignSeed: 360001,
+      totalGenerations: 2,
+      initialPopulation: createTestPopulation(4, 0),
+      validationOpponents: testOpponents,
+      validationSeeds: [3601, 3602],
+      sessionFactory: testSessionFactory,
+      checkpointDir: "test-dir",
+      checkpointStorage: memoryStorage,
+      checkpointIntervalGenerations: 1,
+      minimumCompletedPairs: 2,
+    };
+
+    const checkpointPath = "test-dir/campaign-corrupted-test-checkpoint.json";
+
+    // 世代0終了時に正常チェックポイントを保存させ、世代1で改ざん後に中断させる
+    let genCount = 0;
+    vi.spyOn(EvolutionLoop, "run").mockImplementation((p) => {
+      genCount++;
+      if (genCount === 1) {
+        return createMockLoopResult(p.initialPopulation.generation, p.campaignSeed, 4);
+      }
+      // 世代1の実行直前に保存済みチェックポイントのチェックサムを改ざんする
+      const originalRaw = memoryStorage.load(checkpointPath);
+      expect(originalRaw).not.toBeNull();
+      const parsed = JSON.parse(originalRaw!);
+      // チェックサムを無効な値に改ざん
+      parsed.checksum = "0000000000000000000000000000000000000000000000000000000000000000";
+      memoryStorage.save(checkpointPath, JSON.stringify(parsed));
+
+      return {
+        logicalResult: {
+          status: "REEVALUATION_REQUIRED",
+          reason: "Aborted at gen 1 after checkpoint tampering",
+          generations: [],
+          readiness: { status: "REEVALUATION_REQUIRED", validCount: 0, requiredCount: 2 },
+        } as any,
+        runtimeMetrics: { totalExecutionTimeMs: 10, generations: [] },
+      };
+    });
+    vi.spyOn(EvolutionIndependentEvaluator, "evaluate").mockImplementation((p) => {
+      return createMockValResult(p.candidateDNA, 0.6);
+    });
+
+    const result = EvolutionCampaignManager.run(config);
+    expect(result.status).toBe("REEVALUATION_REQUIRED");
+    expect(result.completedGenerations).toBe(1);
+
+    // canResume が false になり、理由が記録されていること
+    expect(result.diagnosticInfo).toBeDefined();
+    expect(result.diagnosticInfo?.canResume).toBe(false);
+    expect(result.diagnosticInfo?.resumeValidationReason).toBeDefined();
+    expect(result.diagnosticInfo?.resumeValidationReason).toContain("Checkpoint checksum mismatch");
+    expect(result.diagnosticInfo?.lastValidCheckpointGeneration).toBe(1);
+
+    // 破損したチェックポイントファイル自体は破壊・削除されずに保持されていること
+    expect(memoryStorage.exists(checkpointPath)).toBe(true);
+
+    // 診断ファイルにも canResume = false と resumeValidationReason が安全に永続化されていること
+    const diagPath = "test-dir/campaign-corrupted-test-diagnostic.json";
+    expect(memoryStorage.exists(diagPath)).toBe(true);
+    const diag = JSON.parse(memoryStorage.load(diagPath)!);
+    expect(diag.canResume).toBe(false);
+    expect(diag.resumeValidationReason).toContain("Checkpoint checksum mismatch");
+  });
 });
