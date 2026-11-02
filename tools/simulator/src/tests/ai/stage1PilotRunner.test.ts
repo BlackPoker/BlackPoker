@@ -15,6 +15,8 @@ import {
   createStage1ValidationOpponents,
   runPreflightCheck,
   getGitStatusInfo,
+  computeFileSha256,
+  verifyCheckpointIntegrity,
   evaluatePilotOverallSuccess,
   auditExistingPilotArtifacts,
   RunMeasurement,
@@ -24,9 +26,15 @@ import {
   DNA_INTERACTION_DIMENSION,
 } from "../../domain/ai/DecisionDNATypes.js";
 import { EvolutionIndependentEvaluator } from "../../engine/ai/EvolutionIndependentEvaluator.js";
+import { EvolutionCampaignManager } from "../../engine/ai/EvolutionCampaignManager.js";
+import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
+
+// =============================================================================
+// テスト用 Mock 生成ヘルパー
+// =============================================================================
 
 function createMockRunMeasurement(overrides?: Partial<RunMeasurement>): RunMeasurement {
   const dummyPop = createStage1InitialPopulation();
@@ -49,7 +57,7 @@ function createMockRunMeasurement(overrides?: Partial<RunMeasurement>): RunMeasu
       trainingSeedsByGeneration: {},
       validationSeeds: VALIDATION_SEEDS,
       holdoutSeeds: [],
-      allUsedSeeds: Array.from({ length: 35 }, (_, i) => 1000 + i), // 35 unique seeds
+      allUsedSeeds: Array.from({ length: 35 }, (_, i) => 1000 + i),
     },
     finalPopulation: dummyPop,
     provisionalBestChampion: {
@@ -101,13 +109,313 @@ function createMockRunMeasurement(overrides?: Partial<RunMeasurement>): RunMeasu
     sampledPeakHeapUsedBytes: 80 * 1024 * 1024,
     memorySamplingMethod: "SESSION_FACTORY_INVOCATION_SAMPLING",
     memoryMeasurementNote: "SAMPLED_MAXIMUM: Memory was sampled at SessionFactory invocations.",
-    checkpointFilePath: path.resolve(__dirname, "../../cli/stage1PilotRunner.ts"), // 既存実在ファイル
+    checkpointFilePath: path.resolve(__dirname, "../../cli/stage1PilotRunner.ts"),
     checkpointSizeBytes: 1024,
     ...overrides,
   };
 }
 
-describe("Stage 1 Small Pilot CLI & Evidence Audit Foundation (Work 3-3 R1)", () => {
+// =============================================================================
+// CI 用完全小規模監査 Fixture 生成ヘルパー
+// =============================================================================
+
+function createValidAuditFixture(fixtureRoot: string) {
+  const runADir = path.join(fixtureRoot, "run-a");
+  const runBDir = path.join(fixtureRoot, "run-b");
+  fs.mkdirSync(runADir, { recursive: true });
+  fs.mkdirSync(runBDir, { recursive: true });
+
+  const dummyPop = createStage1InitialPopulation();
+  const champDna = dummyPop.entries[0].dna;
+  const champDigest = EvolutionIndependentEvaluator.computeDnaDigest(champDna);
+
+  // Training Seeds: Gen0 15ペア(30試合), Gen1 15ペア(30試合)
+  const gen0Seeds: number[] = [];
+  for (let i = 0; i < 15; i++) {
+    gen0Seeds.push(1001 + i, 1001 + i); // 座席反転 Leg0, Leg1
+  }
+  const gen1Seeds: number[] = [];
+  for (let i = 0; i < 15; i++) {
+    gen1Seeds.push(1016 + i, 1016 + i); // 座席反転 Leg0, Leg1
+  }
+  const valSeeds = [91001, 91002, 91003, 91004, 91005];
+
+  const uniqueTraining = Array.from(new Set([...gen0Seeds, ...gen1Seeds]));
+  const allUsedSeeds = [...uniqueTraining, ...valSeeds]; // 計 35 個
+
+  const seedRegistry = {
+    trainingSeedsByGeneration: { 0: gen0Seeds, 1: gen1Seeds },
+    validationSeeds: valSeeds,
+    holdoutSeeds: [],
+    allUsedSeeds,
+  };
+
+  const validationOpponentsRecord: any = {
+    "baseline-first-legal": {
+      opponentId: "baseline-first-legal",
+      name: "FirstLegal",
+      role: "BASELINE",
+      meanPairScore: 0.5,
+      targetMet: false,
+      evidenceStatus: "VALID",
+      improvementStatus: "IMPROVEMENT_UNVERIFIED",
+    },
+    "baseline-seeded-random": {
+      opponentId: "baseline-seeded-random",
+      name: "SeededRandom",
+      role: "BASELINE",
+      meanPairScore: 0.5,
+      targetMet: false,
+      evidenceStatus: "VALID",
+      improvementStatus: "IMPROVEMENT_UNVERIFIED",
+    },
+  };
+
+  const history = [
+    {
+      generation: 0,
+      candidateGenomeId: "ind-g0-000",
+      candidateFitnessScore: 10.0,
+      candidateDnaDigest: champDigest,
+      isBestChampionUpdated: true,
+      validationResult: {
+        evaluatorVersion: 1,
+        candidateGenomeId: "ind-g0-000",
+        candidateDnaDigest: champDigest,
+        opponents: validationOpponentsRecord,
+        pairs: [],
+        totalPairs: 10,
+        totalMatches: 20,
+      },
+      timestamp: "2026-11-03T00:00:00.000Z",
+    },
+    {
+      generation: 1,
+      candidateGenomeId: "ind-g1-000",
+      candidateFitnessScore: 12.0,
+      candidateDnaDigest: champDigest,
+      isBestChampionUpdated: true,
+      validationResult: {
+        evaluatorVersion: 1,
+        candidateGenomeId: "ind-g1-000",
+        candidateDnaDigest: champDigest,
+        opponents: validationOpponentsRecord,
+        pairs: [],
+        totalPairs: 10,
+        totalMatches: 20,
+      },
+      timestamp: "2026-11-03T00:00:00.000Z",
+    },
+  ];
+
+  const logicalResult = {
+    campaignVersion: 1,
+    campaignId: "campaign-stage1-pilot",
+    campaignSeed: CAMPAIGN_SEED,
+    regulationId: REGULATION_ID,
+    frameId: FRAME_ID,
+    rulePackageVersion: "1.0.0",
+    featureSchemaVersion: 6,
+    totalTargetGenerations: 2,
+    completedGenerations: 2,
+    status: "COMPLETED",
+    stopReason: "COMPLETED_NORMALLY",
+    provisionalBestChampion: {
+      genomeId: "ind-g1-000",
+      generation: 1,
+      dna: champDna,
+      dnaDigest: champDigest,
+      validationMeanWinRate: 0.5,
+    },
+    history,
+    finalPopulation: dummyPop,
+    seedRegistry,
+    summaryText: "Fixture Summary Text",
+  };
+
+  const metrics = {
+    runId: "RUN_A",
+    campaignId: "campaign-stage1-pilot",
+    totalMatchesExecuted: 100,
+    trainingMatchesExecuted: 60,
+    validationMatchesExecuted: 40,
+    completedMatches: 100,
+    failedMatches: 0,
+    incompleteMatches: 0,
+    totalDecisions: 1500,
+    trainingDecisions: 900,
+    validationDecisions: 600,
+    elapsedTotalMs: 10000,
+    matchesPerSec: 10,
+    sampledPeakRssMB: 150,
+    sampledPeakHeapUsedMB: 80,
+    checkpointSizeBytes: 5000,
+  };
+
+  const manifest = {
+    workId: WORK_ID,
+    gitCommitSha: "mock-fixture-commit-sha",
+    isGitClean: true,
+    timestamp: "2026-11-03T00:00:00.000Z",
+    regulationId: REGULATION_ID,
+    frameId: FRAME_ID,
+    rulePackageVersion: "1.0.0",
+    featureSchemaVersion: 6,
+    campaignSeed: CAMPAIGN_SEED,
+    populationSize: 6,
+    totalGenerations: 2,
+    pairRepetitions: 1,
+    plannedTrainingMatchesByGen: { 0: 30, 1: 30 },
+    plannedTrainingSeedsByGen: { 0: gen0Seeds, 1: gen1Seeds },
+    validationSeeds: valSeeds,
+    validationOpponents: [
+      { opponentId: "baseline-first-legal", name: "FirstLegal", role: "BASELINE" },
+      { opponentId: "baseline-seeded-random", name: "SeededRandom", role: "BASELINE" },
+    ],
+    earlyStoppingEnabled: false,
+    holdoutMatchesPlanned: 0,
+    storageClass: "FileCampaignCheckpointStorage",
+    artifactsDirectory: fixtureRoot,
+  };
+
+  // Checkpoint 作成とチェックサム計算
+  const checkpointStateWithoutChecksum = {
+    checkpointVersion: 1,
+    campaignId: "campaign-stage1-pilot",
+    campaignSeed: CAMPAIGN_SEED,
+    regulationId: REGULATION_ID,
+    frameId: FRAME_ID,
+    rulePackageVersion: "1.0.0",
+    featureSchemaVersion: 6,
+    totalTargetGenerations: 2,
+    completedGenerations: 2,
+    nextGenerationToProcess: 2,
+    nextPopulation: dummyPop,
+    provisionalBestChampion: logicalResult.provisionalBestChampion,
+    history,
+    seedRegistry,
+    earlyStoppingState: {
+      enabled: false,
+      patience: 3,
+      minGenerations: 1,
+      noImprovementCount: 0,
+      bestValidationMeanScore: 0.5,
+      triggered: false,
+    },
+    configSnapshot: {
+      campaignId: "campaign-stage1-pilot",
+      campaignSeed: CAMPAIGN_SEED,
+      regulationId: REGULATION_ID,
+      frameId: FRAME_ID,
+      rulePackageVersion: "1.0.0",
+      featureSchemaVersion: 6,
+      totalTargetGenerations: 2,
+    },
+    timestamp: "2026-11-03T00:00:00.000Z",
+  };
+  const checksum = EvolutionCampaignManager.computeCheckpointChecksum(checkpointStateWithoutChecksum as any);
+  const checkpointState = { ...checkpointStateWithoutChecksum, checksum };
+
+  // Run A ファイル書き出し
+  fs.writeFileSync(path.join(runADir, "preflight-manifest.json"), JSON.stringify(manifest, null, 2), "utf-8");
+  fs.writeFileSync(path.join(runADir, "campaign-stage1-pilot-result.json"), JSON.stringify(logicalResult, null, 2), "utf-8");
+  fs.writeFileSync(path.join(runADir, "campaign-stage1-pilot-metrics.json"), JSON.stringify(metrics, null, 2), "utf-8");
+  fs.writeFileSync(path.join(runADir, "campaign-stage1-pilot-checkpoint.json"), JSON.stringify(checkpointState, null, 2), "utf-8");
+
+  // Run B ファイル書き出し (runId のみ変更)
+  const metricsB = { ...metrics, runId: "RUN_B" };
+  fs.writeFileSync(path.join(runBDir, "preflight-manifest.json"), JSON.stringify(manifest, null, 2), "utf-8");
+  fs.writeFileSync(path.join(runBDir, "campaign-stage1-pilot-result.json"), JSON.stringify(logicalResult, null, 2), "utf-8");
+  fs.writeFileSync(path.join(runBDir, "campaign-stage1-pilot-metrics.json"), JSON.stringify(metricsB, null, 2), "utf-8");
+  fs.writeFileSync(path.join(runBDir, "campaign-stage1-pilot-checkpoint.json"), JSON.stringify(checkpointState, null, 2), "utf-8");
+
+  // Evidence 作成
+  const evidence = {
+    workId: WORK_ID,
+    gitCommitSha: "mock-fixture-commit-sha",
+    isGitClean: true,
+    timestamp: "2026-11-03T00:00:00.000Z",
+    status: "SUCCESS",
+    reproducibilityResult: "REPRODUCIBILITY_PASS",
+    dnaEvolutionRecord: {
+      initialPopulationDigest: champDigest,
+      gen0CandidateDigest: champDigest,
+      gen1CandidateDigest: champDigest,
+      provisionalBestChampionDigest: champDigest,
+      gen1ChampionNonZeroWeightsCount: 0,
+    },
+    generationDetails: [
+      {
+        generation: 0,
+        candidateGenomeId: "ind-g0-000",
+        candidateFitnessScore: 10.0,
+        candidateDnaDigest: champDigest,
+        isBestChampionUpdated: true,
+        validationOpponents: validationOpponentsRecord,
+      },
+      {
+        generation: 1,
+        candidateGenomeId: "ind-g1-000",
+        candidateFitnessScore: 12.0,
+        candidateDnaDigest: champDigest,
+        isBestChampionUpdated: true,
+        validationOpponents: validationOpponentsRecord,
+      },
+    ],
+    measurements: {
+      runA: {
+        totalMatches: 100,
+        completedMatches: 100,
+        failedMatches: 0,
+        incompleteMatches: 0,
+        totalDecisions: 1500,
+        trainingDecisions: 900,
+        validationDecisions: 600,
+        elapsedTotalMs: 10000,
+      },
+      runB: {
+        totalMatches: 100,
+        completedMatches: 100,
+        failedMatches: 0,
+        incompleteMatches: 0,
+        totalDecisions: 1500,
+        trainingDecisions: 900,
+        validationDecisions: 600,
+        elapsedTotalMs: 10000,
+      },
+    },
+  };
+  fs.writeFileSync(path.join(fixtureRoot, "stage1-pilot-evidence.json"), JSON.stringify(evidence, null, 2), "utf-8");
+  fs.writeFileSync(path.join(fixtureRoot, "AUDIT_PROVENANCE_NOTE.md"), "# Mock Provenance Note", "utf-8");
+
+  // MANIFEST_SHA256.json の作成 (全ファイルの実ハッシュを計算して格納)
+  const relPaths = [
+    "run-a/preflight-manifest.json",
+    "run-a/campaign-stage1-pilot-result.json",
+    "run-a/campaign-stage1-pilot-metrics.json",
+    "run-a/campaign-stage1-pilot-checkpoint.json",
+    "run-b/preflight-manifest.json",
+    "run-b/campaign-stage1-pilot-result.json",
+    "run-b/campaign-stage1-pilot-metrics.json",
+    "run-b/campaign-stage1-pilot-checkpoint.json",
+    "stage1-pilot-evidence.json",
+  ];
+  const manifestShaList = relPaths.map((p) => {
+    const fullP = path.join(fixtureRoot, p);
+    return {
+      path: p,
+      sha256: computeFileSha256(fullP),
+      size: fs.statSync(fullP).size,
+    };
+  });
+  fs.writeFileSync(path.join(fixtureRoot, "MANIFEST_SHA256.json"), JSON.stringify(manifestShaList, null, 2), "utf-8");
+}
+
+// =============================================================================
+// テストスイート
+// =============================================================================
+
+describe("Stage 1 Small Pilot CLI & Evidence Audit Foundation (Work 3-3 R2)", () => {
   const tempTestDir = path.resolve(__dirname, `../../.tmp_stage1_cli_test_${Date.now()}`);
 
   it("Test 1: createStage1InitialPopulation creates exact N=6 population with valid Decision DNA", () => {
@@ -236,7 +544,52 @@ describe("Stage 1 Small Pilot CLI & Evidence Audit Foundation (Work 3-3 R1)", ()
     expect(verdict.reasons.some((r) => r.includes("total matches executed"))).toBe(true);
   });
 
-  it("Test 7: measurements strictly distinguish between measured, unmeasured (null) and sampled metrics", () => {
+  it("Test 7: evaluatePilotOverallSuccess rejects when checkpoint checksum is invalid", () => {
+    const tempDir = path.resolve(__dirname, `../../.tmp_chk_integ_test_${Date.now()}`);
+    fs.mkdirSync(tempDir, { recursive: true });
+
+    try {
+      const corruptChkPath = path.join(tempDir, "corrupt-checkpoint.json");
+      // ファイルは存在しサイズも正常だがチェックサムが不一致の JSON
+      fs.writeFileSync(
+        corruptChkPath,
+        JSON.stringify({
+          checkpointVersion: 1,
+          campaignId: "campaign-stage1-pilot",
+          checksum: "invalid-tampered-checksum-12345",
+          completedGenerations: 2,
+          seedRegistry: { allUsedSeeds: [] },
+          nextPopulation: { entries: [] },
+        }),
+        "utf-8"
+      );
+
+      const runA = createMockRunMeasurement({
+        runId: "RUN_A",
+        checkpointFilePath: corruptChkPath,
+        checkpointSizeBytes: fs.statSync(corruptChkPath).size,
+      });
+      const runB = createMockRunMeasurement({ runId: "RUN_B" });
+
+      const verdict = evaluatePilotOverallSuccess({
+        runA,
+        runB,
+        reproducibilityResult: "REPRODUCIBILITY_PASS",
+        plannedMatchesPerRun: 100,
+      });
+
+      expect(verdict.isSuccess).toBe(false);
+      expect(verdict.status).toBe("FAILED");
+      expect(verdict.conditionCheck.checkpointsIntegrityVerified).toBe(false);
+      expect(verdict.reasons.some((r) => r.includes("checkpoint integrity verification failed"))).toBe(true);
+    } finally {
+      if (fs.existsSync(tempDir)) {
+        fs.rmSync(tempDir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("Test 8: measurements strictly distinguish between measured, unmeasured (null) and sampled metrics", () => {
     const measurement = createMockRunMeasurement();
 
     // 未測定値は null
@@ -258,7 +611,7 @@ describe("Stage 1 Small Pilot CLI & Evidence Audit Foundation (Work 3-3 R1)", ()
     expect(measurement.memoryMeasurementNote).toContain("SAMPLED_MAXIMUM");
   });
 
-  it("Test 8: runPreflightCheck rejects git dirty state by default and allows bypass with allowDirty", async () => {
+  it("Test 9: runPreflightCheck rejects git dirty state by default and allows bypass with allowDirty", async () => {
     const gitInfo = getGitStatusInfo();
     const testSubDir = path.resolve(__dirname, `../../.tmp_preflight_git_test_${Date.now()}`);
     fs.mkdirSync(testSubDir, { recursive: true });
@@ -285,62 +638,181 @@ describe("Stage 1 Small Pilot CLI & Evidence Audit Foundation (Work 3-3 R1)", ()
     }
   });
 
-  it("Test 9: auditExistingPilotArtifacts detects invalid, corrupted or missing artifacts", () => {
-    const corruptDir = path.resolve(__dirname, `../../.tmp_corrupt_artifacts_${Date.now()}`);
-    fs.mkdirSync(corruptDir, { recursive: true });
+  it("Test 10: auditExistingPilotArtifacts passes on clean self-contained audit fixture", () => {
+    const fixtureDir = path.resolve(__dirname, `../../.tmp_valid_audit_fixture_${Date.now()}`);
+    fs.mkdirSync(fixtureDir, { recursive: true });
 
     try {
-      // 1. ファイルが存在しない場合
-      const missingAudit = auditExistingPilotArtifacts(corruptDir);
-      expect(missingAudit.isValid).toBe(false);
-      expect(missingAudit.errors.length).toBeGreaterThan(0);
-      expect(missingAudit.errors.some((e) => e.includes("missing"))).toBe(true);
+      createValidAuditFixture(fixtureDir);
 
-      // 2. 空ファイルが存在する場合
-      fs.writeFileSync(path.join(corruptDir, "stage1-pilot-evidence.json"), "{}", "utf-8");
-      fs.mkdirSync(path.join(corruptDir, "run-a"), { recursive: true });
-      fs.mkdirSync(path.join(corruptDir, "run-b"), { recursive: true });
-      fs.writeFileSync(path.join(corruptDir, "run-a/preflight-manifest.json"), "{}", "utf-8");
-      fs.writeFileSync(path.join(corruptDir, "run-b/preflight-manifest.json"), "{}", "utf-8");
-      fs.writeFileSync(path.join(corruptDir, "run-a/campaign-stage1-pilot-result.json"), "{}", "utf-8");
-      fs.writeFileSync(path.join(corruptDir, "run-b/campaign-stage1-pilot-result.json"), "{}", "utf-8");
-      fs.writeFileSync(path.join(corruptDir, "run-a/campaign-stage1-pilot-checkpoint.json"), "", "utf-8"); // 0 bytes
-      fs.writeFileSync(path.join(corruptDir, "run-b/campaign-stage1-pilot-checkpoint.json"), "", "utf-8"); // 0 bytes
+      const audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.errors).toEqual([]);
+      expect(audit.isValid).toBe(true);
 
-      const emptyAudit = auditExistingPilotArtifacts(corruptDir);
-      expect(emptyAudit.isValid).toBe(false);
-      expect(emptyAudit.errors.some((e) => e.includes("checkpoint is empty"))).toBe(true);
+      // Checkpoint 完全性
+      expect(audit.checkpointIntegrity.runA.isValid).toBe(true);
+      expect(audit.checkpointIntegrity.runB.isValid).toBe(true);
+
+      // MANIFEST_SHA256 完全性
+      expect(audit.manifestIntegrity.hasManifestShaFile).toBe(true);
+      expect(audit.manifestIntegrity.totalFilesChecked).toBe(9);
+      expect(audit.manifestIntegrity.matchedFilesCount).toBe(9);
+      expect(audit.manifestIntegrity.mismatches).toEqual([]);
+
+      // 照合項目 (全項目 PASS)
+      expect(audit.verifications.trainingMatches.status).toBe("PASS");
+      expect(audit.verifications.validationMatches.status).toBe("PASS");
+      expect(audit.verifications.completionStatus.status).toBe("PASS");
+      expect(audit.verifications.abnormalMatches.status).toBe("PASS");
+      expect(audit.verifications.totalDecisions.status).toBe("PASS");
+      expect(audit.verifications.generationFitness.status).toBe("PASS");
+      expect(audit.verifications.validationScores.status).toBe("PASS");
+      expect(audit.verifications.championDnaAndDigest.status).toBe("PASS");
+      expect(audit.verifications.checkpointCompletedGenerations.status).toBe("PASS");
+      expect(audit.verifications.reproducibilityVerdict.status).toBe("PASS");
+
+      // Seed Registry 実構造検証
+      expect(audit.seedAudit.runA?.status).toBe("PASS");
+      expect(audit.seedAudit.runA?.totalUniqueSeedsUsed).toBe(35);
+      expect(audit.seedAudit.runA?.validationSeedsCount).toBe(5);
+      expect(audit.seedAudit.runA?.uniqueTrainingSeedsCount).toBe(30);
+      expect(audit.seedAudit.runA?.seedCollisionsDetected).toBe(0);
+      expect(audit.seedAudit.runA?.seatInversionPairMatchesValid).toBe(true);
+      expect(audit.seedAudit.runA?.aggregatedAllUsedSeedsMatch).toBe(true);
+      expect(audit.seedAudit.runA?.totalMatchesExplained.totalMatches).toBe(100);
+
+      expect(audit.provenanceNotePresent).toBe(true);
     } finally {
-      if (fs.existsSync(corruptDir)) {
-        fs.rmSync(corruptDir, { recursive: true, force: true });
+      if (fs.existsSync(fixtureDir)) {
+        fs.rmSync(fixtureDir, { recursive: true, force: true });
       }
     }
   });
 
-  it("Test 10: auditExistingPilotArtifacts verifies integrity of archived R0 pilot artifacts", () => {
+  it("Test 11: auditExistingPilotArtifacts detects various specific integrity failures", () => {
+    const fixtureDir = path.resolve(__dirname, `../../.tmp_corrupt_subtests_${Date.now()}`);
+    fs.mkdirSync(fixtureDir, { recursive: true });
+
+    try {
+      createValidAuditFixture(fixtureDir);
+
+      // 11-A: Metrics の試合数不一致を検出
+      const metricsPath = path.join(fixtureRoot(fixtureDir), "run-a/campaign-stage1-pilot-metrics.json");
+      const origMetrics = JSON.parse(fs.readFileSync(metricsPath, "utf-8"));
+      fs.writeFileSync(metricsPath, JSON.stringify({ ...origMetrics, trainingMatchesExecuted: 59 }, null, 2), "utf-8");
+
+      let audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.verifications.trainingMatches.status).toBe("FAIL");
+      expect(audit.errors.some((e) => e.includes("Training match count mismatch"))).toBe(true);
+
+      // 復元
+      fs.writeFileSync(metricsPath, JSON.stringify(origMetrics, null, 2), "utf-8");
+
+      // 11-B: Checkpoint のチェックサム改ざんを検出
+      const chkPath = path.join(fixtureDir, "run-a/campaign-stage1-pilot-checkpoint.json");
+      const origChk = JSON.parse(fs.readFileSync(chkPath, "utf-8"));
+      fs.writeFileSync(chkPath, JSON.stringify({ ...origChk, checksum: "bad-tampered-checksum" }, null, 2), "utf-8");
+
+      audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.checkpointIntegrity.runA.isValid).toBe(false);
+      expect(audit.errors.some((e) => e.includes("Checkpoint checksum mismatch"))).toBe(true);
+
+      // 復元
+      fs.writeFileSync(chkPath, JSON.stringify(origChk, null, 2), "utf-8");
+
+      // 11-C: Validation スコア不一致を検出
+      const resPath = path.join(fixtureDir, "run-a/campaign-stage1-pilot-result.json");
+      const origRes = JSON.parse(fs.readFileSync(resPath, "utf-8"));
+      const tamperedRes = JSON.parse(JSON.stringify(origRes));
+      tamperedRes.history[0].validationResult.opponents["baseline-first-legal"].meanPairScore = 0.999;
+      fs.writeFileSync(resPath, JSON.stringify(tamperedRes, null, 2), "utf-8");
+
+      audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.verifications.validationScores.status).toBe("FAIL");
+      expect(audit.errors.some((e) => e.includes("Validation scores mismatch"))).toBe(true);
+
+      // 復元
+      fs.writeFileSync(resPath, JSON.stringify(origRes, null, 2), "utf-8");
+
+      // 11-D: Seed 衝突（世代間重複）を検出
+      const tamperedSeedRes = JSON.parse(JSON.stringify(origRes));
+      tamperedSeedRes.seedRegistry.trainingSeedsByGeneration[1] = tamperedSeedRes.seedRegistry.trainingSeedsByGeneration[0]; // Gen0 と同シード
+      fs.writeFileSync(resPath, JSON.stringify(tamperedSeedRes, null, 2), "utf-8");
+
+      audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.errors.some((e) => e.includes("crossGenOverlap=true"))).toBe(true);
+
+      // 復元
+      fs.writeFileSync(resPath, JSON.stringify(origRes, null, 2), "utf-8");
+
+      // 11-E: MANIFEST_SHA256 の不一致を検出 (Evidence ファイルを変更)
+      const evPath = path.join(fixtureDir, "stage1-pilot-evidence.json");
+      fs.writeFileSync(evPath, JSON.stringify({ ...JSON.parse(fs.readFileSync(evPath, "utf-8")), extraNote: "tampered" }, null, 2), "utf-8");
+
+      audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.manifestIntegrity.mismatches.length).toBeGreaterThan(0);
+      expect(audit.errors.some((e) => e.includes("MANIFEST_SHA256 mismatch"))).toBe(true);
+    } finally {
+      if (fs.existsSync(fixtureDir)) {
+        fs.rmSync(fixtureDir, { recursive: true, force: true });
+      }
+    }
+
+    function fixtureRoot(root: string) {
+      return root;
+    }
+  });
+
+  it("Test 12: auditExistingPilotArtifacts on real R0 archive (audited when present, marked UNVERIFIED when absent)", () => {
     const archiveDir = path.resolve(__dirname, "../../.artifacts/stage1-pilot-r0-archive");
     if (!fs.existsSync(archiveDir)) {
-      // アーカイブが存在しない環境ではスキップ
+      // アーカイブが存在しない環境（CI ベアラナー等）では、偽りの合格にせず未実施を明示
+      console.log("NOTICE: R0 Archive not present in this workspace environment (Audit UNVERIFIED/SKIPPED)");
+      expect(fs.existsSync(archiveDir)).toBe(false);
       return;
     }
 
+    // アーカイブが存在する場合は、実機 200 試合の完全監査を実施
     const audit = auditExistingPilotArtifacts(archiveDir);
     expect(audit.errors).toEqual([]);
     expect(audit.isValid).toBe(true);
+
+    // Checkpoint 完全性
+    expect(audit.checkpointIntegrity.runA.isValid).toBe(true);
+    expect(audit.checkpointIntegrity.runB.isValid).toBe(true);
     expect(audit.runACheckpointBytes).toBeGreaterThan(1000000);
     expect(audit.runBCheckpointBytes).toBeGreaterThan(1000000);
-    expect(audit.runAResultBytes).toBeGreaterThan(1000000);
-    expect(audit.runBResultBytes).toBeGreaterThan(1000000);
-    expect(audit.championDnaMatch).toBe(true);
-    expect(audit.seedCollisionDetected).toBe(false);
 
-    // Evidence の内容検証
-    expect(audit.evidence).toBeDefined();
-    expect(audit.evidence.status).toBe("SUCCESS");
-    expect(audit.evidence.reproducibilityResult).toBe("REPRODUCIBILITY_PASS");
-    expect(audit.evidence.measurements.runA.completedMatches).toBe(100);
-    expect(audit.evidence.measurements.runB.completedMatches).toBe(100);
-    expect(audit.evidence.measurements.runA.failedMatches).toBe(0);
-    expect(audit.evidence.measurements.runB.failedMatches).toBe(0);
+    // MANIFEST_SHA256 完全性 (全ファイルの一致)
+    expect(audit.manifestIntegrity.hasManifestShaFile).toBe(true);
+    expect(audit.manifestIntegrity.mismatches).toEqual([]);
+    expect(audit.manifestIntegrity.matchedFilesCount).toBe(15);
+
+    // 照合項目
+    expect(audit.verifications.trainingMatches.status).toBe("PASS");
+    expect(audit.verifications.validationMatches.status).toBe("PASS");
+    expect(audit.verifications.completionStatus.status).toBe("PASS");
+    expect(audit.verifications.abnormalMatches.status).toBe("PASS");
+    expect(audit.verifications.totalDecisions.status).toBe("PASS");
+    expect(audit.verifications.championDnaAndDigest.status).toBe("PASS");
+    expect(audit.verifications.checkpointCompletedGenerations.status).toBe("PASS");
+    expect(audit.verifications.reproducibilityVerdict.status).toBe("PASS");
+
+    // Seed 監査 (Training 60試合 = 30シード, Validation 40試合 = 5シード, 合計一意35シード)
+    expect(audit.seedAudit.runA?.status).toBe("PASS");
+    expect(audit.seedAudit.runA?.totalUniqueSeedsUsed).toBe(35);
+    expect(audit.seedAudit.runA?.uniqueTrainingSeedsCount).toBe(30);
+    expect(audit.seedAudit.runA?.validationSeedsCount).toBe(5);
+    expect(audit.seedAudit.runA?.seedCollisionsDetected).toBe(0);
+    expect(audit.seedAudit.runA?.seatInversionPairMatchesValid).toBe(true);
+    expect(audit.seedAudit.runA?.aggregatedAllUsedSeedsMatch).toBe(true);
+
+    // 出自メモの存在
+    expect(audit.provenanceNotePresent).toBe(true);
   });
 });
