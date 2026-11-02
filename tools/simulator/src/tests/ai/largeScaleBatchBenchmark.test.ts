@@ -345,4 +345,148 @@ describe("LargeScaleBatchBenchmark Stage 1 Evidence Gate", () => {
       }
     });
   });
+
+  describe("10,000 Matches Long-Run Stability Evidence Gate", () => {
+    const stability10kEvidencePath = path.resolve(
+      rootDir,
+      "tools/simulator/reports/ai/large-scale-batch-stability-10k.json"
+    );
+
+    it("Test 16: 10,000試合安定性 Evidence JSON が存在し、Git実検証ステータスが VERIFIED であること", () => {
+      expect(fs.existsSync(stability10kEvidencePath)).toBe(true);
+      const evidence: LargeScaleBatchEvidence = JSON.parse(
+        fs.readFileSync(stability10kEvidencePath, "utf-8")
+      );
+
+      expect(evidence.schemaVersion).toBe("1.0.0");
+      expect(evidence.workId).toBe("BP-SIM-AI-V92-WORK2-10K-STABILITY-GATE");
+      expect(evidence.configuration.regulationId).toBe("standard-pack");
+      expect(evidence.configuration.matchCount).toBe(10000);
+
+      // Git 実検証の厳格確認
+      const git = evidence.executionManifest.gitMetadata;
+      expect(git.verificationStatus).toBe("VERIFIED");
+      expect(git.isDirty).toBe(false);
+      expect(git.dirtyFiles.length).toBe(0);
+      expect(git.headCommitSha).toMatch(/^[0-9a-f]{40}$/);
+    });
+
+    it("Test 17: 10,000試合全試合が決着完走 (100% completed, 0 failed, 0 incomplete) であること", () => {
+      const evidence: LargeScaleBatchEvidence = JSON.parse(
+        fs.readFileSync(stability10kEvidencePath, "utf-8")
+      );
+
+      expect(evidence.summary.totalMatches).toBe(10000);
+      expect(evidence.summary.completedCount).toBe(10000);
+      expect(evidence.summary.incompleteCount).toBe(0);
+      expect(evidence.summary.failedCount).toBe(0);
+      expect(evidence.isolatedFailures.length).toBe(0);
+      expect(evidence.matches.length).toBe(10000);
+
+      // 勝敗サマリー
+      expect(evidence.summary.winsByPlayer.p2).toBe(7870);
+      expect(evidence.summary.winsByPlayer.p1).toBe(2130);
+      expect(evidence.summary.winRates.p2).toBe(0.787);
+      expect(evidence.summary.winRates.p1).toBe(0.213);
+    });
+
+    it("Test 18: 最初の500試合が正式500試合Evidenceと100%完全一致すること (決定論的整合性)", () => {
+      const verified500Path = path.resolve(
+        rootDir,
+        "tools/simulator/reports/ai/large-scale-batch-benchmark-stage1-verified.json"
+      );
+      const d10k: LargeScaleBatchEvidence = JSON.parse(
+        fs.readFileSync(stability10kEvidencePath, "utf-8")
+      );
+      const d500: LargeScaleBatchEvidence = JSON.parse(
+        fs.readFileSync(verified500Path, "utf-8")
+      );
+
+      for (let i = 0; i < 500; i++) {
+        const m10 = d10k.matches[i];
+        const m5 = d500.matches[i];
+        expect(m10.winner).toBe(m5.winner);
+        expect(m10.totalDecisions).toBe(m5.totalDecisions);
+        expect(m10.turnCount).toBe(m5.turnCount);
+        expect(m10.finalStateHash).toBe(m5.finalStateHash);
+        expect(m10.traceDigest).toBe(m5.traceDigest);
+      }
+    });
+
+    it("Test 19: 前半5,000試合と後半5,000試合の比較メトリクスおよびGC診断が正常であること (長時間メモリ安定性)", () => {
+      const evidence: LargeScaleBatchEvidence = JSON.parse(
+        fs.readFileSync(stability10kEvidencePath, "utf-8")
+      );
+
+      expect(evidence.halfwayComparison).toBeDefined();
+      const hw = evidence.halfwayComparison!;
+      expect(hw.firstHalf.matchCount).toBe(5000);
+      expect(hw.secondHalf.matchCount).toBe(5000);
+
+      // スループット維持率が 80% 以上であること
+      expect(hw.throughputRetentionRatio).toBeGreaterThanOrEqual(0.80);
+
+      // メモリ上限監視 (安全上限 RSS 1.5GB / Heap 1.0GB を一度も超えていないこと)
+      const mem = evidence.performance.memory;
+      expect(mem.peakRssBytes).toBeLessThan(1.5 * 1024 * 1024 * 1024);
+      expect(mem.peakHeapUsedBytes).toBeLessThan(1.0 * 1024 * 1024 * 1024);
+
+      // GC 診断の確認
+      const gcDiag = mem.gcDiagnostics;
+      expect(gcDiag).toBeDefined();
+      expect(gcDiag!.gcAvailable).toBe(true);
+      // 強制 GC 後の実残存ヒープが 100MB 未満であること
+      expect(gcDiag!.postGcHeapUsedBytes).toBeLessThan(100 * 1024 * 1024);
+    });
+
+    it("Test 20: 代表試合 (Match 0, 5000, 9999) の同一条件単独再実行で全結果が完全一致すること (10,000試合決定論的再現性検証)", async () => {
+      const evidence: LargeScaleBatchEvidence = JSON.parse(
+        fs.readFileSync(stability10kEvidencePath, "utf-8")
+      );
+
+      const catalog = await loadRegulationCatalog();
+      const rulesDir = path.resolve(rootDir, "tools/simulator/src/data/rules-vnext");
+      const fullRulePackage = await loadRulePackageFromDirectory(rulesDir);
+      const sessionFactory = await OfficialRegulationMatchFactory.prepareSessionFactory(
+        evidence.configuration.regulationId,
+        { catalog, fullRulePackage }
+      );
+
+      const sampleIndices = evidence.reproducibilityRecipe.sampleIndices; // [0, 5000, 9999]
+
+      for (const idx of sampleIndices) {
+        const recordedMatch = evidence.matches[idx];
+        const matchContext = {
+          matchIndex: recordedMatch.matchIndex,
+          matchId: recordedMatch.matchId,
+          baseSeed: recordedMatch.baseSeed,
+          matchSeed: recordedMatch.matchSeed,
+          playerSeeds: recordedMatch.playerSeeds,
+        };
+
+        const session = sessionFactory(matchContext);
+        const p1 = new FirstLegalPolicy(false);
+        const p2 = new RandomPolicy(
+          new SeededRandom(recordedMatch.playerSeeds.p2),
+          "SeededRandom-P2"
+        );
+
+        const simRes = SimulationRunner.run(
+          session,
+          { p1, p2 },
+          { maxDecisions: evidence.configuration.maxDecisionsPerMatch }
+        );
+
+        const replayedTraceDigest = computeTraceDigestFromSimulation(simRes);
+
+        // 各試合の主要指標が Evidence の記録と完全一致することを検証
+        expect(simRes.completed).toBe(recordedMatch.completed);
+        expect(simRes.winner).toBe(recordedMatch.winner);
+        expect(simRes.totalDecisions).toBe(recordedMatch.totalDecisions);
+        expect(simRes.turnCount).toBe(recordedMatch.turnCount);
+        expect(simRes.finalStateHash).toBe(recordedMatch.finalStateHash);
+        expect(replayedTraceDigest).toBe(recordedMatch.traceDigest);
+      }
+    });
+  });
 });
