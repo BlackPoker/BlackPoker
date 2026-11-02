@@ -54,13 +54,21 @@ export class EvaluationSeedCollisionError extends Error {
 
 export type EvaluationSeedCategory = "TRAINING" | "VALIDATION" | "HOLDOUT";
 
+/**
+ * 評価用 Seed 集合の定義。
+ *
+ * 保証範囲と限界 (Limitation):
+ * - Evaluator 単体での assertNoSeedCollision は、渡された seedRegistry 配列内の非重複（カテゴリ間衝突のないこと）を検証する純粋検査機能です。
+ * - Evaluator 単体では、渡された seedRegistry が過去の全世代の学習・検証で消費されたすべての Seed を網羅・真正に含んでいるかまでは保証できません。
+ * - 本番 Holdout における完全な未使用性の真正性保証は、Work 3-2 の Campaign Evidence / Manifest（不変学習履歴マニフェスト）との連携によって達成される責務です。
+ */
 export interface EvaluationSeedSet {
   readonly category: EvaluationSeedCategory;
   readonly seeds: readonly number[];
 }
 
 // =============================================================================
-// 対戦相手定義 (Baseline 優位性と進化的改善の分離)
+// 対戦相手定義 (Baseline 優位性と進化的改善の分離・Champion 真正性保証)
 // =============================================================================
 
 /**
@@ -70,18 +78,48 @@ export interface EvaluationSeedSet {
  */
 export type EvaluationOpponentRole = "BASELINE" | "REFERENCE_CHAMPION";
 
-export interface EvaluationOpponentDefinition {
+export interface BaseEvaluationOpponentDefinition {
   readonly opponentId: string;
   readonly name: string;
-  readonly role?: EvaluationOpponentRole; // デフォルトは "BASELINE"
+  /** 設計上の目標ペア勝率 (例: 0.55) */
+  readonly targetWinRate: number;
+}
+
+/**
+ * 固定 Baseline 対戦相手の定義。
+ * 任意の DecisionPolicy ファクトリを受け入れ可能。
+ */
+export interface BaselineOpponentDefinition extends BaseEvaluationOpponentDefinition {
+  readonly role?: "BASELINE";
   readonly policyFactory: (
     seat: "p1" | "p2",
     matchSeed: number,
     playerSeeds: { readonly p1: number; readonly p2: number }
   ) => DecisionPolicy;
-  /** 設計上の目標ペア勝率 (例: 0.55) */
-  readonly targetWinRate: number;
 }
+
+/**
+ * 過去 Champion 対戦相手の定義 (真正性保証)。
+ *
+ * 偽装防止契約:
+ * 1. 任意の policyFactory の直接注入を禁止 (never)。
+ * 2. 実際の検証済み referenceDNA の提供を必須化。
+ * 3. 必要に応じて expectedDnaDigest を照合。
+ * 4. 実際の対戦 Policy は referenceDNA から確定的に内部生成 (GenomePolicy) される。
+ */
+export interface ReferenceChampionOpponentDefinition extends BaseEvaluationOpponentDefinition {
+  readonly role: "REFERENCE_CHAMPION";
+  /** 参照 Champion の DecisionDNA (スキーマ・有限値検証が必須) */
+  readonly referenceDNA: DecisionDNA;
+  /** 期待される Full DNA Digest (指定時は完全一致を検証) */
+  readonly expectedDnaDigest?: string;
+  /** 任意の policyFactory の指定は禁止 (偽装防止) */
+  readonly policyFactory?: never;
+}
+
+export type EvaluationOpponentDefinition =
+  | BaselineOpponentDefinition
+  | ReferenceChampionOpponentDefinition;
 
 // =============================================================================
 // 座席反転ペア対戦結果
@@ -163,6 +201,10 @@ export interface OpponentEvaluationSummary {
   readonly opponentId: string;
   readonly opponentName: string;
   readonly role: EvaluationOpponentRole;
+  /** REFERENCE_CHAMPION の場合の参照 Genome ID (メタデータより取得) */
+  readonly championGenomeId?: string;
+  /** REFERENCE_CHAMPION の場合の参照 Full DNA Digest */
+  readonly championDnaDigest?: string;
   readonly totalPairs: number;
   readonly completedPairs: number;
   readonly incompletePairs: number;
@@ -197,10 +239,20 @@ export interface IndependentEvaluationLogicalResult {
   readonly pairs: readonly PairedMatchResult[];
   readonly totalPairs: number;
   readonly totalMatches: number;
+  /**
+   * 全ての対戦相手に対して目標ペア勝率を達成しているか。
+   * EvidenceStatus が VALID でない場合は常に false。
+   */
   readonly allTargetsMet: boolean;
-  /** 全ての BASELINE 対戦相手に対して目標達成かつ統計的優位を維持しているか */
+  /**
+   * 全ての BASELINE 対戦相手に対して目標達成かつ統計的有意差を維持しているか。
+   * EvidenceStatus が VALID でない場合は常に false。
+   */
   readonly baselineSuperior: boolean;
-  /** REFERENCE_CHAMPION が存在し、かつその比較において有意に改善しているか */
+  /**
+   * REFERENCE_CHAMPION が存在し、かつその比較において有意に改善しているか。
+   * EvidenceStatus が VALID でない場合、または Candidate と Champion の Digest が同一の場合は常に false。
+   */
   readonly championImproved: boolean;
   readonly evidenceStatus: EvidenceStatus;
   readonly improvementStatus: ImprovementStatus;
@@ -230,6 +282,10 @@ export interface EvaluationConfig {
   readonly opponents: readonly EvaluationOpponentDefinition[];
   readonly sessionFactory: BatchSimulationOptions["sessionFactory"];
   readonly maxDecisionsPerMatch?: number;
+  /**
+   * 改善検定の片側有意水準 (0 < alpha < 0.5)。
+   * 通常利用は 0.05。0.5 以上の値は片側検定の境界として無効であり Fail-Fast で拒絶される。
+   */
   readonly significanceLevelAlpha?: number;
   readonly minimumCompletedPairs?: number;
   readonly regulationId?: string;

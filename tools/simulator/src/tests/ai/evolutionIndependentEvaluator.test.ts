@@ -12,6 +12,7 @@ import { createManualGenericGenomeDNA } from "../../engine/ai/BaselinePolicies";
 import { BatchMatchContext } from "../../domain/simulation/BatchSimulationTypes";
 import {
   EvaluationConfigurationError,
+  EvaluationIntegrityError,
   EvaluationOpponentDefinition,
   EvaluationSeedCollisionError,
 } from "../../domain/ai/EvolutionEvaluationTypes";
@@ -913,10 +914,16 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
   });
 
   // ===========================================================================
-  // Test 23 (R2): Baseline 優位性と進化的改善の分離
+  // Test 23 (R2/R3): Baseline 優位性と進化的改善の分離
   // ===========================================================================
-  it("Test 23 (R2): Baseline のみとの対戦では進化的改善 (IMPROVEMENT_VERIFIED) と認定せず、REFERENCE_CHAMPION との対戦比較が存在して初めて認定すること", () => {
+  it("Test 23 (R2/R3): Baseline のみとの対戦では進化的改善 (IMPROVEMENT_VERIFIED) と認定せず、REFERENCE_CHAMPION との対戦比較が存在して初めて認定すること", () => {
     const candidateDna = createManualGenericGenomeDNA();
+    const baseChampion = createManualGenericGenomeDNA();
+    const championDna = {
+      ...baseChampion,
+      metadata: { id: "champ-dna-001" },
+      patternWeights: Object.freeze(baseChampion.patternWeights.map((w) => w * 0.9)),
+    };
 
     const baselineOpponent: EvaluationOpponentDefinition = {
       opponentId: "baseline-first-legal",
@@ -942,12 +949,12 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     expect(baselineOnlyResult.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
     expect(baselineOnlyResult.championImproved).toBe(false);
 
-    // 2. REFERENCE_CHAMPION を含めた評価
+    // 2. REFERENCE_CHAMPION (検証済み referenceDNA 保持) を含めた評価
     const championOpponent: EvaluationOpponentDefinition = {
       opponentId: "reference-champion-gen0",
       name: "Initial Champion",
       role: "REFERENCE_CHAMPION",
-      policyFactory: () => new FirstLegalPolicy(false),
+      referenceDNA: championDna,
       targetWinRate: 0.5,
     };
 
@@ -962,7 +969,11 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
     });
 
     expect(championResult.evidenceStatus).toBe("VALID");
-    expect(championResult.opponents["reference-champion-gen0"].role).toBe("REFERENCE_CHAMPION");
+    const champSummary = championResult.opponents["reference-champion-gen0"];
+    expect(champSummary.role).toBe("REFERENCE_CHAMPION");
+    expect(champSummary.championGenomeId).toBe("champ-dna-001");
+    expect(champSummary.championDnaDigest).toBeDefined();
+    expect(typeof champSummary.championDnaDigest).toBe("string");
   });
 
   // ===========================================================================
@@ -1027,5 +1038,238 @@ describe("Evolution Independent Evaluator Foundation (Work 3-1)", () => {
         sessionFactory: testSessionFactory,
       });
     }).not.toThrow();
+  });
+
+  // ===========================================================================
+  // Test 25 (R3): REFERENCE_CHAMPION への policyFactory 偽装注入の拒絶
+  // ===========================================================================
+  it("Test 25 (R3): REFERENCE_CHAMPION に任意の policyFactory を指定した場合は偽装として Fail-Fast で拒絶されること", () => {
+    const candidateDna = createManualGenericGenomeDNA();
+    const championDna = createManualGenericGenomeDNA();
+
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [92090],
+        seedCategory: "VALIDATION",
+        opponents: [
+          {
+            opponentId: "fake-champion",
+            name: "Fake Champion",
+            role: "REFERENCE_CHAMPION",
+            referenceDNA: championDna,
+            policyFactory: () => new FirstLegalPolicy(false),
+            targetWinRate: 0.5,
+          } as any,
+        ],
+        sessionFactory: testSessionFactory,
+      });
+    }).toThrow(EvaluationConfigurationError);
+  });
+
+  // ===========================================================================
+  // Test 26 (R3): REFERENCE_CHAMPION の expectedDnaDigest 整合性検証
+  // ===========================================================================
+  it("Test 26 (R3): expectedDnaDigest が指定された場合、参照 DNA の実際の Digest と不一致なら EvaluationIntegrityError で拒絶され、一致なら通過すること", () => {
+    const candidateDna = createManualGenericGenomeDNA();
+    const championDna = {
+      ...createManualGenericGenomeDNA(),
+      metadata: { id: "valid-champ" },
+    };
+    const actualDigest = EvolutionIndependentEvaluator.computeDnaDigest(championDna);
+
+    // 1. Digest 不一致時
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [92091],
+        seedCategory: "VALIDATION",
+        opponents: [
+          {
+            opponentId: "champ-digest-mismatch",
+            name: "Champion with Wrong Digest",
+            role: "REFERENCE_CHAMPION",
+            referenceDNA: championDna,
+            expectedDnaDigest: "incorrect_digest_0000000000000000000000000000000000000000000000",
+            targetWinRate: 0.5,
+          },
+        ],
+        sessionFactory: testSessionFactory,
+      });
+    }).toThrow(EvaluationIntegrityError);
+
+    // 2. Digest 一致時
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [92091],
+        seedCategory: "VALIDATION",
+        opponents: [
+          {
+            opponentId: "champ-digest-match",
+            name: "Champion with Correct Digest",
+            role: "REFERENCE_CHAMPION",
+            referenceDNA: championDna,
+            expectedDnaDigest: actualDigest,
+            targetWinRate: 0.5,
+          },
+        ],
+        sessionFactory: testSessionFactory,
+      });
+    }).not.toThrow();
+  });
+
+  // ===========================================================================
+  // Test 27 (R3): 自己比較排除 (Candidate と同一 Digest の Champion では進化的改善を認定しない)
+  // ===========================================================================
+  it("Test 27 (R3): Candidate と同一の DNA Digest を持つ Champion との対戦では、自己比較であるため championImproved=false かつ IMPROVEMENT_UNVERIFIED となること", () => {
+    const candidateDna = {
+      ...createManualGenericGenomeDNA(),
+      metadata: { id: "same-dna-candidate" },
+    };
+
+    const selfChampion: EvaluationOpponentDefinition = {
+      opponentId: "self-champion",
+      name: "Self Champion (Same DNA)",
+      role: "REFERENCE_CHAMPION",
+      referenceDNA: candidateDna, // 同一ゲノム
+      targetWinRate: 0.5,
+    };
+
+    const result = EvolutionIndependentEvaluator.evaluate({
+      candidateDNA: candidateDna,
+      seeds: [92092, 92093],
+      seedCategory: "VALIDATION",
+      opponents: [selfChampion],
+      sessionFactory: testSessionFactory,
+      maxDecisionsPerMatch: 500,
+      minimumCompletedPairs: 2,
+    });
+
+    expect(result.evidenceStatus).toBe("VALID");
+    // 自己比較のため、改善フラグは立たない
+    expect(result.championImproved).toBe(false);
+    expect(result.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
+  });
+
+  // ===========================================================================
+  // Test 28 (R3): 無効 Evidence (FAILED/INCOMPLETE 混入) からの改善フラグ生成防止
+  // ===========================================================================
+  it("Test 28 (R3): FAILED または INCOMPLETE が 1 件でも存在して Evidence が INVALID_EVIDENCE となる場合、たとえ他ペアで全勝していても championImproved, baselineSuperior, allTargetsMet は false となること", () => {
+    const candidateDna = createManualGenericGenomeDNA();
+    const baseChampion = createManualGenericGenomeDNA();
+    const championDna = {
+      ...baseChampion,
+      patternWeights: Object.freeze(baseChampion.patternWeights.map((w) => w * 0.5)),
+    };
+
+    const baselineOpponent: EvaluationOpponentDefinition = {
+      opponentId: "baseline-normal",
+      name: "Baseline",
+      role: "BASELINE",
+      policyFactory: () => new FirstLegalPolicy(false),
+      targetWinRate: 0.5,
+    };
+
+    const championOpponent: EvaluationOpponentDefinition = {
+      opponentId: "champion-normal",
+      name: "Champion",
+      role: "REFERENCE_CHAMPION",
+      referenceDNA: championDna,
+      targetWinRate: 0.5,
+    };
+
+    // 特定の Seed (92097) で例外を発生させる sessionFactory (FAILED を生成)
+    const faultSessionFactory = (ctx: BatchMatchContext) => {
+      if (ctx.matchSeed === 92097) {
+        throw new Error("Simulated unexpected engine failure during match");
+      }
+      return standardPackSessionCreator(ctx.matchSeed);
+    };
+
+    const result = EvolutionIndependentEvaluator.evaluate({
+      candidateDNA: candidateDna,
+      seeds: [92095, 92096, 92097], // 92097 で FAILED 発生
+      seedCategory: "VALIDATION",
+      opponents: [baselineOpponent, championOpponent],
+      sessionFactory: faultSessionFactory,
+      maxDecisionsPerMatch: 500,
+      minimumCompletedPairs: 2,
+    });
+
+    // 全体 Evidence は INVALID_EVIDENCE
+    expect(result.evidenceStatus).toBe("INVALID_EVIDENCE");
+
+    // 無効 Evidence 防護: 正式認定フラグはすべて false でなければならない
+    expect(result.allTargetsMet).toBe(false);
+    expect(result.baselineSuperior).toBe(false);
+    expect(result.championImproved).toBe(false);
+    expect(result.improvementStatus).toBe("IMPROVEMENT_UNVERIFIED");
+  });
+
+  // ===========================================================================
+  // Test 29 (R3): 有意水準 alpha の境界値検証 (Fail-Fast & Student-t 対称性)
+  // ===========================================================================
+  it("Test 29 (R3): 有意水準 alpha が 0 < alpha < 0.5 の範囲外の場合は Fail-Fast で拒絶され、studentTOneTailedCritical は正負の対称性を満たすこと", () => {
+    const candidateDna = createManualGenericGenomeDNA();
+    const opponent: EvaluationOpponentDefinition = {
+      opponentId: "test-opp",
+      name: "Opponent",
+      role: "BASELINE",
+      policyFactory: () => new FirstLegalPolicy(false),
+      targetWinRate: 0.5,
+    };
+
+    // 1. alpha >= 0.5 の拒絶
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [92098],
+        seedCategory: "VALIDATION",
+        opponents: [opponent],
+        sessionFactory: testSessionFactory,
+        significanceLevelAlpha: 0.5,
+      });
+    }).toThrow(EvaluationConfigurationError);
+
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [92098],
+        seedCategory: "VALIDATION",
+        opponents: [opponent],
+        sessionFactory: testSessionFactory,
+        significanceLevelAlpha: 0.8,
+      });
+    }).toThrow(EvaluationConfigurationError);
+
+    // 2. alpha <= 0 の拒絶
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [92098],
+        seedCategory: "VALIDATION",
+        opponents: [opponent],
+        sessionFactory: testSessionFactory,
+        significanceLevelAlpha: 0.0,
+      });
+    }).toThrow(EvaluationConfigurationError);
+
+    expect(() => {
+      EvolutionIndependentEvaluator.validateConfig({
+        candidateDNA: candidateDna,
+        seeds: [92098],
+        seedCategory: "VALIDATION",
+        opponents: [opponent],
+        sessionFactory: testSessionFactory,
+        significanceLevelAlpha: -0.05,
+      });
+    }).toThrow(EvaluationConfigurationError);
+
+    // 3. studentTOneTailedCritical の境界値と対称性
+    expect(studentTOneTailedCritical(0.5, 10)).toBe(0.0);
+    const crit05 = studentTOneTailedCritical(0.05, 10);
+    const crit95 = studentTOneTailedCritical(0.95, 10);
+    expect(crit95).toBeCloseTo(-crit05, 6);
   });
 });

@@ -162,11 +162,20 @@ export function studentTOneTailedPValue(t: number, df: number): number {
 /**
  * Student-t 分布の片側臨界値 t_{alpha, df} (P(T_df >= t) = alpha となる t)
  * 二分探索 (Bisection) により高精度に逆算
+ *
+ * 境界値対応:
+ * - alpha = 0.5 の場合は t = 0
+ * - alpha > 0.5 の場合は t 分布の対称性より t_{alpha, df} = -t_{1 - alpha, df}
  */
 export function studentTOneTailedCritical(alpha: number, df: number): number {
   if (df <= 0 || !Number.isFinite(df)) return Infinity;
   if (alpha <= 0 || alpha >= 1 || !Number.isFinite(alpha)) return Infinity;
   if (alpha === 0.5) return 0.0;
+
+  // alpha > 0.5 の場合は対称性を利用して負の臨界値を算出
+  if (alpha > 0.5) {
+    return -studentTOneTailedCritical(1.0 - alpha, df);
+  }
 
   // alpha < 0.5 なら t > 0
   let low = 0.0;
@@ -233,6 +242,23 @@ export function exactBinomialOneTailedPValue(successes: number, trials: number):
 // =============================================================================
 
 export class EvolutionIndependentEvaluator {
+  /**
+   * Decision DNA の Full Semantic Digest を計算
+   */
+  public static computeDnaDigest(dna: DecisionDNA): string {
+    return SemanticSHA256.hash(
+      JSON.stringify({
+        dnaFormatVersion: dna.dnaFormatVersion,
+        featureSchemaVersion: dna.featureSchemaVersion,
+        scoringModel: dna.scoringModel,
+        contextDimension: dna.contextDimension,
+        patternDimension: dna.patternDimension,
+        patternWeights: dna.patternWeights,
+        contextPatternWeights: dna.contextPatternWeights,
+      })
+    );
+  }
+
   /**
    * Seed 空間の衝突検証 (Fail-Closed)
    *
@@ -317,7 +343,10 @@ export class EvolutionIndependentEvaluator {
 
       const session0 = sessionFactory(matchContext0);
       const candPolicy0 = new GenomePolicy(candidateDna, `Candidate-${candidateGenomeId}`);
-      const oppPolicy0 = opponent.policyFactory("p2", matchSeed, playerSeeds);
+      const oppPolicy0 =
+        opponent.role === "REFERENCE_CHAMPION"
+          ? new GenomePolicy(opponent.referenceDNA, opponent.name)
+          : opponent.policyFactory("p2", matchSeed, playerSeeds);
 
       const simResult0 = SimulationRunner.run(session0, { p1: candPolicy0, p2: oppPolicy0 }, {
         maxDecisions: maxDecisionsPerMatch,
@@ -380,7 +409,10 @@ export class EvolutionIndependentEvaluator {
       };
 
       const session1 = sessionFactory(matchContext1);
-      const oppPolicy1 = opponent.policyFactory("p1", matchSeed, playerSeeds);
+      const oppPolicy1 =
+        opponent.role === "REFERENCE_CHAMPION"
+          ? new GenomePolicy(opponent.referenceDNA, opponent.name)
+          : opponent.policyFactory("p1", matchSeed, playerSeeds);
       const candPolicy1 = new GenomePolicy(candidateDna, `Candidate-${candidateGenomeId}`);
 
       const simResult1 = SimulationRunner.run(session1, { p1: oppPolicy1, p2: candPolicy1 }, {
@@ -465,13 +497,22 @@ export class EvolutionIndependentEvaluator {
   /**
    * ペアスコア配列から統計指標および検定を計算
    *
-   * 統計契約:
-   * 1. 両側 95% 信頼区間 (confidenceInterval95) と片側 (1 - alpha) 信頼下限 (oneSidedLowerBound) を明確に区別。
-   * 2. 分散ゼロ時 (s^2 = 0):
-   *    - 全勝/全敗: EXACT_BINOMIAL 検定と厳密二項片側限界
-   *    - 全ペア 0.75 等の分数固定値: HOEFFDING_BOUND 検定 (帰無仮説 H0: mu <= 0.5、二項 p 値は混在させず pValue: null)
-   * 3. Student-t 検定の前提と限界:
-   *    5段階離散スコア Xi in {0, 0.25, 0.5, 0.75, 1} に対する近似的推論であり、極小標本での厳密正規性を仮定しない。
+   * 統計契約と統計的仮定・限界 (Statistical Assumptions & Limitations):
+   * 1. 両側 95% 信頼区間 (confidenceInterval95) と片側 (1 - alpha) 信頼下限 (oneSidedLowerBound) の厳格分離:
+   *    - 両側 95% CI は記述統計として固定両側 alpha=0.05 (各側 0.025, t_{0.025, df}) で算出。
+   *    - 片側信頼下限は改善検定仮説 (H0: mu <= 0.5 vs H1: mu > 0.5) に基づき、Bonferroni 補正後の片側 alphaUsed で算出。
+   * 2. 分散ゼロ時 (s^2 = 0) の仮説と検定の一致:
+   *    - 全勝/全敗: ベルヌーイ試行として EXACT_BINOMIAL 検定と厳密二項片側限界を適用。
+   *    - 全ペア 0.75 等の分数固定値: 2値試行ではないため二項符号検定は適用せず、有界スコア [0, 1] に対する
+   *      Hoeffding の不等式に基づく片側信頼下限 (HOEFFDING_BOUND) を適用。pValue は二項検定と混在させず null とする。
+   * 3. Student-t 近似推論の前提と限界:
+   *    - ペアスコア Xi in {0, 0.25, 0.5, 0.75, 1} は5段階の有界離散スコアであり、連続正規分布ではない。
+   *    - Student-t 検定は中心極限定理 (CLT) に基づく標本平均の漸近近似であり、n >= 5 だけでは厳密な正規性や
+   *      名目有意水準の完全保証はなされない (特に分布が極端に非対称な場合)。
+   *    - 固定 Seed 集合から得られた結果の推論は、Seed 空間の無作為抽出性と試合間の独立性の仮定に依存する。
+   * 4. 目標勝率判定と帰無仮説判定の区別:
+   *    - targetMet は平均ペア勝率が設定目標に達しているか (meanPairScore >= targetWinRate) を判定。
+   *    - 統計的有意性は、偶発的勝利を排除するための帰無仮説 H0: mu <= 0.5 に対する検定 (oneSidedLowerBound > 0.5) を判定。
    */
   public static computeStatistics(params: {
     pairScores: readonly number[];
@@ -733,15 +774,15 @@ export class EvolutionIndependentEvaluator {
       featureSchemaVersion = 6,
     } = config;
 
-    // 有意水準 alpha の検証 (0 < alpha < 1, 有限数)
+    // 有意水準 alpha の検証 (片側検定の棄却水準として意味のある 0 < alpha < 0.5 に制限)
     if (
       typeof significanceLevelAlpha !== "number" ||
       !Number.isFinite(significanceLevelAlpha) ||
       significanceLevelAlpha <= 0 ||
-      significanceLevelAlpha >= 1
+      significanceLevelAlpha >= 0.5
     ) {
       throw new EvaluationConfigurationError(
-        `Invalid significanceLevelAlpha: must be a finite number between 0 and 1, got ${significanceLevelAlpha}`
+        `Invalid significanceLevelAlpha: must be a finite number between 0 and 0.5 (exclusive), got ${significanceLevelAlpha}`
       );
     }
 
@@ -839,10 +880,51 @@ export class EvolutionIndependentEvaluator {
         );
       }
 
-      if (typeof opp.policyFactory !== "function") {
-        throw new EvaluationConfigurationError(
-          `Opponent "${opp.opponentId}" missing required policyFactory function`
-        );
+      if (opp.role === "REFERENCE_CHAMPION") {
+        // 偽装防止: REFERENCE_CHAMPION は任意の policyFactory を指定不可 (referenceDNA から自動確定生成)
+        if ((opp as any).policyFactory !== undefined) {
+          throw new EvaluationConfigurationError(
+            `REFERENCE_CHAMPION "${opp.opponentId}" must not specify policyFactory (it is automatically derived from validated referenceDNA)`
+          );
+        }
+
+        if (!opp.referenceDNA || typeof opp.referenceDNA !== "object") {
+          throw new EvaluationConfigurationError(
+            `REFERENCE_CHAMPION "${opp.opponentId}" requires a valid referenceDNA object`
+          );
+        }
+
+        // 参照 DNA の構文・有限値検証
+        DecisionDNACodec.validate(opp.referenceDNA);
+
+        // Feature Schema バージョン整合性検証
+        if (opp.referenceDNA.featureSchemaVersion !== featureSchemaVersion) {
+          throw new EvaluationConfigurationError(
+            `Feature schema mismatch for REFERENCE_CHAMPION "${opp.opponentId}": schemaVersion=${opp.referenceDNA.featureSchemaVersion} does not match config featureSchemaVersion=${featureSchemaVersion}`
+          );
+        }
+
+        // 期待される Digest が指定されている場合は完全一致を検証
+        if (opp.expectedDnaDigest !== undefined) {
+          if (typeof opp.expectedDnaDigest !== "string" || opp.expectedDnaDigest.trim() === "") {
+            throw new EvaluationConfigurationError(
+              `REFERENCE_CHAMPION "${opp.opponentId}" expectedDnaDigest must be a non-empty string when specified`
+            );
+          }
+          const actualDigest = EvolutionIndependentEvaluator.computeDnaDigest(opp.referenceDNA);
+          if (actualDigest !== opp.expectedDnaDigest) {
+            throw new EvaluationIntegrityError(
+              `REFERENCE_CHAMPION "${opp.opponentId}" DNA digest mismatch: expected "${opp.expectedDnaDigest}", but computed "${actualDigest}"`
+            );
+          }
+        }
+      } else {
+        // BASELINE 対戦相手の場合: policyFactory が必須
+        if (typeof (opp as any).policyFactory !== "function") {
+          throw new EvaluationConfigurationError(
+            `BASELINE Opponent "${opp.opponentId}" missing required policyFactory function`
+          );
+        }
       }
     }
 
@@ -894,18 +976,8 @@ export class EvolutionIndependentEvaluator {
 
     const candidateClone = DecisionDNACodec.clone(candidateDNA);
 
-    // DNA Digest 算出
-    const candidateDnaDigest = SemanticSHA256.hash(
-      JSON.stringify({
-        dnaFormatVersion: candidateClone.dnaFormatVersion,
-        featureSchemaVersion: candidateClone.featureSchemaVersion,
-        scoringModel: candidateClone.scoringModel,
-        contextDimension: candidateClone.contextDimension,
-        patternDimension: candidateClone.patternDimension,
-        patternWeights: candidateClone.patternWeights,
-        contextPatternWeights: candidateClone.contextPatternWeights,
-      })
-    );
+    // DNA Digest 算出 (共通メソッドを使用)
+    const candidateDnaDigest = this.computeDnaDigest(candidateClone);
     const candidateGenomeId = candidateClone.metadata?.id ?? "candidate-genome";
 
     // 2. Seed 衝突の横断的検証
@@ -969,10 +1041,19 @@ export class EvolutionIndependentEvaluator {
         minCompletedPairs: minimumCompletedPairs,
       });
 
+      let championGenomeId: string | undefined;
+      let championDnaDigest: string | undefined;
+      if (opponent.role === "REFERENCE_CHAMPION") {
+        championGenomeId = opponent.referenceDNA.metadata?.id ?? opponent.opponentId;
+        championDnaDigest = this.computeDnaDigest(opponent.referenceDNA);
+      }
+
       opponentSummaries[opponent.opponentId] = {
         opponentId: opponent.opponentId,
         opponentName: opponent.name,
         role: oppRole,
+        championGenomeId,
+        championDnaDigest,
         totalPairs: opponentPairs.length,
         completedPairs,
         incompletePairs,
@@ -990,10 +1071,9 @@ export class EvolutionIndependentEvaluator {
       };
     }
 
-    // 5. 総合ステータス集計 (Baseline 優位性と進化的改善の分離)
+    // 5. 総合ステータス集計 (Baseline 優位性と進化的改善の分離・無効 Evidence 防護)
     let overallEvidenceStatus: EvidenceStatus = "VALID";
     let hasRegression = false;
-    let allTargetsMet = true;
 
     for (const summary of Object.values(opponentSummaries)) {
       if (summary.evidenceStatus === "INVALID_EVIDENCE") {
@@ -1005,16 +1085,21 @@ export class EvolutionIndependentEvaluator {
       if (summary.improvementStatus === "CONFIRMED_REGRESSION") {
         hasRegression = true;
       }
-      if (!summary.targetMet) {
-        allTargetsMet = false;
-      }
     }
 
     // Baseline と Reference Champion の分離集計
     const baselineSummaries = Object.values(opponentSummaries).filter((s) => s.role === "BASELINE");
     const championSummaries = Object.values(opponentSummaries).filter((s) => s.role === "REFERENCE_CHAMPION");
 
+    // 正当な認定フラグ: EvidenceStatus が VALID の場合のみ肯定判定可能 (無効 Evidence 防護)
+    const isEvidenceValid = overallEvidenceStatus === "VALID";
+
+    const allTargetsMet =
+      isEvidenceValid &&
+      Object.values(opponentSummaries).every((s) => s.targetMet);
+
     const baselineSuperior =
+      isEvidenceValid &&
       baselineSummaries.length > 0 &&
       baselineSummaries.every(
         (s) =>
@@ -1024,17 +1109,25 @@ export class EvolutionIndependentEvaluator {
       );
 
     const championImproved =
+      isEvidenceValid &&
       championSummaries.length > 0 &&
       championSummaries.every(
-        (s) =>
-          s.statisticalTest.isStatisticallySignificant &&
-          s.statisticalTest.oneSidedLowerBound > 0.5
+        (s) => {
+          // Candidate と同一 DNA Digest の Champion は改善認定から除外 (自己比較排除)
+          if (s.championDnaDigest && s.championDnaDigest === candidateDnaDigest) {
+            return false;
+          }
+          return (
+            s.statisticalTest.isStatisticallySignificant &&
+            s.statisticalTest.oneSidedLowerBound > 0.5
+          );
+        }
       );
 
     // 総合改善判定 (契約: Champion 比較証拠が存在しない場合は進化改善を認定しない)
     let overallImprovementStatus: ImprovementStatus = "IMPROVEMENT_UNVERIFIED";
 
-    if (overallEvidenceStatus === "VALID") {
+    if (isEvidenceValid) {
       if (hasRegression) {
         overallImprovementStatus = "CONFIRMED_REGRESSION";
       } else if (championSummaries.length === 0) {
@@ -1043,6 +1136,12 @@ export class EvolutionIndependentEvaluator {
       } else if (championImproved && (baselineSummaries.length === 0 || baselineSuperior) && allTargetsMet) {
         // Reference Champion に対して統計的有意に改善し、かつ Baseline の目標水準も維持
         overallImprovementStatus = "IMPROVEMENT_VERIFIED";
+      } else {
+        overallImprovementStatus = "IMPROVEMENT_UNVERIFIED";
+      }
+    } else {
+      if (hasRegression) {
+        overallImprovementStatus = "CONFIRMED_REGRESSION";
       } else {
         overallImprovementStatus = "IMPROVEMENT_UNVERIFIED";
       }
