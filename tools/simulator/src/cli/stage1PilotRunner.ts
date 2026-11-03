@@ -1289,28 +1289,45 @@ export function auditExistingPilotArtifacts(artifactsDir: string): ArtifactAudit
     errors.push("Validation match data missing for verification");
   }
 
-  // 照合C: 完了ステータス
+  // 照合C: 完了ステータス (CampaignManager 正規契約に基づく検証)
   let completionStatusVerif: ItemVerification<string> = { status: "UNVERIFIED", details: "Data missing" };
   if (runAResult && runBResult && evidence) {
+    const isCompleted = runAResult.status === "COMPLETED" && runBResult.status === "COMPLETED";
+    const isGenerationsValid =
+      runAResult.completedGenerations === TOTAL_GENERATIONS &&
+      runBResult.completedGenerations === TOTAL_GENERATIONS;
+    const isHistoryValid =
+      Array.isArray(runAResult.history) &&
+      runAResult.history.length === TOTAL_GENERATIONS &&
+      Array.isArray(runBResult.history) &&
+      runBResult.history.length === TOTAL_GENERATIONS;
+    const isStopReasonConsistent =
+      runAResult.stopReason === runBResult.stopReason &&
+      typeof runAResult.stopReason === "string" &&
+      runAResult.stopReason.length > 0 &&
+      !runAResult.stopReason.toLowerCase().includes("fail") &&
+      !runAResult.stopReason.toLowerCase().includes("error");
+    const isEvidenceSuccess = evidence.status === "SUCCESS";
+
     if (
-      runAResult.status === "COMPLETED" &&
-      runBResult.status === "COMPLETED" &&
-      runAResult.stopReason === "COMPLETED_NORMALLY" &&
-      runBResult.stopReason === "COMPLETED_NORMALLY" &&
-      evidence.status === "SUCCESS"
+      isCompleted &&
+      isGenerationsValid &&
+      isHistoryValid &&
+      isStopReasonConsistent &&
+      isEvidenceSuccess
     ) {
       completionStatusVerif = {
         status: "PASS",
-        details: "All runs completed successfully (Result: COMPLETED/COMPLETED_NORMALLY, Evidence: SUCCESS)",
+        details: `All runs completed successfully (Result: COMPLETED, Generations: ${runAResult.completedGenerations}/${TOTAL_GENERATIONS}, StopReason: "${runAResult.stopReason}", Evidence: SUCCESS)`,
         expected: "COMPLETED/SUCCESS",
         actual: `${runAResult.status}/${evidence.status}`,
       };
     } else {
       completionStatusVerif = {
         status: "FAIL",
-        details: `Status mismatch: runA=${runAResult.status}, runB=${runBResult.status}, evidence=${evidence.status}`,
+        details: `Status or normal completion contract mismatch: statusA=${runAResult.status}, statusB=${runBResult.status}, genA=${runAResult.completedGenerations}, genB=${runBResult.completedGenerations}, stopReasonA="${runAResult.stopReason}", stopReasonB="${runBResult.stopReason}", evidence=${evidence.status}`,
       };
-      errors.push("Completion status mismatch");
+      errors.push("Completion status mismatch or abnormal termination detected");
     }
   } else {
     errors.push("Completion status data missing for verification");
@@ -2055,7 +2072,11 @@ export async function runStage1Pilot(
 }
 
 // 直接実行時のエントリポイント (CLI 実行)
-if (!process.env.VITEST && !process.argv.includes("--no-auto-run")) {
+const isMainScript =
+  process.argv[1] &&
+  fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+
+if (isMainScript && !process.env.VITEST && !process.argv.includes("--no-auto-run")) {
   runStage1Pilot().catch((err) => {
     console.error("Stage 1 Pilot execution FAILED with uncaught error:", err);
     process.exit(1);

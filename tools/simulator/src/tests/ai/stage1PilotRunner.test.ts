@@ -219,7 +219,7 @@ function createValidAuditFixture(fixtureRoot: string) {
     totalTargetGenerations: 2,
     completedGenerations: 2,
     status: "COMPLETED",
-    stopReason: "COMPLETED_NORMALLY",
+    stopReason: "All target generations (2) completed successfully",
     provisionalBestChampion: {
       genomeId: "ind-g1-000",
       generation: 1,
@@ -769,7 +769,13 @@ describe("Stage 1 Small Pilot CLI & Evidence Audit Foundation (Work 3-3 R2)", ()
   });
 
   it("Test 12: auditExistingPilotArtifacts on real R0 archive (audited when present, marked UNVERIFIED when absent)", () => {
-    const archiveDir = path.resolve(__dirname, "../../.artifacts/stage1-pilot-r0-archive");
+    const possiblePaths = [
+      path.resolve(__dirname, "../../../.artifacts/stage1-pilot-r0-archive"),
+      path.resolve(process.cwd(), ".artifacts/stage1-pilot-r0-archive"),
+      path.resolve(__dirname, "../../.artifacts/stage1-pilot-r0-archive"),
+    ];
+    const archiveDir = possiblePaths.find((p) => fs.existsSync(p)) ?? possiblePaths[0];
+
     if (!fs.existsSync(archiveDir)) {
       // アーカイブが存在しない環境（CI ベアラナー等）では、偽りの合格にせず未実施を明示
       console.log("NOTICE: R0 Archive not present in this workspace environment (Audit UNVERIFIED/SKIPPED)");
@@ -779,6 +785,18 @@ describe("Stage 1 Small Pilot CLI & Evidence Audit Foundation (Work 3-3 R2)", ()
 
     // アーカイブが存在する場合は、実機 200 試合の完全監査を実施
     const audit = auditExistingPilotArtifacts(archiveDir);
+    console.log("=== R0 Real Archive Audit Execution Results ===");
+    console.log(`Overall isValid: ${audit.isValid}`);
+    console.log(`Errors: [${audit.errors.join(", ")}]`);
+    console.log(`Warnings: [${audit.warnings.join(", ")}]`);
+    for (const [key, verif] of Object.entries(audit.verifications)) {
+      console.log(`  Verification [${key}]: ${verif.status} (${verif.details})`);
+    }
+    console.log(`  Checkpoint Integrity: Run A: ${audit.checkpointIntegrity.runA.isValid}, Run B: ${audit.checkpointIntegrity.runB.isValid}`);
+    console.log(`  Seed Audit: Run A: ${audit.seedAudit.runA?.status} (Unique: ${audit.seedAudit.runA?.totalUniqueSeedsUsed}), Run B: ${audit.seedAudit.runB?.status} (Unique: ${audit.seedAudit.runB?.totalUniqueSeedsUsed})`);
+    console.log(`  Manifest Integrity: Matched: ${audit.manifestIntegrity.matchedFilesCount}, Mismatches: ${audit.manifestIntegrity.mismatches.length}, Missing: ${audit.manifestIntegrity.missingRequiredFiles.length}`);
+    console.log(`  Provenance Note Present: ${audit.provenanceNotePresent}`);
+
     expect(audit.errors).toEqual([]);
     expect(audit.isValid).toBe(true);
 
@@ -792,6 +810,7 @@ describe("Stage 1 Small Pilot CLI & Evidence Audit Foundation (Work 3-3 R2)", ()
     expect(audit.manifestIntegrity.hasManifestShaFile).toBe(true);
     expect(audit.manifestIntegrity.mismatches).toEqual([]);
     expect(audit.manifestIntegrity.matchedFilesCount).toBe(15);
+    expect(audit.manifestIntegrity.missingRequiredFiles).toEqual([]);
 
     // 照合項目
     expect(audit.verifications.trainingMatches.status).toBe("PASS");
@@ -943,6 +962,48 @@ describe("Stage 1 Small Pilot CLI & Evidence Audit Foundation (Work 3-3 R2)", ()
       expect(audit.isValid).toBe(false);
       expect(audit.verifications.totalDecisions.status).toBe("FAIL");
       expect(audit.errors.some((e) => e.includes("Total decisions mismatch"))).toBe(true);
+    } finally {
+      if (fs.existsSync(fixtureDir)) {
+        fs.rmSync(fixtureDir, { recursive: true, force: true });
+      }
+    }
+  });
+
+  it("Test 18: regression tests for completionStatus contract (rejects error stopReason, incomplete generations, failed status)", () => {
+    const fixtureDir = path.resolve(__dirname, `../../.tmp_fixture_test18_${Date.now()}`);
+    createValidAuditFixture(fixtureDir);
+
+    try {
+      const resPathA = path.join(fixtureDir, "run-a/campaign-stage1-pilot-result.json");
+      const origRes = JSON.parse(fs.readFileSync(resPathA, "utf-8"));
+
+      // 18-A: stopReason にエラー・失敗文言が含まれる場合は FAIL
+      const tamperedStop = JSON.parse(JSON.stringify(origRes));
+      tamperedStop.stopReason = "Simulation failed due to unhandled error in generation 1";
+      fs.writeFileSync(resPathA, JSON.stringify(tamperedStop, null, 2), "utf-8");
+
+      let audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.verifications.completionStatus.status).toBe("FAIL");
+      expect(audit.errors.some((e) => e.includes("Completion status mismatch or abnormal termination"))).toBe(true);
+
+      // 18-B: completedGenerations が 2 未満の場合は FAIL
+      const tamperedGen = JSON.parse(JSON.stringify(origRes));
+      tamperedGen.completedGenerations = 1;
+      fs.writeFileSync(resPathA, JSON.stringify(tamperedGen, null, 2), "utf-8");
+
+      audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.verifications.completionStatus.status).toBe("FAIL");
+
+      // 18-C: status が FAILED の場合は FAIL
+      const tamperedStatus = JSON.parse(JSON.stringify(origRes));
+      tamperedStatus.status = "FAILED";
+      fs.writeFileSync(resPathA, JSON.stringify(tamperedStatus, null, 2), "utf-8");
+
+      audit = auditExistingPilotArtifacts(fixtureDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.verifications.completionStatus.status).toBe("FAIL");
     } finally {
       if (fs.existsSync(fixtureDir)) {
         fs.rmSync(fixtureDir, { recursive: true, force: true });
