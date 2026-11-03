@@ -294,6 +294,21 @@ export function assertNoSeedCollisions(plan: Stage2SeedPlan): void {
 }
 
 // =============================================================================
+// 公式 SessionFactory 準備ヘルパー (ESM / tsx / vite-node 完全互換)
+// =============================================================================
+
+export async function prepareOfficialSessionFactory(regulationId: string) {
+  const regulationsDir = path.resolve(__dirname, "../data/regulations");
+  const rulesDir = path.resolve(__dirname, "../data/rules-vnext");
+  const catalog = await loadRegulationCatalog(regulationsDir);
+  const fullRulePackage = await loadRulePackageFromDirectory(rulesDir);
+  return OfficialRegulationMatchFactory.prepareSessionFactory(regulationId, {
+    catalog,
+    fullRulePackage,
+  });
+}
+
+// =============================================================================
 // Preflight チェック
 // =============================================================================
 
@@ -353,7 +368,8 @@ export async function runPreflightCheck(
 
   // 1. レギュレーション検証
   try {
-    const catalog = await loadRegulationCatalog();
+    const regulationsDir = path.resolve(__dirname, "../data/regulations");
+    const catalog = await loadRegulationCatalog(regulationsDir);
     const validation = RegulationValidator.validateRegulation(catalog, REGULATION_ID, {
       assertImplemented: true,
     });
@@ -380,7 +396,7 @@ export async function runPreflightCheck(
 
   // 3. OfficialRegulationMatchFactory の初期化検証
   try {
-    const sessionFactory = await OfficialRegulationMatchFactory.prepareSessionFactory(REGULATION_ID);
+    const sessionFactory = await prepareOfficialSessionFactory(REGULATION_ID);
     const testSession = sessionFactory({
       matchIndex: 0,
       matchId: "preflight-test",
@@ -587,7 +603,7 @@ export async function executeStage2Evolution(
   seedPlan: Stage2SeedPlan,
   artifactsDir: string
 ): Promise<Stage2ExecutionOutput> {
-  const rawSessionFactory = await OfficialRegulationMatchFactory.prepareSessionFactory(REGULATION_ID);
+  const rawSessionFactory = await prepareOfficialSessionFactory(REGULATION_ID);
 
   // サンプリングメモリ追跡
   let sampledPeakRssBytes = process.memoryUsage().rss;
@@ -1769,8 +1785,8 @@ export async function runStage2Evolution(
 
 // 直接実行時のエントリポイント
 const isMainScript =
-  process.argv[1] &&
-  fileURLToPath(import.meta.url) === path.resolve(process.argv[1]);
+  (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) ||
+  process.argv.some((arg) => arg.includes("stage2EvolutionRunner"));
 
 if (isMainScript && !process.env.VITEST && !process.argv.includes("--no-auto-run")) {
   runStage2Evolution().catch((err) => {
