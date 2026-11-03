@@ -549,6 +549,17 @@ function createMockValidStage2Fixture(fixtureDir: string) {
   fs.writeFileSync(path.join(fixtureDir, "MANIFEST_SHA256.json"), JSON.stringify(manifestItems, null, 2), "utf-8");
 }
 
+/**
+ * 自己完結 Fixture 用の完全整合 Addendum 生成ヘルパー
+ */
+function createMockValidStage2Addendum(fixtureDir: string, addendumDir: string): void {
+  const dummyZipPath = path.resolve(fixtureDir, "../stage2-evolution-archive.zip");
+  if (!fs.existsSync(dummyZipPath)) {
+    fs.writeFileSync(dummyZipPath, "DUMMY_ZIP_CONTENT_FOR_FIXTURE_TESTING", "utf-8");
+  }
+  generateStage2AuditProvenanceAddendum(fixtureDir, addendumDir);
+}
+
 // =============================================================================
 // テストスイート
 // =============================================================================
@@ -1273,5 +1284,120 @@ describe("Stage 2 Controlled Evolution Runner & Audit Tests (Work 3-4)", () => {
     expect(auditHonestNull.isValid).toBe(true);
     expect(auditHonestNull.verifications.passStallMeasurementHonesty.status).toBe("PASS");
     expect(auditHonestNull.verifications.passStallMeasurementHonesty.actual).toBe("HONEST_DISCLOSURE");
+  });
+
+  // ---------------------------------------------------------------------------
+  // 8. Addendum 必須項目 Fail-Closed・Manifest 網羅性検証 (R3 指摘対応)
+  // ---------------------------------------------------------------------------
+  it("Test 29: Addendum Manifest から必須 JSON の記載を削除したら FAIL (網羅性 Fail-Closed)", () => {
+    createMockValidStage2Fixture(tempFixtureDir);
+    const tempAddendumDir = path.join(tempFixtureDir, "mock-addendum");
+    createMockValidStage2Addendum(tempFixtureDir, tempAddendumDir);
+
+    // Manifest から stage2-evolution-provenance-addendum.json を除外して保存
+    const manifestPath = path.join(tempAddendumDir, "MANIFEST_SHA256.json");
+    const manifestItems = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+    const filteredManifest = manifestItems.filter(
+      (m: any) => m.path !== "stage2-evolution-provenance-addendum.json"
+    );
+    fs.writeFileSync(manifestPath, JSON.stringify(filteredManifest, null, 2), "utf-8");
+
+    const audit = auditStage2Artifacts(tempFixtureDir, {
+      allowLegacyR0Schema: true,
+      addendumDir: tempAddendumDir,
+    });
+
+    expect(audit.isValid).toBe(false);
+    expect(audit.errors.some((e) => e.includes("Required addendum file missing from MANIFEST_SHA256.json"))).toBe(true);
+    expect(audit.addendumAudit?.isValid).toBe(false);
+  });
+
+  it("Test 30: Addendum の seededRandomPValue を削除し、Manifest ハッシュを更新しても FAIL (有限数値 Fail-Closed)", () => {
+    createMockValidStage2Fixture(tempFixtureDir);
+    const tempAddendumDir = path.join(tempFixtureDir, "mock-addendum");
+    createMockValidStage2Addendum(tempFixtureDir, tempAddendumDir);
+
+    // seededRandomPValue を削除
+    const addendumJsonPath = path.join(tempAddendumDir, "stage2-evolution-provenance-addendum.json");
+    const addendumData = JSON.parse(fs.readFileSync(addendumJsonPath, "utf-8"));
+    delete addendumData.statisticalSignificanceClarification.seededRandomPValue;
+    fs.writeFileSync(addendumJsonPath, JSON.stringify(addendumData, null, 2), "utf-8");
+
+    // Manifest も正しく再計算して更新
+    const manifest = [
+      {
+        path: "stage2-evolution-provenance-addendum.json",
+        sha256: computeFileSha256(addendumJsonPath),
+        size: fs.statSync(addendumJsonPath).size,
+      },
+      {
+        path: "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md",
+        sha256: computeFileSha256(path.join(tempAddendumDir, "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md")),
+        size: fs.statSync(path.join(tempAddendumDir, "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md")).size,
+      },
+    ];
+    fs.writeFileSync(path.join(tempAddendumDir, "MANIFEST_SHA256.json"), JSON.stringify(manifest, null, 2), "utf-8");
+
+    const audit = auditStage2Artifacts(tempFixtureDir, {
+      allowLegacyR0Schema: true,
+      addendumDir: tempAddendumDir,
+    });
+
+    expect(audit.isValid).toBe(false);
+    expect(audit.errors.some((e) => e.includes("seededRandomPValue must be a finite number"))).toBe(true);
+    expect(audit.addendumAudit?.isValid).toBe(false);
+  });
+
+  it("Test 31: Addendum の populationDistinction を削除し、Manifest ハッシュを更新しても FAIL (必須セクション Fail-Closed)", () => {
+    createMockValidStage2Fixture(tempFixtureDir);
+    const tempAddendumDir = path.join(tempFixtureDir, "mock-addendum");
+    createMockValidStage2Addendum(tempFixtureDir, tempAddendumDir);
+
+    // populationDistinction を削除
+    const addendumJsonPath = path.join(tempAddendumDir, "stage2-evolution-provenance-addendum.json");
+    const addendumData = JSON.parse(fs.readFileSync(addendumJsonPath, "utf-8"));
+    delete addendumData.populationDistinction;
+    fs.writeFileSync(addendumJsonPath, JSON.stringify(addendumData, null, 2), "utf-8");
+
+    // Manifest も正しく再計算して更新
+    const manifest = [
+      {
+        path: "stage2-evolution-provenance-addendum.json",
+        sha256: computeFileSha256(addendumJsonPath),
+        size: fs.statSync(addendumJsonPath).size,
+      },
+      {
+        path: "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md",
+        sha256: computeFileSha256(path.join(tempAddendumDir, "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md")),
+        size: fs.statSync(path.join(tempAddendumDir, "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md")).size,
+      },
+    ];
+    fs.writeFileSync(path.join(tempAddendumDir, "MANIFEST_SHA256.json"), JSON.stringify(manifest, null, 2), "utf-8");
+
+    const audit = auditStage2Artifacts(tempFixtureDir, {
+      allowLegacyR0Schema: true,
+      addendumDir: tempAddendumDir,
+    });
+
+    expect(audit.isValid).toBe(false);
+    expect(audit.errors.some((e) => e.includes("Addendum missing populationDistinction section"))).toBe(true);
+    expect(audit.addendumAudit?.isValid).toBe(false);
+  });
+
+  it("Test 32: 自己完結 Fixture による正しい原本＋正しい Addendum の完全監査 PASS (CI 再現性保証)", () => {
+    createMockValidStage2Fixture(tempFixtureDir);
+    const tempAddendumDir = path.join(tempFixtureDir, "mock-addendum");
+    createMockValidStage2Addendum(tempFixtureDir, tempAddendumDir);
+
+    const audit = auditStage2Artifacts(tempFixtureDir, {
+      allowLegacyR0Schema: true,
+      addendumDir: tempAddendumDir,
+    });
+
+    expect(audit.isValid).toBe(true);
+    expect(audit.errors).toEqual([]);
+    expect(audit.addendumAudit?.isValid).toBe(true);
+    expect(audit.verifications.decisionStatsAccounting.status).toBe("PASS");
+    expect(audit.verifications.manifestSeedMatch.status).toBe("PASS");
   });
 });

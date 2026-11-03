@@ -1468,18 +1468,42 @@ export function verifyStage2AddendumSemantics(
     return { isValid: false, errors, details: errors.join("; ") };
   }
 
-  // 1. MANIFEST_SHA256.json ファイルハッシュ照合 (Fail-Closed)
+  // 1. MANIFEST_SHA256.json ファイルハッシュ照合・網羅性検証 (Fail-Closed)
+  const REQUIRED_ADDENDUM_MANIFEST_FILES = [
+    "stage2-evolution-provenance-addendum.json",
+    "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md",
+  ] as const;
+
   try {
     const manifestItems = JSON.parse(fs.readFileSync(addendumManifestPath, "utf-8"));
     if (!Array.isArray(manifestItems) || manifestItems.length === 0) {
       errors.push("Addendum MANIFEST_SHA256.json is empty or invalid format");
     } else {
+      const seenPaths = new Set<string>();
+      const presentPaths = new Set<string>();
+
       for (const item of manifestItems) {
+        if (!item || typeof item.path !== "string" || typeof item.sha256 !== "string") {
+          errors.push("Invalid entry structure in Addendum MANIFEST_SHA256.json");
+          continue;
+        }
+        if (seenPaths.has(item.path)) {
+          errors.push(`Duplicate path in Addendum MANIFEST_SHA256.json: "${item.path}"`);
+        }
+        seenPaths.add(item.path);
+        presentPaths.add(item.path);
+
         const fullP = path.join(addendumDir, item.path);
         if (!fs.existsSync(fullP)) {
           errors.push(`Addendum file missing for sha256 check: ${item.path}`);
         } else if (computeFileSha256(fullP) !== item.sha256) {
           errors.push(`Addendum file sha256 mismatch: ${item.path}`);
+        }
+      }
+
+      for (const reqFile of REQUIRED_ADDENDUM_MANIFEST_FILES) {
+        if (!presentPaths.has(reqFile)) {
+          errors.push(`Required addendum file missing from MANIFEST_SHA256.json: "${reqFile}"`);
         }
       }
     }
@@ -1513,7 +1537,7 @@ export function verifyStage2AddendumSemantics(
     }
   }
 
-  // 4. 意思決定数・試合数の再計算と照合
+  // 4. 意思決定数・試合数の再計算と照合 (型・存在・有限数値 Fail-Closed)
   if (!campaignResult) {
     errors.push("Campaign result missing to recompute validation decisions for addendum verification");
   } else if (!evidence?.decisionStats) {
@@ -1530,6 +1554,19 @@ export function verifyStage2AddendumSemantics(
     if (!addRecount) {
       errors.push("Addendum missing decisionStatsRecount section");
     } else {
+      const numFields: Array<[string, any]> = [
+        ["validationMatchesCount", addRecount.validationMatchesCount],
+        ["validationDecisions", addRecount.validationDecisions],
+        ["totalDecisions", addRecount.totalDecisions],
+        ["exploratoryDecisions", addRecount.exploratoryDecisions],
+        ["trainingDecisions", addRecount.trainingDecisions],
+      ];
+      for (const [name, val] of numFields) {
+        if (typeof val !== "number" || !Number.isFinite(val) || val < 0) {
+          errors.push(`Addendum decisionStatsRecount.${name} must be a non-negative finite number, got ${val}`);
+        }
+      }
+
       if (addRecount.validationMatchesCount !== expectedValMatches) {
         errors.push(
           `Addendum validationMatchesCount mismatch: recomputed=${expectedValMatches}, addendum=${addRecount.validationMatchesCount}`
@@ -1564,7 +1601,7 @@ export function verifyStage2AddendumSemantics(
     }
   }
 
-  // 5. 世代別 Baseline スコアの再計算と照合
+  // 5. 世代別 Baseline スコアの再計算と照合 (型・存在・有限数値 Fail-Closed)
   if (campaignResult?.history) {
     const recomputedScores: GenerationChampionValidationScores[] = [];
     for (const h of campaignResult.history) {
@@ -1572,52 +1609,80 @@ export function verifyStage2AddendumSemantics(
         recomputedScores.push(computeGenerationChampionValidationScores(h.validationResult, h.generation));
       }
     }
-    const addScores = addendumData.validationScoresClarification?.generationChampionScores;
-    if (!Array.isArray(addScores) || addScores.length !== TOTAL_GENERATIONS) {
-      errors.push(`Addendum generationChampionScores must contain ${TOTAL_GENERATIONS} generations`);
+    const vsc = addendumData.validationScoresClarification;
+    if (!vsc) {
+      errors.push("Addendum missing validationScoresClarification section");
     } else {
-      for (let g = 0; g < TOTAL_GENERATIONS; g++) {
-        const rc = recomputedScores.find((s) => s.generation === g);
-        const ad = addScores.find((s) => s.generation === g);
-        if (!rc || !ad) {
-          errors.push(`Missing validation scores for generation ${g} in recomputed or addendum`);
-        } else {
-          if (Math.abs(rc.firstLegalMeanScore - ad.firstLegalMeanScore) > 1e-4) {
-            errors.push(
-              `Addendum Gen ${g} firstLegalMeanScore mismatch: recomputed=${rc.firstLegalMeanScore}, addendum=${ad.firstLegalMeanScore}`
-            );
-          }
-          if (Math.abs(rc.seededRandomMeanScore - ad.seededRandomMeanScore) > 1e-4) {
-            errors.push(
-              `Addendum Gen ${g} seededRandomMeanScore mismatch: recomputed=${rc.seededRandomMeanScore}, addendum=${ad.seededRandomMeanScore}`
-            );
-          }
-          if (Math.abs(rc.overallBaselineMeanScore - ad.overallBaselineMeanScore) > 1e-4) {
-            errors.push(
-              `Addendum Gen ${g} overallBaselineMeanScore mismatch: recomputed=${rc.overallBaselineMeanScore}, addendum=${ad.overallBaselineMeanScore}`
-            );
+      const vscFields: Array<[string, any]> = [
+        ["finalChampionValidationWinRate", vsc.finalChampionValidationWinRate],
+        ["gen4OverallBaselineMeanScore", vsc.gen4OverallBaselineMeanScore],
+        ["gen4FirstLegalMeanScore", vsc.gen4FirstLegalMeanScore],
+        ["gen4SeededRandomMeanScore", vsc.gen4SeededRandomMeanScore],
+      ];
+      for (const [name, val] of vscFields) {
+        if (typeof val !== "number" || !Number.isFinite(val)) {
+          errors.push(`Addendum validationScoresClarification.${name} must be a finite number, got ${val}`);
+        }
+      }
+
+      const addScores = vsc.generationChampionScores;
+      if (!Array.isArray(addScores) || addScores.length !== TOTAL_GENERATIONS) {
+        errors.push(`Addendum generationChampionScores must contain exactly ${TOTAL_GENERATIONS} generations`);
+      } else {
+        for (let g = 0; g < TOTAL_GENERATIONS; g++) {
+          const rc = recomputedScores.find((s) => s.generation === g);
+          const ad = addScores.find((s) => s.generation === g);
+          if (!rc || !ad) {
+            errors.push(`Missing validation scores for generation ${g} in recomputed or addendum`);
+          } else {
+            const scoreFields: Array<[string, any]> = [
+              ["generation", ad.generation],
+              ["firstLegalMeanScore", ad.firstLegalMeanScore],
+              ["seededRandomMeanScore", ad.seededRandomMeanScore],
+              ["overallBaselineMeanScore", ad.overallBaselineMeanScore],
+            ];
+            for (const [sName, sVal] of scoreFields) {
+              if (typeof sVal !== "number" || !Number.isFinite(sVal)) {
+                errors.push(`Addendum Gen ${g} ${sName} must be a finite number, got ${sVal}`);
+              }
+            }
+
+            if (Math.abs(rc.firstLegalMeanScore - ad.firstLegalMeanScore) > 1e-4) {
+              errors.push(
+                `Addendum Gen ${g} firstLegalMeanScore mismatch: recomputed=${rc.firstLegalMeanScore}, addendum=${ad.firstLegalMeanScore}`
+              );
+            }
+            if (Math.abs(rc.seededRandomMeanScore - ad.seededRandomMeanScore) > 1e-4) {
+              errors.push(
+                `Addendum Gen ${g} seededRandomMeanScore mismatch: recomputed=${rc.seededRandomMeanScore}, addendum=${ad.seededRandomMeanScore}`
+              );
+            }
+            if (Math.abs(rc.overallBaselineMeanScore - ad.overallBaselineMeanScore) > 1e-4) {
+              errors.push(
+                `Addendum Gen ${g} overallBaselineMeanScore mismatch: recomputed=${rc.overallBaselineMeanScore}, addendum=${ad.overallBaselineMeanScore}`
+              );
+            }
           }
         }
       }
-    }
 
-    const gen4Rc = recomputedScores.find((s) => s.generation === 4);
-    const vsc = addendumData.validationScoresClarification;
-    if (gen4Rc && vsc) {
-      if (Math.abs(gen4Rc.overallBaselineMeanScore - vsc.gen4OverallBaselineMeanScore) > 1e-4) {
-        errors.push(
-          `Addendum gen4OverallBaselineMeanScore mismatch: recomputed=${gen4Rc.overallBaselineMeanScore}, addendum=${vsc.gen4OverallBaselineMeanScore}`
-        );
-      }
-      if (Math.abs(gen4Rc.firstLegalMeanScore - vsc.gen4FirstLegalMeanScore) > 1e-4) {
-        errors.push(
-          `Addendum gen4FirstLegalMeanScore mismatch: recomputed=${gen4Rc.firstLegalMeanScore}, addendum=${vsc.gen4FirstLegalMeanScore}`
-        );
-      }
-      if (Math.abs(gen4Rc.seededRandomMeanScore - vsc.gen4SeededRandomMeanScore) > 1e-4) {
-        errors.push(
-          `Addendum gen4SeededRandomMeanScore mismatch: recomputed=${gen4Rc.seededRandomMeanScore}, addendum=${vsc.gen4SeededRandomMeanScore}`
-        );
+      const gen4Rc = recomputedScores.find((s) => s.generation === 4);
+      if (gen4Rc) {
+        if (Math.abs(gen4Rc.overallBaselineMeanScore - vsc.gen4OverallBaselineMeanScore) > 1e-4) {
+          errors.push(
+            `Addendum gen4OverallBaselineMeanScore mismatch: recomputed=${gen4Rc.overallBaselineMeanScore}, addendum=${vsc.gen4OverallBaselineMeanScore}`
+          );
+        }
+        if (Math.abs(gen4Rc.firstLegalMeanScore - vsc.gen4FirstLegalMeanScore) > 1e-4) {
+          errors.push(
+            `Addendum gen4FirstLegalMeanScore mismatch: recomputed=${gen4Rc.firstLegalMeanScore}, addendum=${vsc.gen4FirstLegalMeanScore}`
+          );
+        }
+        if (Math.abs(gen4Rc.seededRandomMeanScore - vsc.gen4SeededRandomMeanScore) > 1e-4) {
+          errors.push(
+            `Addendum gen4SeededRandomMeanScore mismatch: recomputed=${gen4Rc.seededRandomMeanScore}, addendum=${vsc.gen4SeededRandomMeanScore}`
+          );
+        }
       }
     }
   }
@@ -1626,27 +1691,56 @@ export function verifyStage2AddendumSemantics(
   if (campaignResult?.provisionalBestChampion) {
     const champ = campaignResult.provisionalBestChampion;
     const vsc = addendumData.validationScoresClarification;
-    const popDist = addendumData.populationDistinction;
-    if (vsc && Math.abs(champ.validationMeanWinRate - vsc.finalChampionValidationWinRate) > 1e-4) {
+    if (vsc) {
+      if (typeof vsc.finalChampionValidationWinRate === "number" && Number.isFinite(vsc.finalChampionValidationWinRate)) {
+        if (Math.abs(champ.validationMeanWinRate - vsc.finalChampionValidationWinRate) > 1e-4) {
+          errors.push(
+            `Addendum finalChampionValidationWinRate mismatch: champ=${champ.validationMeanWinRate}, addendum=${vsc.finalChampionValidationWinRate}`
+          );
+        }
+      }
+    }
+  }
+
+  // 7. Population Distinction の照合 (型・存在・有限数値 Fail-Closed)
+  const popDist = addendumData.populationDistinction;
+  if (!popDist) {
+    errors.push("Addendum missing populationDistinction section");
+  } else {
+    if (typeof popDist.finalEvaluatedChampionId !== "string" || popDist.finalEvaluatedChampionId.trim() === "") {
+      errors.push("Addendum populationDistinction.finalEvaluatedChampionId must be a non-empty string");
+    }
+    if (
+      typeof popDist.finalEvaluatedChampionGeneration !== "number" ||
+      !Number.isFinite(popDist.finalEvaluatedChampionGeneration) ||
+      popDist.finalEvaluatedChampionGeneration !== 4
+    ) {
       errors.push(
-        `Addendum finalChampionValidationWinRate mismatch: champ=${champ.validationMeanWinRate}, addendum=${vsc.finalChampionValidationWinRate}`
+        `Addendum finalEvaluatedChampionGeneration must be 4, got ${popDist.finalEvaluatedChampionGeneration}`
       );
     }
-    if (popDist) {
-      if (popDist.finalEvaluatedChampionId !== champ.genomeId) {
+    if (campaignResult?.provisionalBestChampion) {
+      if (popDist.finalEvaluatedChampionId !== campaignResult.provisionalBestChampion.genomeId) {
         errors.push(
-          `Addendum finalEvaluatedChampionId mismatch: champ=${champ.genomeId}, addendum=${popDist.finalEvaluatedChampionId}`
-        );
-      }
-      if (popDist.finalEvaluatedChampionGeneration !== 4) {
-        errors.push(
-          `Addendum finalEvaluatedChampionGeneration must be 4, got ${popDist.finalEvaluatedChampionGeneration}`
+          `Addendum finalEvaluatedChampionId mismatch: champ=${campaignResult.provisionalBestChampion.genomeId}, addendum=${popDist.finalEvaluatedChampionId}`
         );
       }
     }
   }
 
-  // 7. Engine 正規導出 Seed と実使用 Seed の照合
+  // 8. Engine 正規導出 Seed と実使用 Seed の照合
+  const scc = addendumData.seedContractClarification;
+  if (!scc) {
+    errors.push("Addendum missing seedContractClarification section");
+  } else {
+    if (scc.executedSeedsVerified !== true) {
+      errors.push("Addendum seedContractClarification.executedSeedsVerified must be true");
+    }
+    if (typeof scc.seedGenerationContract !== "string" || scc.seedGenerationContract.trim() === "") {
+      errors.push("Addendum seedContractClarification.seedGenerationContract must be a non-empty string");
+    }
+  }
+
   if (campaignResult?.campaignSeed && campaignResult.seedRegistry?.trainingSeedsByGeneration) {
     const derived = deriveStage2TrainingSeedsByEngine(
       campaignResult.campaignSeed,
@@ -1666,42 +1760,57 @@ export function verifyStage2AddendumSemantics(
     if (!seedsMatch) {
       errors.push("Engine-derived seeds do not match executed training seeds in campaign result");
     }
-    if (addendumData.seedContractClarification?.executedSeedsVerified !== true) {
-      errors.push("Addendum seedContractClarification.executedSeedsVerified must be true");
+  }
+
+  // 9. 探索評価の検定値・有意性・改善判定の照合 (型・存在・有限数値 Fail-Closed)
+  const statClar = addendumData.statisticalSignificanceClarification;
+  if (!statClar) {
+    errors.push("Addendum missing statisticalSignificanceClarification section");
+  } else {
+    if (typeof statClar.seededRandomPValue !== "number" || !Number.isFinite(statClar.seededRandomPValue)) {
+      errors.push(
+        `Addendum statisticalSignificanceClarification.seededRandomPValue must be a finite number, got ${statClar.seededRandomPValue}`
+      );
+    }
+    if (typeof statClar.seededRandomSignificant !== "boolean") {
+      errors.push("Addendum statisticalSignificanceClarification.seededRandomSignificant must be a boolean");
+    } else if (statClar.seededRandomSignificant !== false) {
+      errors.push("Addendum seededRandomSignificant must be false under Bonferroni correction");
+    }
+    if (statClar.improvementStatus !== "IMPROVEMENT_UNVERIFIED") {
+      errors.push(
+        `Addendum improvementStatus must be IMPROVEMENT_UNVERIFIED, got ${statClar.improvementStatus}`
+      );
+    }
+    if (statClar.evidenceStatus !== "VALID") {
+      errors.push(`Addendum evidenceStatus must be VALID, got ${statClar.evidenceStatus}`);
     }
   }
 
-  // 8. 探索評価の検定値・有意性・改善判定の照合
   if (exploratoryResult) {
     const rawOpponents = exploratoryResult.logicalResult?.opponents ?? exploratoryResult.opponents;
     const srOpp =
       rawOpponents?.["baseline-seeded-random"] ??
       (Array.isArray(rawOpponents) ? rawOpponents.find((o: any) => o.opponentId === "SeededRandom") : undefined);
     const srP = srOpp?.statisticalTest?.pValue ?? srOpp?.pValue;
-    const statClar = addendumData.statisticalSignificanceClarification;
-    if (!statClar) {
-      errors.push("Addendum missing statisticalSignificanceClarification section");
-    } else {
-      if (typeof srP === "number" && Math.abs(srP - statClar.seededRandomPValue) > 1e-6) {
+
+    // 元の Exploratory Result に p 値がない場合も FAIL
+    if (typeof srP !== "number" || !Number.isFinite(srP)) {
+      errors.push("Original exploratory result missing valid finite pValue for SeededRandom");
+    } else if (
+      statClar &&
+      typeof statClar.seededRandomPValue === "number" &&
+      Number.isFinite(statClar.seededRandomPValue)
+    ) {
+      if (Math.abs(srP - statClar.seededRandomPValue) > 1e-6) {
         errors.push(
           `Addendum seededRandomPValue mismatch: exploratory=${srP}, addendum=${statClar.seededRandomPValue}`
         );
       }
-      if (statClar.seededRandomSignificant !== false) {
-        errors.push("Addendum seededRandomSignificant must be false under Bonferroni correction");
-      }
-      if (statClar.improvementStatus !== "IMPROVEMENT_UNVERIFIED") {
-        errors.push(
-          `Addendum improvementStatus must be IMPROVEMENT_UNVERIFIED, got ${statClar.improvementStatus}`
-        );
-      }
-      if (statClar.evidenceStatus !== "VALID") {
-        errors.push(`Addendum evidenceStatus must be VALID, got ${statClar.evidenceStatus}`);
-      }
     }
   }
 
-  // 9. 未測定時間・未検証 PASS 偏重の開示照合
+  // 10. 未測定時間・未検証 PASS 偏重の開示照合
   const timeStall = addendumData.timingAndStallClarification;
   if (!timeStall) {
     errors.push("Addendum missing timingAndStallClarification section");
@@ -1714,9 +1823,13 @@ export function verifyStage2AddendumSemantics(
     if (timeStall.passHeavyStallStatus !== "UNVERIFIED") {
       errors.push(`Addendum passHeavyStallStatus must be UNVERIFIED, got ${timeStall.passHeavyStallStatus}`);
     }
-    if (timeStall.matchesReachingDecisionLimit !== 0) {
+    if (
+      typeof timeStall.matchesReachingDecisionLimit !== "number" ||
+      !Number.isFinite(timeStall.matchesReachingDecisionLimit) ||
+      timeStall.matchesReachingDecisionLimit !== 0
+    ) {
       errors.push(
-        `Addendum matchesReachingDecisionLimit must be 0, got ${timeStall.matchesReachingDecisionLimit}`
+        `Addendum matchesReachingDecisionLimit must be 0 (finite number), got ${timeStall.matchesReachingDecisionLimit}`
       );
     }
   }
