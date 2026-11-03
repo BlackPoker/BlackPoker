@@ -43,6 +43,14 @@ export class GenomePolicy implements DecisionPolicy {
    * 同期的に意思決定を実行
    */
   public choose(request: Readonly<DecisionRequest>): DecisionResponse {
+    // 0. ストリーミングプロバイダが存在し、かつパターン配列が空または大規模な場合
+    if (
+      request.blockAssignmentStream &&
+      (request.patterns.length === 0 || request.blockAssignmentStream.patternCount > 256)
+    ) {
+      return this.chooseStreaming(request);
+    }
+
     const patterns = request.patterns;
     if (!patterns || patterns.length === 0) {
       throw new Error(`DecisionRequest に選択可能なパターンが存在しません: ${request.decisionId}`);
@@ -70,6 +78,59 @@ export class GenomePolicy implements DecisionPolicy {
       decisionId: request.decisionId,
       stateVersion: request.stateVersion,
       selectedPatternRef: bestPatternRef,
+    };
+  }
+
+  /**
+   * ブロック割り当てなどの超大規模合法手空間をストリーミング評価して最善手を決定論的に選択
+   */
+  private chooseStreaming(request: Readonly<DecisionRequest>): DecisionResponse {
+    const stream = request.blockAssignmentStream!;
+    if (stream.patternCount === 0) {
+      throw new Error(`DecisionRequest に選択可能なパターンが存在しません: ${request.decisionId}`);
+    }
+
+    // 1. 文脈特徴量ベクトル (163次元) を 1 回だけ計算
+    const contextValues = DecisionFeatureEncoder.encodeContextOnly(request);
+
+    // 2. ブロック割り当て特徴量エンコーダのコンテキスト準備
+    const encoderContext = DecisionFeatureEncoder.createBlockAssignmentEncoderContext(request);
+
+    let bestScore = -Infinity;
+    let bestIndex = 0;
+    let currentIndex = 0;
+
+    for (const assignments of stream.iterateAssignments()) {
+      const pValues = DecisionFeatureEncoder.encodeBlockAssignmentValues(
+        assignments,
+        stream.patternCount,
+        encoderContext
+      );
+      const score = GenomeScorer.scoreSinglePattern(contextValues, pValues, this.dna);
+
+      // 決定論的 Argmax: 厳格な大なり > により、同点時は先頭 (first-encountered) を優先
+      if (score > bestScore) {
+        bestScore = score;
+        bestIndex = currentIndex;
+      }
+      currentIndex++;
+    }
+
+    // 3. 選択された合法手のみを実体化して catalog / patterns にセット（Core での適用のため）
+    const instantiated = stream.instantiatePatternAt(bestIndex);
+    if (instantiated) {
+      if (request.catalog?.effectSelections && !request.catalog.effectSelections[bestIndex]) {
+        (request.catalog.effectSelections as any)[bestIndex] = instantiated.effectSelection;
+      }
+      if (request.patterns && !request.patterns.some((p) => (p as any).effectSelectionRef === bestIndex)) {
+        (request.patterns as any).push(instantiated.pattern);
+      }
+    }
+
+    return {
+      decisionId: request.decisionId,
+      stateVersion: request.stateVersion,
+      selectedPatternRef: bestIndex,
     };
   }
 

@@ -22,7 +22,8 @@
  * NaN/Infinity/定義域違反に対する fail-closed 安全性を保証します。
  */
 
-import { DecisionRequest } from "../../domain/decision/DecisionRequest";
+import { DecisionRequest } from "../../domain/decision/DecisionRequest.js";
+import { UnitAssignment } from "../../domain/decision/DecisionCatalog.js";
 import { CardView, KnownCardView, UnitView, RequestView } from "../../domain/decision/PlayerObservation";
 import { generateLogicalPatternKey } from "../../domain/decision/LogicalPatternKey";
 import {
@@ -1360,4 +1361,204 @@ export class DecisionFeatureEncoder {
 
     return encodedPatterns;
   }
+
+  /**
+   * 文脈特徴量 (Context Feature Vector: 163次元) のみをエンコード
+   */
+  public static encodeContextOnly(request: Readonly<DecisionRequest>): number[] {
+    return this.encodeContext(request);
+  }
+
+  /**
+   * ブロック割り当て特徴量エンコーダのコンテキスト (allUnitsMap等) を構築
+   */
+  public static createBlockAssignmentEncoderContext(
+    request: Readonly<DecisionRequest>
+  ): BlockAssignmentEncoderContext {
+    const obs = request.observation;
+    const viewerId = request.playerId;
+
+    const selfPlayer = obs.players?.find((p) => p.playerId === viewerId || p.isViewer);
+    const opponentPlayer = obs.players?.find((p) => p.playerId !== viewerId && !p.isViewer);
+
+    const allUnitsMap = new Map<string, { unit: UnitView; owner: "self" | "opponent" }>();
+    if (selfPlayer) {
+      if (selfPlayer.field) {
+        for (const u of selfPlayer.field) allUnitsMap.set(u.unitId, { unit: u, owner: "self" });
+      }
+      if (selfPlayer.trumps) {
+        for (const u of selfPlayer.trumps) allUnitsMap.set(u.unitId, { unit: u, owner: "self" });
+      }
+    }
+    if (opponentPlayer) {
+      if (opponentPlayer.field) {
+        for (const u of opponentPlayer.field) allUnitsMap.set(u.unitId, { unit: u, owner: "opponent" });
+      }
+      if (opponentPlayer.trumps) {
+        for (const u of opponentPlayer.trumps) allUnitsMap.set(u.unitId, { unit: u, owner: "opponent" });
+      }
+    }
+
+    return { allUnitsMap };
+  }
+
+  /**
+   * 単一のブロック割り当てパターンに対する数値特徴量ベクトル (111次元) を高速エンコード
+   * 既存の encodePatterns 内の unitAssignment エンコードと完全に同一の出力を返します。
+   */
+  public static encodeBlockAssignmentValues(
+    assignments: readonly UnitAssignment[],
+    candidateCount: number,
+    encoderContext: BlockAssignmentEncoderContext
+  ): number[] {
+    const allUnitsMap = encoderContext.allUnitsMap;
+
+    const effAssignSourceCount = assignments.length;
+    let effAssignSelectedCount = 0;
+    let effectAssignedUnitTotal = 0;
+    let effAssignSourceSizeSum = 0;
+    let effAssignSourceSizeMax = 0;
+    let effAssignSourceSizeMin = 0;
+    let effAssignSelectedSizeSum = 0;
+    let effAssignSelectedSizeMax = 0;
+    let effAssignSelectedSizeMin = 0;
+    let effAssignSizeDeltaSum = 0;
+    let effAssignPositiveDeltaCount = 0;
+    let effAssignNegativeDeltaCount = 0;
+    let effAssignSelfToOppCount = 0;
+    let effAssignOppToSelfCount = 0;
+
+    let minSourceSize = Infinity;
+    let minSelectedSize = Infinity;
+
+    for (let aIdx = 0; aIdx < assignments.length; aIdx++) {
+      const a = assignments[aIdx];
+      const assignedUnits = a.selectedUnitIds || [];
+      const assignedLen = assignedUnits.length;
+      effectAssignedUnitTotal += assignedLen;
+      effAssignSelectedCount += assignedLen;
+
+      // Source ユニットのサイズ集計
+      const srcEntry = allUnitsMap.get(a.sourceUnitId);
+      let srcSize = 0;
+      let srcOwner: "self" | "opponent" | undefined = undefined;
+      if (srcEntry) {
+        srcSize = srcEntry.unit.currentSize ?? 0;
+        srcOwner = srcEntry.owner;
+        effAssignSourceSizeSum += srcSize;
+        if (srcSize > effAssignSourceSizeMax) effAssignSourceSizeMax = srcSize;
+        if (srcSize < minSourceSize) minSourceSize = srcSize;
+      }
+
+      // Selected ユニット群のサイズ集計
+      let targetGroupSize = 0;
+      for (let uIdx = 0; uIdx < assignedLen; uIdx++) {
+        const uId = assignedUnits[uIdx];
+        const tgtEntry = allUnitsMap.get(uId);
+        if (tgtEntry) {
+          const tgtSize = tgtEntry.unit.currentSize ?? 0;
+          targetGroupSize += tgtSize;
+          effAssignSelectedSizeSum += tgtSize;
+          if (tgtSize > effAssignSelectedSizeMax) effAssignSelectedSizeMax = tgtSize;
+          if (tgtSize < minSelectedSize) minSelectedSize = tgtSize;
+
+          if (tgtEntry.owner === "self" && srcOwner === "opponent") {
+            effAssignOppToSelfCount++;
+          } else if (tgtEntry.owner === "opponent" && srcOwner === "self") {
+            effAssignSelfToOppCount++;
+          }
+        }
+      }
+
+      // Delta 集計 (Selected - Source)
+      if (assignedLen > 0) {
+        const delta = targetGroupSize - srcSize;
+        effAssignSizeDeltaSum += delta;
+        if (delta > 0) effAssignPositiveDeltaCount++;
+        else if (delta < 0) effAssignNegativeDeltaCount++;
+      }
+    }
+
+    if (minSourceSize !== Infinity) effAssignSourceSizeMin = minSourceSize;
+    if (minSelectedSize !== Infinity) effAssignSelectedSizeMin = minSelectedSize;
+
+    const effSelectedCount = effAssignSelectedCount;
+    const effCoverageRatio = candidateCount > 0 ? effSelectedCount / candidateCount : 0;
+
+    const patternValues = [
+      // 1. Pattern Kind (4)
+      0, // isAction
+      0, // isPass
+      1, // isEffect (EFFECT_SELECTION)
+      0, // isOther
+
+      // 2. Action Metadata (9)
+      0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+      // 3. Candidate Action Stable Identity (16 buckets)
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+      // 4. Cost Payment (6)
+      0, 0, 0, 0, 0, 0,
+
+      // 5. Key Card Selection (11)
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+      // 6. Key Unit Selection (8)
+      0, 0, 0, 0, 0, 0, 0, 0,
+
+      // 7. Target Selection (13)
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+      // 8. Effect Selection - Base Metadata (7)
+      1, // hasEffectSelection
+      0, // effectTypeUnit
+      1, // effectTypeUnitAssignment
+      0, // effectTypeOther
+      0, // effectSelectedValueCount
+      assignments.length, // effectAssignmentCount
+      effectAssignedUnitTotal, // effectAssignedUnitTotal
+
+      // 9. Generic Effect Selection - Unit Aggregate (12)
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+      // 10. Generic Effect Selection - Card Aggregate (17)
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+      // 11. Generic Effect Selection - Option Stable Identity (16 buckets)
+      0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+
+      // 12. Generic Effect Selection - Player / Request Semantics (6)
+      0, 0, 0, 0, 0, 0,
+
+      // 13. Generic Effect Selection - Unit Assignment Semantics (13)
+      effAssignSourceCount,
+      effAssignSelectedCount,
+      effAssignSourceSizeSum,
+      effAssignSourceSizeMax,
+      effAssignSourceSizeMin,
+      effAssignSelectedSizeSum,
+      effAssignSelectedSizeMax,
+      effAssignSelectedSizeMin,
+      effAssignSizeDeltaSum,
+      effAssignPositiveDeltaCount,
+      effAssignNegativeDeltaCount,
+      effAssignSelfToOppCount,
+      effAssignOppToSelfCount,
+
+      // 14. Generic Effect Selection - Coverage Ratio (3)
+      candidateCount,
+      effSelectedCount,
+      effCoverageRatio,
+
+      // 15. Order Selection (2)
+      0, 0,
+    ];
+
+    return DecisionFeatureScaler.scalePattern(patternValues);
+  }
+}
+
+export interface BlockAssignmentEncoderContext {
+  readonly allUnitsMap: Map<string, { unit: UnitView; owner: "self" | "opponent" }>;
 }

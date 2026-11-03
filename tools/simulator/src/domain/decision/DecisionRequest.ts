@@ -1,7 +1,23 @@
-import { PlayerKey, DecisionSource } from "./DecisionSource";
-import { PlayerObservation } from "./PlayerObservation";
-import { DecisionCatalog } from "./DecisionCatalog";
-import { LegalPattern } from "./LegalPattern";
+import { PlayerKey, DecisionSource } from "./DecisionSource.js";
+import { PlayerObservation } from "./PlayerObservation.js";
+import { DecisionCatalog, UnitAssignment, EffectSelection } from "./DecisionCatalog.js";
+import { LegalPattern } from "./LegalPattern.js";
+
+/**
+ * ブロック割り当てなどの超大規模合法手集合に対するオンデマンド・ストリーミング評価プロバイダ
+ */
+export interface BlockAssignmentStreamProvider {
+  /** 合法パターンの総数 (厳密値) */
+  readonly patternCount: number;
+  /** 全合法パターンを 1 件ずつ遅延列挙するジェネレータ (DFS探索順序完全固定) */
+  readonly iterateAssignments: () => Generator<UnitAssignment[], void, unknown>;
+  /** 指定インデックスの割り当てを取得 */
+  readonly getAssignmentAt: (index: number) => UnitAssignment[] | undefined;
+  /** 割り当てに対する要約文字列をオンデマンド生成 */
+  readonly createSummary: (assignments: readonly UnitAssignment[]) => string;
+  /** 選択された特定インデックスのパターンと効果選択を安全に実体化 */
+  readonly instantiatePatternAt: (index: number) => { pattern: LegalPattern; effectSelection: EffectSelection } | undefined;
+}
 
 /**
  * エンジンからプレイヤー（人間またはAI）へ提示される判断要求。
@@ -39,6 +55,12 @@ export interface DecisionRequest {
 
   /**
    * 現在選べる合法な完成パターン全件。
+   * ストリーミングモードの場合でも、小規模時は全件、大規模時は選択された手や軽量表現を保持します。
    */
   readonly patterns: readonly LegalPattern[];
+
+  /**
+   * ブロック割り当て等の大規模合法手空間をストリーミング処理するためのプロバイダ (任意)
+   */
+  readonly blockAssignmentStream?: BlockAssignmentStreamProvider;
 }

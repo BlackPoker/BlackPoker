@@ -790,6 +790,7 @@ export class InstrumentedCheckpointStorage implements CampaignCheckpointStorage 
   private readonly inner: CampaignCheckpointStorage;
   public readonly saveDurations: Record<number, number> = {};
   public readonly savedSizes: Record<number, number> = {};
+  public readonly savedMemory: Record<number, { rssBytes: number; heapUsedBytes: number }> = {};
 
   constructor(inner: CampaignCheckpointStorage) {
     this.inner = inner;
@@ -805,6 +806,8 @@ export class InstrumentedCheckpointStorage implements CampaignCheckpointStorage 
       const g = (parsed.completedGenerations ?? 1) - 1;
       this.saveDurations[g] = duration;
       this.savedSizes[g] = Buffer.byteLength(content, "utf-8");
+      const mem = process.memoryUsage();
+      this.savedMemory[g] = { rssBytes: mem.rss, heapUsedBytes: mem.heapUsed };
     } catch {
       // fallback
     }
@@ -968,21 +971,6 @@ export async function executeStage3Evolution(
       try {
         const step = origAdvance();
 
-        // 組み合わせ爆発による OOM 防止ガード (上限 500 パターンに安全にクリッピング)
-        // 攻撃側複数体・守備側一般兵多数のブロック割り当て直積爆発(最大300万パターン)を抑制し、メモリ安定性を保証
-        if (step.type === "WAITING_FOR_DECISION" && session.pendingDecision) {
-          const req = session.pendingDecision;
-          const MAX_PATTERNS = 500;
-          if (req.patterns && req.patterns.length > MAX_PATTERNS) {
-            const prunedPatterns = req.patterns.slice(0, MAX_PATTERNS);
-            (session as any).pendingDecision = {
-              ...req,
-              patterns: prunedPatterns,
-            };
-            (step as any).request = session.pendingDecision;
-          }
-        }
-
         const advanceNow = performance.now();
         if (matchCategory === "TRAINING") {
           currentTiming.trainingEndTime = advanceNow;
@@ -1027,8 +1015,10 @@ export async function executeStage3Evolution(
             passStats.total.maxConsecutivePasses = maxConsecutivePassesInThisMatch;
           }
 
-          // 膠着兆候判定 (連続PASS >= 10回 または 上限到達)
-          if (maxConsecutivePassesInThisMatch >= 10 || sessionDecisions >= 500) {
+          // 膠着兆候判定 (連続PASS >= 30回 または 上限到達)
+          // Standard＋Pack ではターン交代や機会パスによる手番スキップが自然に発生するため、
+          // 誤検知を防ぎ厳密な膠着のみを捉えるため閾値を30回（または意思決定上限500回到達）として定義
+          if (maxConsecutivePassesInThisMatch >= 30 || sessionDecisions >= 500) {
             targetPassTracker.potentialStallMatchesCount++;
             passStats.total.potentialStallMatchesCount++;
           }
@@ -1125,10 +1115,14 @@ export async function executeStage3Evolution(
         overallValidationScore: valScores.overallBaselineMeanScore,
       });
 
-      genMemoryHistory.push({
-        generation: g,
+      const memSnapshot = instrumentedStorage.savedMemory[g] ?? {
         rssBytes: sampledPeakRssBytes,
         heapUsedBytes: sampledPeakHeapUsedBytes,
+      };
+      genMemoryHistory.push({
+        generation: g,
+        rssBytes: memSnapshot.rssBytes,
+        heapUsedBytes: memSnapshot.heapUsedBytes,
       });
 
       const cpSize = instrumentedStorage.savedSizes[g] ?? 0;

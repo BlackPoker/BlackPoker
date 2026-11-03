@@ -94,4 +94,51 @@ export class GenomeScorer {
 
     return results;
   }
+
+  /**
+   * 単一パターンの特徴量ベクトルに対するスコアを高速計算 (ストリーミング評価用)
+   * 厳密な純粋関数、決定論、非有限数 Fail-Closed 契約を維持します。
+   */
+  public static scoreSinglePattern(
+    contextValues: readonly number[],
+    pValues: readonly number[],
+    dna: Readonly<DecisionDNA>
+  ): number {
+    const pWeights = dna.patternWeights;
+    const cpWeights = dna.contextPatternWeights;
+    const pDim = dna.patternDimension;
+    const cDim = dna.contextDimension;
+
+    let score = 0;
+
+    // 1. Pattern Linear Weights: Σ_j w_j * p_j
+    for (let j = 0; j < pDim; j++) {
+      const p_j = pValues[j] ?? 0;
+      const w_j = pWeights[j] ?? 0;
+      score += w_j * p_j;
+    }
+
+    // 2. Context-Pattern Interaction: Σ_i Σ_j M_ij * c_i * p_j (Row-major 順序固定)
+    for (let i = 0; i < cDim; i++) {
+      const c_i = contextValues[i] ?? 0;
+      if (c_i === 0) continue;
+
+      const rowOffset = i * pDim;
+      for (let j = 0; j < pDim; j++) {
+        const p_j = pValues[j] ?? 0;
+        if (p_j === 0) continue;
+
+        const m_ij = cpWeights[rowOffset + j] ?? 0;
+        score += m_ij * c_i * p_j;
+      }
+    }
+
+    if (!Number.isFinite(score)) {
+      throw new DecisionDNAExecutionError(
+        `単一パターンのスコア演算結果が非有限数となりました: ${score}`
+      );
+    }
+
+    return score;
+  }
 }

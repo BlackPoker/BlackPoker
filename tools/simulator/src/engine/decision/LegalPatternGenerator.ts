@@ -1,4 +1,4 @@
-import { DecisionRequest } from "../../domain/decision/DecisionRequest";
+import { DecisionRequest, BlockAssignmentStreamProvider } from "../../domain/decision/DecisionRequest.js";
 import { DecisionCatalog, ActionSelection, CardSelection, UnitSelection, CostPayment, TargetSelection, EffectSelection, UnitAssignment, OrderSelection } from "../../domain/decision/DecisionCatalog";
 import { LegalPattern } from "../../domain/decision/LegalPattern";
 import { PlayerKey, DecisionSource, RULE_SYSTEM_CHANCE } from "../../domain/decision/DecisionSource";
@@ -870,35 +870,56 @@ export class LegalPatternGenerator {
   public static latestBlockAssignmentMetrics?: BlockAssignmentMetrics;
 
   /**
-   * ブロック効果解決時（EFFECT_RESOLUTION）のアタッカー毎のブロッカー割当てDecisionRequestを生成
-   * TODO: 将来、ActionDefinition を変更する能力や別アクションの assignment が追加された場合、
-   * DSL 制約定義を直接解釈する汎用 assignment generator へ移行すること。
+   * 配列から k 個を選ぶ組み合わせを中間配列を作らず 1 件ずつ遅延生成するジェネレータ
+   * 空間計算量: O(k)
    */
-  public static generateBlockAssignmentDecision(
-    state: any,
-    playerId: PlayerKey,
-    sourceRequest: ActionRequest,
-    effectStepId: string,
-    attackers: any[],
-    candidateBlockers: any[],
+  public static *iterateCombinations<T>(array: readonly T[], k: number): Generator<T[], void, unknown> {
+    if (k === 0) {
+      yield [];
+      return;
+    }
+    if (array.length < k) return;
+    const current: T[] = [];
+    function* helper(start: number): Generator<T[], void, unknown> {
+      if (current.length === k) {
+        yield [...current];
+        return;
+      }
+      for (let i = start; i < array.length; i++) {
+        current.push(array[i]);
+        yield* helper(i + 1);
+        current.pop();
+      }
+    }
+    yield* helper(0);
+  }
+
+  /**
+   * ブロック割り当ての合法パターンを DFS 探索順序（従来の generateBlockAssignmentDecision と完全に同一）で
+   * 1 件ずつオンデマンドに yield する遅延ジェネレータ。
+   *
+   * 空間計算量: O(A + B)（アタッカー数 A、ブロッカー数 B の線形。数百万手でも数 KB 程度）。
+   * 共有可変参照を防ぐため、yield 時には各 assignment オブジェクトおよび配列を完全に複製して返します。
+   */
+  public static *iterateBlockAssignments(
+    attackers: readonly any[],
+    candidateBlockers: readonly any[],
     components: readonly ComponentDefinition[] = []
-  ): { request: DecisionRequest; metrics: BlockAssignmentMetrics } {
-    const startTime = Date.now();
-    const decisionId = `dec-eff-${sourceRequest.id}-${effectStepId}-${Date.now()}`;
-    const stateVersion = state?.stateVersion ?? state?.version ?? 1;
-    const matchId = state?.matchId ?? "match-local";
-    const observation = ObservationFactory.createObservation(state, playerId, { currentRequest: sourceRequest });
+  ): Generator<UnitAssignment[], void, unknown> {
+    if (attackers.length === 0) {
+      yield [];
+      return;
+    }
 
-    // アタッカー群に対するブロッカー割当ての全合法パターンをバックトラッキングで列挙
-    const allAssignments: UnitAssignment[][] = [];
+    const currentAssignments: UnitAssignment[] = [];
+    const usedBlockerIds = new Set<string>();
 
-    const backtrack = (
-      attackerIndex: number,
-      currentAssignments: UnitAssignment[],
-      usedBlockerIds: Set<string>
-    ) => {
+    function* backtrack(attackerIndex: number): Generator<UnitAssignment[], void, unknown> {
       if (attackerIndex === attackers.length) {
-        allAssignments.push([...currentAssignments]);
+        yield currentAssignments.map((a) => ({
+          sourceUnitId: a.sourceUnitId,
+          selectedUnitIds: [...a.selectedUnitIds],
+        }));
         return;
       }
 
@@ -910,7 +931,7 @@ export class LegalPatternGenerator {
         sourceUnitId: attacker.unitId,
         selectedUnitIds: [],
       });
-      backtrack(attackerIndex + 1, currentAssignments, usedBlockerIds);
+      yield* backtrack(attackerIndex + 1);
       currentAssignments.pop();
 
       // 2. 単一ブロッカー (任意の利用可能ブロッカー1体)
@@ -920,7 +941,7 @@ export class LegalPatternGenerator {
           selectedUnitIds: [blocker.unitId],
         });
         usedBlockerIds.add(blocker.unitId);
-        backtrack(attackerIndex + 1, currentAssignments, usedBlockerIds);
+        yield* backtrack(attackerIndex + 1);
         usedBlockerIds.delete(blocker.unitId);
         currentAssignments.pop();
       }
@@ -929,64 +950,176 @@ export class LegalPatternGenerator {
       const availableSoldiers = available.filter((b) => isSoldierType(b, components));
       if (availableSoldiers.length >= 2) {
         for (let k = 2; k <= availableSoldiers.length; k++) {
-          const soldierCombos = this.getCombinations(availableSoldiers, k);
-          for (const combo of soldierCombos) {
+          for (const combo of LegalPatternGenerator.iterateCombinations(availableSoldiers, k)) {
             const soldierIds = combo.map((s) => s.unitId);
             currentAssignments.push({
               sourceUnitId: attacker.unitId,
               selectedUnitIds: soldierIds,
             });
             for (const id of soldierIds) usedBlockerIds.add(id);
-            backtrack(attackerIndex + 1, currentAssignments, usedBlockerIds);
+            yield* backtrack(attackerIndex + 1);
             for (const id of soldierIds) usedBlockerIds.delete(id);
             currentAssignments.pop();
           }
         }
       }
-    };
-
-    if (attackers.length > 0) {
-      backtrack(0, [], new Set());
-    } else {
-      allAssignments.push([]);
     }
 
-    // カタログと LegalPattern を生成
+    yield* backtrack(0);
+  }
+
+  /**
+   * ブロック割り当ての要約文字列を生成（オンデマンド）
+   */
+  public static createBlockAssignmentSummary(
+    assignments: readonly UnitAssignment[],
+    attackers: readonly any[],
+    candidateBlockers: readonly any[]
+  ): string {
+    if (!assignments || assignments.length === 0) {
+      return "全アタッカー ブロックなし";
+    }
+    const summaryParts = assignments.map((a) => {
+      const attackerUnit = attackers.find((u: any) => u.unitId === a.sourceUnitId);
+      const attackerName = attackerUnit?.kind || a.sourceUnitId;
+      if (a.selectedUnitIds.length === 0) {
+        return `${attackerName} -> [ブロックなし]`;
+      }
+      const blockerNames = a.selectedUnitIds.map((bid) => {
+        const u = candidateBlockers.find((b: any) => b.unitId === bid);
+        return u?.kind || bid;
+      });
+      return `${attackerName} -> [${blockerNames.join(", ")}]`;
+    });
+    return summaryParts.length > 0 ? summaryParts.join(" | ") : "全アタッカー ブロックなし";
+  }
+
+  /**
+   * ブロック割り当ての合法パターン総数を高速計算
+   */
+  public static calculateBlockAssignmentPatternCount(
+    attackers: readonly any[],
+    candidateBlockers: readonly any[],
+    components: readonly ComponentDefinition[] = []
+  ): number {
+    if (attackers.length === 0) return 1;
+    const soldiers = candidateBlockers.filter((b) => isSoldierType(b, components));
+    const nonSoldiers = candidateBlockers.length - soldiers.length;
+
+    if (nonSoldiers === 0) {
+      // 全員兵士の場合: 厳密に (A + 1)^S
+      return Math.pow(attackers.length + 1, soldiers.length);
+    }
+
+    // 非兵士が混在する場合、数え上げ（中間配列生成なし）
+    let count = 0;
+    for (const _ of this.iterateBlockAssignments(attackers, candidateBlockers, components)) {
+      count++;
+    }
+    return count;
+  }
+
+  /**
+   * 指定インデックスの割り当てを取得
+   */
+  public static getBlockAssignmentAt(
+    index: number,
+    attackers: readonly any[],
+    candidateBlockers: readonly any[],
+    components: readonly ComponentDefinition[] = []
+  ): UnitAssignment[] | undefined {
+    let curr = 0;
+    for (const a of this.iterateBlockAssignments(attackers, candidateBlockers, components)) {
+      if (curr === index) return a;
+      curr++;
+    }
+    return undefined;
+  }
+
+  /**
+   * BlockAssignmentStreamProvider を生成
+   */
+  public static createBlockAssignmentStreamProvider(
+    attackers: readonly any[],
+    candidateBlockers: readonly any[],
+    components: readonly ComponentDefinition[] = []
+  ): BlockAssignmentStreamProvider {
+    const patternCount = this.calculateBlockAssignmentPatternCount(attackers, candidateBlockers, components);
+
+    return {
+      patternCount,
+      iterateAssignments: () => this.iterateBlockAssignments(attackers, candidateBlockers, components),
+      getAssignmentAt: (index: number) => this.getBlockAssignmentAt(index, attackers, candidateBlockers, components),
+      createSummary: (assignments: readonly UnitAssignment[]) =>
+        this.createBlockAssignmentSummary(assignments, attackers, candidateBlockers),
+      instantiatePatternAt: (index: number) => {
+        const assignments = this.getBlockAssignmentAt(index, attackers, candidateBlockers, components);
+        if (!assignments) return undefined;
+        const summary = this.createBlockAssignmentSummary(assignments, attackers, candidateBlockers);
+        const effectSelection: EffectSelection = {
+          selectionType: "unitAssignment",
+          assignments,
+          summary,
+          candidateCount: candidateBlockers.length,
+        };
+        const pattern: LegalPattern = {
+          patternId: `pat-block-${index}`,
+          kind: "EFFECT_SELECTION",
+          effectSelectionRef: index,
+        };
+        return { pattern, effectSelection };
+      },
+    };
+  }
+
+  /**
+   * ブロック効果解決時（EFFECT_RESOLUTION）のアタッカー毎のブロッカー割当てDecisionRequestを生成
+   *
+   * @param options.maxFullPatternLimit 一括配列として生成するパターンの上限（デフォルト: 256）。
+   *                                    これを超える場合は patterns 配列の巨大生成を抑止し、
+   *                                    blockAssignmentStream による遅延ストリーミング評価に切り替えます。
+   */
+  public static generateBlockAssignmentDecision(
+    state: any,
+    playerId: PlayerKey,
+    sourceRequest: ActionRequest,
+    effectStepId: string,
+    attackers: any[],
+    candidateBlockers: any[],
+    components: readonly ComponentDefinition[] = [],
+    options?: { readonly maxFullPatternLimit?: number }
+  ): { request: DecisionRequest; metrics: BlockAssignmentMetrics } {
+    const startTime = Date.now();
+    const decisionId = `dec-eff-${sourceRequest.id}-${effectStepId}-${Date.now()}`;
+    const stateVersion = state?.stateVersion ?? state?.version ?? 1;
+    const matchId = state?.matchId ?? "match-local";
+    const observation = ObservationFactory.createObservation(state, playerId, { currentRequest: sourceRequest });
+
+    const maxLimit = options?.maxFullPatternLimit ?? 256;
+    const streamProvider = this.createBlockAssignmentStreamProvider(attackers, candidateBlockers, components);
+    const patternCount = streamProvider.patternCount;
+
     const effectSelections: EffectSelection[] = [];
     const patterns: LegalPattern[] = [];
 
-    for (let i = 0; i < allAssignments.length; i++) {
-      const assignments = allAssignments[i];
-      const effectSelectionRef = i;
-
-      // 概要サマリーの生成
-      const summaryParts = assignments.map((a) => {
-        const attackerUnit = attackers.find((u) => u.unitId === a.sourceUnitId);
-        const attackerName = attackerUnit?.kind || a.sourceUnitId;
-        if (a.selectedUnitIds.length === 0) {
-          return `${attackerName} -> [ブロックなし]`;
-        }
-        const blockerNames = a.selectedUnitIds.map((bid) => {
-          const u = candidateBlockers.find((b) => b.unitId === bid);
-          return u?.kind || bid;
+    // パターン数が上限以下、または明示的に全件展開が求められている場合のみ一括アロケーション
+    if (patternCount <= maxLimit) {
+      let idx = 0;
+      for (const assignments of streamProvider.iterateAssignments()) {
+        const summary = streamProvider.createSummary(assignments);
+        effectSelections.push({
+          selectionType: "unitAssignment",
+          assignments,
+          summary,
+          candidateCount: candidateBlockers.length,
         });
-        return `${attackerName} -> [${blockerNames.join(", ")}]`;
-      });
-
-      const summary = summaryParts.length > 0 ? summaryParts.join(" | ") : "全アタッカー ブロックなし";
-
-      effectSelections.push({
-        selectionType: "unitAssignment",
-        assignments,
-        summary,
-        candidateCount: candidateBlockers.length,
-      });
-
-      patterns.push({
-        patternId: `pat-block-${i}`,
-        kind: "EFFECT_SELECTION",
-        effectSelectionRef,
-      });
+        patterns.push({
+          patternId: `pat-block-${idx}`,
+          kind: "EFFECT_SELECTION",
+          effectSelectionRef: idx,
+        });
+        idx++;
+      }
     }
 
     const catalog: DecisionCatalog = {
@@ -1011,7 +1144,7 @@ export class LegalPatternGenerator {
     const metrics: BlockAssignmentMetrics = {
       attackersCount: attackers.length,
       blockersCount: candidateBlockers.length,
-      patternCount: patterns.length,
+      patternCount,
       elapsedMs,
     };
     this.latestBlockAssignmentMetrics = metrics;
@@ -1026,6 +1159,7 @@ export class LegalPatternGenerator {
       catalog,
       patterns,
       observation,
+      blockAssignmentStream: streamProvider,
     };
 
     return { request, metrics };

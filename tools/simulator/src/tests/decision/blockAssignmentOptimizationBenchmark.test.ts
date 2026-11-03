@@ -7,99 +7,16 @@ import { TurnManager } from "../../engine/rules/TurnManager.js";
 import { isSoldierType } from "../../engine/rules/characterUtils.js";
 import { LegalPattern } from "../../domain/decision/LegalPattern.js";
 import { UnitAssignment, EffectSelection } from "../../domain/decision/DecisionCatalog.js";
+import { DecisionRequest, BlockAssignmentStreamProvider } from "../../domain/decision/DecisionRequest.js";
+import { GenomePolicy } from "../../engine/ai/GenomePolicy.js";
+import { GenomeScorer } from "../../engine/ai/GenomeScorer.js";
+import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec.js";
+import { DecisionDNA, DecisionDNAExecutionError, DecisionDNAValidationError } from "../../domain/ai/DecisionDNATypes.js";
+import { FirstLegalPolicy, RandomPolicy } from "../../engine/simulation/DecisionPolicy.js";
+import { GameSession } from "../../engine/session/GameSession.js";
 import * as path from "path";
 
-// =============================================================================
-// 最適化方式（遅延ストリーミングジェネレータ）のプロトタイプ実装
-// =============================================================================
-
-/**
- * 組み合わせヘルパー（Core と完全に同一のロジック）
- */
-function getCombinations<T>(arr: readonly T[], k: number): T[][] {
-  if (k === 0) return [[]];
-  if (arr.length < k) return [];
-  const [head, ...tail] = arr;
-  const withHead = getCombinations(tail, k - 1).map((c) => [head, ...c]);
-  const withoutHead = getCombinations(tail, k);
-  return [...withHead, ...withoutHead];
-}
-
-/**
- * 遅延ストリーミングジェネレータ:
- * 従来方式とまったく同じ DFS 順序で UnitAssignment[] を 1件ずつ yield する。
- * メモリ上に巨大な配列を一切アロケートしない。
- */
-function* iterateBlockAssignments(
-  attackers: readonly any[],
-  candidateBlockers: readonly any[],
-  components: readonly any[] = []
-): Generator<UnitAssignment[], void, unknown> {
-  if (attackers.length === 0) {
-    yield [];
-    return;
-  }
-
-  const currentAssignments: UnitAssignment[] = [];
-  const usedBlockerIds = new Set<string>();
-
-  function* backtrack(attackerIndex: number): Generator<UnitAssignment[], void, unknown> {
-    if (attackerIndex === attackers.length) {
-      yield [...currentAssignments];
-      return;
-    }
-
-    const attacker = attackers[attackerIndex];
-    const available = candidateBlockers.filter((b) => !usedBlockerIds.has(b.unitId));
-
-    // 1. 0体ブロック (常に合法)
-    currentAssignments.push({
-      sourceUnitId: attacker.unitId,
-      selectedUnitIds: [],
-    });
-    yield* backtrack(attackerIndex + 1);
-    currentAssignments.pop();
-
-    // 2. 単一ブロッカー (任意の利用可能ブロッカー1体)
-    for (const blocker of available) {
-      currentAssignments.push({
-        sourceUnitId: attacker.unitId,
-        selectedUnitIds: [blocker.unitId],
-      });
-      usedBlockerIds.add(blocker.unitId);
-      yield* backtrack(attackerIndex + 1);
-      usedBlockerIds.delete(blocker.unitId);
-      currentAssignments.pop();
-    }
-
-    // 3. 複数兵士ブロッカー (利用可能な兵士ユニットのみから 2体以上の組み合わせ)
-    const availableSoldiers = available.filter((b) => isSoldierType(b, components));
-    if (availableSoldiers.length >= 2) {
-      for (let k = 2; k <= availableSoldiers.length; k++) {
-        const soldierCombos = getCombinations(availableSoldiers, k);
-        for (const combo of soldierCombos) {
-          const soldierIds = combo.map((s) => s.unitId);
-          currentAssignments.push({
-            sourceUnitId: attacker.unitId,
-            selectedUnitIds: soldierIds,
-          });
-          for (const id of soldierIds) usedBlockerIds.add(id);
-          yield* backtrack(attackerIndex + 1);
-          for (const id of soldierIds) usedBlockerIds.delete(id);
-          currentAssignments.pop();
-        }
-      }
-    }
-  }
-
-  yield* backtrack(0);
-}
-
-// =============================================================================
-// テストスイート
-// =============================================================================
-
-describe("Block Assignment Optimization Benchmark & Integrity Verification", () => {
+describe("Block Assignment Optimization Benchmark & Integrity Verification (Work 3-5 R2)", () => {
   const components: any[] = [{ id: "comp-soldier", properties: { characterType: "soldier" } }];
   const mockRequest: any = { id: "req-block", actionId: "action.block" };
   const mockState: any = { stateVersion: 1, players: {} };
@@ -111,12 +28,15 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
     properties: { characterType: "soldier" },
   });
 
-  describe("1. 小規模合法手集合における従来方式と遅延ストリーミング方式の完全同等性証明", () => {
+  // ===========================================================================
+  // A. 合法手の完全同等性 (Legacy vs Streaming)
+  // ===========================================================================
+  describe("A. 合法手の完全同等性 (Legacy vs Streaming)", () => {
     it("A=1, B=2 (兵士2体): 全4パターンが完全に同一の順序・同一の割り当てで生成されること", () => {
       const attackers = [createSoldierUnit("atk-0")];
       const blockers = [createSoldierUnit("blk-0"), createSoldierUnit("blk-1")];
 
-      // 従来方式
+      // 従来方式 (全展開)
       const legacyResult = LegalPatternGenerator.generateBlockAssignmentDecision(
         mockState,
         "p2",
@@ -124,18 +44,19 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
         "step1",
         attackers,
         blockers,
-        components
+        components,
+        { maxFullPatternLimit: Infinity }
       );
       const legacyAssignments = legacyResult.request.catalog.effectSelections.map((es) => es.assignments);
 
-      // 最適化方式
+      // 最適化方式 (遅延ストリーミング)
       const optimizedAssignments: UnitAssignment[][] = [];
-      for (const a of iterateBlockAssignments(attackers, blockers, components)) {
+      for (const a of LegalPatternGenerator.iterateBlockAssignments(attackers, blockers, components)) {
         optimizedAssignments.push(a);
       }
 
       expect(optimizedAssignments.length).toBe(legacyAssignments.length);
-      expect(optimizedAssignments.length).toBe(4); // 2^2 = 4
+      expect(optimizedAssignments.length).toBe(4); // (1+1)^2 = 4
 
       for (let i = 0; i < legacyAssignments.length; i++) {
         expect(optimizedAssignments[i]).toEqual(legacyAssignments[i]);
@@ -150,7 +71,6 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
         createSoldierUnit("blk-2"),
       ];
 
-      // 従来方式
       const legacyResult = LegalPatternGenerator.generateBlockAssignmentDecision(
         mockState,
         "p2",
@@ -158,25 +78,25 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
         "step1",
         attackers,
         blockers,
-        components
+        components,
+        { maxFullPatternLimit: Infinity }
       );
       const legacyAssignments = legacyResult.request.catalog.effectSelections.map((es) => es.assignments);
 
-      // 最適化方式
       const optimizedAssignments: UnitAssignment[][] = [];
-      for (const a of iterateBlockAssignments(attackers, blockers, components)) {
+      for (const a of LegalPatternGenerator.iterateBlockAssignments(attackers, blockers, components)) {
         optimizedAssignments.push(a);
       }
 
       expect(optimizedAssignments.length).toBe(legacyAssignments.length);
-      expect(optimizedAssignments.length).toBe(27); // 3^3 = 27
+      expect(optimizedAssignments.length).toBe(27); // (2+1)^3 = 27
 
       for (let i = 0; i < legacyAssignments.length; i++) {
         expect(optimizedAssignments[i]).toEqual(legacyAssignments[i]);
       }
     });
 
-    it("複合ブロッカー (防壁1体 + 兵士2体): 単独ブロックのみ可能な防壁と複数ブロック可能な兵士が整合すること", () => {
+    it("複合ブロッカー (防壁1体 + 兵士2体): 単独ブロックのみの防壁と複数ブロック可能な兵士が正しく整合すること", () => {
       const attackers = [createSoldierUnit("atk-0")];
       const blockers = [
         { unitId: "bulwark-0", kind: "bulwark", properties: { characterType: "bulwark" } },
@@ -195,18 +115,18 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
         "step1",
         attackers,
         blockers,
-        customComponents
+        customComponents,
+        { maxFullPatternLimit: Infinity }
       );
       const legacyAssignments = legacyResult.request.catalog.effectSelections.map((es) => es.assignments);
 
       const optimizedAssignments: UnitAssignment[][] = [];
-      for (const a of iterateBlockAssignments(attackers, blockers, customComponents)) {
+      for (const a of LegalPatternGenerator.iterateBlockAssignments(attackers, blockers, customComponents)) {
         optimizedAssignments.push(a);
       }
 
       expect(optimizedAssignments.length).toBe(legacyAssignments.length);
-      // 0体(1) + 単独(3: bulwark, s0, s1) + 複数兵士(1: {s0, s1}) = 5パターン
-      expect(optimizedAssignments.length).toBe(5);
+      expect(optimizedAssignments.length).toBe(5); // 0体(1) + 単体(3) + 複数兵士(1) = 5
 
       for (let i = 0; i < legacyAssignments.length; i++) {
         expect(optimizedAssignments[i]).toEqual(legacyAssignments[i]);
@@ -214,111 +134,189 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
     });
   });
 
-  describe("2. 中規模・大規模ケースにおける網羅性・欠落なしの検証", () => {
-    it("A=3, S=4 (4^4 = 256 パターン): 重複なし・一意性・期待件数の検証", () => {
-      const attackers = Array.from({ length: 3 }, (_, i) => createSoldierUnit(`atk-${i}`));
-      const blockers = Array.from({ length: 4 }, (_, i) => createSoldierUnit(`blk-${i}`));
+  // ===========================================================================
+  // B. GenomePolicy のスコア・選択同等性
+  // ===========================================================================
+  describe("B. GenomePolicy のスコア・選択同等性", () => {
+    it("同一盤面・同一DNAにおいて、従来の一括評価とストリーミング評価が完全同一の手を選択すること", () => {
+      const attackers = [createSoldierUnit("atk-0"), createSoldierUnit("atk-1")];
+      const blockers = [createSoldierUnit("blk-0"), createSoldierUnit("blk-1"), createSoldierUnit("blk-2")];
 
-      let count = 0;
-      const signatures = new Set<string>();
+      // 非ゼロ重みを持つテスト用 DNA
+      const dna = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-test" });
+      (dna.patternWeights as number[])[0] = 0.5;
+      (dna.patternWeights as number[])[68] = 1.2; // effAssignSelectedCount 重み
+      (dna.patternWeights as number[])[70] = -0.8; // effAssignSelectedSizeSum 重み
 
-      for (const assignment of iterateBlockAssignments(attackers, blockers, components)) {
-        count++;
-        // 各割り当ての一意シグネチャ (例: "atk-0:blk-0,blk-1|atk-1:|atk-2:blk-2")
-        const sig = assignment
-          .map((a) => `${a.sourceUnitId}:${[...a.selectedUnitIds].sort().join(",")}`)
-          .join("|");
-        signatures.add(sig);
-      }
-
-      expect(count).toBe(256); // (3+1)^4 = 256
-      expect(signatures.size).toBe(256); // 全て一意（重複ゼロ）
-    });
-
-    it("A=3, S=6 (4^6 = 4,096 パターン): 欠落なく全 4,096 パターンが正しく列挙されること", () => {
-      const attackers = Array.from({ length: 3 }, (_, i) => createSoldierUnit(`atk-${i}`));
-      const blockers = Array.from({ length: 6 }, (_, i) => createSoldierUnit(`blk-${i}`));
-
-      let count = 0;
-      for (const _ of iterateBlockAssignments(attackers, blockers, components)) {
-        count++;
-      }
-
-      expect(count).toBe(4096); // (3+1)^6 = 4096
-    });
-  });
-
-  describe("3. 性能・メモリ消費の比較ベンチマーク", () => {
-    it("A=3, S=5 (1,024 パターン): 従来方式 vs 最適化ストリーミング方式のメモリと速度比較", () => {
-      const attackers = Array.from({ length: 3 }, (_, i) => createSoldierUnit(`atk-${i}`));
-      const blockers = Array.from({ length: 5 }, (_, i) => createSoldierUnit(`blk-${i}`));
-
-      // 従来方式（配列アロケーション）
-      const t0 = performance.now();
-      const legacyRes = LegalPatternGenerator.generateBlockAssignmentDecision(
+      const reqLegacy = LegalPatternGenerator.generateBlockAssignmentDecision(
         mockState,
         "p2",
         mockRequest,
         "step1",
         attackers,
         blockers,
-        components
+        components,
+        { maxFullPatternLimit: Infinity }
+      ).request;
+
+      const reqStream = LegalPatternGenerator.generateBlockAssignmentDecision(
+        mockState,
+        "p2",
+        mockRequest,
+        "step1",
+        attackers,
+        blockers,
+        components,
+        { maxFullPatternLimit: 0 } // 強制ストリーミングモード
+      ).request;
+
+      expect(reqLegacy.patterns.length).toBe(27);
+      expect(reqStream.patterns.length).toBe(0);
+      expect(reqStream.blockAssignmentStream).toBeDefined();
+
+      const policy = new GenomePolicy(dna);
+      const resLegacy = policy.choose(reqLegacy);
+      const resStream = policy.choose(reqStream);
+
+      expect(resStream.selectedPatternRef).toBe(resLegacy.selectedPatternRef);
+      expect(reqStream.catalog.effectSelections[resStream.selectedPatternRef]).toBeDefined();
+      expect(reqStream.catalog.effectSelections[resStream.selectedPatternRef].assignments).toEqual(
+        reqLegacy.catalog.effectSelections[resLegacy.selectedPatternRef].assignments
       );
-      const legacyElapsedMs = performance.now() - t0;
-
-      // 最適化方式（ストリーミング・最善手探索シミュレーション）
-      const t1 = performance.now();
-      let bestIndex = -1;
-      let bestScore = -Infinity;
-      let currentIndex = 0;
-
-      // ダミースコア関数 (インライン評価)
-      for (const assignment of iterateBlockAssignments(attackers, blockers, components)) {
-        // 各割り当ての特徴量をその場で計算して argmax を更新（配列アロケートなし）
-        const score = assignment.reduce((sum, a) => sum + a.selectedUnitIds.length, 0);
-        if (score > bestScore) {
-          bestScore = score;
-          bestIndex = currentIndex;
-        }
-        currentIndex++;
-      }
-      const streamElapsedMs = performance.now() - t1;
-
-      console.log(`\n[BENCHMARK] A=3, S=5 (1,024 patterns):`);
-      console.log(`  Legacy (All Array Alloc): ${legacyElapsedMs.toFixed(2)}ms`);
-      console.log(`  Streaming (O(1) Memory):  ${streamElapsedMs.toFixed(2)}ms`);
-      console.log(`  Total Evaluated: ${currentIndex} patterns, Best Index: ${bestIndex}, Best Score: ${bestScore}`);
-
-      expect(currentIndex).toBe(1024);
-      expect(legacyRes.request.patterns.length).toBe(1024);
     });
 
-    it("A=4, S=7 (78,125 パターン): 従来方式なら巨大なメモリを食う局面をストリーミングで安全に完走できること", () => {
-      const attackers = Array.from({ length: 4 }, (_, i) => createSoldierUnit(`atk-${i}`));
-      const blockers = Array.from({ length: 7 }, (_, i) => createSoldierUnit(`blk-${i}`));
+    it("全重みゼロ（全スコア完全同点）の場合に、最小インデックス (先頭手 index 0) が厳格に選択されること", () => {
+      const attackers = [createSoldierUnit("atk-0")];
+      const blockers = [createSoldierUnit("blk-0"), createSoldierUnit("blk-1")];
+      const zeroDna = DecisionDNACodec.createZeroDecisionDNA({ id: "zero" });
 
-      const t0 = performance.now();
-      let count = 0;
-      let maxBlockersUsed = 0;
+      const reqStream = LegalPatternGenerator.generateBlockAssignmentDecision(
+        mockState,
+        "p2",
+        mockRequest,
+        "step1",
+        attackers,
+        blockers,
+        components,
+        { maxFullPatternLimit: 0 }
+      ).request;
 
-      for (const assignment of iterateBlockAssignments(attackers, blockers, components)) {
-        count++;
-        const used = assignment.reduce((sum, a) => sum + a.selectedUnitIds.length, 0);
-        if (used > maxBlockersUsed) maxBlockersUsed = used;
-      }
-      const elapsedMs = performance.now() - t0;
+      const policy = new GenomePolicy(zeroDna);
+      const res = policy.choose(reqStream);
+      expect(res.selectedPatternRef).toBe(0); // 厳格なタイブレーク契約
+    });
 
-      console.log(`\n[BENCHMARK] A=4, S=7 (78,125 patterns):`);
-      console.log(`  Streaming Evaluated: ${count} patterns in ${elapsedMs.toFixed(2)}ms`);
-      console.log(`  Throughput: ${(count / (elapsedMs / 1000)).toFixed(0)} patterns/sec`);
-      console.log(`  Max Blockers Used in Single Pattern: ${maxBlockersUsed}`);
+    it("非有限重み (NaN / Infinity) が与えられた場合に Fail-Closed 例外をスローすること", () => {
+      const attackers = [createSoldierUnit("atk-0")];
+      const blockers = [createSoldierUnit("blk-0")];
 
-      expect(count).toBe(78125); // (4+1)^7 = 78,125
-      expect(maxBlockersUsed).toBe(7);
+      const corruptedDna = DecisionDNACodec.createZeroDecisionDNA({ id: "corrupt" });
+      (corruptedDna.patternWeights as number[])[0] = NaN;
+
+      const reqStream = LegalPatternGenerator.generateBlockAssignmentDecision(
+        mockState,
+        "p2",
+        mockRequest,
+        "step1",
+        attackers,
+        blockers,
+        components,
+        { maxFullPatternLimit: 0 }
+      ).request;
+
+      // コンストラクタ時の Fail-Closed 検証 (DecisionDNAValidationError)
+      expect(() => new GenomePolicy(corruptedDna)).toThrowError(DecisionDNAValidationError);
+
+      // スコア計算時の非有限数 Fail-Closed 検証 (DecisionDNAExecutionError)
+      const validDna = DecisionDNACodec.createZeroDecisionDNA({ id: "valid" });
+      const contextValues = new Array(163).fill(0);
+      const pValues = new Array(143).fill(0);
+      pValues[0] = Infinity;
+      expect(() => GenomeScorer.scoreSinglePattern(contextValues, pValues, validDna)).toThrowError(
+        DecisionDNAExecutionError
+      );
     });
   });
 
-  describe("4. ゲーム状態への適用結果（戦闘解決・ダメージ判定・墓地移動）の同一性検証", () => {
+  // ===========================================================================
+  // C. 大規模テスト (A=4, S=7 / A=4, S=8 / A=4, S=9)
+  // ===========================================================================
+  describe("C. 大規模テスト (A=4, S=7, S=8, S=9) と実機 GenomePolicy 評価速度測定", () => {
+    it("A=4, S=7 (78,125 件): 全合法手を 1 手も切り捨てずに GenomePolicy で全件ストリーミング評価できること", () => {
+      const attackers = Array.from({ length: 4 }, (_, i) => createSoldierUnit(`atk-${i}`));
+      const blockers = Array.from({ length: 7 }, (_, i) => createSoldierUnit(`blk-${i}`));
+      const dna = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-large-7" });
+      (dna.patternWeights as number[])[68] = 0.5;
+
+      const reqStream = LegalPatternGenerator.generateBlockAssignmentDecision(
+        mockState,
+        "p2",
+        mockRequest,
+        "step1",
+        attackers,
+        blockers,
+        components,
+        { maxFullPatternLimit: 0 }
+      ).request;
+
+      expect(reqStream.blockAssignmentStream?.patternCount).toBe(78125); // (4+1)^7 = 78,125
+
+      const policy = new GenomePolicy(dna);
+      const memBefore = process.memoryUsage().heapUsed;
+      const t0 = performance.now();
+      const res = policy.choose(reqStream);
+      const elapsedMs = performance.now() - t0;
+      const memDeltaMb = (process.memoryUsage().heapUsed - memBefore) / 1024 / 1024;
+
+      console.log(`\n[LARGE BENCHMARK A=4, S=7 (78,125 patterns)]`);
+      console.log(`  Elapsed: ${elapsedMs.toFixed(2)}ms`);
+      console.log(`  Throughput: ${(78125 / (elapsedMs / 1000)).toFixed(0)} evaluations/sec`);
+      console.log(`  Heap delta: ${memDeltaMb.toFixed(3)} MB`);
+      console.log(`  Selected PatternRef: ${res.selectedPatternRef}`);
+
+      expect(res.selectedPatternRef).toBeGreaterThanOrEqual(0);
+      expect(res.selectedPatternRef).toBeLessThan(78125);
+      expect(reqStream.catalog.effectSelections[res.selectedPatternRef]).toBeDefined();
+    });
+
+    it("A=4, S=8 (390,625 件): 巨大合法手空間をメモリ破綻なく高速に全件評価できること", () => {
+      const attackers = Array.from({ length: 4 }, (_, i) => createSoldierUnit(`atk-${i}`));
+      const blockers = Array.from({ length: 8 }, (_, i) => createSoldierUnit(`blk-${i}`));
+      const dna = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-large-8" });
+      (dna.patternWeights as number[])[68] = 1.0;
+
+      const reqStream = LegalPatternGenerator.generateBlockAssignmentDecision(
+        mockState,
+        "p2",
+        mockRequest,
+        "step1",
+        attackers,
+        blockers,
+        components,
+        { maxFullPatternLimit: 0 }
+      ).request;
+
+      expect(reqStream.blockAssignmentStream?.patternCount).toBe(390625); // (4+1)^8 = 390,625
+
+      const policy = new GenomePolicy(dna);
+      const t0 = performance.now();
+      const res = policy.choose(reqStream);
+      const elapsedMs = performance.now() - t0;
+
+      console.log(`\n[LARGE BENCHMARK A=4, S=8 (390,625 patterns)]`);
+      console.log(`  Elapsed: ${elapsedMs.toFixed(2)}ms`);
+      console.log(`  Throughput: ${(390625 / (elapsedMs / 1000)).toFixed(0)} evaluations/sec`);
+      console.log(`  Selected PatternRef: ${res.selectedPatternRef}`);
+
+      expect(res.selectedPatternRef).toBeGreaterThanOrEqual(0);
+      expect(res.selectedPatternRef).toBeLessThan(390625);
+    });
+  });
+
+  // ===========================================================================
+  // D. 実機統合テスト (GameSession)
+  // ===========================================================================
+  describe("D. 実機統合テスト (GameSession と Core 状態遷移の検証)", () => {
     let rulePackage: RulePackage;
 
     beforeAll(async () => {
@@ -389,7 +387,7 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
       const state1 = createMatchState();
       const state2 = createMatchState();
 
-      // 従来方式で全パターン生成し、3番目のパターン（例: [b1, b2] 複数ブロック）を選択
+      // 従来方式
       const legacyResult = LegalPatternGenerator.generateBlockAssignmentDecision(
         state1,
         "p2",
@@ -397,30 +395,34 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
         "selectBlockAssignments",
         state1.players.p1.field,
         state1.players.p2.field,
-        rulePackage.components
+        rulePackage.components,
+        { maxFullPatternLimit: Infinity }
       );
-      // [soldier-b1, soldier-b2] を含むパターンを探す
       const targetLegacySel = legacyResult.request.catalog.effectSelections.find(
         (es) => es.assignments?.[0]?.selectedUnitIds.length === 2
       )!;
 
-      // ストリーミング方式から同一インデックス・同一内容のパターンを取得
-      let targetStreamSel: UnitAssignment[] | null = null;
-      for (const a of iterateBlockAssignments(
+      // ストリーミング方式
+      const streamProvider = LegalPatternGenerator.createBlockAssignmentStreamProvider(
         state2.players.p1.field,
         state2.players.p2.field,
         rulePackage.components
-      )) {
+      );
+      let targetStreamIndex = -1;
+      let targetStreamSel: UnitAssignment[] | null = null;
+      let idx = 0;
+      for (const a of streamProvider.iterateAssignments()) {
         if (a[0]?.selectedUnitIds.length === 2) {
           targetStreamSel = a;
+          targetStreamIndex = idx;
           break;
         }
+        idx++;
       }
 
       expect(targetStreamSel).not.toBeNull();
       expect(targetStreamSel).toEqual(targetLegacySel.assignments);
 
-      // 両者をそれぞれゲーム状態に適用
       const registry = new CommandRegistry();
       TurnManager.initializeToMain(state1 as any, "p1");
       TurnManager.initializeToMain(state2 as any, "p1");
@@ -481,6 +483,57 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
       expect(state1.players.p2.field.map((u: any) => u.unitId)).toEqual(
         state2.players.p2.field.map((u: any) => u.unitId)
       );
+    });
+  });
+
+  // ===========================================================================
+  // E. 監査・異常系 (Fail-Closed)
+  // ===========================================================================
+  describe("E. 監査・異常系 (Fail-Closed)", () => {
+    it("FirstLegalPolicy: ストリーミングプロバイダが存在する場合にインデックス 0 を実体化して選択すること", () => {
+      const attackers = [createSoldierUnit("atk-0")];
+      const blockers = [createSoldierUnit("blk-0")];
+
+      const reqStream = LegalPatternGenerator.generateBlockAssignmentDecision(
+        mockState,
+        "p2",
+        mockRequest,
+        "step1",
+        attackers,
+        blockers,
+        components,
+        { maxFullPatternLimit: 0 }
+      ).request;
+
+      const firstLegal = new FirstLegalPolicy();
+      const res = firstLegal.choose(reqStream);
+      expect(res.selectedPatternRef).toBe(0);
+      expect(reqStream.catalog.effectSelections[0]).toBeDefined();
+      expect(reqStream.catalog.effectSelections[0].assignments).toEqual([
+        { sourceUnitId: "atk-0", selectedUnitIds: [] },
+      ]);
+    });
+
+    it("RandomPolicy: ストリーミングプロバイダが存在する場合に全パターン数 N の一様ランダムから実体化して選択すること", () => {
+      const attackers = [createSoldierUnit("atk-0")];
+      const blockers = [createSoldierUnit("blk-0"), createSoldierUnit("blk-1")];
+
+      const reqStream = LegalPatternGenerator.generateBlockAssignmentDecision(
+        mockState,
+        "p2",
+        mockRequest,
+        "step1",
+        attackers,
+        blockers,
+        components,
+        { maxFullPatternLimit: 0 }
+      ).request;
+
+      const randomPolicy = new RandomPolicy(42);
+      const res = randomPolicy.choose(reqStream);
+      expect(res.selectedPatternRef).toBeGreaterThanOrEqual(0);
+      expect(res.selectedPatternRef).toBeLessThan(4);
+      expect(reqStream.catalog.effectSelections[res.selectedPatternRef]).toBeDefined();
     });
   });
 });
