@@ -35,6 +35,7 @@ import {
   Stage3ExecutionOutput,
 } from "../../cli/stage3EvolutionRunner.js";
 import { EvolutionIndependentEvaluator } from "../../engine/ai/EvolutionIndependentEvaluator.js";
+import { EvolutionCampaignManager } from "../../engine/ai/EvolutionCampaignManager.js";
 import { InMemoryCampaignCheckpointStorage } from "../../domain/ai/EvolutionCampaignTypes.js";
 import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec.js";
 
@@ -84,7 +85,7 @@ function createMockValidStage3Fixture(fixtureDir: string) {
   fs.writeFileSync(path.join(fixtureDir, "preflight-manifest.json"), JSON.stringify(manifest, null, 2), "utf-8");
 
   // 2. campaign-stage3-evolution-checkpoint.json
-  const checkpoint = {
+  const checkpointBase = {
     checkpointVersion: 1,
     campaignId: "stage3-large-scale-evolution",
     campaignSeed: CAMPAIGN_SEED,
@@ -113,7 +114,11 @@ function createMockValidStage3Fixture(fixtureDir: string) {
       validationSeeds: seedPlan.validationSeeds,
       allUsedSeeds: seedPlan.allUsedSeeds,
     },
-    stateDigest: "a".repeat(64),
+  };
+  const checkpointChecksum = EvolutionCampaignManager.computeCheckpointChecksum(checkpointBase as any);
+  const checkpoint = {
+    ...checkpointBase,
+    checksum: checkpointChecksum,
   };
   fs.writeFileSync(
     path.join(fixtureDir, "campaign-stage3-evolution-checkpoint.json"),

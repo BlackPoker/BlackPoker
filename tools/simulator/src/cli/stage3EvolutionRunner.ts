@@ -1336,8 +1336,18 @@ export function saveStage3Artifacts(
   savedFiles.push("campaign-stage3-evolution-metrics.json");
 
   // 4. campaign-stage3-evolution-checkpoint.json
-  // (FileCampaignCheckpointStorage により実行中に保存済み)
+  // (FileCampaignCheckpointStorage により stage3-large-scale-evolution-checkpoint.json として保存されたものを正式名へ同期・統一)
+  const defaultSavedCpPath = path.join(artifactsDir, "stage3-large-scale-evolution-checkpoint.json");
   const checkpointPath = path.join(artifactsDir, "campaign-stage3-evolution-checkpoint.json");
+  if (fs.existsSync(defaultSavedCpPath) && !fs.existsSync(checkpointPath)) {
+    fs.renameSync(defaultSavedCpPath, checkpointPath);
+  } else if (fs.existsSync(defaultSavedCpPath) && fs.existsSync(checkpointPath)) {
+    try {
+      fs.unlinkSync(defaultSavedCpPath);
+    } catch {
+      // ignore
+    }
+  }
   if (fs.existsSync(checkpointPath)) {
     savedFiles.push("campaign-stage3-evolution-checkpoint.json");
   }
@@ -1731,10 +1741,21 @@ export function auditStage3Artifacts(
       if (
         cpData.completedGenerations === TOTAL_GENERATIONS &&
         cpData.provisionalBestChampion &&
-        typeof cpData.stateDigest === "string" &&
-        cpData.stateDigest.length === 64
+        typeof cpData.checksum === "string" &&
+        cpData.checksum.length === 64
       ) {
-        checks.checkpointIntegrityVerified = true;
+        const { checksum, ...stateWithoutChecksum } = cpData;
+        let computedChecksum = "";
+        try {
+          computedChecksum = EvolutionCampaignManager.computeCheckpointChecksum(stateWithoutChecksum);
+        } catch (err: any) {
+          errors.push(`Failed to compute checkpoint checksum: ${err.message}`);
+        }
+        if (computedChecksum === checksum) {
+          checks.checkpointIntegrityVerified = true;
+        } else {
+          errors.push(`Checkpoint checksum mismatch: recorded="${checksum}", computed="${computedChecksum}"`);
+        }
       } else {
         errors.push(`Checkpoint state incomplete or invalid completedGenerations: ${cpData.completedGenerations}`);
       }
