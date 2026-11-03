@@ -1119,18 +1119,11 @@ export async function executeStage3Evolution(
 
       evaluatedCandidates.push({
         generation: g,
-        genomeId: h.championCandidate.genomeId,
-        dnaDigest: h.championCandidate.dnaDigest,
-        fitnessScore: h.championCandidate.fitnessScore,
+        genomeId: h.candidateGenomeId,
+        dnaDigest: h.candidateDnaDigest,
+        fitnessScore: h.candidateFitnessScore,
         overallValidationScore: valScores.overallBaselineMeanScore,
       });
-
-      // チェックポイントファイルから世代母集団を復元して多様性計算
-      const cpState = h.checkpointState;
-      if (cpState && cpState.nextPopulation && Array.isArray(cpState.nextPopulation.entries)) {
-        const dnas = cpState.nextPopulation.entries.map((e: any) => e.dna);
-        diversityHistory.push(computeDiversityMetrics(dnas, g));
-      }
 
       genMemoryHistory.push({
         generation: g,
@@ -1144,6 +1137,12 @@ export async function executeStage3Evolution(
         sizeBytes: cpSize,
       });
     }
+  }
+
+  // 多様性指標の計算 (P10 は Gen 9 後の未対戦オフスプリング母集団)
+  if (campaignResult.finalPopulation && campaignResult.finalPopulation.entries) {
+    const popDnas = campaignResult.finalPopulation.entries.map((e: any) => e.dna);
+    diversityHistory.push(computeDiversityMetrics(popDnas, TOTAL_GENERATIONS));
   }
 
   // 世代別処理時間の確定
@@ -1164,7 +1163,7 @@ export async function executeStage3Evolution(
   }
 
   // 最終 Champion の選定確認 (P10 オフスプリングではなく、Gen 0..9 の評価済み個体)
-  const provisionalChampion = campaignResult.logicalResult.provisionalBestChampion;
+  const provisionalChampion = campaignResult.provisionalBestChampion ?? campaignResult.logicalResult?.provisionalBestChampion;
   if (!provisionalChampion) {
     throw new Error("No provisional best champion found in campaignResult");
   }
