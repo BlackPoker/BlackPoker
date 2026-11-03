@@ -1,11 +1,12 @@
 import { describe, it, expect, beforeAll } from "vitest";
-import { LegalPatternGenerator } from "../../engine/decision/LegalPatternGenerator";
-import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
-import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
-import { RulePackage } from "../../domain/rules/RulePackage";
-import { TurnManager } from "../../engine/rules/TurnManager";
-import { isSoldierType } from "../../engine/rules/characterUtils";
-import { LegalPattern, UnitAssignment, EffectSelection } from "../../domain/decision/DecisionTypes";
+import { LegalPatternGenerator } from "../../engine/decision/LegalPatternGenerator.js";
+import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry.js";
+import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader.js";
+import { RulePackage } from "../../domain/rules/RulePackage.js";
+import { TurnManager } from "../../engine/rules/TurnManager.js";
+import { isSoldierType } from "../../engine/rules/characterUtils.js";
+import { LegalPattern } from "../../domain/decision/LegalPattern.js";
+import { UnitAssignment, EffectSelection } from "../../domain/decision/DecisionCatalog.js";
 import * as path from "path";
 
 // =============================================================================
@@ -182,7 +183,7 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
         createSoldierUnit("soldier-0"),
         createSoldierUnit("soldier-1"),
       ];
-      const customComponents = [
+      const customComponents: any = [
         { id: "comp-bulwark", properties: { characterType: "bulwark" } },
         { id: "comp-soldier", properties: { characterType: "soldier" } },
       ];
@@ -468,11 +469,11 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification", () 
       // 結果の完全一致を検証
       expect(state1.players.p1.life).toBe(state2.players.p1.life);
       expect(state1.players.p2.life).toBe(state2.players.p2.life);
-      expect(state1.players.p1.grave?.map((u: any) => u.unitId)).toEqual(
-        state2.players.p1.grave?.map((u: any) => u.unitId)
+      expect(state1.players.p1.graveyard?.map((u: any) => u.unitId)).toEqual(
+        state2.players.p1.graveyard?.map((u: any) => u.unitId)
       );
-      expect(state1.players.p2.grave?.map((u: any) => u.unitId)).toEqual(
-        state2.players.p2.grave?.map((u: any) => u.unitId)
+      expect(state1.players.p2.graveyard?.map((u: any) => u.unitId)).toEqual(
+        state2.players.p2.graveyard?.map((u: any) => u.unitId)
       );
       expect(state1.players.p1.field.map((u: any) => u.unitId)).toEqual(
         state2.players.p1.field.map((u: any) => u.unitId)
