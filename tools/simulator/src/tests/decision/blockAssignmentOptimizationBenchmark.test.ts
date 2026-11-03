@@ -46,7 +46,11 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
     return step.request as DecisionRequest;
   };
 
-  const createLargeBattleSession = () => {
+  const createLargeBattleSession = (options?: {
+    extraDefenders?: any[];
+    customDefenders?: any[];
+    customComponents?: any[];
+  }) => {
     // p1: 3体のアタッカー (soldier-a0, soldier-a1, soldier-a2)
     // p2: 5体の一般兵ブロッカー (soldier-d0..d4)
     // パターン数: (3+1)^5 = 1024 件 (> 256)
@@ -77,7 +81,7 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       },
     ];
 
-    const defenders = Array.from({ length: 5 }, (_, i) => ({
+    let defenders = Array.from({ length: 5 }, (_, i) => ({
       unitId: `soldier-d${i}`,
       kind: "一般兵",
       componentId: "character.soldier",
@@ -85,6 +89,12 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       cards: [{ id: `cd${i}`, suit: "C", rank: "5", value: 5 }],
       labels: ["防御", "攻撃"],
     }));
+
+    if (options?.customDefenders) {
+      defenders = options.customDefenders;
+    } else if (options?.extraDefenders) {
+      defenders = [...defenders, ...options.extraDefenders];
+    }
 
     const state: any = {
       turnPlayer: "p1",
@@ -118,7 +128,11 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       requestBuffer: { requests: [], history: [] },
     };
 
-    const session = new GameSession(state, rulePackage);
+    const activeRulePackage = options?.customComponents
+      ? { ...rulePackage, components: [...rulePackage.components, ...options.customComponents] }
+      : rulePackage;
+
+    const session = new GameSession(state, activeRulePackage);
 
     // 1. p1 が attack を実行
     const step1 = session.advance();
@@ -174,7 +188,7 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       }
     }
 
-    return { session, blockStep: currentStep };
+    return { session, blockStep: currentStep, activeRulePackage };
   };
 
   // ===========================================================================
@@ -1177,6 +1191,218 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       expect(nextStep).toBeDefined();
       const followUpStep = restoredSession.advance();
       expect(followUpStep).toBeDefined();
+    });
+  });
+
+  // ===========================================================================
+  // H. Canonical Blocker Eligibility Alignment (Work 3-5 R6)
+  // ===========================================================================
+  describe("H. Canonical Blocker Eligibility Alignment (Work 3-5 R6)", () => {
+    it("1. Charge兵士5体：正規ブロック候補生成とSnapshot復元で5体すべてが一致し正常復元できること (要件4-1)", () => {
+      const { session, blockStep } = createLargeBattleSession();
+      const req = getReq(blockStep);
+      expect(req.blockAssignmentStreamMeta?.candidateBlockerUnitIds.length).toBe(5);
+
+      const snapshot = session.createSnapshot();
+      const json = GameSessionSnapshotCodec.serialize(snapshot);
+      const restored = GameSession.fromSnapshot(GameSessionSnapshotCodec.deserialize(json), rulePackage);
+      expect(restored.pendingDecision?.blockAssignmentStream?.patternCount).toBe(1024);
+      expect(restored.pendingDecision?.blockAssignmentStreamMeta?.candidateBlockerUnitIds).toEqual(
+        req.blockAssignmentStreamMeta?.candidateBlockerUnitIds
+      );
+    });
+
+    it("2. Charge兵士5体＋Drive兵士1体：Drive兵士を除外し、正常に復元できること (要件4-2)", () => {
+      const extraDefenders = [
+        {
+          unitId: "soldier-d-drive",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          state: "drive",
+          cards: [{ id: "c-drv", suit: "C", rank: "2", value: 2 }],
+          labels: ["防御", "攻撃"],
+        },
+      ];
+      const { session, blockStep } = createLargeBattleSession({ extraDefenders });
+      const req = getReq(blockStep);
+      // Drive兵士は実際のブロック候補生成でも除外されている
+      expect(req.blockAssignmentStreamMeta?.candidateBlockerUnitIds.length).toBe(5);
+      expect(req.blockAssignmentStreamMeta?.candidateBlockerUnitIds).not.toContain("soldier-d-drive");
+
+      const snapshot = session.createSnapshot();
+      const json = GameSessionSnapshotCodec.serialize(snapshot);
+      const restored = GameSession.fromSnapshot(GameSessionSnapshotCodec.deserialize(json), rulePackage);
+      expect(restored.pendingDecision?.blockAssignmentStream?.patternCount).toBe(1024);
+      expect(restored.pendingDecision?.blockAssignmentStreamMeta?.candidateBlockerUnitIds).toEqual(
+        req.blockAssignmentStreamMeta?.candidateBlockerUnitIds
+      );
+    });
+
+    it("3. Charge兵士5体＋防御ラベルのないCharacter1体：防御ラベルのないCharacterを除外し、正常に復元できること (要件4-3)", () => {
+      const customComponents = [
+        {
+          id: "character.attacker_only",
+          name: "突撃兵",
+          type: "character",
+          zone: "field",
+          properties: {
+            characterType: "soldier",
+            labels: ["攻撃"],
+          },
+        },
+      ];
+      const extraDefenders = [
+        {
+          unitId: "soldier-d-nodef",
+          kind: "突撃兵",
+          componentId: "character.attacker_only",
+          state: "charge",
+          cards: [{ id: "c-nodef", suit: "C", rank: "3", value: 3 }],
+          labels: ["攻撃"],
+        },
+      ];
+      const { session, blockStep, activeRulePackage } = createLargeBattleSession({ extraDefenders, customComponents });
+      const req = getReq(blockStep);
+      // 防御ラベルのないCharacterは実際の候補から除外されている
+      expect(req.blockAssignmentStreamMeta?.candidateBlockerUnitIds.length).toBe(5);
+      expect(req.blockAssignmentStreamMeta?.candidateBlockerUnitIds).not.toContain("soldier-d-nodef");
+
+      const snapshot = session.createSnapshot();
+      const json = GameSessionSnapshotCodec.serialize(snapshot);
+      const restored = GameSession.fromSnapshot(GameSessionSnapshotCodec.deserialize(json), activeRulePackage);
+      expect(restored.pendingDecision?.blockAssignmentStream?.patternCount).toBe(1024);
+      expect(restored.pendingDecision?.blockAssignmentStreamMeta?.candidateBlockerUnitIds).toEqual(
+        req.blockAssignmentStreamMeta?.candidateBlockerUnitIds
+      );
+    });
+
+    it("4. Charge兵士5体＋Character以外のユニット1体：Character以外を除外し、正常に復元できること (要件4-4)", () => {
+      const customComponents = [
+        {
+          id: "item.bulwark_plate",
+          name: "防壁プレート",
+          type: "item",
+          zone: "field",
+          properties: {
+            labels: ["防御"],
+          },
+        },
+      ];
+      const extraDefenders = [
+        {
+          unitId: "item-defense",
+          componentId: "item.bulwark_plate",
+          state: "charge",
+          cards: [{ id: "c-item", suit: "C", rank: "4", value: 4 }],
+          labels: ["防御"],
+        },
+      ];
+      const { session, blockStep, activeRulePackage } = createLargeBattleSession({ extraDefenders, customComponents });
+      const req = getReq(blockStep);
+      // Character以外のユニットは実際の候補から除外されている
+      expect(req.blockAssignmentStreamMeta?.candidateBlockerUnitIds.length).toBe(5);
+      expect(req.blockAssignmentStreamMeta?.candidateBlockerUnitIds).not.toContain("item-defense");
+
+      const snapshot = session.createSnapshot();
+      const json = GameSessionSnapshotCodec.serialize(snapshot);
+      const restored = GameSession.fromSnapshot(GameSessionSnapshotCodec.deserialize(json), activeRulePackage);
+      expect(restored.pendingDecision?.blockAssignmentStream?.patternCount).toBe(1024);
+      expect(restored.pendingDecision?.blockAssignmentStreamMeta?.candidateBlockerUnitIds).toEqual(
+        req.blockAssignmentStreamMeta?.candidateBlockerUnitIds
+      );
+    });
+
+    it("5. ユニット自身には防御ラベルがなく、ComponentDefinitionから防御ラベルを継承するCharacter：正規候補生成と同じ判定となること (要件4-5)", () => {
+      // ユニットオブジェクトに labels を設定せず、character.soldier (properties.labels に defense を持つ) を使用
+      const customDefenders = Array.from({ length: 5 }, (_, i) => ({
+        unitId: `soldier-inherited-${i}`,
+        kind: "一般兵",
+        componentId: "character.soldier",
+        state: "charge",
+        cards: [{ id: `cd${i}`, suit: "C", rank: "5", value: 5 }],
+      }));
+      const { session, blockStep } = createLargeBattleSession({ customDefenders });
+      const req = getReq(blockStep);
+      // 5体すべてがブロッカー候補として正規生成されている
+      expect(req.blockAssignmentStreamMeta?.candidateBlockerUnitIds.length).toBe(5);
+      expect(req.blockAssignmentStreamMeta?.candidateBlockerUnitIds).toEqual(
+        customDefenders.map((u) => u.unitId)
+      );
+
+      const snapshot = session.createSnapshot();
+      const json = GameSessionSnapshotCodec.serialize(snapshot);
+      const restored = GameSession.fromSnapshot(GameSessionSnapshotCodec.deserialize(json), rulePackage);
+      expect(restored.pendingDecision?.blockAssignmentStream?.patternCount).toBe(1024);
+      expect(restored.pendingDecision?.blockAssignmentStreamMeta?.candidateBlockerUnitIds).toEqual(
+        req.blockAssignmentStreamMeta?.candidateBlockerUnitIds
+      );
+    });
+
+    it("6. 実際に正規候補となるユニットをSnapshotメタデータから削除した場合：Fail-Closed (要件4-6)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+      const parsed = JSON.parse(JSON.stringify(snapshot));
+      const origCandidateIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds;
+      // 5体のうち1体をメタデータから削除 (4体に削減)
+      parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds = origCandidateIds.slice(1);
+
+      expect(() => {
+        GameSession.fromSnapshot(parsed, rulePackage);
+      }).toThrowError(/ブロッカー候補数が盤面導出結果と一致しません/);
+    });
+
+    it("7. 正規候補に含まれないユニットをSnapshotメタデータへ追加した場合：Fail-Closed (要件4-7)", () => {
+      const extraDefenders = [
+        {
+          unitId: "soldier-d-drive",
+          kind: "一般兵",
+          componentId: "character.soldier",
+          state: "drive",
+          cards: [{ id: "c-drv", suit: "C", rank: "2", value: 2 }],
+          labels: ["防御", "攻撃"],
+        },
+      ];
+      const { session } = createLargeBattleSession({ extraDefenders });
+      const snapshot = session.createSnapshot();
+      const parsed = JSON.parse(JSON.stringify(snapshot));
+      // 非正規候補（drive兵士）をメタデータに追加
+      parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds.push("soldier-d-drive");
+
+      expect(() => {
+        GameSession.fromSnapshot(parsed, rulePackage);
+      }).toThrowError(/ブロッカー候補数が盤面導出結果と一致しません/);
+    });
+
+    it("8. 実際のGameSessionからブロック判断を発生させ、Snapshot保存・復元後、同一の論理PatternRefが同一のUnitAssignmentを指し、解決できること (要件4)", () => {
+      const { session, blockStep } = createLargeBattleSession();
+      const req = getReq(blockStep);
+
+      const snapshot = session.createSnapshot();
+      const json = GameSessionSnapshotCodec.serialize(snapshot);
+      const restored = GameSession.fromSnapshot(GameSessionSnapshotCodec.deserialize(json), rulePackage);
+      const restoredReq = restored.pendingDecision!;
+
+      // 複数論理PatternRefについて UnitAssignment の完全一致を検証
+      const checkIndices = [0, 1, 10, 42, 100, 255, 512, 1023];
+      for (const idx of checkIndices) {
+        const origAssignment = req.blockAssignmentStream?.getAssignmentAt(idx);
+        const restoredAssignment = restoredReq.blockAssignmentStream?.getAssignmentAt(idx);
+        expect(restoredAssignment).toBeDefined();
+        expect(restoredAssignment).toEqual(origAssignment);
+      }
+
+      // GenomePolicy による先頭以外の手の選択と正常解決
+      const dna = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-r6-verify" });
+      (dna.patternWeights as number[])[73] = 4.0;
+      (dna.patternWeights as number[])[127] = 4.0;
+      const policy = new GenomePolicy(dna);
+      const res = policy.choose(restoredReq);
+      expect(res.selectedPatternRef).toBeGreaterThan(0);
+
+      const nextStep = restored.submitDecision(res);
+      expect(nextStep).toBeDefined();
+      const followUp = restored.advance();
+      expect(followUp).toBeDefined();
     });
   });
 });

@@ -18,7 +18,7 @@ import {
 } from "../../domain/session/GameSessionSnapshot";
 import { GameSessionSnapshotCodec } from "./GameSessionSnapshotCodec";
 import { GraveTopCoordinator } from "../rules/GraveTopCoordinator";
-import { hasUnitLabel } from "../rules/characterUtils";
+import { hasUnitLabel, isLegalBlockerCandidate } from "../rules/characterUtils";
 
 /**
  * 即時誘発アクションの効果実行完了後、墓地TOP選択待ちを表す汎用ステップID
@@ -411,16 +411,10 @@ export class GameSession {
       }
     }
 
-    // 2. 正規のブロッカー候補導出 (defenderField 内の charge/drive かつ 防御適格ユニットを配列順序で抽出)
-    const canonicalBlockers = defenderField.filter((u: any) => {
-      const isStateValid = u.state === "charge" || u.state === "drive";
-      if (!isStateValid) return false;
-      const hasLabels = (u.labels && u.labels.length > 0) || this.rulePackage.components.some((c) => c.id === u.componentId && (c.properties?.labels || c.display?.labels));
-      if (hasLabels) {
-        return hasUnitLabel(u, "防御", this.rulePackage.components);
-      }
-      return true;
-    });
+    // 2. 正規のブロッカー候補導出 (defenderField 内の charge状態・character・防御ラベル適格ユニットを配列順序で抽出)
+    const canonicalBlockers = defenderField.filter((u: any) =>
+      isLegalBlockerCandidate(u, this.rulePackage.components)
+    );
     const canonicalBlockerIds = canonicalBlockers.map((u: any) => u.unitId ?? u.id);
 
     if (canonicalBlockerIds.length !== meta.candidateBlockerUnitIds.length) {
