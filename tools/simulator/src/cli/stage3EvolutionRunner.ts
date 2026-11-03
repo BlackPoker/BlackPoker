@@ -808,6 +808,15 @@ export class InstrumentedCheckpointStorage implements CampaignCheckpointStorage 
     } catch {
       // fallback
     }
+
+    // 世代チェックポイント保存後に不要オブジェクトを強制GC回収（メモリ安全性保証）
+    if (typeof (global as any).gc === "function") {
+      try {
+        (global as any).gc();
+      } catch {
+        // ignore
+      }
+    }
   }
 
   load(filePath: string): string | null {
@@ -1741,78 +1750,105 @@ export async function runStage3Evolution(
   artifactsDir: string = DEFAULT_STAGE3_ARTIFACTS_DIR,
   options?: { readonly allowDirty?: boolean }
 ): Promise<Stage3ExecutionOutput> {
-  console.log(`================================================================================`);
-  console.log(`[Stage 3 Large-Scale Evolution] Starting Work 3-5 (1,920 Matches Total)`);
-  console.log(`================================================================================`);
-  console.log(`Work ID:             ${WORK_ID}`);
-  console.log(`Regulation:          ${REGULATION_ID} (${FRAME_ID})`);
-  console.log(`Population Size (N): ${POPULATION_SIZE}`);
-  console.log(`Generations (G):     ${TOTAL_GENERATIONS}`);
-  console.log(`Campaign Seed:       ${CAMPAIGN_SEED}`);
-  console.log(`Artifacts Root:      ${artifactsDir}`);
-  console.log(`--------------------------------------------------------------------------------`);
+  // Core の大量 [TRIGGER] / [BUFFER-] ログを抑制し、メモリ肥大化を防止
+  const origConsoleLog = console.log;
+  console.log = (...args: any[]) => {
+    const first = typeof args[0] === "string" ? args[0] : "";
+    if (
+      first.startsWith("[Stage 3") ||
+      first.startsWith("===") ||
+      first.startsWith("---") ||
+      first.startsWith("[Step") ||
+      first.startsWith("  ") ||
+      first.startsWith("Campaign") ||
+      first.startsWith("Work ID") ||
+      first.startsWith("Regulation") ||
+      first.startsWith("Population") ||
+      first.startsWith("Generations") ||
+      first.startsWith("Campaign Seed") ||
+      first.startsWith("Artifacts") ||
+      first.startsWith("[Gen ")
+    ) {
+      origConsoleLog(...args);
+    }
+  };
 
-  // Step 1: Preflight Check
-  console.log(`[Step 1] Running Preflight Checks...`);
-  const preflight = await runPreflightCheck(artifactsDir, options);
-  if (!preflight.isValid) {
-    console.error("Preflight check FAILED with errors:", preflight.errors);
-    throw new Error(`Preflight check failed: ${preflight.errors.join("; ")}`);
+  try {
+    console.log(`================================================================================`);
+    console.log(`[Stage 3 Large-Scale Evolution] Starting Work 3-5 (1,920 Matches Total)`);
+    console.log(`================================================================================`);
+    console.log(`Work ID:             ${WORK_ID}`);
+    console.log(`Regulation:          ${REGULATION_ID} (${FRAME_ID})`);
+    console.log(`Population Size (N): ${POPULATION_SIZE}`);
+    console.log(`Generations (G):     ${TOTAL_GENERATIONS}`);
+    console.log(`Campaign Seed:       ${CAMPAIGN_SEED}`);
+    console.log(`Artifacts Root:      ${artifactsDir}`);
+    console.log(`--------------------------------------------------------------------------------`);
+
+    // Step 1: Preflight Check
+    console.log(`[Step 1] Running Preflight Checks...`);
+    const preflight = await runPreflightCheck(artifactsDir, options);
+    if (!preflight.isValid) {
+      origConsoleLog("Preflight check FAILED with errors:", preflight.errors);
+      throw new Error(`Preflight check failed: ${preflight.errors.join("; ")}`);
+    }
+    console.log(`  Git Commit SHA:    ${preflight.manifest.gitCommitSha}`);
+    console.log(`  Git Working Tree:  ${preflight.manifest.isGitClean ? "CLEAN (Verified)" : "DIRTY (Allowed by option)"}`);
+    console.log(`  Seed Integrity:    660 unique Training seeds + 15 Validation seeds verified without collisions`);
+    console.log(`  Preflight Status:  PASS`);
+
+    // Preflight Manifest 保存
+    fs.mkdirSync(artifactsDir, { recursive: true });
+    fs.writeFileSync(
+      path.join(artifactsDir, "preflight-manifest.json"),
+      JSON.stringify(preflight.manifest, null, 2),
+      "utf-8"
+    );
+
+    // Step 2: 10世代進化実行 (1,320 Training + 600 Validation)
+    console.log(`--------------------------------------------------------------------------------`);
+    console.log(`[Step 2] Executing 10 Generations Evolution (1,320 Training + 600 Validation = 1,920 Matches)...`);
+    const execOutput = await executeStage3Evolution(preflight.seedPlan, artifactsDir);
+
+    console.log(`Campaign Finished:`);
+    console.log(`  Status:              ${execOutput.campaignResult.status}`);
+    console.log(`  Generations:         ${execOutput.campaignResult.completedGenerations}/${TOTAL_GENERATIONS}`);
+    console.log(`  Training Matches:    ${execOutput.trainingMatchesExecuted}/1320`);
+    console.log(`  Validation Matches:  ${execOutput.validationMatchesExecuted}/600`);
+    console.log(`  Total Matches:       ${execOutput.totalMatchesExecuted}/1920`);
+    console.log(`  Matches Detail:      COMPLETED: ${execOutput.completedMatches}, FAILED: ${execOutput.failedMatches}, INCOMPLETE: ${execOutput.incompleteMatches}`);
+    console.log(`  Total Decisions:     ${execOutput.decisionStats.total.totalDecisions} (Training: ${execOutput.decisionStats.training.totalDecisions}, Validation: ${execOutput.decisionStats.validation.totalDecisions})`);
+    console.log(`  PASS Decisions:      ${execOutput.passAndStallTelemetry.total.totalPassDecisions} (${(execOutput.passAndStallTelemetry.total.passRatio * 100).toFixed(2)}%)`);
+    console.log(`  Max Consec. PASS:    ${execOutput.passAndStallTelemetry.total.maxConsecutivePassesInSingleMatch}`);
+    console.log(`  Elapsed Time:        ${(execOutput.elapsedTotalMs / 1000).toFixed(2)}s (${execOutput.throughputMatchesPerSec.toFixed(1)} matches/sec, ${execOutput.throughputDecisionsPerSec.toFixed(1)} decisions/sec)`);
+    console.log(`  Peak Memory:         RSS: ${(execOutput.sampledPeakRssBytes / 1024 / 1024).toFixed(1)} MB, Heap: ${(execOutput.sampledPeakHeapUsedBytes / 1024 / 1024).toFixed(1)} MB (Sampled)`);
+
+    const finalChamp = execOutput.finalChampion;
+    console.log(`  Best Champion:       ${finalChamp.genomeId} (Gen: ${finalChamp.generation}, Digest: ${finalChamp.dnaDigest}, ValWR: ${finalChamp.validationMeanWinRate.toFixed(3)})`);
+
+    // Step 3: 結果ファイル保存
+    console.log(`--------------------------------------------------------------------------------`);
+    console.log(`[Step 3] Saving Logical Results, Metrics, Evidence, and Manifest...`);
+    const savedArtifacts = saveStage3Artifacts(execOutput, preflight.manifest, artifactsDir);
+    console.log(`  Saved Files:         ${savedArtifacts.savedFiles.join(", ")}`);
+
+    // Step 4: 独立監査
+    console.log(`--------------------------------------------------------------------------------`);
+    console.log(`[Step 4] Running Fail-Closed Self-Audit on Saved Artifacts...`);
+    const auditResult = auditStage3Artifacts(artifactsDir);
+    if (!auditResult.isValid) {
+      origConsoleLog("Stage 3 Self-Audit FAILED with errors:", auditResult.errors);
+      throw new Error(`Stage 3 Self-Audit failed: ${auditResult.errors.join("; ")}`);
+    }
+    console.log(`  Self-Audit:          PASS (All 11 checks verified)`);
+    console.log(`================================================================================`);
+    console.log(`[Stage 3 Large-Scale Evolution] COMPLETED SUCCESSFULLY (READY FOR PRE-HOLDOUT REVIEW)`);
+    console.log(`================================================================================`);
+
+    return execOutput;
+  } finally {
+    console.log = origConsoleLog;
   }
-  console.log(`  Git Commit SHA:    ${preflight.manifest.gitCommitSha}`);
-  console.log(`  Git Working Tree:  ${preflight.manifest.isGitClean ? "CLEAN (Verified)" : "DIRTY (Allowed by option)"}`);
-  console.log(`  Seed Integrity:    660 unique Training seeds + 15 Validation seeds verified without collisions`);
-  console.log(`  Preflight Status:  PASS`);
-
-  // Preflight Manifest 保存
-  fs.mkdirSync(artifactsDir, { recursive: true });
-  fs.writeFileSync(
-    path.join(artifactsDir, "preflight-manifest.json"),
-    JSON.stringify(preflight.manifest, null, 2),
-    "utf-8"
-  );
-
-  // Step 2: 10世代進化実行 (1,320 Training + 600 Validation)
-  console.log(`--------------------------------------------------------------------------------`);
-  console.log(`[Step 2] Executing 10 Generations Evolution (1,320 Training + 600 Validation = 1,920 Matches)...`);
-  const execOutput = await executeStage3Evolution(preflight.seedPlan, artifactsDir);
-
-  console.log(`Campaign Finished:`);
-  console.log(`  Status:              ${execOutput.campaignResult.status}`);
-  console.log(`  Generations:         ${execOutput.campaignResult.completedGenerations}/${TOTAL_GENERATIONS}`);
-  console.log(`  Training Matches:    ${execOutput.trainingMatchesExecuted}/1320`);
-  console.log(`  Validation Matches:  ${execOutput.validationMatchesExecuted}/600`);
-  console.log(`  Total Matches:       ${execOutput.totalMatchesExecuted}/1920`);
-  console.log(`  Matches Detail:      COMPLETED: ${execOutput.completedMatches}, FAILED: ${execOutput.failedMatches}, INCOMPLETE: ${execOutput.incompleteMatches}`);
-  console.log(`  Total Decisions:     ${execOutput.decisionStats.total.totalDecisions} (Training: ${execOutput.decisionStats.training.totalDecisions}, Validation: ${execOutput.decisionStats.validation.totalDecisions})`);
-  console.log(`  PASS Decisions:      ${execOutput.passAndStallTelemetry.total.totalPassDecisions} (${(execOutput.passAndStallTelemetry.total.passRatio * 100).toFixed(2)}%)`);
-  console.log(`  Max Consec. PASS:    ${execOutput.passAndStallTelemetry.total.maxConsecutivePassesInSingleMatch}`);
-  console.log(`  Elapsed Time:        ${(execOutput.elapsedTotalMs / 1000).toFixed(2)}s (${execOutput.throughputMatchesPerSec.toFixed(1)} matches/sec, ${execOutput.throughputDecisionsPerSec.toFixed(1)} decisions/sec)`);
-  console.log(`  Peak Memory:         RSS: ${(execOutput.sampledPeakRssBytes / 1024 / 1024).toFixed(1)} MB, Heap: ${(execOutput.sampledPeakHeapUsedBytes / 1024 / 1024).toFixed(1)} MB (Sampled)`);
-
-  const finalChamp = execOutput.finalChampion;
-  console.log(`  Best Champion:       ${finalChamp.genomeId} (Gen: ${finalChamp.generation}, Digest: ${finalChamp.dnaDigest}, ValWR: ${finalChamp.validationMeanWinRate.toFixed(3)})`);
-
-  // Step 3: 結果ファイル保存
-  console.log(`--------------------------------------------------------------------------------`);
-  console.log(`[Step 3] Saving Logical Results, Metrics, Evidence, and Manifest...`);
-  const savedArtifacts = saveStage3Artifacts(execOutput, preflight.manifest, artifactsDir);
-  console.log(`  Saved Files:         ${savedArtifacts.savedFiles.join(", ")}`);
-
-  // Step 4: 独立監査
-  console.log(`--------------------------------------------------------------------------------`);
-  console.log(`[Step 4] Running Fail-Closed Self-Audit on Saved Artifacts...`);
-  const auditResult = auditStage3Artifacts(artifactsDir);
-  if (!auditResult.isValid) {
-    console.error("Stage 3 Self-Audit FAILED with errors:", auditResult.errors);
-    throw new Error(`Stage 3 Self-Audit failed: ${auditResult.errors.join("; ")}`);
-  }
-  console.log(`  Self-Audit:          PASS (All 11 checks verified)`);
-  console.log(`================================================================================`);
-  console.log(`[Stage 3 Large-Scale Evolution] COMPLETED SUCCESSFULLY (READY FOR PRE-HOLDOUT REVIEW)`);
-  console.log(`================================================================================`);
-
-  return execOutput;
 }
 
 // 直接実行時のエントリポイント
