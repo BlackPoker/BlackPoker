@@ -1045,14 +1045,27 @@ export class LegalPatternGenerator {
     components: readonly ComponentDefinition[] = []
   ): BlockAssignmentStreamProvider {
     const patternCount = this.calculateBlockAssignmentPatternCount(attackers, candidateBlockers, components);
+    if (!Number.isSafeInteger(patternCount) || patternCount < 0) {
+      throw new Error(
+        `Block assignment pattern count overflow: calculated ${patternCount} exceeds Number.MAX_SAFE_INTEGER.`
+      );
+    }
+
+    const candidateCount = candidateBlockers.length;
+    const attackerCount = attackers.length;
 
     return {
       patternCount,
+      candidateCount,
+      attackerCount,
       iterateAssignments: () => this.iterateBlockAssignments(attackers, candidateBlockers, components),
       getAssignmentAt: (index: number) => this.getBlockAssignmentAt(index, attackers, candidateBlockers, components),
       createSummary: (assignments: readonly UnitAssignment[]) =>
         this.createBlockAssignmentSummary(assignments, attackers, candidateBlockers),
       instantiatePatternAt: (index: number) => {
+        if (!Number.isSafeInteger(index) || index < 0 || index >= patternCount) {
+          return undefined;
+        }
         const assignments = this.getBlockAssignmentAt(index, attackers, candidateBlockers, components);
         if (!assignments) return undefined;
         const summary = this.createBlockAssignmentSummary(assignments, attackers, candidateBlockers);
@@ -1060,7 +1073,7 @@ export class LegalPatternGenerator {
           selectionType: "unitAssignment",
           assignments,
           summary,
-          candidateCount: candidateBlockers.length,
+          candidateCount,
         };
         const pattern: LegalPattern = {
           patternId: `pat-block-${index}`,
@@ -1160,6 +1173,10 @@ export class LegalPatternGenerator {
       patterns,
       observation,
       blockAssignmentStream: streamProvider,
+      blockAssignmentStreamMeta: {
+        attackerUnitIds: attackers.map((u: any) => u.unitId ?? u.id ?? ""),
+        candidateBlockerUnitIds: candidateBlockers.map((u: any) => u.unitId ?? u.id ?? ""),
+      },
     };
 
     return { request, metrics };

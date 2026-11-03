@@ -1,6 +1,7 @@
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { TargetSelection } from "../../domain/decision/DecisionCatalog";
+import { LegalPattern } from "../../domain/decision/LegalPattern";
 import { PlayerKey, RequestRef, RULE_SYSTEM_CHANCE } from "../../domain/decision/DecisionSource";
 import { RulePackage } from "../../domain/rules/RulePackage";
 import { CommandRegistry } from "../rules/CommandRegistry";
@@ -280,6 +281,59 @@ export class GameSession {
         logRecorder: this.logRecorder,
         matchSeed: this.matchSeed,
       };
+    }
+
+    this.rehydratePendingDecisionStream();
+  }
+
+  /**
+   * Snapshot 復元後に、JSONシリアライズできないストリーミングプロバイダを盤面状態と識別情報から再構築
+   */
+  public rehydratePendingDecisionStream(): void {
+    if (!this.pendingDecision) return;
+
+    // 1. blockAssignmentStreamMeta が存在する場合の再構築
+    if (this.pendingDecision.blockAssignmentStreamMeta) {
+      const meta = this.pendingDecision.blockAssignmentStreamMeta;
+      const allUnits: any[] = [];
+      for (const p of Object.values<any>(this.state.players || {})) {
+        if (p.field) allUnits.push(...p.field);
+        if (p.trumps) allUnits.push(...p.trumps);
+      }
+      const unitMap = new Map<string, any>();
+      for (const u of allUnits) {
+        if (u.unitId) unitMap.set(u.unitId, u);
+      }
+
+      const attackers = meta.attackerUnitIds.map((id) => unitMap.get(id)).filter(Boolean);
+      const candidates = meta.candidateBlockerUnitIds.map((id) => unitMap.get(id)).filter(Boolean);
+
+      (this.pendingDecision as any).blockAssignmentStream =
+        LegalPatternGenerator.createBlockAssignmentStreamProvider(
+          attackers,
+          candidates,
+          this.rulePackage.components
+        );
+      return;
+    }
+
+    // 2. blockAssignmentStream が未設定かつ EFFECT_RESOLUTION かつ action.block の場合
+    if (
+      this.pendingDecision.source.type === "EFFECT_RESOLUTION" &&
+      (this.pendingDecision.source as any).sourceActionId === "action.block" &&
+      (!this.pendingDecision.patterns || this.pendingDecision.patterns.length === 0)
+    ) {
+      const decPlayer = this.pendingDecision.playerId;
+      const oppPlayerKey = decPlayer === "p1" ? "p2" : "p1";
+      const defenders = (this.state.players?.[decPlayer]?.field || []).filter((u: any) => u.state === "charge" || u.state === "drive");
+      const attackers = (this.state.players?.[oppPlayerKey]?.field || []).filter((u: any) => u.battle?.role === "attacker");
+
+      (this.pendingDecision as any).blockAssignmentStream =
+        LegalPatternGenerator.createBlockAssignmentStreamProvider(
+          attackers,
+          defenders,
+          this.rulePackage.components
+        );
     }
   }
 
@@ -654,7 +708,7 @@ export class GameSession {
     if (this.pendingDecision.source.type === "ZONE_TOP_SELECTION") {
       const pattern = this.pendingDecision.patterns[response.selectedPatternRef];
       let selectedCardId: string | undefined = undefined;
-      if (pattern.effectSelectionRef !== undefined) {
+      if (pattern && pattern.effectSelectionRef !== undefined) {
         const effSel = this.pendingDecision.catalog.effectSelections[pattern.effectSelectionRef];
         if (effSel?.selectedValues && effSel.selectedValues.length > 0) {
           selectedCardId = effSel.selectedValues[0];
@@ -754,12 +808,30 @@ export class GameSession {
 
     // 1. 効果解決時の判断 (EFFECT_RESOLUTION) の場合
     if (this.pendingDecision.source.type === "EFFECT_RESOLUTION") {
-      const pattern = this.pendingDecision.patterns[response.selectedPatternRef];
+      let pattern: LegalPattern | undefined;
       let selectedValues: readonly string[] | undefined = undefined;
       let assignments: readonly any[] | undefined = undefined;
       let targetSelection: TargetSelection | undefined = undefined;
 
-      if (pattern.effectSelectionRef !== undefined) {
+      if (
+        this.pendingDecision.blockAssignmentStream &&
+        (!this.pendingDecision.patterns || this.pendingDecision.patterns.length === 0)
+      ) {
+        const instantiated = this.pendingDecision.blockAssignmentStream.instantiatePatternAt(
+          response.selectedPatternRef
+        );
+        if (!instantiated) {
+          throw new Error(`ストリーミングインデックス ${response.selectedPatternRef} の実体化に失敗しました。`);
+        }
+        pattern = instantiated.pattern;
+        assignments = instantiated.effectSelection.assignments;
+        selectedValues = instantiated.effectSelection.selectedValues;
+        targetSelection = instantiated.effectSelection.targetSelection;
+      } else {
+        pattern = this.pendingDecision.patterns[response.selectedPatternRef];
+      }
+
+      if (pattern && pattern.effectSelectionRef !== undefined && !assignments) {
         const effSel = this.pendingDecision.catalog.effectSelections[pattern.effectSelectionRef];
         if (effSel) {
           selectedValues = effSel.selectedValues;

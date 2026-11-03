@@ -30,7 +30,12 @@ export class PatternExecutor {
     // 1. レスポンスの検証
     this.validateResponse(request, response);
 
-    const pattern = request.patterns[response.selectedPatternRef];
+    const pattern = (request.blockAssignmentStream && (!request.patterns || request.patterns.length === 0))
+      ? request.blockAssignmentStream.instantiatePatternAt(response.selectedPatternRef)?.pattern
+      : request.patterns[response.selectedPatternRef];
+    if (!pattern) {
+      throw new Error(`選択されたパターンの取得に失敗しました: ${response.selectedPatternRef}`);
+    }
     if (pattern.kind === "PASS") {
       return {};
     }
@@ -193,11 +198,13 @@ export class PatternExecutor {
     }
     if (
       response.selectedPatternRef < 0 ||
-      response.selectedPatternRef >= request.patterns.length
+      (!Number.isSafeInteger(response.selectedPatternRef)) ||
+      (request.blockAssignmentStream && (!request.patterns || request.patterns.length === 0) && (response.selectedPatternRef >= request.blockAssignmentStream.patternCount || !Number.isSafeInteger(request.blockAssignmentStream.patternCount) || request.blockAssignmentStream.patternCount < 0)) ||
+      ((!request.blockAssignmentStream || (request.patterns && request.patterns.length > 0)) && response.selectedPatternRef >= request.patterns.length)
     ) {
       throw new Error(
         `selectedPatternRef が範囲外です。インデックス: ${response.selectedPatternRef}, 有効範囲: 0..${
-          request.patterns.length - 1
+          (request.blockAssignmentStream && (!request.patterns || request.patterns.length === 0) ? request.blockAssignmentStream.patternCount : request.patterns.length) - 1
         }`
       );
     }

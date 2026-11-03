@@ -52,16 +52,6 @@ export class FirstLegalPolicy implements DecisionPolicy {
 
   choose(request: Readonly<DecisionRequest>): DecisionResponse {
     if (request.blockAssignmentStream && (!request.patterns || request.patterns.length === 0)) {
-      const stream = request.blockAssignmentStream;
-      const instantiated = stream.instantiatePatternAt(0);
-      if (instantiated) {
-        if (request.catalog?.effectSelections && !request.catalog.effectSelections[0]) {
-          (request.catalog.effectSelections as any)[0] = instantiated.effectSelection;
-        }
-        if (request.patterns && !request.patterns.some((p) => (p as any).effectSelectionRef === 0)) {
-          (request.patterns as any).push(instantiated.pattern);
-        }
-      }
       return {
         decisionId: request.decisionId,
         stateVersion: request.stateVersion,
@@ -138,15 +128,6 @@ export class RandomPolicy implements DecisionPolicy {
       const N = stream.patternCount;
       const randomIndex = N > 0 ? this.rng.nextInt(0, N - 1) : 0;
       const clampedIndex = Math.max(0, Math.min(randomIndex, N - 1));
-      const instantiated = stream.instantiatePatternAt(clampedIndex);
-      if (instantiated) {
-        if (request.catalog?.effectSelections && !request.catalog.effectSelections[clampedIndex]) {
-          (request.catalog.effectSelections as any)[clampedIndex] = instantiated.effectSelection;
-        }
-        if (request.patterns && !request.patterns.some((p) => (p as any).effectSelectionRef === clampedIndex)) {
-          (request.patterns as any).push(instantiated.pattern);
-        }
-      }
       return {
         decisionId: request.decisionId,
         stateVersion: request.stateVersion,

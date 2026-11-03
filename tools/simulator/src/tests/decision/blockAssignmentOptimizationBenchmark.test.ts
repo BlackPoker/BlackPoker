@@ -11,12 +11,22 @@ import { DecisionRequest, BlockAssignmentStreamProvider } from "../../domain/dec
 import { GenomePolicy } from "../../engine/ai/GenomePolicy.js";
 import { GenomeScorer } from "../../engine/ai/GenomeScorer.js";
 import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec.js";
+import { DecisionFeatureEncoder } from "../../engine/ai/DecisionFeatureEncoder.js";
 import { DecisionDNA, DecisionDNAExecutionError, DecisionDNAValidationError } from "../../domain/ai/DecisionDNATypes.js";
 import { FirstLegalPolicy, RandomPolicy } from "../../engine/simulation/DecisionPolicy.js";
 import { GameSession } from "../../engine/session/GameSession.js";
+import { GameSessionSnapshotCodec } from "../../engine/session/GameSessionSnapshotCodec.js";
+import { SimulationRunner } from "../../engine/simulation/SimulationRunner.js";
 import * as path from "path";
 
 describe("Block Assignment Optimization Benchmark & Integrity Verification (Work 3-5 R2)", () => {
+  let rulePackage: RulePackage;
+
+  beforeAll(async () => {
+    const rulesDir = path.resolve(__dirname, "../../data/rules-vnext");
+    rulePackage = await loadRulePackageFromDirectory(rulesDir);
+  });
+
   const components: any[] = [{ id: "comp-soldier", properties: { characterType: "soldier" } }];
   const mockRequest: any = { id: "req-block", actionId: "action.block" };
   const mockState: any = { stateVersion: 1, players: {} };
@@ -27,6 +37,144 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
     componentId: "comp-soldier",
     properties: { characterType: "soldier" },
   });
+
+  const getReq = (step: any): DecisionRequest => {
+    if (!step || step.type !== "WAITING_FOR_DECISION" || !step.request) {
+      throw new Error(`Expected WAITING_FOR_DECISION step with request, got: ${JSON.stringify(step)}`);
+    }
+    return step.request as DecisionRequest;
+  };
+
+  const createLargeBattleSession = () => {
+    // p1: 3体のアタッカー (soldier-a0, soldier-a1, soldier-a2)
+    // p2: 5体の一般兵ブロッカー (soldier-d0..d4)
+    // パターン数: (3+1)^5 = 1024 件 (> 256)
+    const attackers = [
+      {
+        unitId: "soldier-a0",
+        kind: "一般兵",
+        componentId: "character.soldier",
+        state: "charge",
+        cards: [{ id: "ca0", suit: "S", rank: "8", value: 8 }],
+        labels: ["攻撃", "防御"],
+      },
+      {
+        unitId: "soldier-a1",
+        kind: "一般兵",
+        componentId: "character.soldier",
+        state: "charge",
+        cards: [{ id: "ca1", suit: "H", rank: "6", value: 6 }],
+        labels: ["攻撃", "防御"],
+      },
+      {
+        unitId: "soldier-a2",
+        kind: "一般兵",
+        componentId: "character.soldier",
+        state: "charge",
+        cards: [{ id: "ca2", suit: "D", rank: "4", value: 4 }],
+        labels: ["攻撃", "防御"],
+      },
+    ];
+
+    const defenders = Array.from({ length: 5 }, (_, i) => ({
+      unitId: `soldier-d${i}`,
+      kind: "一般兵",
+      componentId: "character.soldier",
+      state: "charge",
+      cards: [{ id: `cd${i}`, suit: "C", rank: "5", value: 5 }],
+      labels: ["防御", "攻撃"],
+    }));
+
+    const state: any = {
+      turnPlayer: "p1",
+      chancePlayer: "p1",
+      players: {
+        p1: {
+          name: "Player 1",
+          life: [
+            { id: "l1-1", suit: "S", rank: "A", value: 1 },
+            { id: "l1-2", suit: "H", rank: "2", value: 2 },
+          ],
+          hand: [
+            { id: "key-s8", suit: "S", rank: "8", value: 8 },
+            { id: "cost-c2", suit: "C", rank: "2", value: 2 },
+          ],
+          field: attackers,
+          graveyard: [],
+        },
+        p2: {
+          name: "Player 2",
+          life: [
+            { id: "l2-1", suit: "D", rank: "K", value: 13 },
+            { id: "l2-2", suit: "C", rank: "Q", value: 12 },
+          ],
+          hand: [],
+          field: defenders,
+          graveyard: [],
+        },
+      },
+      stage: { requests: [], history: [] },
+      requestBuffer: { requests: [], history: [] },
+    };
+
+    const session = new GameSession(state, rulePackage);
+
+    // 1. p1 が attack を実行
+    const step1 = session.advance();
+    const req1 = getReq(step1);
+    const atkRef = req1.patterns.findIndex((p: any) => {
+      const act = req1.catalog.actions[p.actionSelectionRef!];
+      return act?.actionId === "action.attack";
+    });
+    session.submitDecision({ decisionId: req1.decisionId, stateVersion: req1.stateVersion, selectedPatternRef: atkRef });
+
+    // 2. p1 PASS
+    const step2 = session.advance();
+    const req2 = getReq(step2);
+    session.submitDecision({
+      decisionId: req2.decisionId,
+      stateVersion: req2.stateVersion,
+      selectedPatternRef: req2.patterns.findIndex((p: any) => p.kind === "PASS"),
+    });
+
+    // 3. p2 PASS -> attack 解決開始
+    const step3 = session.advance();
+    const req3 = getReq(step3);
+    const step4 = session.submitDecision({
+      decisionId: req3.decisionId,
+      stateVersion: req3.stateVersion,
+      selectedPatternRef: req3.patterns.findIndex((p: any) => p.kind === "PASS"),
+    });
+
+    // 3体全アタックを選択
+    const req4 = getReq(step4);
+    const multiAtkRef = req4.patterns.findIndex((p) => {
+      const eff = req4.catalog.effectSelections[p.effectSelectionRef!];
+      return eff.selectedValues?.length === 3;
+    });
+    session.submitDecision({
+      decisionId: req4.decisionId,
+      stateVersion: req4.stateVersion,
+      selectedPatternRef: multiAtkRef,
+    });
+
+    // 4. 双方が PASS して stage の action.block 解決 (EFFECT_RESOLUTION) に進める
+    let currentStep = session.advance();
+    while (currentStep.type === "WAITING_FOR_DECISION" && (currentStep as any).request?.source.type === "ACTION_REQUEST") {
+      const req = (currentStep as any).request;
+      const passIdx = req.patterns.findIndex((p: any) => p.kind === "PASS");
+      currentStep = session.submitDecision({
+        decisionId: req.decisionId,
+        stateVersion: req.stateVersion,
+        selectedPatternRef: passIdx !== -1 ? passIdx : 0,
+      });
+      if (currentStep.type !== "WAITING_FOR_DECISION") {
+        currentStep = session.advance();
+      }
+    }
+
+    return { session, blockStep: currentStep };
+  };
 
   // ===========================================================================
   // A. 合法手の完全同等性 (Legacy vs Streaming)
@@ -179,10 +327,69 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       const resStream = policy.choose(reqStream);
 
       expect(resStream.selectedPatternRef).toBe(resLegacy.selectedPatternRef);
-      expect(reqStream.catalog.effectSelections[resStream.selectedPatternRef]).toBeDefined();
-      expect(reqStream.catalog.effectSelections[resStream.selectedPatternRef].assignments).toEqual(
+      const stream = reqStream.blockAssignmentStream!;
+      const streamAssignment = stream.getAssignmentAt(resStream.selectedPatternRef);
+      expect(streamAssignment).toEqual(
         reqLegacy.catalog.effectSelections[resLegacy.selectedPatternRef].assignments
       );
+    });
+
+    it("全パターンにおいて、従来の一括エンコード結果とストリーミング用エンコード結果が全143次元で完全一致すること (問題B 特徴量完全同等性)", () => {
+      const attackers = [createSoldierUnit("atk-0"), createSoldierUnit("atk-1")];
+      const blockers = [createSoldierUnit("blk-0"), createSoldierUnit("blk-1"), createSoldierUnit("blk-2")];
+
+      const reqLegacy = LegalPatternGenerator.generateBlockAssignmentDecision(
+        mockState,
+        "p2",
+        mockRequest,
+        "step1",
+        attackers,
+        blockers,
+        components,
+        { maxFullPatternLimit: Infinity }
+      ).request;
+
+      const reqStream = LegalPatternGenerator.generateBlockAssignmentDecision(
+        mockState,
+        "p2",
+        mockRequest,
+        "step1",
+        attackers,
+        blockers,
+        components,
+        { maxFullPatternLimit: 0 }
+      ).request;
+
+      const encodedLegacy = DecisionFeatureEncoder.encode(reqLegacy);
+      const encoderContext = DecisionFeatureEncoder.createBlockAssignmentEncoderContext(reqStream);
+      const stream = reqStream.blockAssignmentStream!;
+
+      const testDna = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-feature-test" });
+      (testDna.patternWeights as number[])[68] = 1.5; // effAssignSelectedCount
+      (testDna.patternWeights as number[])[70] = -0.5; // effAssignSelectedSizeSum
+      (testDna.patternWeights as number[])[83] = 2.0; // effCoverageRatio
+
+      let idx = 0;
+      for (const assignments of stream.iterateAssignments()) {
+        const legacyPatternFeatures = encodedLegacy.patterns[idx].values;
+        const streamingPatternFeatures = DecisionFeatureEncoder.encodeBlockAssignmentValues(
+          assignments,
+          stream.candidateCount, // 候補ブロッカー数を正規化分母として渡す
+          encoderContext
+        );
+
+        // 143次元すべての要素が完全一致
+        expect(streamingPatternFeatures.length).toBe(143);
+        expect(legacyPatternFeatures.length).toBe(143);
+        expect(streamingPatternFeatures).toEqual(legacyPatternFeatures);
+
+        // 非ゼロDNAによるスコアの完全一致
+        const scoreLegacy = GenomeScorer.scoreSinglePattern(encodedLegacy.context.values, legacyPatternFeatures, testDna);
+        const scoreStream = GenomeScorer.scoreSinglePattern(encodedLegacy.context.values, streamingPatternFeatures, testDna);
+        expect(scoreStream).toBeCloseTo(scoreLegacy, 10);
+        idx++;
+      }
+      expect(idx).toBe(27);
     });
 
     it("全重みゼロ（全スコア完全同点）の場合に、最小インデックス (先頭手 index 0) が厳格に選択されること", () => {
@@ -276,7 +483,7 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
 
       expect(res.selectedPatternRef).toBeGreaterThanOrEqual(0);
       expect(res.selectedPatternRef).toBeLessThan(78125);
-      expect(reqStream.catalog.effectSelections[res.selectedPatternRef]).toBeDefined();
+      expect(reqStream.blockAssignmentStream?.getAssignmentAt(res.selectedPatternRef)).toBeDefined();
     });
 
     it("A=4, S=8 (390,625 件): 巨大合法手空間をメモリ破綻なく高速に全件評価できること", () => {
@@ -317,13 +524,6 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
   // D. 実機統合テスト (GameSession)
   // ===========================================================================
   describe("D. 実機統合テスト (GameSession と Core 状態遷移の検証)", () => {
-    let rulePackage: RulePackage;
-
-    beforeAll(async () => {
-      const rulesDir = path.resolve(__dirname, "../../data/rules-vnext/examples");
-      rulePackage = await loadRulePackageFromDirectory(rulesDir);
-    });
-
     it("従来方式で選んだパターンとストリーミング方式で選んだ同一パターンのゲーム解決結果が 100% 一致すること", () => {
       const createMatchState = () => ({
         version: 1,
@@ -484,13 +684,100 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
         state2.players.p2.field.map((u: any) => u.unitId)
       );
     });
+
+    it("256件超のストリーミングブロック局面において、GenomePolicyが先頭以外の選択手 (selectedPatternRef >= 1) をGameSessionに送信し正常解決すること (問題C 実機統合テスト)", () => {
+      const { session, blockStep } = createLargeBattleSession();
+      expect(blockStep.type).toBe("WAITING_FOR_DECISION");
+      const req = getReq(blockStep);
+      expect(req.blockAssignmentStream).toBeDefined();
+      expect(req.blockAssignmentStream?.patternCount).toBe(1024); // (3+1)^5 = 1024
+      expect(req.patterns.length).toBe(0); // ストリーミングモードのため一括生成なし
+
+      // ブロッカー割り当て数を高く評価する DNA (先頭の 0体ブロック index 0 を絶対に選ばない)
+      const dna = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-active-block" });
+      (dna.patternWeights as number[])[73] = 5.0; // effect_assigned_unit_total
+      (dna.patternWeights as number[])[127] = 5.0; // effect_assignment_selected_count
+
+      const policy = new GenomePolicy(dna);
+      const res = policy.choose(req);
+
+      // 先頭以外の手 (selectedPatternRef >= 1) が選択されていることを検証
+      expect(res.selectedPatternRef).toBeGreaterThan(0);
+      expect(res.selectedPatternRef).toBeLessThan(1024);
+
+      // Core の session.submitDecision に直接回答を渡す
+      const nextStep = session.submitDecision(res);
+
+      // PatternExecutor の検証を通過し、ブロック処理が正常に進むこと
+      expect(nextStep).toBeDefined();
+
+      // ゲームを終了または進行させ、状態遷移が正常に完了すること
+      const followUpStep = session.advance();
+      expect(followUpStep).toBeDefined();
+    });
+
+    it("ストリーミング判断待機中にSnapshotを保存・復元し、同一の合法手を選択・正常解決できること (問題D Snapshot契約)", () => {
+      const { session, blockStep } = createLargeBattleSession();
+      const req = getReq(blockStep);
+
+      // スナップショットキャプチャ & JSON シリアライズ/デシリアライズ & 復元
+      const snapshot = session.createSnapshot();
+      const json = GameSessionSnapshotCodec.serialize(snapshot);
+      const restoredSnapshot = GameSessionSnapshotCodec.deserialize(json);
+      const restoredSession = GameSession.fromSnapshot(restoredSnapshot, rulePackage);
+
+      // 復元された pendingDecision のストリーミングプロバイダが再構築されていること
+      const restoredReq = restoredSession.pendingDecision;
+      expect(restoredReq).toBeDefined();
+      expect(restoredReq?.blockAssignmentStream).toBeDefined();
+      expect(restoredReq?.blockAssignmentStream?.patternCount).toBe(1024);
+
+      // 復元前後のプロバイダから取得できる割り当てが完全一致すること
+      const originalAssignments = req.blockAssignmentStream?.getAssignmentAt(42);
+      const restoredAssignments = restoredReq?.blockAssignmentStream?.getAssignmentAt(42);
+      expect(restoredAssignments).toEqual(originalAssignments);
+
+      // 復元されたセッションに Policy からの決定を渡して正常解決すること
+      const dna = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-restore-test" });
+      (dna.patternWeights as number[])[73] = 3.0; // effect_assigned_unit_total
+      const policy = new GenomePolicy(dna);
+      const res = policy.choose(restoredReq!);
+
+      const submitStep = restoredSession.submitDecision(res);
+      expect(submitStep).toBeDefined();
+    });
+
+    it("FirstLegalPolicyおよびRandomPolicyがGameSessionで正常にブロック判断を送信・解決できること", () => {
+      // FirstLegalPolicy (index 0 選択)
+      {
+        const { session, blockStep } = createLargeBattleSession();
+        const firstLegal = new FirstLegalPolicy();
+        const res = firstLegal.choose(getReq(blockStep));
+        expect(res.selectedPatternRef).toBe(0);
+
+        const nextStep = session.submitDecision(res);
+        expect(nextStep).toBeDefined();
+      }
+
+      // RandomPolicy (一様ランダム 0..1023 選択)
+      {
+        const { session, blockStep } = createLargeBattleSession();
+        const randomPolicy = new RandomPolicy(12345);
+        const res = randomPolicy.choose(getReq(blockStep));
+        expect(res.selectedPatternRef).toBeGreaterThanOrEqual(0);
+        expect(res.selectedPatternRef).toBeLessThan(1024);
+
+        const nextStep = session.submitDecision(res);
+        expect(nextStep).toBeDefined();
+      }
+    });
   });
 
   // ===========================================================================
   // E. 監査・異常系 (Fail-Closed)
   // ===========================================================================
   describe("E. 監査・異常系 (Fail-Closed)", () => {
-    it("FirstLegalPolicy: ストリーミングプロバイダが存在する場合にインデックス 0 を実体化して選択すること", () => {
+    it("FirstLegalPolicy: ストリーミングプロバイダが存在する場合にインデックス 0 を選択すること", () => {
       const attackers = [createSoldierUnit("atk-0")];
       const blockers = [createSoldierUnit("blk-0")];
 
@@ -508,13 +795,12 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       const firstLegal = new FirstLegalPolicy();
       const res = firstLegal.choose(reqStream);
       expect(res.selectedPatternRef).toBe(0);
-      expect(reqStream.catalog.effectSelections[0]).toBeDefined();
-      expect(reqStream.catalog.effectSelections[0].assignments).toEqual([
+      expect(reqStream.blockAssignmentStream?.getAssignmentAt(0)).toEqual([
         { sourceUnitId: "atk-0", selectedUnitIds: [] },
       ]);
     });
 
-    it("RandomPolicy: ストリーミングプロバイダが存在する場合に全パターン数 N の一様ランダムから実体化して選択すること", () => {
+    it("RandomPolicy: ストリーミングプロバイダが存在する場合に全パターン数 N の一様ランダムから選択すること", () => {
       const attackers = [createSoldierUnit("atk-0")];
       const blockers = [createSoldierUnit("blk-0"), createSoldierUnit("blk-1")];
 
@@ -533,7 +819,71 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       const res = randomPolicy.choose(reqStream);
       expect(res.selectedPatternRef).toBeGreaterThanOrEqual(0);
       expect(res.selectedPatternRef).toBeLessThan(4);
-      expect(reqStream.catalog.effectSelections[res.selectedPatternRef]).toBeDefined();
+      expect(reqStream.blockAssignmentStream?.getAssignmentAt(res.selectedPatternRef)).toBeDefined();
+    });
+
+    it("改ざんされたインデックスや範囲外の回答に対してPatternExecutorおよびGameSessionがFail-Closed例外をスローすること", () => {
+      const { session, blockStep } = createLargeBattleSession();
+      const req = getReq(blockStep);
+
+      // 負数インデックス
+      expect(() => {
+        session.submitDecision({
+          decisionId: req.decisionId,
+          stateVersion: req.stateVersion,
+          selectedPatternRef: -1,
+        });
+      }).toThrowError(/selectedPatternRef が範囲外です/);
+
+      // 上限超過インデックス (1024)
+      expect(() => {
+        session.submitDecision({
+          decisionId: req.decisionId,
+          stateVersion: req.stateVersion,
+          selectedPatternRef: 1024,
+        });
+      }).toThrowError(/selectedPatternRef が範囲外です/);
+
+      // 非整数インデックス (1.5)
+      expect(() => {
+        session.submitDecision({
+          decisionId: req.decisionId,
+          stateVersion: req.stateVersion,
+          selectedPatternRef: 1.5,
+        });
+      }).toThrowError(/selectedPatternRef が(範囲外|安全な整数ではありません)/);
+
+      // NaN インデックス
+      expect(() => {
+        session.submitDecision({
+          decisionId: req.decisionId,
+          stateVersion: req.stateVersion,
+          selectedPatternRef: NaN,
+        });
+      }).toThrowError(/selectedPatternRef が(範囲外|安全な整数ではありません)/);
+    });
+
+    it("SimulationRunner がストリーミング意思決定を空集合とせず正確な総数と選択サマリーを記録すること (問題D 対戦ログ)", () => {
+      const { session, blockStep } = createLargeBattleSession();
+      const req = getReq(blockStep);
+
+      const policy = new FirstLegalPolicy();
+      const policies = {
+        p1: policy,
+        p2: policy,
+      };
+
+      const result = SimulationRunner.run(session, policies, { maxDecisions: 10 });
+      expect(result.decisionTrace.length).toBeGreaterThan(0);
+
+      // ストリーミングブロック判断のトレースレコードを検証
+      const streamRecord = result.decisionTrace.find((r) => r.isStreaming);
+      expect(streamRecord).toBeDefined();
+      expect(streamRecord?.totalLegalPatternCount).toBe(1024);
+      expect(streamRecord?.legalPatterns.length).toBe(0); // 1024件全件展開を抑止
+      expect(streamRecord?.selectedPatternRef).toBe(0);
+      expect(streamRecord?.assignmentsSummary).toBeDefined();
+      expect(streamRecord?.selectedLogicalPatternKey).toContain("block-stream-0");
     });
   });
 });

@@ -57,6 +57,12 @@ export interface DecisionTraceRecord {
   readonly actionId?: string;
   /** 意思決定を行った Policy のバージョン付き記述子 */
   readonly policyDescriptor: PolicyDescriptor;
+  /** ストリーミング評価による意思決定かどうか */
+  readonly isStreaming?: boolean;
+  /** 合法パターンの論理総数 (ストリーミング時も正確な総数を保持) */
+  readonly totalLegalPatternCount?: number;
+  /** ストリーミング割り当て等のサマリー文字列 */
+  readonly assignmentsSummary?: string;
 }
 
 /**
@@ -180,8 +186,16 @@ export class SimulationRunner {
         // 1. Decision 直前の Logical State Hash を算出 (State Hash v2)
         const currentStateHash = StateHasher.hash(session.state);
 
-        // 2. 選択可能な合法パターンサマリーを生成 (logicalPatternKey 付き、秘密情報は含まない)
-        const legalPatterns: DecisionLegalPatternSummary[] = (step.request.patterns || []).map((p, idx) => {
+        const isStreaming = Boolean(
+          step.request.blockAssignmentStream &&
+          (!step.request.patterns || step.request.patterns.length === 0)
+        );
+        const totalLegalPatternCount = isStreaming
+          ? step.request.blockAssignmentStream!.patternCount
+          : (step.request.patterns || []).length;
+
+        // 2. 選択可能な合法パターンサマリーを生成 (ストリーミング時は巨大展開を抑止し総数を記録)
+        const legalPatterns: DecisionLegalPatternSummary[] = isStreaming ? [] : (step.request.patterns || []).map((p, idx) => {
           let actId: string | undefined;
           if (p.actionSelectionRef !== undefined) {
             actId = step.request.catalog?.actions?.[p.actionSelectionRef]?.actionId;
@@ -222,24 +236,37 @@ export class SimulationRunner {
           detector.recordDecision(response, step.request);
         }
 
-        const selectedPat = step.request.patterns[response.selectedPatternRef];
-        const selectedPatternKind = selectedPat?.kind || "UNKNOWN";
+        let selectedPatternKind = "UNKNOWN";
         let actionId: string | undefined;
+        let selectedLogicalPatternKey = "streaming-block-assignment";
+        let assignmentsSummary: string | undefined;
 
-        if (selectedPat?.actionSelectionRef !== undefined) {
-          actionId = step.request.catalog?.actions?.[selectedPat.actionSelectionRef]?.actionId;
+        if (isStreaming) {
+          const stream = step.request.blockAssignmentStream!;
+          selectedPatternKind = "EFFECT_SELECTION";
+          actionId = "action.block";
+          const assignments = stream.getAssignmentAt(response.selectedPatternRef);
+          if (assignments) {
+            assignmentsSummary = stream.createSummary(assignments);
+            selectedLogicalPatternKey = `block-stream-${response.selectedPatternRef}-${assignmentsSummary}`;
+          }
+        } else {
+          const selectedPat = step.request.patterns[response.selectedPatternRef];
+          selectedPatternKind = selectedPat?.kind || "UNKNOWN";
+          if (selectedPat?.actionSelectionRef !== undefined) {
+            actionId = step.request.catalog?.actions?.[selectedPat.actionSelectionRef]?.actionId;
+          }
+          selectedLogicalPatternKey = generateLogicalPatternKey({
+            kind: selectedPatternKind,
+            actionSelectionRef: selectedPat?.actionSelectionRef,
+            keyCardSelectionRef: selectedPat?.keyCardSelectionRef,
+            keyUnitSelectionRef: selectedPat?.keyUnitSelectionRef,
+            costPaymentRef: selectedPat?.costPaymentRef,
+            targetSelectionRef: selectedPat?.targetSelectionRef,
+            effectSelectionRef: selectedPat?.effectSelectionRef,
+            orderSelectionRef: selectedPat?.orderSelectionRef,
+          });
         }
-
-        const selectedLogicalPatternKey = generateLogicalPatternKey({
-          kind: selectedPatternKind,
-          actionSelectionRef: selectedPat?.actionSelectionRef,
-          keyCardSelectionRef: selectedPat?.keyCardSelectionRef,
-          keyUnitSelectionRef: selectedPat?.keyUnitSelectionRef,
-          costPaymentRef: selectedPat?.costPaymentRef,
-          targetSelectionRef: selectedPat?.targetSelectionRef,
-          effectSelectionRef: selectedPat?.effectSelectionRef,
-          orderSelectionRef: selectedPat?.orderSelectionRef,
-        });
 
         const logicalDecisionId = this.generateLogicalDecisionId(
           totalDecisions,
@@ -261,17 +288,22 @@ export class SimulationRunner {
           selectedPatternKind,
           actionId,
           policyDescriptor: policy.descriptor,
+          isStreaming,
+          totalLegalPatternCount,
+          assignmentsSummary,
         };
 
         decisionTrace.push(stepRecord);
 
         if (options?.onStep) {
           let summary = "PASS";
-          if (actionId) {
+          if (isStreaming) {
+            summary = assignmentsSummary ? `action.block (${assignmentsSummary})` : "action.block (streaming)";
+          } else if (actionId) {
             summary = actionId;
-          } else if (selectedPat?.effectSelectionRef !== undefined) {
+          } else if (selectedPatternKind === "EFFECT_SELECTION") {
             summary = "EFFECT_SELECTION";
-          } else if (selectedPat?.orderSelectionRef !== undefined) {
+          } else if (selectedPatternKind === "ORDER_SELECTION") {
             summary = "ORDER_SELECTION";
           }
           options.onStep({

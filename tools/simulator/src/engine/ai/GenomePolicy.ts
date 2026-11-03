@@ -103,7 +103,7 @@ export class GenomePolicy implements DecisionPolicy {
     for (const assignments of stream.iterateAssignments()) {
       const pValues = DecisionFeatureEncoder.encodeBlockAssignmentValues(
         assignments,
-        stream.patternCount,
+        stream.candidateCount,
         encoderContext
       );
       const score = GenomeScorer.scoreSinglePattern(contextValues, pValues, this.dna);
@@ -114,17 +114,6 @@ export class GenomePolicy implements DecisionPolicy {
         bestIndex = currentIndex;
       }
       currentIndex++;
-    }
-
-    // 3. 選択された合法手のみを実体化して catalog / patterns にセット（Core での適用のため）
-    const instantiated = stream.instantiatePatternAt(bestIndex);
-    if (instantiated) {
-      if (request.catalog?.effectSelections && !request.catalog.effectSelections[bestIndex]) {
-        (request.catalog.effectSelections as any)[bestIndex] = instantiated.effectSelection;
-      }
-      if (request.patterns && !request.patterns.some((p) => (p as any).effectSelectionRef === bestIndex)) {
-        (request.patterns as any).push(instantiated.pattern);
-      }
     }
 
     return {

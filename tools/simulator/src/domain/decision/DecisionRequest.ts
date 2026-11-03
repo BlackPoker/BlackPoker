@@ -9,6 +9,10 @@ import { LegalPattern } from "./LegalPattern.js";
 export interface BlockAssignmentStreamProvider {
   /** 合法パターンの総数 (厳密値) */
   readonly patternCount: number;
+  /** 候補ブロッカー数 (candidateBlockers.length, 特徴量カバレッジ率の正規化分母) */
+  readonly candidateCount: number;
+  /** アタッカー数 */
+  readonly attackerCount: number;
   /** 全合法パターンを 1 件ずつ遅延列挙するジェネレータ (DFS探索順序完全固定) */
   readonly iterateAssignments: () => Generator<UnitAssignment[], void, unknown>;
   /** 指定インデックスの割り当てを取得 */
@@ -63,4 +67,12 @@ export interface DecisionRequest {
    * ブロック割り当て等の大規模合法手空間をストリーミング処理するためのプロバイダ (任意)
    */
   readonly blockAssignmentStream?: BlockAssignmentStreamProvider;
+
+  /**
+   * ストリーミングプロバイダを JSON-safe にスナップショット復元するための識別情報 (任意)
+   */
+  readonly blockAssignmentStreamMeta?: {
+    readonly attackerUnitIds: readonly string[];
+    readonly candidateBlockerUnitIds: readonly string[];
+  };
 }
