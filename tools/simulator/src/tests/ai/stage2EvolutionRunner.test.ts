@@ -749,4 +749,65 @@ describe("Stage 2 Controlled Evolution Runner & Audit Tests (Work 3-4)", () => {
     expect(audit.provenanceNotePresent).toBe(false);
     expect(audit.errors.some((e) => e.includes("AUDIT_PROVENANCE_NOTE.md is required"))).toBe(true);
   });
+
+  // ---------------------------------------------------------------------------
+  // 6. 実機 Stage 2 成果物の完全監査 (Live Artifacts Audit)
+  // ---------------------------------------------------------------------------
+  it("Test 13: 実機 Stage 2 成果物 (.artifacts/stage2-evolution) の完全監査", () => {
+    const liveArtifactsDir = path.resolve(__dirname, "../../../.artifacts/stage2-evolution");
+    if (!fs.existsSync(liveArtifactsDir)) {
+      // 実機成果物がまだ存在しない環境ではスキップ
+      return;
+    }
+
+    const audit = auditStage2Artifacts(liveArtifactsDir);
+
+    expect(audit.isValid).toBe(true);
+    expect(audit.errors).toEqual([]);
+    expect(audit.provenanceNotePresent).toBe(true);
+
+    // Manifest SHA256 完全一致
+    expect(audit.manifestIntegrity.hasManifestShaFile).toBe(true);
+    expect(audit.manifestIntegrity.mismatches).toEqual([]);
+    expect(audit.manifestIntegrity.missingRequiredFiles).toEqual([]);
+    expect(audit.manifestIntegrity.matchedFilesCount).toBe(7);
+
+    // Checkpoint 完全性
+    expect(audit.checkpointIntegrity.isValid).toBe(true);
+    expect(audit.checkpointIntegrity.errors).toEqual([]);
+    expect(audit.checkpointIntegrity.state?.completedGenerations).toBe(5);
+
+    // 各照合項目の PASS
+    expect(audit.verifications.totalMatches.status).toBe("PASS");
+    expect(audit.verifications.totalMatches.actual).toBe(600);
+
+    expect(audit.verifications.trainingMatches.status).toBe("PASS");
+    expect(audit.verifications.trainingMatches.actual).toBe(280);
+
+    expect(audit.verifications.validationMatches.status).toBe("PASS");
+    expect(audit.verifications.validationMatches.actual).toBe(200);
+
+    expect(audit.verifications.exploratoryMatches.status).toBe("PASS");
+    expect(audit.verifications.exploratoryMatches.actual).toBe(120);
+
+    expect(audit.verifications.completionStatus.status).toBe("PASS");
+    expect(audit.verifications.abnormalMatches.status).toBe("PASS");
+    expect(audit.verifications.abnormalMatches.actual).toEqual({ failed: 0, incomplete: 0 });
+
+    expect(audit.verifications.checkpointCompletedGenerations.status).toBe("PASS");
+    expect(audit.verifications.checkpointCompletedGenerations.actual).toBe(5);
+
+    expect(audit.verifications.exploratoryOpponentsCount.status).toBe("PASS");
+    expect(audit.verifications.exploratoryOpponentsCount.actual).toBe(3);
+
+    expect(audit.verifications.finalChampionIntegrity.status).toBe("PASS");
+
+    // Seed 監査 (170 一意シード、衝突ゼロ)
+    expect(audit.seedAudit?.status).toBe("PASS");
+    expect(audit.seedAudit?.totalUniqueSeedsUsed).toBe(170);
+    expect(audit.seedAudit?.uniqueTrainingSeedsCount).toBe(140);
+    expect(audit.seedAudit?.validationSeedsCount).toBe(10);
+    expect(audit.seedAudit?.exploratorySeedsCount).toBe(20);
+    expect(audit.seedAudit?.seedCollisionsDetected).toBe(0);
+  });
 });
