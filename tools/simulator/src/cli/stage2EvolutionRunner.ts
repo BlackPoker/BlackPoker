@@ -1309,7 +1309,7 @@ export interface Stage2EvolutionEvidence {
   };
   readonly stallDiagnostics: {
     readonly passHeavyStallStatus?: "UNVERIFIED" | "VERIFIED_NOT_DETECTED" | "DETECTED";
-    readonly passHeavyStallDetected?: boolean;
+    readonly passHeavyStallDetected?: boolean | null;
     readonly matchesReachingDecisionLimit: number;
     readonly stallNote: string;
   };
@@ -1381,6 +1381,354 @@ export interface Stage2ArtifactAuditResult {
     readonly present: boolean;
     readonly isValid: boolean;
     readonly details: string;
+  };
+}
+
+export interface Stage2ProvenanceAddendumData {
+  readonly workId: string;
+  readonly baseArtifactsSha256: string;
+  readonly auditStatus: "PASS" | "FAIL";
+  readonly timestamp: string;
+  readonly decisionStatsRecount: {
+    readonly totalDecisions: number;
+    readonly trainingDecisions: number;
+    readonly validationDecisions: number;
+    readonly exploratoryDecisions: number;
+    readonly validationMatchesCount: number;
+    readonly sourceOfTruth: string;
+  };
+  readonly seedContractClarification: {
+    readonly seedGenerationContract: string;
+    readonly manifestPlannedSeedsNote: string;
+    readonly executedSeedsVerified: boolean;
+  };
+  readonly validationScoresClarification: {
+    readonly gen4OverallBaselineMeanScore: number;
+    readonly gen4FirstLegalMeanScore: number;
+    readonly gen4SeededRandomMeanScore: number;
+    readonly finalChampionValidationWinRate: number;
+    readonly generationChampionScores: readonly GenerationChampionValidationScores[];
+  };
+  readonly statisticalSignificanceClarification: {
+    readonly alphaRaw: number;
+    readonly bonferroniAlpha: number;
+    readonly seededRandomPValue: number;
+    readonly seededRandomSignificant: boolean;
+    readonly evidenceStatus: string;
+    readonly improvementStatus: string;
+    readonly note: string;
+  };
+  readonly timingAndStallClarification: {
+    readonly generationTimingStatus: "UNMEASURED";
+    readonly generationTimingNote: string;
+    readonly passHeavyStallStatus: "UNVERIFIED";
+    readonly passHeavyStallNote: string;
+    readonly matchesReachingDecisionLimit: number;
+  };
+  readonly populationDistinction: {
+    readonly finalEvaluatedChampionGeneration: number;
+    readonly finalEvaluatedChampionId: string;
+    readonly p5OffspringPopulationNote: string;
+  };
+}
+
+export interface AddendumSemanticVerificationResult {
+  readonly isValid: boolean;
+  readonly errors: readonly string[];
+  readonly details: string;
+  readonly data?: Stage2ProvenanceAddendumData;
+}
+
+/**
+ * 監査補足資料 (Addendum) の意味的整合性を原本データから完全再計算・照合する (Fail-Closed)
+ */
+export function verifyStage2AddendumSemantics(
+  artifactsDir: string,
+  addendumDir: string,
+  campaignResult?: any,
+  evidence?: Stage2EvolutionEvidence,
+  exploratoryResult?: any
+): AddendumSemanticVerificationResult {
+  const errors: string[] = [];
+
+  const addendumJsonPath = path.join(addendumDir, "stage2-evolution-provenance-addendum.json");
+  const addendumManifestPath = path.join(addendumDir, "MANIFEST_SHA256.json");
+  const addendumNotePath = path.join(addendumDir, "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md");
+
+  if (!fs.existsSync(addendumJsonPath)) {
+    errors.push("Missing required addendum file: stage2-evolution-provenance-addendum.json");
+  }
+  if (!fs.existsSync(addendumManifestPath)) {
+    errors.push("Missing required addendum file: MANIFEST_SHA256.json");
+  }
+  if (!fs.existsSync(addendumNotePath)) {
+    errors.push("Missing required addendum file: STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md");
+  }
+  if (errors.length > 0) {
+    return { isValid: false, errors, details: errors.join("; ") };
+  }
+
+  // 1. MANIFEST_SHA256.json ファイルハッシュ照合 (Fail-Closed)
+  try {
+    const manifestItems = JSON.parse(fs.readFileSync(addendumManifestPath, "utf-8"));
+    if (!Array.isArray(manifestItems) || manifestItems.length === 0) {
+      errors.push("Addendum MANIFEST_SHA256.json is empty or invalid format");
+    } else {
+      for (const item of manifestItems) {
+        const fullP = path.join(addendumDir, item.path);
+        if (!fs.existsSync(fullP)) {
+          errors.push(`Addendum file missing for sha256 check: ${item.path}`);
+        } else if (computeFileSha256(fullP) !== item.sha256) {
+          errors.push(`Addendum file sha256 mismatch: ${item.path}`);
+        }
+      }
+    }
+  } catch (e: any) {
+    errors.push(`Failed to parse Addendum MANIFEST_SHA256.json: ${e.message}`);
+  }
+
+  // 2. Addendum JSON パース
+  let addendumData: Stage2ProvenanceAddendumData | undefined;
+  try {
+    addendumData = JSON.parse(fs.readFileSync(addendumJsonPath, "utf-8"));
+  } catch (e: any) {
+    errors.push(`Failed to parse stage2-evolution-provenance-addendum.json: ${e.message}`);
+    return { isValid: false, errors, details: errors.join("; ") };
+  }
+
+  if (!addendumData) {
+    return { isValid: false, errors, details: "Parsed addendum data is empty" };
+  }
+
+  // 3. 元 ZIP の実 SHA-256 検証
+  const baseZipPath = path.resolve(artifactsDir, "../stage2-evolution-archive.zip");
+  if (!fs.existsSync(baseZipPath)) {
+    errors.push(`Base archive ZIP not found at "${baseZipPath}" to verify baseArtifactsSha256`);
+  } else {
+    const realZipSha = computeFileSha256(baseZipPath);
+    if (realZipSha !== addendumData.baseArtifactsSha256) {
+      errors.push(
+        `Addendum baseArtifactsSha256 mismatch: actual archive sha=${realZipSha}, addendum recorded sha=${addendumData.baseArtifactsSha256}`
+      );
+    }
+  }
+
+  // 4. 意思決定数・試合数の再計算と照合
+  if (!campaignResult) {
+    errors.push("Campaign result missing to recompute validation decisions for addendum verification");
+  } else if (!evidence?.decisionStats) {
+    errors.push("Evidence decisionStats missing to verify addendum decision stats");
+  } else {
+    const recount = aggregateValidationDecisionsFromResult(campaignResult);
+    const expectedValMatches = 200;
+    const expectedValDecisions = recount.totalDecisions; // 37081
+    const totalDec = evidence.decisionStats.totalDecisions; // 107386
+    const expDec = evidence.decisionStats.exploratoryDecisions; // 14960
+    const trainingDec = totalDec - expDec - expectedValDecisions; // 55345
+
+    const addRecount = addendumData.decisionStatsRecount;
+    if (!addRecount) {
+      errors.push("Addendum missing decisionStatsRecount section");
+    } else {
+      if (addRecount.validationMatchesCount !== expectedValMatches) {
+        errors.push(
+          `Addendum validationMatchesCount mismatch: recomputed=${expectedValMatches}, addendum=${addRecount.validationMatchesCount}`
+        );
+      }
+      if (addRecount.validationDecisions !== expectedValDecisions) {
+        errors.push(
+          `Addendum validationDecisions mismatch: recomputed=${expectedValDecisions}, addendum=${addRecount.validationDecisions}`
+        );
+      }
+      if (addRecount.totalDecisions !== totalDec) {
+        errors.push(
+          `Addendum totalDecisions mismatch: evidence=${totalDec}, addendum=${addRecount.totalDecisions}`
+        );
+      }
+      if (addRecount.exploratoryDecisions !== expDec) {
+        errors.push(
+          `Addendum exploratoryDecisions mismatch: evidence=${expDec}, addendum=${addRecount.exploratoryDecisions}`
+        );
+      }
+      if (addRecount.trainingDecisions !== trainingDec) {
+        errors.push(
+          `Addendum trainingDecisions mismatch: recomputed=${trainingDec}, addendum=${addRecount.trainingDecisions}`
+        );
+      }
+      if (
+        addRecount.trainingDecisions + addRecount.validationDecisions + addRecount.exploratoryDecisions !==
+        addRecount.totalDecisions
+      ) {
+        errors.push("Addendum recounted decisions do not sum to total decisions");
+      }
+    }
+  }
+
+  // 5. 世代別 Baseline スコアの再計算と照合
+  if (campaignResult?.history) {
+    const recomputedScores: GenerationChampionValidationScores[] = [];
+    for (const h of campaignResult.history) {
+      if (h.validationResult) {
+        recomputedScores.push(computeGenerationChampionValidationScores(h.validationResult, h.generation));
+      }
+    }
+    const addScores = addendumData.validationScoresClarification?.generationChampionScores;
+    if (!Array.isArray(addScores) || addScores.length !== TOTAL_GENERATIONS) {
+      errors.push(`Addendum generationChampionScores must contain ${TOTAL_GENERATIONS} generations`);
+    } else {
+      for (let g = 0; g < TOTAL_GENERATIONS; g++) {
+        const rc = recomputedScores.find((s) => s.generation === g);
+        const ad = addScores.find((s) => s.generation === g);
+        if (!rc || !ad) {
+          errors.push(`Missing validation scores for generation ${g} in recomputed or addendum`);
+        } else {
+          if (Math.abs(rc.firstLegalMeanScore - ad.firstLegalMeanScore) > 1e-4) {
+            errors.push(
+              `Addendum Gen ${g} firstLegalMeanScore mismatch: recomputed=${rc.firstLegalMeanScore}, addendum=${ad.firstLegalMeanScore}`
+            );
+          }
+          if (Math.abs(rc.seededRandomMeanScore - ad.seededRandomMeanScore) > 1e-4) {
+            errors.push(
+              `Addendum Gen ${g} seededRandomMeanScore mismatch: recomputed=${rc.seededRandomMeanScore}, addendum=${ad.seededRandomMeanScore}`
+            );
+          }
+          if (Math.abs(rc.overallBaselineMeanScore - ad.overallBaselineMeanScore) > 1e-4) {
+            errors.push(
+              `Addendum Gen ${g} overallBaselineMeanScore mismatch: recomputed=${rc.overallBaselineMeanScore}, addendum=${ad.overallBaselineMeanScore}`
+            );
+          }
+        }
+      }
+    }
+
+    const gen4Rc = recomputedScores.find((s) => s.generation === 4);
+    const vsc = addendumData.validationScoresClarification;
+    if (gen4Rc && vsc) {
+      if (Math.abs(gen4Rc.overallBaselineMeanScore - vsc.gen4OverallBaselineMeanScore) > 1e-4) {
+        errors.push(
+          `Addendum gen4OverallBaselineMeanScore mismatch: recomputed=${gen4Rc.overallBaselineMeanScore}, addendum=${vsc.gen4OverallBaselineMeanScore}`
+        );
+      }
+      if (Math.abs(gen4Rc.firstLegalMeanScore - vsc.gen4FirstLegalMeanScore) > 1e-4) {
+        errors.push(
+          `Addendum gen4FirstLegalMeanScore mismatch: recomputed=${gen4Rc.firstLegalMeanScore}, addendum=${vsc.gen4FirstLegalMeanScore}`
+        );
+      }
+      if (Math.abs(gen4Rc.seededRandomMeanScore - vsc.gen4SeededRandomMeanScore) > 1e-4) {
+        errors.push(
+          `Addendum gen4SeededRandomMeanScore mismatch: recomputed=${gen4Rc.seededRandomMeanScore}, addendum=${vsc.gen4SeededRandomMeanScore}`
+        );
+      }
+    }
+  }
+
+  // 6. 最終 Champion スコアと DNA の照合
+  if (campaignResult?.provisionalBestChampion) {
+    const champ = campaignResult.provisionalBestChampion;
+    const vsc = addendumData.validationScoresClarification;
+    const popDist = addendumData.populationDistinction;
+    if (vsc && Math.abs(champ.validationMeanWinRate - vsc.finalChampionValidationWinRate) > 1e-4) {
+      errors.push(
+        `Addendum finalChampionValidationWinRate mismatch: champ=${champ.validationMeanWinRate}, addendum=${vsc.finalChampionValidationWinRate}`
+      );
+    }
+    if (popDist) {
+      if (popDist.finalEvaluatedChampionId !== champ.genomeId) {
+        errors.push(
+          `Addendum finalEvaluatedChampionId mismatch: champ=${champ.genomeId}, addendum=${popDist.finalEvaluatedChampionId}`
+        );
+      }
+      if (popDist.finalEvaluatedChampionGeneration !== 4) {
+        errors.push(
+          `Addendum finalEvaluatedChampionGeneration must be 4, got ${popDist.finalEvaluatedChampionGeneration}`
+        );
+      }
+    }
+  }
+
+  // 7. Engine 正規導出 Seed と実使用 Seed の照合
+  if (campaignResult?.campaignSeed && campaignResult.seedRegistry?.trainingSeedsByGeneration) {
+    const derived = deriveStage2TrainingSeedsByEngine(
+      campaignResult.campaignSeed,
+      TOTAL_GENERATIONS,
+      POPULATION_SIZE,
+      PAIR_REPETITIONS
+    );
+    let seedsMatch = true;
+    for (let g = 0; g < TOTAL_GENERATIONS; g++) {
+      const dSeeds = derived.trainingSeedsByGeneration[g] ?? [];
+      const aSeeds = campaignResult.seedRegistry.trainingSeedsByGeneration[g] ?? [];
+      if (JSON.stringify(dSeeds) !== JSON.stringify(aSeeds)) {
+        seedsMatch = false;
+        break;
+      }
+    }
+    if (!seedsMatch) {
+      errors.push("Engine-derived seeds do not match executed training seeds in campaign result");
+    }
+    if (addendumData.seedContractClarification?.executedSeedsVerified !== true) {
+      errors.push("Addendum seedContractClarification.executedSeedsVerified must be true");
+    }
+  }
+
+  // 8. 探索評価の検定値・有意性・改善判定の照合
+  if (exploratoryResult) {
+    const rawOpponents = exploratoryResult.logicalResult?.opponents ?? exploratoryResult.opponents;
+    const srOpp =
+      rawOpponents?.["baseline-seeded-random"] ??
+      (Array.isArray(rawOpponents) ? rawOpponents.find((o: any) => o.opponentId === "SeededRandom") : undefined);
+    const srP = srOpp?.statisticalTest?.pValue ?? srOpp?.pValue;
+    const statClar = addendumData.statisticalSignificanceClarification;
+    if (!statClar) {
+      errors.push("Addendum missing statisticalSignificanceClarification section");
+    } else {
+      if (typeof srP === "number" && Math.abs(srP - statClar.seededRandomPValue) > 1e-6) {
+        errors.push(
+          `Addendum seededRandomPValue mismatch: exploratory=${srP}, addendum=${statClar.seededRandomPValue}`
+        );
+      }
+      if (statClar.seededRandomSignificant !== false) {
+        errors.push("Addendum seededRandomSignificant must be false under Bonferroni correction");
+      }
+      if (statClar.improvementStatus !== "IMPROVEMENT_UNVERIFIED") {
+        errors.push(
+          `Addendum improvementStatus must be IMPROVEMENT_UNVERIFIED, got ${statClar.improvementStatus}`
+        );
+      }
+      if (statClar.evidenceStatus !== "VALID") {
+        errors.push(`Addendum evidenceStatus must be VALID, got ${statClar.evidenceStatus}`);
+      }
+    }
+  }
+
+  // 9. 未測定時間・未検証 PASS 偏重の開示照合
+  const timeStall = addendumData.timingAndStallClarification;
+  if (!timeStall) {
+    errors.push("Addendum missing timingAndStallClarification section");
+  } else {
+    if (timeStall.generationTimingStatus !== "UNMEASURED") {
+      errors.push(
+        `Addendum generationTimingStatus must be UNMEASURED, got ${timeStall.generationTimingStatus}`
+      );
+    }
+    if (timeStall.passHeavyStallStatus !== "UNVERIFIED") {
+      errors.push(`Addendum passHeavyStallStatus must be UNVERIFIED, got ${timeStall.passHeavyStallStatus}`);
+    }
+    if (timeStall.matchesReachingDecisionLimit !== 0) {
+      errors.push(
+        `Addendum matchesReachingDecisionLimit must be 0, got ${timeStall.matchesReachingDecisionLimit}`
+      );
+    }
+  }
+
+  return {
+    isValid: errors.length === 0,
+    errors,
+    details:
+      errors.length === 0
+        ? "Provenance addendum semantically verified and reconciled with original data"
+        : errors.join("; "),
+    data: addendumData,
   };
 }
 
@@ -1508,7 +1856,35 @@ export function auditStage2Artifacts(
     errors.push("Seed registry data missing for Stage 2 seed audit");
   }
 
-  // 6. 各種照合検証項目の作成 (Fail-Closed)
+  // 6. Addendum 意味的整合性検証および Legacy モード条件確認 (Fail-Closed)
+  if (options?.allowLegacyR0Schema && !options?.addendumDir) {
+    errors.push("allowLegacyR0Schema requires a valid addendumDir containing provenance addendum");
+  }
+
+  let addendumAudit: { present: boolean; isValid: boolean; details: string } | undefined = undefined;
+  let addendumSemanticsValid = false;
+  if (options?.addendumDir) {
+    const semVerif = verifyStage2AddendumSemantics(
+      artifactsDir,
+      options.addendumDir,
+      campaignResult,
+      evidence,
+      exploratoryResult
+    );
+    addendumAudit = {
+      present: true,
+      isValid: semVerif.isValid,
+      details: semVerif.details,
+    };
+    addendumSemanticsValid = semVerif.isValid;
+    if (!semVerif.isValid) {
+      errors.push(...semVerif.errors);
+    }
+  }
+
+  const allowLegacyWithAddendum = Boolean(options?.allowLegacyR0Schema && addendumSemanticsValid);
+
+  // 7. 各種照合検証項目の作成 (Fail-Closed)
   // 照合A: 総試合数 (600試合 = 280 + 200 + 120)
   let totalMatchesVerif: ItemVerification<number> = { status: "UNVERIFIED", details: "Data missing" };
   if (evidence) {
@@ -1755,15 +2131,15 @@ export function auditStage2Artifacts(
       };
       errors.push("Decision stats breakdown does not sum to total decisions");
     } else if (ds.validationDecisions === 0 && (evidence.matchBreakdown?.validationMatches ?? 0) > 0) {
-      if (options?.allowLegacyR0Schema) {
+      if (allowLegacyWithAddendum) {
         const recount = aggregateValidationDecisionsFromResult(campaignResult);
         const correctedTraining = ds.trainingDecisions - recount.totalDecisions;
         warnings.push(
-          `Legacy R0 schema misclassified validation decisions into training (recorded val=0). Independent recount from result pairs: Validation=${recount.totalDecisions}, Adjusted Training=${correctedTraining}, Exploratory=${ds.exploratoryDecisions}, Total=${ds.totalDecisions}.`
+          `Legacy R0 schema misclassified validation decisions into training (recorded val=0). Addendum reconciliation verified: Validation=${recount.totalDecisions}, Training=${correctedTraining}, Exploratory=${ds.exploratoryDecisions}, Total=${ds.totalDecisions}.`
         );
         decisionStatsAccountingVerif = {
           status: "PASS",
-          details: `Legacy R0 misclassification reconciled via result recount: Validation=${recount.totalDecisions}, Training=${correctedTraining}, Total=${ds.totalDecisions}`,
+          details: `Legacy R0 misclassification reconciled via verified addendum: Validation=${recount.totalDecisions}, Training=${correctedTraining}, Total=${ds.totalDecisions}`,
           expected: {
             totalDecisions: ds.totalDecisions,
             trainingDecisions: correctedTraining,
@@ -1775,7 +2151,7 @@ export function auditStage2Artifacts(
       } else {
         decisionStatsAccountingVerif = {
           status: "FAIL",
-          details: `Validation decisions recorded as 0 despite ${evidence.matchBreakdown.validationMatches} validation matches executed (Fail-Closed)`,
+          details: `Validation decisions recorded as 0 despite ${evidence.matchBreakdown?.validationMatches} validation matches executed (Fail-Closed, requires verified addendum under legacy schema)`,
           actual: ds,
         };
         errors.push("Validation decisions recorded as 0 despite executed validation matches");
@@ -1815,21 +2191,22 @@ export function auditStage2Artifacts(
         actual: "MATCH",
       };
     } else {
-      if (options?.allowLegacyR0Schema) {
+      if (allowLegacyWithAddendum) {
         warnings.push(
-          "Legacy R0 manifest contained sequential placeholder seeds (10001-10140) differing from engine-derived executed seeds. Provenance addendum verifies exact deterministic derivation."
+          "Legacy R0 manifest contained sequential placeholder seeds (10001-10140) differing from engine-derived executed seeds. Addendum reconciliation verified exact deterministic derivation."
         );
         manifestSeedMatchVerif = {
           status: "PASS",
           details:
-            "Legacy R0 sequential manifest seeds identified and reconciled with engine-derived executed seeds in provenance addendum",
+            "Legacy R0 sequential manifest seeds identified and reconciled with engine-derived executed seeds via verified addendum",
           expected: "ENGINE_DERIVED_MATCH",
           actual: "LEGACY_R0_RECONCILED",
         };
       } else {
         manifestSeedMatchVerif = {
           status: "FAIL",
-          details: "Preflight planned training seeds do not match executed training seeds in campaign result",
+          details:
+            "Preflight planned training seeds do not match executed training seeds in campaign result (requires verified addendum under legacy schema)",
           expected: "MATCH",
           actual: "MISMATCH",
         };
@@ -1914,25 +2291,26 @@ export function auditStage2Artifacts(
       timingNote.includes("UNMEASURED") ||
       timingNote.includes("Phase breakdown");
 
-    if (options?.allowLegacyR0Schema) {
-      timingHonestyVerif = {
-        status: "PASS",
-        details:
-          "Legacy R0 average-split generation time recognized and clarified in audit: boundary timers were not isolated, generation-level elapsed time is UNMEASURED in provenance addendum",
-        expected: "DISCLOSED_OR_UNMEASURED",
-        actual: "LEGACY_R0_DISCLOSED",
-      };
-    } else if (isExplicitlyUnmeasured || !genElapsed || genElapsed.length === 0) {
+    if (isExplicitlyUnmeasured || !genElapsed || genElapsed.length === 0) {
       timingHonestyVerif = {
         status: "PASS",
         details: "Timing measurement honestly discloses that generation-level boundary timers are UNMEASURED",
         expected: "UNMEASURED_DISCLOSED",
         actual: "HONEST_DISCLOSURE",
       };
+    } else if (allowLegacyWithAddendum) {
+      timingHonestyVerif = {
+        status: "PASS",
+        details:
+          "Legacy R0 average-split generation time recognized and clarified via verified addendum: boundary timers were not isolated, generation-level elapsed time is UNMEASURED in addendum",
+        expected: "DISCLOSED_OR_UNMEASURED",
+        actual: "LEGACY_R0_DISCLOSED",
+      };
     } else {
       timingHonestyVerif = {
         status: "FAIL",
-        details: "Generation elapsed times appear to be synthetic equal splits rather than boundary measurements",
+        details:
+          "Generation elapsed times appear to be synthetic equal splits rather than boundary measurements (requires verified addendum under legacy schema)",
       };
       errors.push("Generation elapsed times appear to be synthetic equal splits");
     }
@@ -1946,33 +2324,43 @@ export function auditStage2Artifacts(
     const sd = evidence.stallDiagnostics;
     const zeroLimitMatches = sd.matchesReachingDecisionLimit === 0;
 
-    if (options?.allowLegacyR0Schema) {
+    if (sd.passHeavyStallDetected === false) {
+      if (allowLegacyWithAddendum && zeroLimitMatches) {
+        passStallHonestyVerif = {
+          status: "PASS",
+          details:
+            "Legacy R0 pass stall evaluated: 0 matches reached 500 decision limit (verified). Pass loop detection without action log is recognized as UNVERIFIED via verified addendum.",
+          expected: "LIMIT_0_VERIFIED",
+          actual: "LEGACY_R0_EVALUATED",
+        };
+      } else {
+        passStallHonestyVerif = {
+          status: "FAIL",
+          details:
+            "PASS stall falsely asserted as false without action log (must be UNVERIFIED / null under strict contract, requires verified addendum under legacy schema)",
+          expected: "null",
+          actual: "false",
+        };
+        errors.push("PASS heavy stall must not be asserted as false when action logs are unobserved");
+      }
+    } else if (
+      sd.passHeavyStallStatus === "UNVERIFIED" &&
+      zeroLimitMatches &&
+      (sd.passHeavyStallDetected === null || sd.passHeavyStallDetected === undefined)
+    ) {
       passStallHonestyVerif = {
         status: "PASS",
         details:
-          "Legacy R0 pass stall status evaluated: 0 matches reached 500 decision limit (verified). Pass loop detection without action log is recognized as UNVERIFIED in provenance addendum.",
-        expected: "LIMIT_0_VERIFIED",
-        actual: "LEGACY_R0_EVALUATED",
-      };
-    } else if (sd.passHeavyStallStatus === "UNVERIFIED" && zeroLimitMatches) {
-      passStallHonestyVerif = {
-        status: "PASS",
-        details:
-          "PASS stall status honestly reported as UNVERIFIED due to lack of action log, while 0 matches reached decision limit is verified",
+          "PASS stall status honestly reported as UNVERIFIED (detected: null) due to lack of action log, while 0 matches reached decision limit is independently verified",
         expected: "UNVERIFIED_STATUS_AND_ZERO_LIMIT",
         actual: "HONEST_DISCLOSURE",
       };
-    } else if (sd.passHeavyStallDetected === false && !options?.allowLegacyR0Schema) {
-      passStallHonestyVerif = {
-        status: "FAIL",
-        details: "PASS stall falsely claimed as false without action log (must be UNVERIFIED under strict contract)",
-      };
-      errors.push("PASS heavy stall must be reported as UNVERIFIED when action logs are unobserved");
     } else {
       passStallHonestyVerif = {
-        status: "PASS",
-        details: "PASS stall verified with 0 limit-reaching matches",
+        status: "FAIL",
+        details: `Invalid pass stall diagnostics: status=${sd.passHeavyStallStatus}, detected=${sd.passHeavyStallDetected}`,
       };
+      errors.push("PASS heavy stall diagnostics fail strict contract");
     }
   } else {
     errors.push("Stall diagnostics missing for honesty verification");
@@ -1983,61 +2371,6 @@ export function auditStage2Artifacts(
   if (!provenanceNotePresent) {
     warnings.push("AUDIT_PROVENANCE_NOTE.md is not found in artifacts directory");
     errors.push("AUDIT_PROVENANCE_NOTE.md is required for complete audit provenance");
-  }
-
-  // Addendum ディレクトリの検証 (オプション指定時)
-  let addendumAudit: { present: boolean; isValid: boolean; details: string } | undefined = undefined;
-  if (options?.addendumDir) {
-    const addendumJsonPath = path.join(options.addendumDir, "stage2-evolution-provenance-addendum.json");
-    const addendumManifestPath = path.join(options.addendumDir, "MANIFEST_SHA256.json");
-    const addendumNotePath = path.join(options.addendumDir, "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md");
-
-    const hasAddendumJson = fs.existsSync(addendumJsonPath);
-    const hasAddendumManifest = fs.existsSync(addendumManifestPath);
-    const hasAddendumNote = fs.existsSync(addendumNotePath);
-
-    if (hasAddendumJson && hasAddendumManifest && hasAddendumNote) {
-      try {
-        const addendumData = JSON.parse(fs.readFileSync(addendumJsonPath, "utf-8"));
-        const addendumManifestList = JSON.parse(fs.readFileSync(addendumManifestPath, "utf-8"));
-        let addendumShaValid = true;
-        for (const item of addendumManifestList) {
-          const fp = path.join(options.addendumDir, item.path);
-          if (!fs.existsSync(fp) || computeFileSha256(fp) !== item.sha256) {
-            addendumShaValid = false;
-            break;
-          }
-        }
-        if (addendumShaValid && addendumData.auditStatus === "PASS") {
-          addendumAudit = {
-            present: true,
-            isValid: true,
-            details: "Provenance addendum verified with valid SHA-256 manifest and PASS audit status",
-          };
-        } else {
-          addendumAudit = {
-            present: true,
-            isValid: false,
-            details: "Provenance addendum hash mismatch or invalid audit status",
-          };
-          errors.push("Provenance addendum verification failed");
-        }
-      } catch (err: any) {
-        addendumAudit = {
-          present: true,
-          isValid: false,
-          details: `Failed to parse provenance addendum: ${err.message}`,
-        };
-        errors.push(`Provenance addendum parse error: ${err.message}`);
-      }
-    } else {
-      addendumAudit = {
-        present: false,
-        isValid: false,
-        details: "One or more required addendum files are missing in addendumDir",
-      };
-      errors.push("Required provenance addendum files are missing in addendumDir");
-    }
   }
 
   const verifications = {
@@ -2303,10 +2636,10 @@ export async function runStage2Evolution(
     },
     stallDiagnostics: {
       passHeavyStallStatus: "UNVERIFIED",
-      passHeavyStallDetected: false,
+      passHeavyStallDetected: null,
       matchesReachingDecisionLimit: execOutput.decisionStats.total.matchesReachingDecisionLimit,
       stallNote:
-        "0 matches reached maximum decision limits (500). Pass heavy stall loops are UNVERIFIED due to absence of per-step action history in match outcomes.",
+        "0 matches reached maximum decision limits (500). Absence of limit-reaching matches does not prove absence of PASS loops. Pass heavy stall loops are UNVERIFIED due to absence of per-step action history in match outcomes.",
     },
   };
 
@@ -2373,54 +2706,6 @@ export async function runStage2Evolution(
 // 監査補足資料 (Addendum) 生成ヘルパー
 // =============================================================================
 
-export interface Stage2ProvenanceAddendumData {
-  readonly workId: string;
-  readonly baseArtifactsSha256: string;
-  readonly auditStatus: "PASS" | "FAIL";
-  readonly timestamp: string;
-  readonly decisionStatsRecount: {
-    readonly totalDecisions: number;
-    readonly trainingDecisions: number;
-    readonly validationDecisions: number;
-    readonly exploratoryDecisions: number;
-    readonly validationMatchesCount: number;
-    readonly sourceOfTruth: string;
-  };
-  readonly seedContractClarification: {
-    readonly seedGenerationContract: string;
-    readonly manifestPlannedSeedsNote: string;
-    readonly executedSeedsVerified: boolean;
-  };
-  readonly validationScoresClarification: {
-    readonly gen4OverallBaselineMeanScore: number;
-    readonly gen4FirstLegalMeanScore: number;
-    readonly gen4SeededRandomMeanScore: number;
-    readonly finalChampionValidationWinRate: number;
-    readonly generationChampionScores: readonly GenerationChampionValidationScores[];
-  };
-  readonly statisticalSignificanceClarification: {
-    readonly alphaRaw: number;
-    readonly bonferroniAlpha: number;
-    readonly seededRandomPValue: number;
-    readonly seededRandomSignificant: boolean;
-    readonly evidenceStatus: string;
-    readonly improvementStatus: string;
-    readonly note: string;
-  };
-  readonly timingAndStallClarification: {
-    readonly generationTimingStatus: "UNMEASURED";
-    readonly generationTimingNote: string;
-    readonly passHeavyStallStatus: "UNVERIFIED";
-    readonly passHeavyStallNote: string;
-    readonly matchesReachingDecisionLimit: number;
-  };
-  readonly populationDistinction: {
-    readonly finalEvaluatedChampionGeneration: number;
-    readonly finalEvaluatedChampionId: string;
-    readonly p5OffspringPopulationNote: string;
-  };
-}
-
 export function generateStage2AuditProvenanceAddendum(
   artifactsDir: string = DEFAULT_STAGE2_ARTIFACTS_DIR,
   addendumDir: string = path.resolve(process.cwd(), ".artifacts/stage2-evolution-addendum")
@@ -2441,6 +2726,9 @@ export function generateStage2AuditProvenanceAddendum(
 
   // 1. 意思決定数の再計算 (Result 内の validationResult.pairs より)
   const recount = aggregateValidationDecisionsFromResult(campaignResult);
+  if (!evidence?.decisionStats) {
+    throw new Error("Evidence decisionStats is missing in original artifacts");
+  }
   const totalDecisions = evidence.decisionStats.totalDecisions; // 107386
   const exploratoryDecisions = evidence.decisionStats.exploratoryDecisions; // 14960
   const validationDecisions = recount.totalDecisions; // 37081
@@ -2448,21 +2736,57 @@ export function generateStage2AuditProvenanceAddendum(
 
   // 2. 世代別 Validation スコア集計
   const generationScores: GenerationChampionValidationScores[] = [];
-  if (Array.isArray(campaignResult.history)) {
-    for (const h of campaignResult.history) {
-      generationScores.push(computeGenerationChampionValidationScores(h.validationResult, h.generation));
-    }
+  if (!Array.isArray(campaignResult.history) || campaignResult.history.length === 0) {
+    throw new Error("Campaign history is missing or empty in campaign result");
   }
-  const gen4Scores = generationScores.find((s) => s.generation === 4) ?? {
-    generation: 4,
-    firstLegalMeanScore: 1.0,
-    seededRandomMeanScore: 0.65,
-    overallBaselineMeanScore: 0.825,
-  };
+  for (const h of campaignResult.history) {
+    if (!h.validationResult) {
+      throw new Error(`Validation result missing for generation ${h.generation} in campaign history`);
+    }
+    generationScores.push(computeGenerationChampionValidationScores(h.validationResult, h.generation));
+  }
+  const gen4Scores = generationScores.find((s) => s.generation === 4);
+  if (!gen4Scores) {
+    throw new Error("Generation 4 validation result missing in campaign history");
+  }
 
-  // 3. 原本 ZIP の存在確認とハッシュ
+  // 3. 原本 ZIP の存在確認とハッシュ (フォールバック廃止)
   const zipPath = path.resolve(artifactsDir, "../stage2-evolution-archive.zip");
-  const baseZipSha = fs.existsSync(zipPath) ? computeFileSha256(zipPath) : "UNOBSERVED";
+  if (!fs.existsSync(zipPath)) {
+    throw new Error(`Base archive zip not found at "${zipPath}"`);
+  }
+  const baseZipSha = computeFileSha256(zipPath);
+
+  // 4. Champion 検証 (フォールバック廃止)
+  if (!campaignResult.provisionalBestChampion) {
+    throw new Error("Provisional best champion missing in campaign result");
+  }
+  const finalChampionValidationWinRate = campaignResult.provisionalBestChampion.validationMeanWinRate;
+  if (typeof finalChampionValidationWinRate !== "number") {
+    throw new Error("provisionalBestChampion.validationMeanWinRate is missing or not a number");
+  }
+  const finalChampionId = campaignResult.provisionalBestChampion.genomeId;
+  if (!finalChampionId) {
+    throw new Error("provisionalBestChampion.genomeId is missing");
+  }
+
+  // 5. 探索評価からの正確なデータ取得 (フォールバック廃止)
+  const rawOpponents = exploratoryResult.logicalResult?.opponents ?? exploratoryResult.opponents;
+  const srOpponent =
+    rawOpponents?.["baseline-seeded-random"] ??
+    (Array.isArray(rawOpponents) ? rawOpponents.find((o: any) => o.opponentId === "SeededRandom") : undefined);
+  const srPValue = srOpponent?.statisticalTest?.pValue ?? srOpponent?.pValue;
+  if (typeof srPValue !== "number") {
+    throw new Error("SeededRandom pValue missing in exploratory result");
+  }
+  const impStatus = exploratoryResult.improvementStatus;
+  if (!impStatus) {
+    throw new Error("improvementStatus missing in exploratory result");
+  }
+  const evStatus = exploratoryResult.evidenceStatus;
+  if (!evStatus) {
+    throw new Error("evidenceStatus missing in exploratory result");
+  }
 
   const addendumData: Stage2ProvenanceAddendumData = {
     workId: WORK_ID,
@@ -2489,16 +2813,16 @@ export function generateStage2AuditProvenanceAddendum(
       gen4OverallBaselineMeanScore: gen4Scores.overallBaselineMeanScore,
       gen4FirstLegalMeanScore: gen4Scores.firstLegalMeanScore,
       gen4SeededRandomMeanScore: gen4Scores.seededRandomMeanScore,
-      finalChampionValidationWinRate: campaignResult.provisionalBestChampion?.validationMeanWinRate ?? 0.825,
+      finalChampionValidationWinRate: finalChampionValidationWinRate,
       generationChampionScores: generationScores,
     },
     statisticalSignificanceClarification: {
       alphaRaw: 0.05,
       bonferroniAlpha: 0.05 / 3, // 0.016666...
-      seededRandomPValue: 0.027628421569494212,
+      seededRandomPValue: srPValue,
       seededRandomSignificant: false,
-      evidenceStatus: "VALID",
-      improvementStatus: "IMPROVEMENT_UNVERIFIED",
+      evidenceStatus: evStatus,
+      improvementStatus: impStatus,
       note: "Under Bonferroni-corrected alpha=0.01667, SeededRandom is non-significant (p=0.0276 > 0.01667). evidenceStatus=VALID certifies empirical validity of test; improvementStatus remains IMPROVEMENT_UNVERIFIED.",
     },
     timingAndStallClarification: {
@@ -2512,7 +2836,7 @@ export function generateStage2AuditProvenanceAddendum(
     },
     populationDistinction: {
       finalEvaluatedChampionGeneration: 4,
-      finalEvaluatedChampionId: campaignResult.provisionalBestChampion?.genomeId ?? "gen-000004-offspring-000006",
+      finalEvaluatedChampionId: finalChampionId,
       p5OffspringPopulationNote:
         "Population P5 consists of untested offspring generated at the conclusion of Generation 4. Diversity metrics describe P5 genotype variance, distinct from the Gen 4 Champion empirical performance.",
     },

@@ -529,9 +529,10 @@ function createMockValidStage2Fixture(fixtureDir: string) {
     },
     stallDiagnostics: {
       passHeavyStallStatus: "UNVERIFIED",
-      passHeavyStallDetected: false,
+      passHeavyStallDetected: null,
       matchesReachingDecisionLimit: 0,
-      stallNote: "UNVERIFIED: Action logs were not retained in outcomes. 0 matches reached limit.",
+      stallNote:
+        "0 matches reached maximum decision limits (500). Absence of limit-reaching matches does not prove absence of PASS loops. Pass heavy stall loops are UNVERIFIED due to absence of per-step action history in match outcomes.",
     },
   };
   fs.writeFileSync(path.join(fixtureDir, "stage2-evolution-evidence.json"), JSON.stringify(evidence, null, 2), "utf-8");
@@ -896,11 +897,10 @@ describe("Stage 2 Controlled Evolution Runner & Audit Tests (Work 3-4)", () => {
     expect(auditStrict.verifications.decisionStatsAccounting.status).toBe("FAIL");
     expect(auditStrict.errors.some((e) => e.includes("Validation decisions recorded as 0"))).toBe(true);
 
-    // allowLegacyR0Schema: true の場合は警告を出して再計算値により PASS となること
-    const auditLegacy = auditStage2Artifacts(tempFixtureDir, { allowLegacyR0Schema: true });
-    expect(auditLegacy.isValid).toBe(true);
-    expect(auditLegacy.verifications.decisionStatsAccounting.status).toBe("PASS");
-    expect(auditLegacy.warnings.some((w) => w.includes("Legacy R0 schema misclassified validation decisions"))).toBe(true);
+    // allowLegacyR0Schema: true でも Addendum なしの場合は FAIL となること (R2 厳格契約)
+    const auditLegacyWithoutAddendum = auditStage2Artifacts(tempFixtureDir, { allowLegacyR0Schema: true });
+    expect(auditLegacyWithoutAddendum.isValid).toBe(false);
+    expect(auditLegacyWithoutAddendum.errors.some((e) => e.includes("allowLegacyR0Schema requires a valid addendumDir"))).toBe(true);
   });
 
   it("Test 16: [必須] 保存 Result からの Validation 意思決定数独立集計の検証 (aggregateValidationDecisionsFromResult)", () => {
@@ -1076,5 +1076,202 @@ describe("Stage 2 Controlled Evolution Runner & Audit Tests (Work 3-4)", () => {
     if (fs.existsSync(liveAddendumDir)) {
       expect(audit.addendumAudit?.isValid).toBe(true);
     }
+  });
+
+  // ---------------------------------------------------------------------------
+  // 7. Addendum 意味的整合性・Legacy 厳格化・PASS 未検証表現 (R2 指摘対応)
+  // ---------------------------------------------------------------------------
+  it("Test 23: Addendum 内の意思決定数を改変し、Manifest ハッシュも更新した場合に FAIL (意味的整合性 Fail-Closed)", () => {
+    const liveArtifactsDir = path.resolve(__dirname, "../../../.artifacts/stage2-evolution");
+    const liveAddendumDir = path.resolve(__dirname, "../../../.artifacts/stage2-evolution-addendum");
+    if (!fs.existsSync(liveArtifactsDir) || !fs.existsSync(liveAddendumDir)) {
+      return;
+    }
+
+    // 一時ディレクトリに Addendum を複製
+    const tempAddendumDir = fs.mkdtempSync(path.join(os.tmpdir(), "bp-tampered-addendum-"));
+    const files = fs.readdirSync(liveAddendumDir);
+    for (const f of files) {
+      fs.copyFileSync(path.join(liveAddendumDir, f), path.join(tempAddendumDir, f));
+    }
+
+    // 意思決定数を改変 (37081 -> 99999)
+    const addendumJsonPath = path.join(tempAddendumDir, "stage2-evolution-provenance-addendum.json");
+    const addendumData = JSON.parse(fs.readFileSync(addendumJsonPath, "utf-8"));
+    addendumData.decisionStatsRecount.validationDecisions = 99999;
+    fs.writeFileSync(addendumJsonPath, JSON.stringify(addendumData, null, 2), "utf-8");
+
+    // Addendum の MANIFEST_SHA256.json も再計算して完全偽装
+    const newManifest = [
+      {
+        path: "stage2-evolution-provenance-addendum.json",
+        sha256: computeFileSha256(addendumJsonPath),
+        size: fs.statSync(addendumJsonPath).size,
+      },
+      {
+        path: "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md",
+        sha256: computeFileSha256(path.join(tempAddendumDir, "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md")),
+        size: fs.statSync(path.join(tempAddendumDir, "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md")).size,
+      },
+    ];
+    fs.writeFileSync(path.join(tempAddendumDir, "MANIFEST_SHA256.json"), JSON.stringify(newManifest, null, 2), "utf-8");
+
+    // auditStage2Artifacts を実行
+    const audit = auditStage2Artifacts(liveArtifactsDir, {
+      allowLegacyR0Schema: true,
+      addendumDir: tempAddendumDir,
+    });
+
+    expect(audit.isValid).toBe(false);
+    expect(audit.errors.some((e) => e.includes("Addendum validationDecisions mismatch"))).toBe(true);
+    expect(audit.addendumAudit?.isValid).toBe(false);
+  });
+
+  it("Test 24: Addendum の元 ZIP SHA-256 (baseArtifactsSha256) が不一致なら FAIL", () => {
+    const liveArtifactsDir = path.resolve(__dirname, "../../../.artifacts/stage2-evolution");
+    const liveAddendumDir = path.resolve(__dirname, "../../../.artifacts/stage2-evolution-addendum");
+    if (!fs.existsSync(liveArtifactsDir) || !fs.existsSync(liveAddendumDir)) {
+      return;
+    }
+
+    const tempAddendumDir = fs.mkdtempSync(path.join(os.tmpdir(), "bp-tampered-zipsha-"));
+    for (const f of fs.readdirSync(liveAddendumDir)) {
+      fs.copyFileSync(path.join(liveAddendumDir, f), path.join(tempAddendumDir, f));
+    }
+
+    // baseArtifactsSha256 をダミーハッシュに改変
+    const addendumJsonPath = path.join(tempAddendumDir, "stage2-evolution-provenance-addendum.json");
+    const addendumData = JSON.parse(fs.readFileSync(addendumJsonPath, "utf-8"));
+    addendumData.baseArtifactsSha256 = "0000000000000000000000000000000000000000000000000000000000000000";
+    fs.writeFileSync(addendumJsonPath, JSON.stringify(addendumData, null, 2), "utf-8");
+
+    // Manifest も再計算
+    const newManifest = [
+      {
+        path: "stage2-evolution-provenance-addendum.json",
+        sha256: computeFileSha256(addendumJsonPath),
+        size: fs.statSync(addendumJsonPath).size,
+      },
+      {
+        path: "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md",
+        sha256: computeFileSha256(path.join(tempAddendumDir, "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md")),
+        size: fs.statSync(path.join(tempAddendumDir, "STAGE2_AUDIT_SUPPLEMENTARY_EVIDENCE.md")).size,
+      },
+    ];
+    fs.writeFileSync(path.join(tempAddendumDir, "MANIFEST_SHA256.json"), JSON.stringify(newManifest, null, 2), "utf-8");
+
+    const audit = auditStage2Artifacts(liveArtifactsDir, {
+      allowLegacyR0Schema: true,
+      addendumDir: tempAddendumDir,
+    });
+
+    expect(audit.isValid).toBe(false);
+    expect(audit.errors.some((e) => e.includes("Addendum baseArtifactsSha256 mismatch"))).toBe(true);
+    expect(audit.addendumAudit?.isValid).toBe(false);
+  });
+
+  it("Test 25: Legacy モードで Addendum なしの場合は FAIL (Fail-Closed)", () => {
+    const liveArtifactsDir = path.resolve(__dirname, "../../../.artifacts/stage2-evolution");
+    if (!fs.existsSync(liveArtifactsDir)) {
+      return;
+    }
+
+    // addendumDir 未指定
+    const auditNoAddendum = auditStage2Artifacts(liveArtifactsDir, {
+      allowLegacyR0Schema: true,
+    });
+    expect(auditNoAddendum.isValid).toBe(false);
+    expect(auditNoAddendum.errors.some((e) => e.includes("allowLegacyR0Schema requires a valid addendumDir"))).toBe(true);
+
+    // 空のディレクトリを指定
+    const emptyAddendumDir = fs.mkdtempSync(path.join(os.tmpdir(), "bp-empty-addendum-"));
+    const auditEmpty = auditStage2Artifacts(liveArtifactsDir, {
+      allowLegacyR0Schema: true,
+      addendumDir: emptyAddendumDir,
+    });
+    expect(auditEmpty.isValid).toBe(false);
+    expect(auditEmpty.errors.some((e) => e.includes("Missing required addendum file"))).toBe(true);
+  });
+
+  it("Test 26: 正しい原本＋正しい Addendum なら完全監査 PASS", () => {
+    const liveArtifactsDir = path.resolve(__dirname, "../../../.artifacts/stage2-evolution");
+    const liveAddendumDir = path.resolve(__dirname, "../../../.artifacts/stage2-evolution-addendum");
+    if (!fs.existsSync(liveArtifactsDir) || !fs.existsSync(liveAddendumDir)) {
+      return;
+    }
+
+    const audit = auditStage2Artifacts(liveArtifactsDir, {
+      allowLegacyR0Schema: true,
+      addendumDir: liveAddendumDir,
+    });
+
+    expect(audit.isValid).toBe(true);
+    expect(audit.errors).toEqual([]);
+    expect(audit.addendumAudit).toBeDefined();
+    expect(audit.addendumAudit?.isValid).toBe(true);
+    expect(audit.addendumAudit?.details).toContain("Provenance addendum semantically verified");
+  });
+
+  it("Test 27: Gen 4 の Validation 情報が欠落した場合に期待値を捏造しない (フォールバック廃止の検証)", () => {
+    createMockValidStage2Fixture(tempFixtureDir);
+
+    // campaign result から Gen 4 の history を削除
+    const resPath = path.join(tempFixtureDir, "campaign-stage2-evolution-result.json");
+    const res = JSON.parse(fs.readFileSync(resPath, "utf-8"));
+    res.history = res.history.filter((h: any) => h.generation !== 4);
+    fs.writeFileSync(resPath, JSON.stringify(res, null, 2), "utf-8");
+
+    // generateStage2AuditProvenanceAddendum を実行して例外がスローされることを検証
+    const targetAddendumDir = path.join(tempFixtureDir, "addendum-output");
+    expect(() => {
+      generateStage2AuditProvenanceAddendum(tempFixtureDir, targetAddendumDir);
+    }).toThrow(/Generation 4 validation/);
+  });
+
+  it("Test 28: 未検証 PASS 偏重を false と断定しない (strict モードで断定拒絶、null/UNVERIFIED を正当化)", () => {
+    createMockValidStage2Fixture(tempFixtureDir);
+
+    // 1. passHeavyStallDetected: false が入っている場合、strict モードで FAIL
+    const evPath = path.join(tempFixtureDir, "stage2-evolution-evidence.json");
+    const ev = JSON.parse(fs.readFileSync(evPath, "utf-8"));
+    ev.stallDiagnostics = {
+      passHeavyStallStatus: "UNVERIFIED",
+      passHeavyStallDetected: false, // 誤って false と断定
+      matchesReachingDecisionLimit: 0,
+      stallNote: "Wrongly asserted as false",
+    };
+    fs.writeFileSync(evPath, JSON.stringify(ev, null, 2), "utf-8");
+
+    // Manifest も更新
+    const manifestItems = REQUIRED_STAGE2_AUDIT_FILES.map((relFile) => {
+      const fullP = path.join(tempFixtureDir, relFile);
+      return { path: relFile, sha256: computeFileSha256(fullP), size: fs.statSync(fullP).size };
+    });
+    fs.writeFileSync(path.join(tempFixtureDir, "MANIFEST_SHA256.json"), JSON.stringify(manifestItems, null, 2), "utf-8");
+
+    const auditAssertedFalse = auditStage2Artifacts(tempFixtureDir, { allowLegacyR0Schema: false });
+    expect(auditAssertedFalse.isValid).toBe(false);
+    expect(auditAssertedFalse.verifications.passStallMeasurementHonesty.status).toBe("FAIL");
+    expect(auditAssertedFalse.errors.some((e) => e.includes("PASS heavy stall must not be asserted as false"))).toBe(true);
+
+    // 2. passHeavyStallDetected: null かつ UNVERIFIED の場合、HONEST_DISCLOSURE として PASS
+    ev.stallDiagnostics = {
+      passHeavyStallStatus: "UNVERIFIED",
+      passHeavyStallDetected: null, // 正しい未検証表現
+      matchesReachingDecisionLimit: 0,
+      stallNote: "0 matches reached 500 limit. Absence of limit reaches does not prove absence of PASS loops.",
+    };
+    fs.writeFileSync(evPath, JSON.stringify(ev, null, 2), "utf-8");
+
+    const manifestItems2 = REQUIRED_STAGE2_AUDIT_FILES.map((relFile) => {
+      const fullP = path.join(tempFixtureDir, relFile);
+      return { path: relFile, sha256: computeFileSha256(fullP), size: fs.statSync(fullP).size };
+    });
+    fs.writeFileSync(path.join(tempFixtureDir, "MANIFEST_SHA256.json"), JSON.stringify(manifestItems2, null, 2), "utf-8");
+
+    const auditHonestNull = auditStage2Artifacts(tempFixtureDir, { allowLegacyR0Schema: false });
+    expect(auditHonestNull.isValid).toBe(true);
+    expect(auditHonestNull.verifications.passStallMeasurementHonesty.status).toBe("PASS");
+    expect(auditHonestNull.verifications.passStallMeasurementHonesty.actual).toBe("HONEST_DISCLOSURE");
   });
 });
