@@ -74,5 +74,6 @@ export interface DecisionRequest {
   readonly blockAssignmentStreamMeta?: {
     readonly attackerUnitIds: readonly string[];
     readonly candidateBlockerUnitIds: readonly string[];
+    readonly patternCount?: number;
   };
 }

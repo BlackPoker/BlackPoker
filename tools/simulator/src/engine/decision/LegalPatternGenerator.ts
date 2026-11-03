@@ -1176,6 +1176,7 @@ export class LegalPatternGenerator {
       blockAssignmentStreamMeta: {
         attackerUnitIds: attackers.map((u: any) => u.unitId ?? u.id ?? ""),
         candidateBlockerUnitIds: candidateBlockers.map((u: any) => u.unitId ?? u.id ?? ""),
+        patternCount: streamProvider.patternCount,
       },
     };
 

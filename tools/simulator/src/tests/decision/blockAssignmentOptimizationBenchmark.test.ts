@@ -16,6 +16,7 @@ import { DecisionDNA, DecisionDNAExecutionError, DecisionDNAValidationError } fr
 import { FirstLegalPolicy, RandomPolicy } from "../../engine/simulation/DecisionPolicy.js";
 import { GameSession } from "../../engine/session/GameSession.js";
 import { GameSessionSnapshotCodec } from "../../engine/session/GameSessionSnapshotCodec.js";
+import { StateHasher } from "../../engine/simulation/StateHasher.js";
 import { SimulationRunner } from "../../engine/simulation/SimulationRunner.js";
 import * as path from "path";
 
@@ -884,6 +885,172 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       expect(streamRecord?.selectedPatternRef).toBe(0);
       expect(streamRecord?.assignmentsSummary).toBeDefined();
       expect(streamRecord?.selectedLogicalPatternKey).toContain("block-stream-0");
+    });
+  });
+
+  // ===========================================================================
+  // F. Snapshot復元・Canonical Log・事前検証の完全整合性 (R4)
+  // ===========================================================================
+  describe("F. Snapshot復元・Canonical Log・事前検証の完全整合性 (R4)", () => {
+    it("1,024件の合法手を持つストリーミング判断で、Canonical Match Logの合法手数が1,024となり、isStreaming: true, legalPatternRefs: undefined であること (要件3, 5-5)", () => {
+      const { session, blockStep } = createLargeBattleSession();
+      const req = getReq(blockStep);
+      expect(req.blockAssignmentStream?.patternCount).toBe(1024);
+
+      const matchLog = session.getMatchLog();
+      const decReqEvent = matchLog.events.find(
+        (e: any) => e.type === "decision.requested" && e.decisionId === req.decisionId
+      ) as any;
+
+      expect(decReqEvent).toBeDefined();
+      expect(decReqEvent.legalPatternCount).toBe(1024);
+      expect(decReqEvent.isStreaming).toBe(true);
+      expect(decReqEvent.legalPatternRefs).toBeUndefined();
+    });
+
+    it("Snapshot内の攻撃ユニットIDが存在しない場合、復元がFail-Closed例外をスローすること (要件2-1, 5-1)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+      const parsed = JSON.parse(JSON.stringify(snapshot));
+      parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds = ["non-existent-atk-id"];
+
+      expect(() => {
+        GameSession.fromSnapshot(parsed, rulePackage);
+      }).toThrowError(/攻撃ユニットID.*見つかりません/);
+    });
+
+    it("Snapshot内のブロッカーIDが存在しない場合、復元がFail-Closed例外をスローすること (要件2-1, 5-2)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+      const parsed = JSON.parse(JSON.stringify(snapshot));
+      parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds = ["non-existent-blk-id"];
+
+      expect(() => {
+        GameSession.fromSnapshot(parsed, rulePackage);
+      }).toThrowError(/ブロッカー候補ユニットID.*見つかりません/);
+    });
+
+    it("Snapshot内のIDが重複、または不正IDを含む場合、復元がFail-Closed例外をスローすること (要件2-2, 5-3)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+
+      // 重複攻撃ユニットID
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        const atkIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds;
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds = [atkIds[0], atkIds[0]];
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/attackerUnitIds に重複/);
+      }
+
+      // 重複ブロッカーID
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        const blkIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds;
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds = [blkIds[0], blkIds[0]];
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/candidateBlockerUnitIds に重複/);
+      }
+
+      // 攻撃と防御で同一ID (交差)
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        const atkIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds;
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds = [atkIds[0]];
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/同一ユニットID/);
+      }
+
+      // 空文字ID
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds = [""];
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/不正な attackerUnitId/);
+      }
+    });
+
+    it("Snapshot内のユニットが不正な所有者、領域、資格を持つ場合、復元がFail-Closed例外をスローすること (要件2-3, 5-3)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+
+      // 攻撃ユニットを守備側フィールドのユニットに変更 (不正所有者)
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        const blkIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds;
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds = blkIds.slice(1);
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds = [blkIds[0]];
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/相手プレイヤー.*のフィールドに見つかりません/);
+      }
+
+      // 攻撃ユニットの role が attacker ではない場合 (不正資格)
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        const atkId = parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds[0];
+        const atkUnit = parsed.gameState.players.p1.field.find((u: any) => u.unitId === atkId);
+        atkUnit.battle.role = "defender";
+        parsed.gameStateHash = StateHasher.hash(parsed.gameState);
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/攻撃役割.*を持っていません/);
+      }
+
+      // ブロッカー候補が charge でも drive でもない (down状態など) 場合 (不正資格)
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        const blkId = parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds[0];
+        const blkUnit = parsed.gameState.players.p2.field.find((u: any) => u.unitId === blkId);
+        blkUnit.state = "down";
+        parsed.gameStateHash = StateHasher.hash(parsed.gameState);
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/ブロック可能状態.*ではありません/);
+      }
+    });
+
+    it("改ざんされたメタデータの patternCount と再構築結果が不一致の場合、復元がFail-Closed例外をスローすること (要件2-4, 5-4)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+      const parsed = JSON.parse(JSON.stringify(snapshot));
+      parsed.session.pendingDecision.blockAssignmentStreamMeta.patternCount = 999; // 改ざん
+
+      expect(() => {
+        GameSession.fromSnapshot(parsed, rulePackage);
+      }).toThrowError(/合法手総数の不一致を検出しました/);
+    });
+
+    it("ストリーミング判断要求で blockAssignmentStreamMeta が欠落している場合、自動推測復元を禁止して例外をスローすること (要件2-6)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+      const parsed = JSON.parse(JSON.stringify(snapshot));
+      delete parsed.session.pendingDecision.blockAssignmentStreamMeta;
+
+      expect(() => {
+        GameSession.fromSnapshot(parsed, rulePackage);
+      }).toThrowError(/blockAssignmentStreamMeta が存在しません。自動推測による復元は禁止されています/);
+    });
+
+    it("実体化不能な選択肢を submitDecision した場合、StateVersion、盤面状態、pendingDecision、ログが完全不変のままFail-Closed例外を送出すること (要件4, 5-6)", () => {
+      const { session, blockStep } = createLargeBattleSession();
+      const req = getReq(blockStep);
+
+      const initialVersion = session.stateVersion;
+      const initialPendingDecision = session.pendingDecision;
+      const initialLogCount = session.getMatchLog().events.length;
+      const initialPlayersStateJson = JSON.stringify(session.state.players);
+
+      // 実体化不能な範囲外インデックス (1024)
+      expect(() => {
+        session.submitDecision({
+          decisionId: req.decisionId,
+          stateVersion: req.stateVersion,
+          selectedPatternRef: 1024,
+        });
+      }).toThrow();
+
+      // 事前検証で失敗したため、StateVersion は完全に不変
+      expect(session.stateVersion).toBe(initialVersion);
+      // pendingDecision は完全に不変
+      expect(session.pendingDecision).toBe(initialPendingDecision);
+      // MatchLog に decision.responded が出力されていないこと (イベント数不変)
+      expect(session.getMatchLog().events.length).toBe(initialLogCount);
+      expect(
+        session.getMatchLog().events.some((e: any) => e.type === "decision.responded" && e.decisionId === req.decisionId)
+      ).toBe(false);
+      // 盤面状態も完全に不変
+      expect(JSON.stringify(session.state.players)).toBe(initialPlayersStateJson);
     });
   });
 });

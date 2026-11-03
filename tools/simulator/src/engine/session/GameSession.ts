@@ -1,6 +1,6 @@
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
-import { TargetSelection } from "../../domain/decision/DecisionCatalog";
+import { TargetSelection, EffectSelection } from "../../domain/decision/DecisionCatalog";
 import { LegalPattern } from "../../domain/decision/LegalPattern";
 import { PlayerKey, RequestRef, RULE_SYSTEM_CHANCE } from "../../domain/decision/DecisionSource";
 import { RulePackage } from "../../domain/rules/RulePackage";
@@ -287,54 +287,140 @@ export class GameSession {
   }
 
   /**
+   * 判断要求イベント (decision.requested) を CanonicalMatchLog へ一元記録
+   */
+  private recordDecisionRequested(decision: DecisionRequest): void {
+    const isStreaming = !!(
+      decision.blockAssignmentStream &&
+      (!decision.patterns || decision.patterns.length === 0)
+    );
+    const legalPatternCount = isStreaming
+      ? decision.blockAssignmentStream!.patternCount
+      : (decision.patterns?.length ?? 0);
+
+    this.logRecorder.record({
+      type: "decision.requested",
+      stateVersion: this.stateVersion,
+      decisionId: decision.decisionId,
+      playerId: decision.playerId,
+      source: decision.source.type,
+      requestId: (decision.source as any).requestId,
+      legalPatternCount,
+      legalPatternRefs: isStreaming ? undefined : decision.patterns.map((_, i) => i),
+      isStreaming: isStreaming ? true : undefined,
+    });
+  }
+
+  /**
    * Snapshot 復元後に、JSONシリアライズできないストリーミングプロバイダを盤面状態と識別情報から再構築
    */
   public rehydratePendingDecisionStream(): void {
     if (!this.pendingDecision) return;
 
-    // 1. blockAssignmentStreamMeta が存在する場合の再構築
-    if (this.pendingDecision.blockAssignmentStreamMeta) {
-      const meta = this.pendingDecision.blockAssignmentStreamMeta;
-      const allUnits: any[] = [];
-      for (const p of Object.values<any>(this.state.players || {})) {
-        if (p.field) allUnits.push(...p.field);
-        if (p.trumps) allUnits.push(...p.trumps);
-      }
-      const unitMap = new Map<string, any>();
-      for (const u of allUnits) {
-        if (u.unitId) unitMap.set(u.unitId, u);
-      }
+    const isBlockAssignmentResolution =
+      this.pendingDecision.source.type === "EFFECT_RESOLUTION" &&
+      (this.pendingDecision.source as any).sourceActionId === "action.block";
 
-      const attackers = meta.attackerUnitIds.map((id) => unitMap.get(id)).filter(Boolean);
-      const candidates = meta.candidateBlockerUnitIds.map((id) => unitMap.get(id)).filter(Boolean);
+    const isStreamingRequest =
+      !!this.pendingDecision.blockAssignmentStreamMeta ||
+      (isBlockAssignmentResolution && (!this.pendingDecision.patterns || this.pendingDecision.patterns.length === 0));
 
-      (this.pendingDecision as any).blockAssignmentStream =
-        LegalPatternGenerator.createBlockAssignmentStreamProvider(
-          attackers,
-          candidates,
-          this.rulePackage.components
-        );
+    if (!isStreamingRequest) {
       return;
     }
 
-    // 2. blockAssignmentStream が未設定かつ EFFECT_RESOLUTION かつ action.block の場合
-    if (
-      this.pendingDecision.source.type === "EFFECT_RESOLUTION" &&
-      (this.pendingDecision.source as any).sourceActionId === "action.block" &&
-      (!this.pendingDecision.patterns || this.pendingDecision.patterns.length === 0)
-    ) {
-      const decPlayer = this.pendingDecision.playerId;
-      const oppPlayerKey = decPlayer === "p1" ? "p2" : "p1";
-      const defenders = (this.state.players?.[decPlayer]?.field || []).filter((u: any) => u.state === "charge" || u.state === "drive");
-      const attackers = (this.state.players?.[oppPlayerKey]?.field || []).filter((u: any) => u.battle?.role === "attacker");
-
-      (this.pendingDecision as any).blockAssignmentStream =
-        LegalPatternGenerator.createBlockAssignmentStreamProvider(
-          attackers,
-          defenders,
-          this.rulePackage.components
-        );
+    const meta = this.pendingDecision.blockAssignmentStreamMeta;
+    // メタデータ欠落時の自動推測復元は原則禁止 (Fail-Closed)
+    if (!meta) {
+      throw new Error(
+        "rehydratePendingDecisionStream: ストリーミング判断要求に blockAssignmentStreamMeta が存在しません。自動推測による復元は禁止されています。"
+      );
     }
+
+    // 重複IDや不正なIDの検証
+    if (!Array.isArray(meta.attackerUnitIds) || !Array.isArray(meta.candidateBlockerUnitIds)) {
+      throw new Error("rehydratePendingDecisionStream: attackerUnitIds または candidateBlockerUnitIds が配列ではありません。");
+    }
+    if (meta.attackerUnitIds.length === 0) {
+      throw new Error("rehydratePendingDecisionStream: attackerUnitIds が空です。");
+    }
+    for (const id of meta.attackerUnitIds) {
+      if (!id || typeof id !== "string") {
+        throw new Error(`rehydratePendingDecisionStream: 不正な attackerUnitId: ${String(id)}`);
+      }
+    }
+    for (const id of meta.candidateBlockerUnitIds) {
+      if (!id || typeof id !== "string") {
+        throw new Error(`rehydratePendingDecisionStream: 不正な candidateBlockerUnitId: ${String(id)}`);
+      }
+    }
+
+    if (new Set(meta.attackerUnitIds).size !== meta.attackerUnitIds.length) {
+      throw new Error("rehydratePendingDecisionStream: attackerUnitIds に重複が含まれています。");
+    }
+    if (new Set(meta.candidateBlockerUnitIds).size !== meta.candidateBlockerUnitIds.length) {
+      throw new Error("rehydratePendingDecisionStream: candidateBlockerUnitIds に重複が含まれています。");
+    }
+    for (const id of meta.attackerUnitIds) {
+      if (meta.candidateBlockerUnitIds.includes(id)) {
+        throw new Error(`rehydratePendingDecisionStream: 攻撃ユニットとブロッカー候補に同一ユニットID (${id}) が含まれています。`);
+      }
+    }
+
+    // ユニットの存在・所属プレイヤー・配置領域・資格の検証
+    const defenderPlayerKey = this.pendingDecision.playerId;
+    const attackerPlayerKey = defenderPlayerKey === "p1" ? "p2" : "p1";
+
+    const attackerField = this.state.players?.[attackerPlayerKey]?.field || [];
+    const defenderField = this.state.players?.[defenderPlayerKey]?.field || [];
+
+    const attackers: any[] = [];
+    for (const id of meta.attackerUnitIds) {
+      const unit = attackerField.find((u: any) => (u.unitId ?? u.id) === id);
+      if (!unit) {
+        throw new Error(
+          `rehydratePendingDecisionStream: 攻撃ユニットID '${id}' が相手プレイヤー (${attackerPlayerKey}) のフィールドに見つかりません。`
+        );
+      }
+      if (unit.battle?.role !== "attacker") {
+        throw new Error(
+          `rehydratePendingDecisionStream: ユニットID '${id}' は攻撃役割 (role: 'attacker') を持っていません。`
+        );
+      }
+      attackers.push(unit);
+    }
+
+    const candidates: any[] = [];
+    for (const id of meta.candidateBlockerUnitIds) {
+      const unit = defenderField.find((u: any) => (u.unitId ?? u.id) === id);
+      if (!unit) {
+        throw new Error(
+          `rehydratePendingDecisionStream: ブロッカー候補ユニットID '${id}' が守備プレイヤー (${defenderPlayerKey}) のフィールドに見つかりません。`
+        );
+      }
+      if (unit.state !== "charge" && unit.state !== "drive") {
+        throw new Error(
+          `rehydratePendingDecisionStream: ユニットID '${id}' はブロック可能状態 (charge または drive) ではありません。現在の状態: ${unit.state}`
+        );
+      }
+      candidates.push(unit);
+    }
+
+    // ストリーミングプロバイダの再構築
+    const provider = LegalPatternGenerator.createBlockAssignmentStreamProvider(
+      attackers,
+      candidates,
+      this.rulePackage.components
+    );
+
+    // 元の合法手総数と再構築結果の一致検証 (不一致時は Fail-Closed)
+    if (meta.patternCount !== undefined && provider.patternCount !== meta.patternCount) {
+      throw new Error(
+        `rehydratePendingDecisionStream: 合法手総数の不一致を検出しました。保存値: ${meta.patternCount}, 再構築値: ${provider.patternCount}`
+      );
+    }
+
+    (this.pendingDecision as any).blockAssignmentStream = provider;
   }
 
   /**
@@ -398,16 +484,7 @@ export class GameSession {
           matchId: this.matchId,
         }
       );
-      this.logRecorder.record({
-        type: "decision.requested",
-        stateVersion: this.stateVersion,
-        decisionId: this.pendingDecision.decisionId,
-        playerId: this.pendingDecision.playerId,
-        source: this.pendingDecision.source.type,
-        requestId: (this.pendingDecision.source as any).requestId,
-        legalPatternCount: this.pendingDecision.patterns.length,
-        legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
-      });
+      this.recordDecisionRequested(this.pendingDecision);
       return {
         type: "WAITING_FOR_DECISION",
         request: this.pendingDecision,
@@ -454,16 +531,7 @@ export class GameSession {
         this.resolvingRequest = stageResolveEvent.actionRequest;
         this.resolvingContext = stageResolveEvent.context;
 
-        this.logRecorder.record({
-          type: "decision.requested",
-          stateVersion: this.stateVersion,
-          decisionId: this.pendingDecision.decisionId,
-          playerId: this.pendingDecision.playerId,
-          source: this.pendingDecision.source.type,
-          requestId: (this.pendingDecision.source as any).requestId,
-          legalPatternCount: this.pendingDecision.patterns.length,
-          legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
-        });
+        this.recordDecisionRequested(this.pendingDecision);
 
         return {
           type: "WAITING_FOR_DECISION",
@@ -482,16 +550,7 @@ export class GameSession {
             matchId: this.matchId,
           }
         );
-        this.logRecorder.record({
-          type: "decision.requested",
-          stateVersion: this.stateVersion,
-          decisionId: this.pendingDecision.decisionId,
-          playerId: this.pendingDecision.playerId,
-          source: this.pendingDecision.source.type,
-          requestId: (this.pendingDecision.source as any).requestId,
-          legalPatternCount: this.pendingDecision.patterns.length,
-          legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
-        });
+        this.recordDecisionRequested(this.pendingDecision);
         return {
           type: "WAITING_FOR_DECISION",
           request: this.pendingDecision,
@@ -548,16 +607,7 @@ export class GameSession {
             matchId: this.matchId,
           }
         );
-        this.logRecorder.record({
-          type: "decision.requested",
-          stateVersion: this.stateVersion,
-          decisionId: this.pendingDecision.decisionId,
-          playerId: this.pendingDecision.playerId,
-          source: this.pendingDecision.source.type,
-          requestId: (this.pendingDecision.source as any).requestId,
-          legalPatternCount: this.pendingDecision.patterns.length,
-          legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
-        });
+        this.recordDecisionRequested(this.pendingDecision);
         return {
           type: "WAITING_FOR_DECISION",
           request: this.pendingDecision,
@@ -658,16 +708,7 @@ export class GameSession {
 
     if (request.patterns.length > 0) {
       this.pendingDecision = request;
-      this.logRecorder.record({
-        type: "decision.requested",
-        stateVersion: this.stateVersion,
-        decisionId: request.decisionId,
-        playerId: request.playerId,
-        source: request.source.type,
-        requestId: (request.source as any).requestId,
-        legalPatternCount: request.patterns.length,
-        legalPatternRefs: request.patterns.map((_, i) => i),
-      });
+      this.recordDecisionRequested(request);
 
       return {
         type: "WAITING_FOR_DECISION",
@@ -692,6 +733,31 @@ export class GameSession {
 
     PatternExecutor.validateResponse(this.pendingDecision, response, this.stateVersion);
 
+    // === 事前実体化・合法性検証 (StateVersion更新および受理ログ記録より前に実行) ===
+    let preInstantiated: { pattern: LegalPattern; effectSelection: EffectSelection } | undefined = undefined;
+    const isStreaming = !!(
+      this.pendingDecision.blockAssignmentStream &&
+      (!this.pendingDecision.patterns || this.pendingDecision.patterns.length === 0)
+    );
+
+    if (isStreaming) {
+      preInstantiated = this.pendingDecision.blockAssignmentStream!.instantiatePatternAt(
+        response.selectedPatternRef
+      );
+      if (!preInstantiated) {
+        throw new Error(
+          `ストリーミングインデックス ${response.selectedPatternRef} の事前実体化に失敗しました。`
+        );
+      }
+    } else {
+      if (!this.pendingDecision.patterns || !this.pendingDecision.patterns[response.selectedPatternRef]) {
+        throw new Error(
+          `選択されたインデックス ${response.selectedPatternRef} のパターンが存在しません。`
+        );
+      }
+    }
+
+    // 事前検証通過後に初めて受理ログを記録し、StateVersion をインクリメント (Fail-Closed 保証)
     this.logRecorder.record({
       type: "decision.responded",
       stateVersion: this.stateVersion,
@@ -737,16 +803,7 @@ export class GameSession {
             matchId: this.matchId,
           }
         );
-        this.logRecorder.record({
-          type: "decision.requested",
-          stateVersion: this.stateVersion,
-          decisionId: this.pendingDecision.decisionId,
-          playerId: this.pendingDecision.playerId,
-          source: this.pendingDecision.source.type,
-          requestId: (this.pendingDecision.source as any).requestId,
-          legalPatternCount: this.pendingDecision.patterns.length,
-          legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
-        });
+        this.recordDecisionRequested(this.pendingDecision);
         return {
           type: "WAITING_FOR_DECISION",
           request: this.pendingDecision,
@@ -784,6 +841,7 @@ export class GameSession {
           this.continuation = resumeResult.continuation;
           this.resolvingRequest = resumeResult.request;
           this.resolvingContext = resumeResult.context;
+          this.recordDecisionRequested(this.pendingDecision!);
 
           return {
             type: "WAITING_FOR_DECISION",
@@ -813,20 +871,11 @@ export class GameSession {
       let assignments: readonly any[] | undefined = undefined;
       let targetSelection: TargetSelection | undefined = undefined;
 
-      if (
-        this.pendingDecision.blockAssignmentStream &&
-        (!this.pendingDecision.patterns || this.pendingDecision.patterns.length === 0)
-      ) {
-        const instantiated = this.pendingDecision.blockAssignmentStream.instantiatePatternAt(
-          response.selectedPatternRef
-        );
-        if (!instantiated) {
-          throw new Error(`ストリーミングインデックス ${response.selectedPatternRef} の実体化に失敗しました。`);
-        }
-        pattern = instantiated.pattern;
-        assignments = instantiated.effectSelection.assignments;
-        selectedValues = instantiated.effectSelection.selectedValues;
-        targetSelection = instantiated.effectSelection.targetSelection;
+      if (isStreaming && preInstantiated) {
+        pattern = preInstantiated.pattern;
+        assignments = preInstantiated.effectSelection.assignments;
+        selectedValues = preInstantiated.effectSelection.selectedValues;
+        targetSelection = preInstantiated.effectSelection.targetSelection;
       } else {
         pattern = this.pendingDecision.patterns[response.selectedPatternRef];
       }
@@ -859,6 +908,7 @@ export class GameSession {
         this.continuation = resumeResult.continuation;
         this.resolvingRequest = resumeResult.request;
         this.resolvingContext = resumeResult.context;
+        this.recordDecisionRequested(this.pendingDecision!);
 
         return {
           type: "WAITING_FOR_DECISION",
@@ -908,16 +958,7 @@ export class GameSession {
       this.resolvingRequest = flowEvent.actionRequest;
       this.resolvingContext = flowEvent.context;
 
-      this.logRecorder.record({
-        type: "decision.requested",
-        stateVersion: this.stateVersion,
-        decisionId: this.pendingDecision.decisionId,
-        playerId: this.pendingDecision.playerId,
-        source: this.pendingDecision.source.type,
-        requestId: (this.pendingDecision.source as any).requestId,
-        legalPatternCount: this.pendingDecision.patterns.length,
-        legalPatternRefs: this.pendingDecision.patterns.map((_, i) => i),
-      });
+      this.recordDecisionRequested(this.pendingDecision);
 
       return {
         type: "WAITING_FOR_DECISION",

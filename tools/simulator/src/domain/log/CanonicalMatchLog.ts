@@ -88,6 +88,7 @@ export interface DecisionRequestedEvent extends CanonicalGameEventBase {
   readonly requestId?: string;
   readonly legalPatternCount: number;
   readonly legalPatternRefs?: readonly number[];
+  readonly isStreaming?: boolean;
 }
 
 export interface DecisionRespondedEvent extends CanonicalGameEventBase {
