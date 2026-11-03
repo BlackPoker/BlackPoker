@@ -18,6 +18,7 @@ import {
 } from "../../domain/session/GameSessionSnapshot";
 import { GameSessionSnapshotCodec } from "./GameSessionSnapshotCodec";
 import { GraveTopCoordinator } from "../rules/GraveTopCoordinator";
+import { hasUnitLabel } from "../rules/characterUtils";
 
 /**
  * 即時誘発アクションの効果実行完了後、墓地TOP選択待ちを表す汎用ステップID
@@ -337,6 +338,20 @@ export class GameSession {
       );
     }
 
+    // patternCount の厳格なバリデーション (必須化: 欠落・null・NaN・非安全整数・負数はFAIL)
+    if (
+      meta.patternCount === undefined ||
+      meta.patternCount === null ||
+      typeof meta.patternCount !== "number" ||
+      Number.isNaN(meta.patternCount) ||
+      !Number.isSafeInteger(meta.patternCount) ||
+      meta.patternCount < 0
+    ) {
+      throw new Error(
+        `rehydratePendingDecisionStream: blockAssignmentStreamMeta.patternCount が不正または欠落しています: ${String(meta.patternCount)}`
+      );
+    }
+
     // 重複IDや不正なIDの検証
     if (!Array.isArray(meta.attackerUnitIds) || !Array.isArray(meta.candidateBlockerUnitIds)) {
       throw new Error("rehydratePendingDecisionStream: attackerUnitIds または candidateBlockerUnitIds が配列ではありません。");
@@ -374,37 +389,55 @@ export class GameSession {
     const attackerField = this.state.players?.[attackerPlayerKey]?.field || [];
     const defenderField = this.state.players?.[defenderPlayerKey]?.field || [];
 
-    const attackers: any[] = [];
-    for (const id of meta.attackerUnitIds) {
-      const unit = attackerField.find((u: any) => (u.unitId ?? u.id) === id);
-      if (!unit) {
+    // === 正規のブロック候補生成契約に基づく期待リストの盤面導出と順序照合 ===
+    // 1. 正規の攻撃ユニット導出 (attackerField 内の role: attacker かつ targetDefender を配列順序で抽出)
+    const canonicalAttackers = attackerField.filter((u: any) => {
+      const isAttackerRole = u.battle?.role === "attacker";
+      const isTargetDefender = !u.battle?.targetPlayerKey || u.battle.targetPlayerKey === defenderPlayerKey;
+      return isAttackerRole && isTargetDefender;
+    });
+    const canonicalAttackerIds = canonicalAttackers.map((u: any) => u.unitId ?? u.id);
+
+    if (canonicalAttackerIds.length !== meta.attackerUnitIds.length) {
+      throw new Error(
+        `rehydratePendingDecisionStream: 攻撃ユニット数が盤面導出結果と一致しません。保存値=${meta.attackerUnitIds.length}, 期待値=${canonicalAttackerIds.length}`
+      );
+    }
+    for (let i = 0; i < canonicalAttackerIds.length; i++) {
+      if (meta.attackerUnitIds[i] !== canonicalAttackerIds[i]) {
         throw new Error(
-          `rehydratePendingDecisionStream: 攻撃ユニットID '${id}' が相手プレイヤー (${attackerPlayerKey}) のフィールドに見つかりません。`
+          `rehydratePendingDecisionStream: 攻撃ユニットの順序またはIDが盤面導出結果と一致しません。index ${i}: 保存値='${meta.attackerUnitIds[i]}', 期待値='${canonicalAttackerIds[i]}'`
         );
       }
-      if (unit.battle?.role !== "attacker") {
-        throw new Error(
-          `rehydratePendingDecisionStream: ユニットID '${id}' は攻撃役割 (role: 'attacker') を持っていません。`
-        );
-      }
-      attackers.push(unit);
     }
 
-    const candidates: any[] = [];
-    for (const id of meta.candidateBlockerUnitIds) {
-      const unit = defenderField.find((u: any) => (u.unitId ?? u.id) === id);
-      if (!unit) {
-        throw new Error(
-          `rehydratePendingDecisionStream: ブロッカー候補ユニットID '${id}' が守備プレイヤー (${defenderPlayerKey}) のフィールドに見つかりません。`
-        );
+    // 2. 正規のブロッカー候補導出 (defenderField 内の charge/drive かつ 防御適格ユニットを配列順序で抽出)
+    const canonicalBlockers = defenderField.filter((u: any) => {
+      const isStateValid = u.state === "charge" || u.state === "drive";
+      if (!isStateValid) return false;
+      const hasLabels = (u.labels && u.labels.length > 0) || this.rulePackage.components.some((c) => c.id === u.componentId && (c.properties?.labels || c.display?.labels));
+      if (hasLabels) {
+        return hasUnitLabel(u, "防御", this.rulePackage.components);
       }
-      if (unit.state !== "charge" && unit.state !== "drive") {
-        throw new Error(
-          `rehydratePendingDecisionStream: ユニットID '${id}' はブロック可能状態 (charge または drive) ではありません。現在の状態: ${unit.state}`
-        );
-      }
-      candidates.push(unit);
+      return true;
+    });
+    const canonicalBlockerIds = canonicalBlockers.map((u: any) => u.unitId ?? u.id);
+
+    if (canonicalBlockerIds.length !== meta.candidateBlockerUnitIds.length) {
+      throw new Error(
+        `rehydratePendingDecisionStream: ブロッカー候補数が盤面導出結果と一致しません。保存値=${meta.candidateBlockerUnitIds.length}, 期待値=${canonicalBlockerIds.length}`
+      );
     }
+    for (let i = 0; i < canonicalBlockerIds.length; i++) {
+      if (meta.candidateBlockerUnitIds[i] !== canonicalBlockerIds[i]) {
+        throw new Error(
+          `rehydratePendingDecisionStream: ブロッカー候補の順序またはIDが盤面導出結果と一致しません。index ${i}: 保存値='${meta.candidateBlockerUnitIds[i]}', 期待値='${canonicalBlockerIds[i]}'`
+        );
+      }
+    }
+
+    const attackers = canonicalAttackers;
+    const candidates = canonicalBlockers;
 
     // ストリーミングプロバイダの再構築
     const provider = LegalPatternGenerator.createBlockAssignmentStreamProvider(
@@ -413,8 +446,8 @@ export class GameSession {
       this.rulePackage.components
     );
 
-    // 元の合法手総数と再構築結果の一致検証 (不一致時は Fail-Closed)
-    if (meta.patternCount !== undefined && provider.patternCount !== meta.patternCount) {
+    // 合法手総数の一致検証 (不一致時は Fail-Closed)
+    if (provider.patternCount !== meta.patternCount) {
       throw new Error(
         `rehydratePendingDecisionStream: 合法手総数の不一致を検出しました。保存値: ${meta.patternCount}, 再構築値: ${provider.patternCount}`
       );

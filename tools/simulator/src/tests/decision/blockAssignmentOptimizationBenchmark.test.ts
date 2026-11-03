@@ -912,22 +912,24 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       const { session } = createLargeBattleSession();
       const snapshot = session.createSnapshot();
       const parsed = JSON.parse(JSON.stringify(snapshot));
-      parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds = ["non-existent-atk-id"];
+      const atkIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds;
+      parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds = [atkIds[0], atkIds[1], "non-existent-atk-id"];
 
       expect(() => {
         GameSession.fromSnapshot(parsed, rulePackage);
-      }).toThrowError(/攻撃ユニットID.*見つかりません/);
+      }).toThrowError(/攻撃ユニットの(順序またはID|ID.*見つかりません)/);
     });
 
     it("Snapshot内のブロッカーIDが存在しない場合、復元がFail-Closed例外をスローすること (要件2-1, 5-2)", () => {
       const { session } = createLargeBattleSession();
       const snapshot = session.createSnapshot();
       const parsed = JSON.parse(JSON.stringify(snapshot));
-      parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds = ["non-existent-blk-id"];
+      const blkIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds;
+      parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds = [...blkIds.slice(0, 4), "non-existent-blk-id"];
 
       expect(() => {
         GameSession.fromSnapshot(parsed, rulePackage);
-      }).toThrowError(/ブロッカー候補ユニットID.*見つかりません/);
+      }).toThrowError(/ブロッカー候補の(順序またはID|ID.*見つかりません)/);
     });
 
     it("Snapshot内のIDが重複、または不正IDを含む場合、復元がFail-Closed例外をスローすること (要件2-2, 5-3)", () => {
@@ -973,10 +975,11 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       // 攻撃ユニットを守備側フィールドのユニットに変更 (不正所有者)
       {
         const parsed = JSON.parse(JSON.stringify(snapshot));
+        const atkIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds;
         const blkIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds;
         parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds = blkIds.slice(1);
-        parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds = [blkIds[0]];
-        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/相手プレイヤー.*のフィールドに見つかりません/);
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds = [atkIds[0], atkIds[1], blkIds[0]];
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/(相手プレイヤー.*のフィールドに見つかりません|攻撃ユニットの順序またはIDが盤面導出結果と一致しません)/);
       }
 
       // 攻撃ユニットの role が attacker ではない場合 (不正資格)
@@ -986,7 +989,7 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
         const atkUnit = parsed.gameState.players.p1.field.find((u: any) => u.unitId === atkId);
         atkUnit.battle.role = "defender";
         parsed.gameStateHash = StateHasher.hash(parsed.gameState);
-        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/攻撃役割.*を持っていません/);
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/(攻撃役割.*を持っていません|攻撃ユニット数が盤面導出結果と一致しません)/);
       }
 
       // ブロッカー候補が charge でも drive でもない (down状態など) 場合 (不正資格)
@@ -996,7 +999,7 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
         const blkUnit = parsed.gameState.players.p2.field.find((u: any) => u.unitId === blkId);
         blkUnit.state = "down";
         parsed.gameStateHash = StateHasher.hash(parsed.gameState);
-        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/ブロック可能状態.*ではありません/);
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/(ブロック可能状態.*ではありません|ブロッカー候補数が盤面導出結果と一致しません)/);
       }
     });
 
@@ -1051,6 +1054,129 @@ describe("Block Assignment Optimization Benchmark & Integrity Verification (Work
       ).toBe(false);
       // 盤面状態も完全に不変
       expect(JSON.stringify(session.state.players)).toBe(initialPlayersStateJson);
+    });
+  });
+
+  // ===========================================================================
+  // G. Snapshot Action Space Identity Final Fix (Work 3-5 R5)
+  // ===========================================================================
+  describe("G. Snapshot Action Space Identity Final Fix (Work 3-5 R5)", () => {
+    it("1. candidateBlockerUnitIds を入れ替えたSnapshotを復元するとFAIL (要件4-1)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+      const parsed = JSON.parse(JSON.stringify(snapshot));
+      const blkIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds;
+      // 順序を反転 (d0..d4 -> d4..d0)
+      parsed.session.pendingDecision.blockAssignmentStreamMeta.candidateBlockerUnitIds = [...blkIds].reverse();
+
+      expect(() => {
+        GameSession.fromSnapshot(parsed, rulePackage);
+      }).toThrowError(/ブロッカー候補の順序またはIDが盤面導出結果と一致しません/);
+    });
+
+    it("2. attackerUnitIds を入れ替えたSnapshotを復元するとFAIL (要件4-2)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+      const parsed = JSON.parse(JSON.stringify(snapshot));
+      const atkIds = parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds;
+      // 順序を反転 (a0..a2 -> a2..a0)
+      parsed.session.pendingDecision.blockAssignmentStreamMeta.attackerUnitIds = [...atkIds].reverse();
+
+      expect(() => {
+        GameSession.fromSnapshot(parsed, rulePackage);
+      }).toThrowError(/攻撃ユニットの順序またはIDが盤面導出結果と一致しません/);
+    });
+
+    it("3. patternCount を削除したSnapshotを復元するとFAIL (要件4-3)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+      const parsed = JSON.parse(JSON.stringify(snapshot));
+      delete parsed.session.pendingDecision.blockAssignmentStreamMeta.patternCount;
+
+      expect(() => {
+        GameSession.fromSnapshot(parsed, rulePackage);
+      }).toThrowError(/blockAssignmentStreamMeta\.patternCount が不正または欠落しています/);
+    });
+
+    it("4. patternCount に不正な型・非安全整数を設定するとFAIL (要件4-4)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+
+      // 文字列型
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.patternCount = "1024";
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/patternCount が不正または欠落/);
+      }
+
+      // null
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.patternCount = null;
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/patternCount が不正または欠落/);
+      }
+
+      // 小数 (非整数)
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.patternCount = 1024.5;
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/patternCount が不正または欠落/);
+      }
+
+      // 負数
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.patternCount = -1024;
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/patternCount が不正または欠落/);
+      }
+
+      // NaN
+      {
+        const parsed = JSON.parse(JSON.stringify(snapshot));
+        parsed.session.pendingDecision.blockAssignmentStreamMeta.patternCount = NaN;
+        expect(() => GameSession.fromSnapshot(parsed, rulePackage)).toThrowError(/patternCount が不正または欠落/);
+      }
+    });
+
+    it("5. 正常なSnapshotを復元した場合、複数の論理PatternRefについて保存前後のUnitAssignmentが一致する (要件4-5)", () => {
+      const { session, blockStep } = createLargeBattleSession();
+      const req = getReq(blockStep);
+
+      const snapshot = session.createSnapshot();
+      const json = GameSessionSnapshotCodec.serialize(snapshot);
+      const restoredSnapshot = GameSessionSnapshotCodec.deserialize(json);
+      const restoredSession = GameSession.fromSnapshot(restoredSnapshot, rulePackage);
+      const restoredReq = restoredSession.pendingDecision!;
+
+      const testIndices = [0, 1, 42, 255, 512, 1023];
+      for (const idx of testIndices) {
+        const origAssignment = req.blockAssignmentStream?.getAssignmentAt(idx);
+        const restoredAssignment = restoredReq.blockAssignmentStream?.getAssignmentAt(idx);
+        expect(restoredAssignment).toBeDefined();
+        expect(restoredAssignment).toEqual(origAssignment);
+      }
+    });
+
+    it("6. 復元後、GenomePolicyが選択した先頭以外の手をGameSessionで正常に解決できる (要件4-6)", () => {
+      const { session } = createLargeBattleSession();
+      const snapshot = session.createSnapshot();
+      const json = GameSessionSnapshotCodec.serialize(snapshot);
+      const restoredSnapshot = GameSessionSnapshotCodec.deserialize(json);
+      const restoredSession = GameSession.fromSnapshot(restoredSnapshot, rulePackage);
+      const restoredReq = restoredSession.pendingDecision!;
+
+      const dna = DecisionDNACodec.createZeroDecisionDNA({ id: "dna-active-block-r5" });
+      (dna.patternWeights as number[])[73] = 5.0; // effect_assigned_unit_total
+      (dna.patternWeights as number[])[127] = 5.0; // effect_assignment_selected_count
+
+      const policy = new GenomePolicy(dna);
+      const res = policy.choose(restoredReq);
+      expect(res.selectedPatternRef).toBeGreaterThan(0);
+
+      const nextStep = restoredSession.submitDecision(res);
+      expect(nextStep).toBeDefined();
+      const followUpStep = restoredSession.advance();
+      expect(followUpStep).toBeDefined();
     });
   });
 });
