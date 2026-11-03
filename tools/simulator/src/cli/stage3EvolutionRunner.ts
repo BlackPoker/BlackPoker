@@ -817,6 +817,10 @@ export class InstrumentedCheckpointStorage implements CampaignCheckpointStorage 
         // ignore
       }
     }
+    const gIndex = (this.savedSizes[Number(Object.keys(this.savedSizes).pop())] !== undefined)
+      ? Number(Object.keys(this.savedSizes).pop())
+      : 0;
+    console.log(`  [Gen ${gIndex}] Checkpoint saved: ${((this.savedSizes[gIndex] ?? 0) / 1024 / 1024).toFixed(2)} MB in ${(duration).toFixed(1)}ms`);
   }
 
   load(filePath: string): string | null {
@@ -899,9 +903,14 @@ export async function executeStage3Evolution(
     const now = performance.now();
 
     // 世代とフェーズの切り替え検知
-    if (lastSeenCategory === "VALIDATION" && matchCategory === "TRAINING") {
+    if (lastSeenCategory === null && matchCategory === "TRAINING") {
+      console.log(`  [Gen 0/${TOTAL_GENERATIONS}] Starting Training (132 matches)...`);
+    } else if (lastSeenCategory === "VALIDATION" && matchCategory === "TRAINING") {
       // 前世代のValidationから次世代のTrainingへ遷移
       currentObservedGeneration++;
+      console.log(`  [Gen ${currentObservedGeneration}/${TOTAL_GENERATIONS}] Starting Training (132 matches)...`);
+    } else if (lastSeenCategory === "TRAINING" && matchCategory === "VALIDATION") {
+      console.log(`  [Gen ${currentObservedGeneration}/${TOTAL_GENERATIONS}] Starting Validation (60 matches)...`);
     }
     lastSeenCategory = matchCategory;
 
@@ -958,6 +967,22 @@ export async function executeStage3Evolution(
       updateMemoryPeaks();
       try {
         const step = origAdvance();
+
+        // 組み合わせ爆発による OOM 防止ガード (上限 500 パターンに安全にクリッピング)
+        // 攻撃側複数体・守備側一般兵多数のブロック割り当て直積爆発(最大300万パターン)を抑制し、メモリ安定性を保証
+        if (step.type === "WAITING_FOR_DECISION" && session.pendingDecision) {
+          const req = session.pendingDecision;
+          const MAX_PATTERNS = 500;
+          if (req.patterns && req.patterns.length > MAX_PATTERNS) {
+            const prunedPatterns = req.patterns.slice(0, MAX_PATTERNS);
+            (session as any).pendingDecision = {
+              ...req,
+              patterns: prunedPatterns,
+            };
+            (step as any).request = session.pendingDecision;
+          }
+        }
+
         const advanceNow = performance.now();
         if (matchCategory === "TRAINING") {
           currentTiming.trainingEndTime = advanceNow;
