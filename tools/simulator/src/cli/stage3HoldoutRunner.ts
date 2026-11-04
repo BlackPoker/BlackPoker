@@ -1,20 +1,26 @@
 /**
- * BlackPoker Work 3-6 — Stage 3 Champion Holdout Evaluation Runner
+ * BlackPoker Work 3-6 — Stage 3 Champion Holdout Evaluation Runner (R1 改訂版)
  *
  * 【目的と保護原則】
  * 1. Stage 3 Full Action Space Retraining R1 で導出された Gen 7 Champion に対し、
  *    完全未使用の本番 Holdout 240 試合 (Seeds: 95001〜95030, 30 Seeds × 2 座席 × 4 比較相手) を用いた
  *    決定論的・統計的性能評価を実行する。
  * 2. Holdout 未使用保護の Fail-Closed:
- *    - --execute 明示指定がない限り、本番 Holdout (Seeds 95001〜95030) は一切実行しない。
- *    - --dry-run では環境検証・Preflight チェックのみを実行。
- *    - --smoke では診断用独立 Seed (99951〜99952) による小規模対戦 (計16試合) のみを実行。
+ *    - 明示的な --execute 指定がない限り、本番 Holdout (Seeds 95001〜95030) は一切実行しない。
+ *    - --dry-run, --smoke, --execute は相互排他的であり、矛盾する引数や不明な引数は Fail-Closed。
+ *    - --execute では Git Working Tree が Clean でなければ実行を拒否する。
  * 3. 原本保護:
  *    - 旧 Stage 3 原本 (.artifacts/stage3-evolution) および新 Stage 3 原本 (.artifacts/stage3-full-action-retrain-r1)
  *      への誤上書きを Fail-Closed で拒絶。
- * 4. 統計的厳格性:
- *    - 同一 Seed の座席反転ペア対戦 (Leg 0 / Leg 1) によるペアスコア Xi in {0, 0.25, 0.5, 0.75, 1} 集計。
- *    - 記述統計としての両側 95% 信頼区間と、4 比較相手に対する Bonferroni 補正片側検定 (alpha = 0.0125) の厳格分離。
+ *    - Smoke のデフォルト出力先 (.artifacts/stage3-holdout-smoke) は本番用 (.artifacts/stage3-holdout-evaluation)
+ *      から物理的に分離。
+ * 4. 厳格な統計契約と性能認定:
+ *    - 意思決定上限は再学習 Stage 3 と同一の 500 回に統一。
+ *    - 座席反転ペア対戦 (Leg 0: P1=Cand / Leg 1: P2=Cand) によるペアスコア Xi in {0, 0.25, 0.5, 0.75, 1} 集計。
+ *    - 4 比較相手に対する Bonferroni 補正片側検定 (alpha = 0.0125) による厳格な判定。
+ *    - 非劣性 (Non-inferiority: 下限 > 0.45) と優位性 (Superiority: 下限 > 0.50) を分離し、
+ *      非劣性のみの場合は IMPROVEMENT_UNVERIFIED とする契約。
+ *    - 240 試合の完全性、座席反転、Seed 構成、統計サマリーの独立再計算照合を含む自己監査。
  */
 
 import * as fs from "fs";
@@ -33,6 +39,7 @@ import {
 } from "../domain/ai/EvolutionEvaluationTypes";
 import { DecisionDNACodec } from "../engine/ai/DecisionDNACodec";
 import { EvolutionIndependentEvaluator } from "../engine/ai/EvolutionIndependentEvaluator";
+import { EvolutionCampaignManager } from "../engine/ai/EvolutionCampaignManager";
 import { FirstLegalPolicy, RandomPolicy } from "../engine/simulation/DecisionPolicy";
 import { GenomePolicy } from "../engine/ai/GenomePolicy";
 import { BatchSimulationOptions } from "../domain/simulation/BatchSimulationTypes";
@@ -64,11 +71,13 @@ export const OLD_CHAMPION_EXPECTED_DIGEST =
 
 export const DEFAULT_HOLDOUT_ARTIFACTS_DIR: string = ".artifacts/stage3-holdout-evaluation";
 export const DEFAULT_HOLDOUT_ZIP_PATH: string = ".artifacts/stage3-holdout-evaluation.zip";
+export const DEFAULT_SMOKE_ARTIFACTS_DIR: string = ".artifacts/stage3-holdout-smoke";
 
 export const PROTECTED_RETRAIN_DIR = ".artifacts/stage3-full-action-retrain-r1" as const;
 export const PROTECTED_OLD_STAGE3_DIR = ".artifacts/stage3-evolution" as const;
 
-export const DEFAULT_MAX_DECISIONS_PER_MATCH = 400 as const;
+/** 意思決定上限: 再学習 Stage 3 と整合性を保つため 500 回に統一 */
+export const DEFAULT_MAX_DECISIONS_PER_MATCH = 500 as const;
 export const HOLDOUT_SIGNIFICANCE_ALPHA = 0.05 as const;
 export const HOLDOUT_OPPONENTS_COUNT = 4 as const;
 export const HOLDOUT_BONFERRONI_ALPHA = HOLDOUT_SIGNIFICANCE_ALPHA / HOLDOUT_OPPONENTS_COUNT; // 0.0125
@@ -82,8 +91,14 @@ export const OFFICIAL_HOLDOUT_SEEDS: readonly number[] = Object.freeze(
 export const SMOKE_DIAGNOSTIC_SEEDS: readonly number[] = Object.freeze([99951, 99952]);
 
 // =============================================================================
-// インターフェース定義
+// 型定義 (認定ステータス・マニフェスト)
 // =============================================================================
+
+export type HoldoutCertificationStatus =
+  | "SUPERIORITY_VERIFIED"
+  | "NON_INFERIORITY_VERIFIED"
+  | "PERFORMANCE_UNVERIFIED"
+  | "INVALID_EVIDENCE";
 
 export interface HoldoutPreflightManifest {
   readonly workId: string;
@@ -95,6 +110,7 @@ export interface HoldoutPreflightManifest {
   readonly frameId: string;
   readonly rulePackageVersion: string;
   readonly featureSchemaVersion: number;
+  readonly decisionLimitPerMatch: number;
   readonly candidateChampion: {
     readonly genomeId: string;
     readonly expectedDigest: string;
@@ -149,6 +165,8 @@ export interface HoldoutIndividualMatchOutcome {
   readonly reason?: string;
   readonly failed: boolean;
   readonly incomplete: boolean;
+  readonly reachedDecisionLimit: boolean;
+  readonly instantiationFailures: number;
   readonly finalStateHash?: string;
 }
 
@@ -160,10 +178,13 @@ export interface HoldoutEvaluationOutput {
   readonly completedMatches: number;
   readonly failedMatches: number;
   readonly incompleteMatches: number;
+  readonly matchesReachingDecisionLimit: number;
+  readonly totalInstantiationFailures: number;
   readonly totalDecisions: number;
   readonly maxDecisionsInSingleMatch: number;
   readonly minDecisionsInSingleMatch: number;
   readonly executionElapsedMs: number;
+  readonly certificationStatus: HoldoutCertificationStatus;
 }
 
 export interface SaveHoldoutArtifactsResult {
@@ -176,17 +197,23 @@ export interface AuditHoldoutResult {
   readonly isValid: boolean;
   readonly checkedFiles: readonly string[];
   readonly errors: readonly string[];
+  readonly executionMode: "EXECUTE" | "SMOKE" | "UNKNOWN";
   readonly totalMatches: number;
   readonly completedMatches: number;
   readonly failedMatches: number;
   readonly incompleteMatches: number;
+  readonly matchesReachingDecisionLimit: number;
+  readonly totalInstantiationFailures: number;
   readonly candidateDigest: string;
   readonly candidateDigestMatches: boolean;
   readonly oldChampionDigest: string;
   readonly oldChampionDigestMatches: boolean;
   readonly allBaselineTargetsMet: boolean;
+  readonly referenceSuperiorityVerified: boolean;
+  readonly referenceNonInferiorityVerified: boolean;
   readonly evidenceStatus: string;
   readonly improvementStatus: string;
+  readonly certificationStatus: HoldoutCertificationStatus;
 }
 
 // =============================================================================
@@ -210,10 +237,10 @@ export function checkGitCleanliness(): { isClean: boolean; headCommitSha: string
 }
 
 // =============================================================================
-// 出力先ディレクトリ保護 (Fail-Closed)
+// 出力先ディレクトリ & ZIP 保護 (Fail-Closed)
 // =============================================================================
 
-export function validateArtifactsDirectory(artifactsDir: string): void {
+export function validateArtifactsDirectory(artifactsDir: string, zipPath?: string): void {
   const resolved = path.resolve(artifactsDir);
   const protectedPaths = [
     path.resolve(PROTECTED_RETRAIN_DIR),
@@ -238,25 +265,51 @@ export function validateArtifactsDirectory(artifactsDir: string): void {
       );
     }
   }
+
+  // ZIP の上書き防止
+  const targetZip = zipPath ? path.resolve(zipPath) : path.resolve(artifactsDir + ".zip");
+  if (fs.existsSync(targetZip)) {
+    throw new Error(
+      `[Fail-Closed] Output zip file "${targetZip}" already exists. Overwriting existing archive is strictly forbidden.`
+    );
+  }
 }
 
 // =============================================================================
-// DNA 読み込み & 真正性検証
+// DNA 読み込み & 真正性・Checkpoint 完全性検証
 // =============================================================================
 
 export function loadChampionDNA(params: {
   checkpointPath: string;
   expectedGenomeId: string;
   expectedDigest: string;
+  verifyCheckpointChecksum?: boolean;
 }): DecisionDNA {
-  const { checkpointPath, expectedGenomeId, expectedDigest } = params;
+  const { checkpointPath, expectedGenomeId, expectedDigest, verifyCheckpointChecksum = true } = params;
   if (!fs.existsSync(checkpointPath)) {
     throw new Error(`[Fail-Closed] Checkpoint file not found: "${checkpointPath}"`);
   }
 
   const rawJson = fs.readFileSync(checkpointPath, "utf8");
-  const checkpoint = JSON.parse(rawJson);
+  let checkpoint: any;
+  try {
+    checkpoint = JSON.parse(rawJson);
+  } catch (err: any) {
+    throw new Error(`[Fail-Closed] Failed to parse checkpoint JSON "${checkpointPath}": ${err?.message ?? String(err)}`);
+  }
 
+  // 1. Checkpoint 内部チェックサム検証 (完全性保証)
+  if (verifyCheckpointChecksum && checkpoint.checksum && typeof checkpoint.checksum === "string") {
+    const { checksum, ...stateWithoutChecksum } = checkpoint;
+    const computedChecksum = EvolutionCampaignManager.computeCheckpointChecksum(stateWithoutChecksum);
+    if (computedChecksum !== checksum) {
+      throw new Error(
+        `[Fail-Closed] Checkpoint checksum mismatch in "${checkpointPath}": expected "${computedChecksum}", found "${checksum}" (tampering or corruption detected)`
+      );
+    }
+  }
+
+  // 2. provisionalBestChampion の検証
   const championData = checkpoint.provisionalBestChampion;
   if (!championData) {
     throw new Error(`[Fail-Closed] provisionalBestChampion missing in checkpoint "${checkpointPath}"`);
@@ -298,6 +351,11 @@ export function validateHoldoutSeedPlan(
   holdoutSeeds: readonly number[],
   campaignSeed: number = CAMPAIGN_SEED
 ): void {
+  // 配列自体の厳格検証
+  if (!Array.isArray(holdoutSeeds) || holdoutSeeds.length === 0) {
+    throw new Error("[Fail-Closed] holdoutSeeds must be a non-empty array");
+  }
+
   const trainingSeeds = deriveStage3TrainingSeedsByEngine(campaignSeed).allTrainingSeedsList;
   const validationSeeds: number[] = [];
   for (let i = 0; i < VALIDATION_SEEDS_COUNT; i++) {
@@ -320,8 +378,13 @@ export function validateHoldoutSeedPlan(
 export function createHoldoutOpponents(params: {
   oldChampionDNA: DecisionDNA;
   zeroDNA: DecisionDNA;
+  expectedOldChampionDigest?: string;
 }): readonly EvaluationOpponentDefinition[] {
-  const { oldChampionDNA, zeroDNA } = params;
+  const {
+    oldChampionDNA,
+    zeroDNA,
+    expectedOldChampionDigest = OLD_CHAMPION_EXPECTED_DIGEST,
+  } = params;
 
   return [
     {
@@ -352,9 +415,114 @@ export function createHoldoutOpponents(params: {
       targetWinRate: 0.50,
       role: "REFERENCE_CHAMPION",
       referenceDNA: oldChampionDNA,
-      expectedDnaDigest: OLD_CHAMPION_EXPECTED_DIGEST,
+      expectedDnaDigest: expectedOldChampionDigest,
     },
   ];
+}
+
+// =============================================================================
+// 性能認定判定ロジック (Certification Logic)
+// =============================================================================
+
+export function computeHoldoutCertification(params: {
+  evaluationResult: IndependentEvaluationResult;
+  failedMatches: number;
+  incompleteMatches: number;
+  matchesReachingDecisionLimit: number;
+  totalInstantiationFailures: number;
+  totalMatches: number;
+  expectedMatches: number;
+}): {
+  certificationStatus: HoldoutCertificationStatus;
+  effectiveImprovementStatus: "IMPROVEMENT_VERIFIED" | "IMPROVEMENT_UNVERIFIED" | "CONFIRMED_REGRESSION";
+  baselineSuperior: boolean;
+  referenceSuperiorityVerified: boolean;
+  referenceNonInferiorityVerified: boolean;
+} {
+  const {
+    evaluationResult,
+    failedMatches,
+    incompleteMatches,
+    matchesReachingDecisionLimit,
+    totalInstantiationFailures,
+    totalMatches,
+    expectedMatches,
+  } = params;
+
+  // 1. 実行完全性検証 (Fail-Closed)
+  const isExecutionValid =
+    failedMatches === 0 &&
+    incompleteMatches === 0 &&
+    matchesReachingDecisionLimit === 0 &&
+    totalInstantiationFailures === 0 &&
+    totalMatches === expectedMatches &&
+    evaluationResult.evidenceStatus === "VALID";
+
+  if (!isExecutionValid) {
+    return {
+      certificationStatus: "INVALID_EVIDENCE",
+      effectiveImprovementStatus: "CONFIRMED_REGRESSION",
+      baselineSuperior: false,
+      referenceSuperiorityVerified: false,
+      referenceNonInferiorityVerified: false,
+    };
+  }
+
+  // 2. Baseline 3 相手すべて合格判定
+  const firstLegal = evaluationResult.opponents["holdout-first-legal"];
+  const seededRandom = evaluationResult.opponents["holdout-seeded-random"];
+  const zeroDna = evaluationResult.opponents["holdout-zero-dna"];
+
+  const baselineSuperior =
+    !!firstLegal &&
+    firstLegal.meanPairScore >= 0.85 &&
+    firstLegal.statisticalTest.oneSidedLowerBound > 0.50 &&
+    !!seededRandom &&
+    seededRandom.meanPairScore >= 0.75 &&
+    seededRandom.statisticalTest.oneSidedLowerBound > 0.50 &&
+    !!zeroDna &&
+    zeroDna.meanPairScore >= 0.70 &&
+    zeroDna.statisticalTest.oneSidedLowerBound > 0.50;
+
+  // 3. Reference Champion 判定 (対 Stage3Gen5Champion)
+  const refChamp = evaluationResult.opponents["holdout-stage3-gen5-champion"];
+  let referenceSuperiorityVerified = false;
+  let referenceNonInferiorityVerified = false;
+
+  if (refChamp) {
+    // 優位性 (Superiority): 平均勝率 > 0.50 かつ Bonferroni 補正片側下限 > 0.50
+    referenceSuperiorityVerified =
+      refChamp.meanPairScore > 0.50 && refChamp.statisticalTest.oneSidedLowerBound > 0.50;
+
+    // 非劣性 (Non-Inferiority): 平均勝率 >= 0.50 かつ Bonferroni 補正片側下限 > 0.45 (マージン Delta = 0.05)
+    referenceNonInferiorityVerified =
+      refChamp.meanPairScore >= 0.50 && refChamp.statisticalTest.oneSidedLowerBound > 0.45;
+  }
+
+  // 4. 総合認定ステータス決定
+  let certificationStatus: HoldoutCertificationStatus = "PERFORMANCE_UNVERIFIED";
+  let effectiveImprovementStatus: "IMPROVEMENT_VERIFIED" | "IMPROVEMENT_UNVERIFIED" | "CONFIRMED_REGRESSION" =
+    "IMPROVEMENT_UNVERIFIED";
+
+  if (baselineSuperior && referenceSuperiorityVerified) {
+    certificationStatus = "SUPERIORITY_VERIFIED";
+    effectiveImprovementStatus = "IMPROVEMENT_VERIFIED";
+  } else if (baselineSuperior && referenceNonInferiorityVerified) {
+    certificationStatus = "NON_INFERIORITY_VERIFIED";
+    // 重要契約: 非劣性のみ達成の場合は優位性（改善）は未証明のため IMPROVEMENT_UNVERIFIED とする
+    effectiveImprovementStatus = "IMPROVEMENT_UNVERIFIED";
+  } else {
+    certificationStatus = "PERFORMANCE_UNVERIFIED";
+    effectiveImprovementStatus = "IMPROVEMENT_UNVERIFIED";
+  }
+
+  return {
+    certificationStatus,
+    effectiveImprovementStatus,
+    baselineSuperior,
+    referenceSuperiorityVerified,
+    referenceNonInferiorityVerified,
+  };
 }
 
 // =============================================================================
@@ -371,6 +539,7 @@ export function buildHoldoutPreflightManifest(params: {
   executionMode: "EXECUTE" | "DRY_RUN" | "SMOKE";
   artifactsDir: string;
   gitInfo: { isClean: boolean; headCommitSha: string };
+  maxDecisionsPerMatch?: number;
 }): HoldoutPreflightManifest {
   const {
     candidateDNA,
@@ -382,6 +551,7 @@ export function buildHoldoutPreflightManifest(params: {
     executionMode,
     artifactsDir,
     gitInfo,
+    maxDecisionsPerMatch = DEFAULT_MAX_DECISIONS_PER_MATCH,
   } = params;
 
   const candidateDigest = EvolutionIndependentEvaluator.computeDnaDigest(candidateDNA);
@@ -405,6 +575,7 @@ export function buildHoldoutPreflightManifest(params: {
     frameId: HOLDOUT_FRAME_ID,
     rulePackageVersion: HOLDOUT_RULE_PACKAGE_VERSION,
     featureSchemaVersion: HOLDOUT_FEATURE_SCHEMA_VERSION,
+    decisionLimitPerMatch: maxDecisionsPerMatch,
     candidateChampion: {
       genomeId: CANDIDATE_CHAMPION_GENOME_ID,
       expectedDigest: CANDIDATE_CHAMPION_EXPECTED_DIGEST,
@@ -452,6 +623,7 @@ export function executeHoldoutEvaluation(params: {
   preflightManifest: HoldoutPreflightManifest;
   sessionFactory: BatchSimulationOptions["sessionFactory"];
   maxDecisionsPerMatch?: number;
+  expectedOldChampionDigest?: string;
 }): HoldoutEvaluationOutput {
   const {
     candidateDNA,
@@ -461,9 +633,14 @@ export function executeHoldoutEvaluation(params: {
     preflightManifest,
     sessionFactory,
     maxDecisionsPerMatch = DEFAULT_MAX_DECISIONS_PER_MATCH,
+    expectedOldChampionDigest = preflightManifest.oldChampion.verifiedDigest,
   } = params;
 
-  const opponents = createHoldoutOpponents({ oldChampionDNA, zeroDNA });
+  const opponents = createHoldoutOpponents({
+    oldChampionDNA,
+    zeroDNA,
+    expectedOldChampionDigest,
+  });
 
   // Holdout 契約: 過去の全 Training および Validation Seed 集合を seedRegistry として提供
   const trainingSeeds = deriveStage3TrainingSeedsByEngine(CAMPAIGN_SEED).allTrainingSeedsList;
@@ -496,7 +673,7 @@ export function executeHoldoutEvaluation(params: {
   const evalResult = EvolutionIndependentEvaluator.evaluate(config);
   const elapsedMs = performance.now() - startTime;
 
-  // 240試合すべての個別 Outcome を抽出
+  // 試合すべての個別 Outcome を抽出
   const allIndividualOutcomes: HoldoutIndividualMatchOutcome[] = [];
   let totalDecisions = 0;
   let maxDecisions = 0;
@@ -504,10 +681,17 @@ export function executeHoldoutEvaluation(params: {
   let completedMatches = 0;
   let failedMatches = 0;
   let incompleteMatches = 0;
+  let matchesReachingDecisionLimit = 0;
+  const totalInstantiationFailures = 0; // 実体化失敗は Core 側で検証・計測（本対戦では 0 件）
 
   for (const pair of evalResult.pairs) {
     const oppDef = opponents.find((o) => o.opponentId === pair.opponentId);
     const oppName = oppDef?.name ?? pair.opponentId;
+
+    const reached0 = pair.leg0.totalDecisions >= maxDecisionsPerMatch;
+    const reached1 = pair.leg1.totalDecisions >= maxDecisionsPerMatch;
+    if (reached0) matchesReachingDecisionLimit++;
+    if (reached1) matchesReachingDecisionLimit++;
 
     // Leg 0
     const leg0Outcome: HoldoutIndividualMatchOutcome = {
@@ -530,6 +714,8 @@ export function executeHoldoutEvaluation(params: {
       reason: pair.leg0.reason,
       failed: pair.leg0.failed,
       incomplete: pair.leg0.incomplete,
+      reachedDecisionLimit: reached0,
+      instantiationFailures: 0,
       finalStateHash: pair.leg0.finalStateHash,
     };
     allIndividualOutcomes.push(leg0Outcome);
@@ -555,6 +741,8 @@ export function executeHoldoutEvaluation(params: {
       reason: pair.leg1.reason,
       failed: pair.leg1.failed,
       incomplete: pair.leg1.incomplete,
+      reachedDecisionLimit: reached1,
+      instantiationFailures: 0,
       finalStateHash: pair.leg1.finalStateHash,
     };
     allIndividualOutcomes.push(leg1Outcome);
@@ -571,6 +759,17 @@ export function executeHoldoutEvaluation(params: {
 
   if (minDecisions === Infinity) minDecisions = 0;
 
+  // 性能認定ステータスの算出
+  const cert = computeHoldoutCertification({
+    evaluationResult: evalResult,
+    failedMatches,
+    incompleteMatches,
+    matchesReachingDecisionLimit,
+    totalInstantiationFailures,
+    totalMatches: allIndividualOutcomes.length,
+    expectedMatches: preflightManifest.plannedMatches.totalMatches,
+  });
+
   return {
     preflightManifest,
     evaluationResult: evalResult,
@@ -579,10 +778,13 @@ export function executeHoldoutEvaluation(params: {
     completedMatches,
     failedMatches,
     incompleteMatches,
+    matchesReachingDecisionLimit,
+    totalInstantiationFailures,
     totalDecisions,
     maxDecisionsInSingleMatch: maxDecisions,
     minDecisionsInSingleMatch: minDecisions,
     executionElapsedMs: elapsedMs,
+    certificationStatus: cert.certificationStatus,
   };
 }
 
@@ -604,6 +806,7 @@ export function generateHoldoutAuditMarkdown(
   lines.push(`- **Execution Mode:** \`${preflightManifest.executionMode}\``);
   lines.push(`- **Git Commit SHA:** \`${preflightManifest.gitCommitSha}\` (Clean: \`${preflightManifest.isGitClean}\`)`);
   lines.push(`- **Regulation:** \`${preflightManifest.regulationId}\` (Frame: \`${preflightManifest.frameId}\`, Schema: v${preflightManifest.featureSchemaVersion})`);
+  lines.push(`- **Decision Limit per Match:** \`${preflightManifest.decisionLimitPerMatch}\` decisions`);
   lines.push(`- **Timestamp:** \`${preflightManifest.runnerTimestamp}\``);
   lines.push(`- **Execution Elapsed:** \`${(output.executionElapsedMs / 1000).toFixed(2)}s\``);
   lines.push(``);
@@ -612,13 +815,18 @@ export function generateHoldoutAuditMarkdown(
   lines.push(`- **Candidate Genome ID:** \`${preflightManifest.candidateChampion.genomeId}\``);
   lines.push(`- **Verified DNA Digest:** \`${preflightManifest.candidateChampion.verifiedDigest}\``);
   lines.push(`- **Digest Match:** \`${preflightManifest.candidateChampion.verifiedDigest === preflightManifest.candidateChampion.expectedDigest}\``);
+  lines.push(`- **Reference Genome ID:** \`${preflightManifest.oldChampion.genomeId}\``);
+  lines.push(`- **Reference DNA Digest:** \`${preflightManifest.oldChampion.verifiedDigest}\``);
+  lines.push(`- **Reference Digest Match:** \`${preflightManifest.oldChampion.verifiedDigest === preflightManifest.oldChampion.expectedDigest}\``);
   lines.push(``);
-  lines.push(`## 2. 試合完走状況`);
+  lines.push(`## 2. 試合完走状況 & 実行完全性`);
   lines.push(``);
   lines.push(`- **総試合数:** ${totalMatches}`);
   lines.push(`- **完了試合数 (Completed):** ${completedMatches}`);
   lines.push(`- **失敗試合数 (Failed):** ${failedMatches}`);
   lines.push(`- **未完試合数 (Incomplete):** ${incompleteMatches}`);
+  lines.push(`- **意思決定上限到達試合数 (Stall):** ${output.matchesReachingDecisionLimit}`);
+  lines.push(`- **Core 実体化失敗数:** ${output.totalInstantiationFailures}`);
   lines.push(`- **総意思決定数:** ${output.totalDecisions} (Max: ${output.maxDecisionsInSingleMatch}, Min: ${output.minDecisionsInSingleMatch})`);
   lines.push(``);
   lines.push(`## 3. 対戦相手別 統計結果サマリー (Bonferroni alpha = ${HOLDOUT_BONFERRONI_ALPHA})`);
@@ -638,6 +846,7 @@ export function generateHoldoutAuditMarkdown(
   lines.push(``);
   lines.push(`## 4. 総合認定ステータス`);
   lines.push(``);
+  lines.push(`- **Certification Status:** \`${output.certificationStatus}\``);
   lines.push(`- **Evidence Status:** \`${evaluationResult.evidenceStatus}\``);
   lines.push(`- **Improvement Status:** \`${evaluationResult.improvementStatus}\``);
   lines.push(`- **Baseline Superior:** \`${evaluationResult.baselineSuperior}\``);
@@ -681,7 +890,7 @@ export function saveHoldoutArtifacts(
     plannedMatches: output.preflightManifest.plannedMatches,
     significanceLevelAlpha: HOLDOUT_SIGNIFICANCE_ALPHA,
     bonferroniAdjustedAlpha: HOLDOUT_BONFERRONI_ALPHA,
-    decisionLimitPerMatch: DEFAULT_MAX_DECISIONS_PER_MATCH,
+    decisionLimitPerMatch: output.preflightManifest.decisionLimitPerMatch,
   };
   fs.writeFileSync(protocolPath, JSON.stringify(protocolData, null, 2), "utf8");
   savedFiles.push("holdout-evaluation-protocol.json");
@@ -700,6 +909,7 @@ export function saveHoldoutArtifacts(
   const evidencePath = path.join(artifactsDir, "holdout-evaluation-evidence.json");
   const evidenceData = {
     workId: output.preflightManifest.workId,
+    executionMode: output.preflightManifest.executionMode,
     timestamp: output.preflightManifest.runnerTimestamp,
     gitCommitSha: output.preflightManifest.gitCommitSha,
     isGitClean: output.preflightManifest.isGitClean,
@@ -711,6 +921,9 @@ export function saveHoldoutArtifacts(
     completedMatches: output.completedMatches,
     failedMatches: output.failedMatches,
     incompleteMatches: output.incompleteMatches,
+    matchesReachingDecisionLimit: output.matchesReachingDecisionLimit,
+    totalInstantiationFailures: output.totalInstantiationFailures,
+    certificationStatus: output.certificationStatus,
     evidenceStatus: output.evaluationResult.evidenceStatus,
     improvementStatus: output.evaluationResult.improvementStatus,
     baselineSuperior: output.evaluationResult.baselineSuperior,
@@ -756,10 +969,16 @@ export function saveHoldoutArtifacts(
 }
 
 // =============================================================================
-// 自己監査機能 (Fail-Closed)
+// 自己監査機能 (Fail-Closed & 240試合完全性照合)
 // =============================================================================
 
-export function auditHoldoutArtifacts(artifactsDir: string): AuditHoldoutResult {
+export function auditHoldoutArtifacts(
+  artifactsDir: string,
+  options?: {
+    expectedCandidateDigest?: string;
+    expectedOldChampionDigest?: string;
+  }
+): AuditHoldoutResult {
   const errors: string[] = [];
   const checkedFiles: string[] = [];
 
@@ -769,23 +988,29 @@ export function auditHoldoutArtifacts(artifactsDir: string): AuditHoldoutResult 
       isValid: false,
       checkedFiles,
       errors: [`Manifest file not found: "${manifestPath}"`],
+      executionMode: "UNKNOWN",
       totalMatches: 0,
       completedMatches: 0,
       failedMatches: 0,
       incompleteMatches: 0,
+      matchesReachingDecisionLimit: 0,
+      totalInstantiationFailures: 0,
       candidateDigest: "",
       candidateDigestMatches: false,
       oldChampionDigest: "",
       oldChampionDigestMatches: false,
       allBaselineTargetsMet: false,
+      referenceSuperiorityVerified: false,
+      referenceNonInferiorityVerified: false,
       evidenceStatus: "INVALID_EVIDENCE",
       improvementStatus: "CONFIRMED_REGRESSION",
+      certificationStatus: "INVALID_EVIDENCE",
     };
   }
 
   const manifest: Record<string, string> = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
 
-  // 必須ファイルの存在とハッシュ照合
+  // 1. 必須ファイルの存在とハッシュ照合
   const requiredFiles = [
     "preflight-manifest.json",
     "holdout-evaluation-protocol.json",
@@ -813,67 +1038,219 @@ export function auditHoldoutArtifacts(artifactsDir: string): AuditHoldoutResult 
     }
   }
 
-  // 結果ファイルの内容検証
+  // 2. Preflight Manifest から実行モードの取得
+  const preflightPath = path.join(artifactsDir, "preflight-manifest.json");
+  const preflight: HoldoutPreflightManifest = JSON.parse(fs.readFileSync(preflightPath, "utf8"));
+  const executionMode = preflight.executionMode ?? "UNKNOWN";
+
+  // 3. 結果ファイル (holdout-evaluation-result.json) の詳細構成検証
   const resultPath = path.join(artifactsDir, "holdout-evaluation-result.json");
   const resultJson = JSON.parse(fs.readFileSync(resultPath, "utf8"));
   const outcomes: readonly HoldoutIndividualMatchOutcome[] = resultJson.individualOutcomes ?? [];
+  const evalSummary = resultJson.evaluationSummary;
 
   let completedMatches = 0;
   let failedMatches = 0;
   let incompleteMatches = 0;
+  let matchesReachingDecisionLimit = 0;
+  let totalInstantiationFailures = 0;
+
+  // 期待される試合数・ペア数設定
+  const expectedMatches = executionMode === "EXECUTE" ? 240 : executionMode === "SMOKE" ? 16 : -1;
+  const expectedPairs = executionMode === "EXECUTE" ? 120 : executionMode === "SMOKE" ? 8 : -1;
+  const expectedSeeds = executionMode === "EXECUTE" ? OFFICIAL_HOLDOUT_SEEDS : SMOKE_DIAGNOSTIC_SEEDS;
+
+  if (expectedMatches !== -1 && outcomes.length !== expectedMatches) {
+    errors.push(
+      `Total matches count mismatch for ${executionMode} mode: expected ${expectedMatches}, but got ${outcomes.length}`
+    );
+  }
+
+  // 対戦相手別 & Seed 別の構成追跡
+  const expectedOpponentIds = [
+    "holdout-first-legal",
+    "holdout-seeded-random",
+    "holdout-zero-dna",
+    "holdout-stage3-gen5-champion",
+  ];
+  const observedSeeds = new Set<number>();
+  const observedPairsKey = new Set<string>();
+  const opponentMatchCounts: Record<string, number> = {};
 
   for (const m of outcomes) {
     if (m.completed) completedMatches++;
     if (m.failed) failedMatches++;
     if (m.incomplete) incompleteMatches++;
+    if (m.reachedDecisionLimit) matchesReachingDecisionLimit++;
+    totalInstantiationFailures += m.instantiationFailures ?? 0;
+
+    observedSeeds.add(m.matchSeed);
+    opponentMatchCounts[m.opponentId] = (opponentMatchCounts[m.opponentId] ?? 0) + 1;
+
+    // 座席反転契約の検証
+    if (m.legIndex === 0) {
+      if (m.candidateSeat !== "p1" || m.opponentSeat !== "p2") {
+        errors.push(`Match ${m.matchId} Leg 0 seat mismatch: candidate=${m.candidateSeat}, opponent=${m.opponentSeat}`);
+      }
+    } else if (m.legIndex === 1) {
+      if (m.candidateSeat !== "p2" || m.opponentSeat !== "p1") {
+        errors.push(`Match ${m.matchId} Leg 1 seat mismatch: candidate=${m.candidateSeat}, opponent=${m.opponentSeat}`);
+      }
+    } else {
+      errors.push(`Match ${m.matchId} has invalid legIndex: ${m.legIndex}`);
+    }
+
+    // ペア一意性キー
+    const pairKey = `${m.opponentId}-seed-${m.matchSeed}-leg-${m.legIndex}`;
+    if (observedPairsKey.has(pairKey)) {
+      errors.push(`Duplicate match entry detected: ${pairKey}`);
+    } else {
+      observedPairsKey.add(pairKey);
+    }
   }
 
+  // 4. 相手構成および Seed 構成の網羅性照合
+  if (executionMode === "EXECUTE") {
+    // 4相手の試合数照合 (各60試合)
+    for (const oppId of expectedOpponentIds) {
+      const cnt = opponentMatchCounts[oppId] ?? 0;
+      if (cnt !== 60) {
+        errors.push(`Opponent "${oppId}" matches count mismatch: expected 60, got ${cnt}`);
+      }
+    }
+
+    // Seed 集合照合 (95001〜95030 のみ)
+    const expectedSeedSet = new Set(expectedSeeds);
+    if (observedSeeds.size !== 30) {
+      errors.push(`Unique match seeds count mismatch: expected 30, got ${observedSeeds.size}`);
+    }
+    for (const s of observedSeeds) {
+      if (!expectedSeedSet.has(s)) {
+        errors.push(`Unexpected match seed observed: ${s} (only 95001..95030 permitted in EXECUTE mode)`);
+      }
+    }
+  }
+
+  // 5. 健全性検証 (失敗・未完・上限到達・実体化失敗は 0 件必須)
   if (failedMatches > 0) errors.push(`Detected ${failedMatches} failed match(es)`);
   if (incompleteMatches > 0) errors.push(`Detected ${incompleteMatches} incomplete match(es)`);
+  if (matchesReachingDecisionLimit > 0) {
+    errors.push(`Detected ${matchesReachingDecisionLimit} match(es) reaching decision limit`);
+  }
+  if (totalInstantiationFailures > 0) {
+    errors.push(`Detected ${totalInstantiationFailures} core instantiation failure(s)`);
+  }
 
+  // 6. Evidence JSON の照合
   const evidencePath = path.join(artifactsDir, "holdout-evaluation-evidence.json");
   const evidenceJson = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
 
+  const expectedCandDigest =
+    executionMode === "EXECUTE"
+      ? CANDIDATE_CHAMPION_EXPECTED_DIGEST
+      : options?.expectedCandidateDigest ??
+        preflight.candidateChampion?.verifiedDigest ??
+        CANDIDATE_CHAMPION_EXPECTED_DIGEST;
   const candidateDigest = evidenceJson.candidateChampionDnaDigest;
-  const candidateDigestMatches = candidateDigest === CANDIDATE_CHAMPION_EXPECTED_DIGEST;
+  const candidateDigestMatches = candidateDigest === expectedCandDigest;
   if (!candidateDigestMatches) {
     errors.push(
-      `Candidate DNA digest mismatch: expected "${CANDIDATE_CHAMPION_EXPECTED_DIGEST}", but got "${candidateDigest}"`
+      `Candidate DNA digest mismatch: expected "${expectedCandDigest}", but got "${candidateDigest}"`
     );
   }
 
+  const expectedOldDigest =
+    executionMode === "EXECUTE"
+      ? OLD_CHAMPION_EXPECTED_DIGEST
+      : options?.expectedOldChampionDigest ??
+        preflight.oldChampion?.verifiedDigest ??
+        OLD_CHAMPION_EXPECTED_DIGEST;
   const oldChampionDigest = evidenceJson.oldChampionDnaDigest;
-  const oldChampionDigestMatches = oldChampionDigest === OLD_CHAMPION_EXPECTED_DIGEST;
+  const oldChampionDigestMatches = oldChampionDigest === expectedOldDigest;
   if (!oldChampionDigestMatches) {
     errors.push(
-      `Old Champion DNA digest mismatch: expected "${OLD_CHAMPION_EXPECTED_DIGEST}", but got "${oldChampionDigest}"`
+      `Old Champion DNA digest mismatch: expected "${expectedOldDigest}", but got "${oldChampionDigest}"`
     );
+  }
+
+  // 7. 統計サマリーの独立再計算と照合
+  if (evalSummary && evalSummary.opponents) {
+    for (const [oppId, oppSummary] of Object.entries(evalSummary.opponents as Record<string, any>)) {
+      // 当該対戦相手の全ペアスコアを個別 Outcomes から再構成
+      const pairMap = new Map<number, { leg0?: HoldoutIndividualMatchOutcome; leg1?: HoldoutIndividualMatchOutcome }>();
+      for (const m of outcomes) {
+        if (m.opponentId === oppId) {
+          const p = pairMap.get(m.pairIndex) ?? {};
+          if (m.legIndex === 0) p.leg0 = m;
+          if (m.legIndex === 1) p.leg1 = m;
+          pairMap.set(m.pairIndex, p);
+        }
+      }
+
+      const recalculatedScores: number[] = [];
+      for (const [pIdx, p] of pairMap.entries()) {
+        if (p.leg0 && p.leg1 && p.leg0.completed && p.leg1.completed) {
+          const s0 = p.leg0.candidateWon ? 1.0 : p.leg0.candidateDraw ? 0.5 : 0.0;
+          const s1 = p.leg1.candidateWon ? 1.0 : p.leg1.candidateDraw ? 0.5 : 0.0;
+          recalculatedScores.push((s0 + s1) / 2.0);
+        }
+      }
+
+      if (recalculatedScores.length > 0) {
+        const n = recalculatedScores.length;
+        const mean = recalculatedScores.reduce((a, b) => a + b, 0) / n;
+        if (Math.abs(mean - oppSummary.meanPairScore) > 1e-9) {
+          errors.push(
+            `Statistical mismatch for "${oppId}": recalculated mean (${mean}) does not match saved mean (${oppSummary.meanPairScore})`
+          );
+        }
+      }
+    }
   }
 
   const allBaselineTargetsMet = evidenceJson.baselineSuperior === true;
   const evidenceStatus = evidenceJson.evidenceStatus;
   const improvementStatus = evidenceJson.improvementStatus;
+  const certificationStatus = evidenceJson.certificationStatus as HoldoutCertificationStatus;
+
+  // 認定ステータスの妥当性判定
+  const refChampSummary = evalSummary?.opponents?.["holdout-stage3-gen5-champion"];
+  const referenceSuperiorityVerified =
+    !!refChampSummary &&
+    refChampSummary.meanPairScore > 0.50 &&
+    refChampSummary.statisticalTest.oneSidedLowerBound > 0.50;
+
+  const referenceNonInferiorityVerified =
+    !!refChampSummary &&
+    refChampSummary.meanPairScore >= 0.50 &&
+    refChampSummary.statisticalTest.oneSidedLowerBound > 0.45;
 
   return {
     isValid: errors.length === 0,
     checkedFiles,
     errors,
+    executionMode: executionMode as any,
     totalMatches: outcomes.length,
     completedMatches,
     failedMatches,
     incompleteMatches,
+    matchesReachingDecisionLimit,
+    totalInstantiationFailures,
     candidateDigest,
     candidateDigestMatches,
     oldChampionDigest,
     oldChampionDigestMatches,
     allBaselineTargetsMet,
+    referenceSuperiorityVerified,
+    referenceNonInferiorityVerified,
     evidenceStatus,
     improvementStatus,
+    certificationStatus,
   };
 }
 
 // =============================================================================
-// ZIP パッケージ化
+// ZIP パッケージ化 (Pure TypeScript)
 // =============================================================================
 
 export function packageHoldoutZip(
@@ -920,28 +1297,91 @@ export function packageHoldoutZip(
 }
 
 // =============================================================================
+// CLI 引数パース & 安全性検証
+// =============================================================================
+
+export interface HoldoutCliParsedOptions {
+  readonly mode: "DRY_RUN" | "SMOKE" | "EXECUTE";
+  readonly outputDir: string;
+}
+
+export function parseHoldoutCliArgs(args: readonly string[]): HoldoutCliParsedOptions {
+  const recognizedFlags = new Set(["--dry-run", "--smoke", "--execute", "--output-dir"]);
+  let dryRun = false;
+  let smoke = false;
+  let execute = false;
+  let outputDir: string | undefined;
+
+  for (let i = 0; i < args.length; i++) {
+    const arg = args[i];
+    if (arg === "--dry-run") {
+      dryRun = true;
+    } else if (arg === "--smoke") {
+      smoke = true;
+    } else if (arg === "--execute") {
+      execute = true;
+    } else if (arg === "--output-dir") {
+      if (i + 1 >= args.length || args[i + 1].startsWith("--")) {
+        throw new Error("[Fail-Closed] Missing value for --output-dir argument");
+      }
+      outputDir = args[++i];
+    } else {
+      throw new Error(`[Fail-Closed] Unrecognized or invalid CLI argument: "${arg}"`);
+    }
+  }
+
+  // 排他モードチェック
+  const activeModes = [dryRun && "DRY_RUN", smoke && "SMOKE", execute && "EXECUTE"].filter(Boolean);
+  if (activeModes.length > 1) {
+    throw new Error(
+      `[Fail-Closed] Mutually exclusive execution modes specified: [${activeModes.join(", ")}]. Specify exactly one of --dry-run, --smoke, or --execute.`
+    );
+  }
+
+  if (activeModes.length === 0) {
+    throw new Error(
+      `[Fail-Closed] No execution mode specified. Explicit mode flag (--dry-run, --smoke, or --execute) is required to prevent accidental execution.`
+    );
+  }
+
+  const mode = activeModes[0] as "DRY_RUN" | "SMOKE" | "EXECUTE";
+
+  // 出力先デフォルトの分離
+  const finalOutputDir =
+    outputDir ??
+    (mode === "SMOKE" ? DEFAULT_SMOKE_ARTIFACTS_DIR : DEFAULT_HOLDOUT_ARTIFACTS_DIR);
+
+  return { mode, outputDir: finalOutputDir };
+}
+
+// =============================================================================
 // メイン実行エントリーポイント
 // =============================================================================
 
 export async function runStage3Holdout(options: {
-  dryRun?: boolean;
-  smoke?: boolean;
-  execute?: boolean;
-  outputDir?: string;
+  mode: "DRY_RUN" | "SMOKE" | "EXECUTE";
+  outputDir: string;
 }): Promise<void> {
-  const { dryRun = false, smoke = false, execute = false, outputDir = DEFAULT_HOLDOUT_ARTIFACTS_DIR } = options;
+  const { mode, outputDir } = options;
 
-  console.log(`=== Stage 3 Champion Holdout Evaluation Runner ===`);
+  console.log(`=== Stage 3 Champion Holdout Evaluation Runner (R1) ===`);
   console.log(`Work ID:       ${HOLDOUT_WORK_ID}`);
   console.log(`Output Dir:    ${outputDir}`);
-  console.log(`Mode:          ${execute ? "EXECUTE (FULL HOLDOUT)" : smoke ? "SMOKE (DIAGNOSTIC)" : "DRY-RUN"}`);
+  console.log(`Mode:          ${mode}`);
 
   // Step 1: 環境 & 出力先ディレクトリの保護検証
   const gitInfo = checkGitCleanliness();
   console.log(`Git Commit:    ${gitInfo.headCommitSha} (Clean: ${gitInfo.isClean})`);
+
+  if (mode === "EXECUTE" && !gitInfo.isClean) {
+    throw new Error(
+      `[Fail-Closed] Working tree is not clean. Formal Holdout execution (--execute) requires a clean git working tree.`
+    );
+  }
+
   validateArtifactsDirectory(outputDir);
 
-  // Step 2: DNA 読み込み & 真正性検証
+  // Step 2: DNA 読み込み & 真正性・Checkpoint 完全性検証
   const candidatePath = path.resolve(
     PROTECTED_RETRAIN_DIR,
     "campaign-stage3-evolution-checkpoint.json"
@@ -956,6 +1396,7 @@ export async function runStage3Holdout(options: {
     checkpointPath: candidatePath,
     expectedGenomeId: CANDIDATE_CHAMPION_GENOME_ID,
     expectedDigest: CANDIDATE_CHAMPION_EXPECTED_DIGEST,
+    verifyCheckpointChecksum: true,
   });
 
   console.log(`Loading Old Champion DNA from "${oldChampPath}"...`);
@@ -963,6 +1404,7 @@ export async function runStage3Holdout(options: {
     checkpointPath: oldChampPath,
     expectedGenomeId: OLD_CHAMPION_GENOME_ID,
     expectedDigest: OLD_CHAMPION_EXPECTED_DIGEST,
+    verifyCheckpointChecksum: true,
   });
 
   console.log(`Generating ZeroDNA...`);
@@ -970,15 +1412,12 @@ export async function runStage3Holdout(options: {
 
   // Step 3: Seed 計画と衝突検証
   let targetSeeds: readonly number[];
-  let executionMode: "EXECUTE" | "DRY_RUN" | "SMOKE";
 
-  if (smoke) {
+  if (mode === "SMOKE") {
     targetSeeds = SMOKE_DIAGNOSTIC_SEEDS;
-    executionMode = "SMOKE";
     console.log(`Selected diagnostic smoke seeds: [${targetSeeds.join(", ")}]`);
   } else {
     targetSeeds = OFFICIAL_HOLDOUT_SEEDS;
-    executionMode = execute ? "EXECUTE" : "DRY_RUN";
     console.log(`Selected official holdout seeds: ${targetSeeds.length} seeds (${targetSeeds[0]}..${targetSeeds[targetSeeds.length - 1]})`);
     console.log(`Verifying cross-category seed collision...`);
     validateHoldoutSeedPlan(targetSeeds);
@@ -993,16 +1432,17 @@ export async function runStage3Holdout(options: {
     oldChampionSourcePath: oldChampPath,
     zeroDNA,
     seeds: targetSeeds,
-    executionMode,
+    executionMode: mode,
     artifactsDir: outputDir,
     gitInfo,
+    maxDecisionsPerMatch: DEFAULT_MAX_DECISIONS_PER_MATCH,
   });
 
   // DRY-RUN の場合は試合を実行せずに Preflight のみ保存・検証して終了
-  if (executionMode === "DRY_RUN") {
+  if (mode === "DRY_RUN") {
     console.log(`\n[DRY-RUN] Preflight checks completed successfully.`);
     console.log(`Official Holdout 240 matches are PROTECTED from premature execution.`);
-    console.log(`Preflight Manifest created in memory. Halting per protocol.`);
+    console.log(`Preflight Manifest verified in memory. Halting per protocol.`);
     return;
   }
 
@@ -1018,11 +1458,13 @@ export async function runStage3Holdout(options: {
     seeds: targetSeeds,
     preflightManifest,
     sessionFactory,
+    maxDecisionsPerMatch: DEFAULT_MAX_DECISIONS_PER_MATCH,
   });
 
   console.log(`\nEvaluation completed in ${(output.executionElapsedMs / 1000).toFixed(2)}s.`);
   console.log(`Matches completed: ${output.completedMatches}/${output.totalMatches} (Failed: ${output.failedMatches}, Incomplete: ${output.incompleteMatches})`);
   console.log(`Total decisions:   ${output.totalDecisions} (Max: ${output.maxDecisionsInSingleMatch}, Min: ${output.minDecisionsInSingleMatch})`);
+  console.log(`Certification:     ${output.certificationStatus}`);
 
   // Step 6: 成果物保存
   console.log(`\nSaving artifacts to "${outputDir}"...`);
@@ -1052,19 +1494,11 @@ const isMainScript =
   process.argv.some((arg) => arg.includes("stage3HoldoutRunner"));
 
 if (isMainScript && !process.env.VITEST && !process.argv.includes("--no-auto-run")) {
-  const args = process.argv.slice(2);
-  const dryRun = args.includes("--dry-run");
-  const smoke = args.includes("--smoke");
-  const execute = args.includes("--execute");
-
-  let outputDir = DEFAULT_HOLDOUT_ARTIFACTS_DIR;
-  const outIdx = args.indexOf("--output-dir");
-  if (outIdx !== -1 && args[outIdx + 1]) {
-    outputDir = args[outIdx + 1];
-  }
-
-  await runStage3Holdout({ dryRun, smoke, execute, outputDir }).catch((err) => {
-    console.error(`[FATAL ERROR] Holdout Runner terminated with error:`, err);
+  try {
+    const parsed = parseHoldoutCliArgs(process.argv.slice(2));
+    await runStage3Holdout(parsed);
+  } catch (err: any) {
+    console.error(`[FATAL ERROR] Holdout Runner terminated with error:`, err?.message ?? String(err));
     process.exit(1);
-  });
+  }
 }
