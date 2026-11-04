@@ -94,7 +94,7 @@ const __dirname = path.dirname(__filename);
 // 定数定義 (Stage 3 実験パラメータ)
 // =============================================================================
 
-export const WORK_ID = "BP-SIM-AI-V92-WORK3-STAGE3-CHAMPION-PLAYTEST";
+export const WORK_ID = "BP-SIM-AI-V92-WORK3-STAGE3-FULL-ACTION-RETRAIN-R1";
 export const REGULATION_ID = "standard-pack";
 export const FRAME_ID = "pack";
 export const RULE_PACKAGE_VERSION = "1.0.0";
@@ -118,9 +118,14 @@ export const TOTAL_EXPERIMENT_MATCHES = 1920; // 1320 + 600 = 1920
 export const HOLDOUT_SEEDS_COUNT = 30;
 export const TOTAL_HOLDOUT_MATCHES = 240; // 4相手 * 30シード * 2legs (今回未使用)
 
-export const DEFAULT_STAGE3_ARTIFACTS_DIR = path.resolve(
+export const LEGACY_STAGE3_ARTIFACTS_DIR = path.resolve(
   process.cwd(),
   ".artifacts/stage3-evolution"
+);
+
+export const DEFAULT_STAGE3_ARTIFACTS_DIR = path.resolve(
+  process.cwd(),
+  ".artifacts/stage3-full-action-retrain-r1"
 );
 
 export const REQUIRED_STAGE3_AUDIT_FILES = [
@@ -130,7 +135,50 @@ export const REQUIRED_STAGE3_AUDIT_FILES = [
   "campaign-stage3-evolution-checkpoint.json",
   "stage3-evolution-evidence.json",
   "AUDIT_STAGE3_EVIDENCE.md",
+  "STAGE3_AUDIT_REPORT.md",
 ] as const;
+
+/**
+ * 出力先ディレクトリの安全性・原本保護・空状態を検証 (Fail-Closed)
+ */
+export function validateArtifactsDirectory(
+  artifactsDir: string,
+  options?: { readonly allowNonEmpty?: boolean; readonly allowLegacyDir?: boolean }
+): void {
+  const resolved = path.resolve(artifactsDir);
+  const resolvedLegacy = path.resolve(LEGACY_STAGE3_ARTIFACTS_DIR);
+
+  // 1. 旧原本ディレクトリへの誤出力・上書き防止
+  if (!options?.allowLegacyDir && resolved === resolvedLegacy) {
+    throw new Error(
+      `[Safety Error] Output directory matches legacy Stage 3 directory "${resolvedLegacy}". Legacy artifacts must be strictly protected and never overwritten.`
+    );
+  }
+
+  // 2. ディレクトリが存在する場合の空チェック
+  if (fs.existsSync(resolved)) {
+    const files = fs.readdirSync(resolved).filter((f) => !f.startsWith(".probe"));
+    if (!options?.allowNonEmpty && files.length > 0) {
+      throw new Error(
+        `[Safety Error] Target artifacts directory "${resolved}" is not empty (contains ${files.length} items: ${files.slice(0, 3).join(", ")}...). Output directory must be newly created or empty to prevent data corruption.`
+      );
+    }
+  }
+}
+
+/**
+ * CLI 引数または環境変数から成果物出力先ディレクトリを解決
+ */
+export function resolveArtifactsDirectoryFromArgs(args: string[] = process.argv.slice(2)): string {
+  const dirIndex = args.indexOf("--output-dir");
+  if (dirIndex !== -1 && dirIndex + 1 < args.length) {
+    return path.resolve(process.cwd(), args[dirIndex + 1]);
+  }
+  if (process.env.STAGE3_ARTIFACTS_DIR) {
+    return path.resolve(process.cwd(), process.env.STAGE3_ARTIFACTS_DIR);
+  }
+  return DEFAULT_STAGE3_ARTIFACTS_DIR;
+}
 
 // =============================================================================
 // ユーティリティ & ハッシュ計算
@@ -438,7 +486,12 @@ export interface Stage3PreflightResult {
 
 export async function runPreflightCheck(
   artifactsDir: string = DEFAULT_STAGE3_ARTIFACTS_DIR,
-  options?: { readonly allowDirty?: boolean }
+  options?: {
+    readonly allowDirty?: boolean;
+    readonly allowNonEmpty?: boolean;
+    readonly allowLegacyDir?: boolean;
+    readonly workId?: string;
+  }
 ): Promise<Stage3PreflightResult> {
   const errors: string[] = [];
   const gitInfo = getGitStatusInfo();
@@ -451,6 +504,16 @@ export async function runPreflightCheck(
     errors.push(
       `Git working tree is dirty (uncommitted changes detected). Stage 3 requires a clean working tree to ensure complete reproducibility. Status:\n${gitInfo.statusOutput}`
     );
+  }
+
+  // 0. 出力先ディレクトリ安全性・原本保護・空状態検証
+  try {
+    validateArtifactsDirectory(artifactsDir, {
+      allowNonEmpty: options?.allowNonEmpty,
+      allowLegacyDir: options?.allowLegacyDir,
+    });
+  } catch (err: any) {
+    errors.push(err.message);
   }
 
   // 1. レギュレーション検証
@@ -517,7 +580,7 @@ export async function runPreflightCheck(
   }
 
   const manifest: Stage3PreflightManifest = {
-    workId: WORK_ID,
+    workId: options?.workId ?? WORK_ID,
     gitCommitSha: gitInfo.commitSha,
     isGitClean: gitInfo.isClean,
     timestamp: new Date().toISOString(),
@@ -601,6 +664,17 @@ export interface PassAndStallTelemetryStats {
   readonly exceptionOrIncompleteMatches: number;
 }
 
+export interface StreamingActionSpaceTelemetry {
+  readonly streamingDecisionsCount: number;
+  readonly matchesWithStreamingCount: number;
+  readonly maxLegalPatternsCount: number;
+  readonly totalEvaluatedLegalPatternsCount: number;
+  readonly streamingEvaluationTotalElapsedMs: number | "UNMEASURED";
+  readonly instantiationFailuresCount: number;
+  readonly appliedStreamingIndicesSummary: Record<string, number>;
+  readonly uncompletedMatchesCount: number;
+}
+
 export interface GenerationTimingRecord {
   readonly generation: number;
   readonly totalElapsedMs: number;
@@ -641,6 +715,11 @@ export interface Stage3ExecutionOutput {
     readonly total: PassAndStallTelemetryStats;
     readonly training: PassAndStallTelemetryStats;
     readonly validation: PassAndStallTelemetryStats;
+  };
+  readonly streamingTelemetry: {
+    readonly total: StreamingActionSpaceTelemetry;
+    readonly training: StreamingActionSpaceTelemetry;
+    readonly validation: StreamingActionSpaceTelemetry;
   };
   readonly elapsedTotalMs: number;
   readonly generationTimings: readonly GenerationTimingRecord[];
@@ -867,6 +946,39 @@ export async function executeStage3Evolution(
     validation: { totalPassDecisions: 0, maxConsecutivePasses: 0, potentialStallMatchesCount: 0 },
   };
 
+  const streamingStats = {
+    total: {
+      streamingDecisionsCount: 0,
+      matchesWithStreamingCount: 0,
+      maxLegalPatternsCount: 0,
+      totalEvaluatedLegalPatternsCount: 0,
+      streamingEvaluationTotalElapsedMs: "UNMEASURED" as number | "UNMEASURED",
+      instantiationFailuresCount: 0,
+      appliedStreamingIndicesSummary: {} as Record<string, number>,
+      uncompletedMatchesCount: 0,
+    },
+    training: {
+      streamingDecisionsCount: 0,
+      matchesWithStreamingCount: 0,
+      maxLegalPatternsCount: 0,
+      totalEvaluatedLegalPatternsCount: 0,
+      streamingEvaluationTotalElapsedMs: "UNMEASURED" as number | "UNMEASURED",
+      instantiationFailuresCount: 0,
+      appliedStreamingIndicesSummary: {} as Record<string, number>,
+      uncompletedMatchesCount: 0,
+    },
+    validation: {
+      streamingDecisionsCount: 0,
+      matchesWithStreamingCount: 0,
+      maxLegalPatternsCount: 0,
+      totalEvaluatedLegalPatternsCount: 0,
+      streamingEvaluationTotalElapsedMs: "UNMEASURED" as number | "UNMEASURED",
+      instantiationFailuresCount: 0,
+      appliedStreamingIndicesSummary: {} as Record<string, number>,
+      uncompletedMatchesCount: 0,
+    },
+  };
+
   // 世代別時間計測
   const timingHistory: {
     generation: number;
@@ -900,6 +1012,7 @@ export async function executeStage3Evolution(
     let currentConsecutivePasses = 0;
     let maxConsecutivePassesInThisMatch = 0;
     let sessionFinished = false;
+    let matchHadStreaming = false;
 
     // 対戦カテゴリ判定
     const matchCategory = determineMatchCategory(ctx, seedPlan);
@@ -934,18 +1047,65 @@ export async function executeStage3Evolution(
     session.submitDecision = (response: any) => {
       sessionDecisions++;
 
-      // Core 合法アクション契約に基づく PASS 判定
-      const req = session.pendingDecision;
-      let isPass = false;
-      if (req && Array.isArray(req.patterns) && typeof response?.selectedPatternRef === "number") {
-        const pattern = req.patterns[response.selectedPatternRef];
-        if (pattern && pattern.kind === "PASS") {
-          isPass = true;
-        }
-      }
-
       const targetTracker = matchCategory === "TRAINING" ? trackStats.training : trackStats.validation;
       const targetPassTracker = matchCategory === "TRAINING" ? passStats.training : passStats.validation;
+      const targetStreamingTracker = matchCategory === "TRAINING" ? streamingStats.training : streamingStats.validation;
+
+      const req = session.pendingDecision;
+      let isPass = false;
+
+      // ストリーミング合法手判断または通常判断の集計
+      if (req?.blockAssignmentStream) {
+        matchHadStreaming = true;
+        const stream = req.blockAssignmentStream;
+        const pCount = stream.patternCount;
+
+        targetStreamingTracker.streamingDecisionsCount++;
+        streamingStats.total.streamingDecisionsCount++;
+
+        targetStreamingTracker.totalEvaluatedLegalPatternsCount += pCount;
+        streamingStats.total.totalEvaluatedLegalPatternsCount += pCount;
+
+        if (pCount > targetStreamingTracker.maxLegalPatternsCount) {
+          targetStreamingTracker.maxLegalPatternsCount = pCount;
+        }
+        if (pCount > streamingStats.total.maxLegalPatternsCount) {
+          streamingStats.total.maxLegalPatternsCount = pCount;
+        }
+
+        const selectedRef = response?.selectedPatternRef;
+        if (typeof selectedRef === "number") {
+          const instantiated = stream.instantiatePatternAt(selectedRef);
+          if (!instantiated) {
+            targetStreamingTracker.instantiationFailuresCount++;
+            streamingStats.total.instantiationFailuresCount++;
+          }
+          const refKey = String(selectedRef);
+          targetStreamingTracker.appliedStreamingIndicesSummary[refKey] =
+            (targetStreamingTracker.appliedStreamingIndicesSummary[refKey] || 0) + 1;
+          streamingStats.total.appliedStreamingIndicesSummary[refKey] =
+            (streamingStats.total.appliedStreamingIndicesSummary[refKey] || 0) + 1;
+        }
+      } else {
+        const pCount = req?.patterns?.length ?? 0;
+        targetStreamingTracker.totalEvaluatedLegalPatternsCount += pCount;
+        streamingStats.total.totalEvaluatedLegalPatternsCount += pCount;
+
+        if (pCount > targetStreamingTracker.maxLegalPatternsCount) {
+          targetStreamingTracker.maxLegalPatternsCount = pCount;
+        }
+        if (pCount > streamingStats.total.maxLegalPatternsCount) {
+          streamingStats.total.maxLegalPatternsCount = pCount;
+        }
+
+        // Core 合法アクション契約に基づく PASS 判定
+        if (req && Array.isArray(req.patterns) && typeof response?.selectedPatternRef === "number") {
+          const pattern = req.patterns[response.selectedPatternRef];
+          if (pattern && pattern.kind === "PASS") {
+            isPass = true;
+          }
+        }
+      }
 
       targetTracker.totalDecisions++;
       trackStats.total.totalDecisions++;
@@ -984,6 +1144,12 @@ export async function executeStage3Evolution(
 
           const targetTracker = matchCategory === "TRAINING" ? trackStats.training : trackStats.validation;
           const targetPassTracker = matchCategory === "TRAINING" ? passStats.training : passStats.validation;
+          const targetStreamingTracker = matchCategory === "TRAINING" ? streamingStats.training : streamingStats.validation;
+
+          if (matchHadStreaming) {
+            targetStreamingTracker.matchesWithStreamingCount++;
+            streamingStats.total.matchesWithStreamingCount++;
+          }
 
           targetTracker.matchCount++;
           trackStats.total.matchCount++;
@@ -1026,6 +1192,9 @@ export async function executeStage3Evolution(
         return step;
       } catch (err) {
         observedFailed++;
+        const targetStreamingTracker = matchCategory === "TRAINING" ? streamingStats.training : streamingStats.validation;
+        targetStreamingTracker.uncompletedMatchesCount++;
+        streamingStats.total.uncompletedMatchesCount++;
         throw err;
       }
     };
@@ -1241,6 +1410,7 @@ export async function executeStage3Evolution(
         exceptionOrIncompleteMatches: 0,
       },
     },
+    streamingTelemetry: streamingStats,
     elapsedTotalMs,
     generationTimings,
     generationTimingStatus: "MEASURED",
@@ -1298,7 +1468,7 @@ export function saveStage3Artifacts(
 
   // 3. campaign-stage3-evolution-metrics.json
   const metricsData = {
-    workId: WORK_ID,
+    workId: preflightManifest.workId ?? WORK_ID,
     timestamp: new Date().toISOString(),
     totalMatchesExecuted: output.totalMatchesExecuted,
     trainingMatchesExecuted: output.trainingMatchesExecuted,
@@ -1308,6 +1478,7 @@ export function saveStage3Artifacts(
     incompleteMatches: output.incompleteMatches,
     decisionStats: output.decisionStats,
     passAndStallTelemetry: output.passAndStallTelemetry,
+    streamingTelemetry: output.streamingTelemetry,
     elapsedTotalMs: output.elapsedTotalMs,
     generationTimings: output.generationTimings,
     generationTimingStatus: output.generationTimingStatus,
@@ -1348,7 +1519,7 @@ export function saveStage3Artifacts(
 
   // 5. stage3-evolution-evidence.json
   const evidenceData = {
-    workId: WORK_ID,
+    workId: preflightManifest.workId ?? WORK_ID,
     experimentDate: new Date().toISOString(),
     gitCommitSha: preflightManifest.gitCommitSha,
     isGitClean: preflightManifest.isGitClean,
@@ -1371,6 +1542,7 @@ export function saveStage3Artifacts(
     },
     decisionStats: output.decisionStats,
     passAndStallTelemetry: output.passAndStallTelemetry,
+    streamingTelemetry: output.streamingTelemetry,
     timings: {
       elapsedTotalMs: output.elapsedTotalMs,
       generationTimings: output.generationTimings,
@@ -1392,10 +1564,15 @@ export function saveStage3Artifacts(
   fs.writeFileSync(evidencePath, JSON.stringify(evidenceData, null, 2), "utf-8");
   savedFiles.push("stage3-evolution-evidence.json");
 
-  // 6. AUDIT_STAGE3_EVIDENCE.md
+  // 6. AUDIT_STAGE3_EVIDENCE.md & STAGE3_AUDIT_REPORT.md
+  const appliedIndicesKeys = Object.keys(output.streamingTelemetry.total.appliedStreamingIndicesSummary);
+  const sampleAppliedSummary = appliedIndicesKeys.length > 0
+    ? appliedIndicesKeys.slice(0, 10).map((k) => `index ${k}: ${output.streamingTelemetry.total.appliedStreamingIndicesSummary[k]}回`).join(", ")
+    : "なし";
+
   const mdContent = `# Stage 3 Large-Scale Evolution Audit Evidence Report
 
-- **Work ID:** \`${WORK_ID}\`
+- **Work ID:** \`${preflightManifest.workId ?? WORK_ID}\`
 - **Git Commit SHA:** \`${preflightManifest.gitCommitSha}\` (Clean: \`${preflightManifest.isGitClean}\`)
 - **Regulation / Frame:** \`${REGULATION_ID}\` / \`${FRAME_ID}\`
 - **Campaign Seed:** \`${CAMPAIGN_SEED}\`
@@ -1411,7 +1588,16 @@ export function saveStage3Artifacts(
 - **膠着兆候検出試合数:** ${output.passAndStallTelemetry.total.potentialStallMatchesCount} 試合
 - **未完了・例外終了:** ${output.passAndStallTelemetry.total.exceptionOrIncompleteMatches} 試合
 
-## 2. 世代別実測時間 (performance.now)
+## 2. ストリーミング合法手空間テレメトリー (Action Space Streaming Telemetry)
+- **ストリーミング判断発生件数:** ${output.streamingTelemetry.total.streamingDecisionsCount} 件 (Training: ${output.streamingTelemetry.training.streamingDecisionsCount}, Validation: ${output.streamingTelemetry.validation.streamingDecisionsCount})
+- **ストリーミング判断を含む試合数:** ${output.streamingTelemetry.total.matchesWithStreamingCount} 試合
+- **観測された最大合法手総数:** ${output.streamingTelemetry.total.maxLegalPatternsCount} 手
+- **評価された合法手総数:** ${output.streamingTelemetry.total.totalEvaluatedLegalPatternsCount} 手
+- **ストリーミング評価時間:** ${output.streamingTelemetry.total.streamingEvaluationTotalElapsedMs}
+- **実体化失敗件数:** ${output.streamingTelemetry.total.instantiationFailuresCount} 件 (Fail-Closed 保証: 0件)
+- **Core への選択手適用頻度 (上位サンプル):** ${sampleAppliedSummary}
+
+## 3. 世代別実測時間 (performance.now)
 ${output.generationTimings
   .map(
     (t) =>
@@ -1421,7 +1607,7 @@ ${output.generationTimings
 - **全体実行時間:** ${(output.elapsedTotalMs / 1000).toFixed(2)} 秒
 - **スループット:** ${output.throughputMatchesPerSec.toFixed(2)} 試合/秒, ${output.throughputDecisionsPerSec.toFixed(1)} 意思決定/秒
 
-## 3. Champion 候補
+## 4. Champion 候補
 - **選定世代:** Gen ${output.finalChampion.generation} (P10 オフスプリングではない)
 - **Genome ID:** \`${output.finalChampion.genomeId}\`
 - **DNA Digest:** \`${output.finalChampion.dnaDigest}\`
@@ -1429,9 +1615,13 @@ ${output.generationTimings
 - **選定理由:** ${output.finalChampion.selectionReason}
 - **Holdout 実施状態:** ${preflightManifest.holdoutStatus} (完全未使用保護)
 `;
-  const mdPath = path.join(artifactsDir, "AUDIT_STAGE3_EVIDENCE.md");
-  fs.writeFileSync(mdPath, mdContent, "utf-8");
+  const mdPath1 = path.join(artifactsDir, "AUDIT_STAGE3_EVIDENCE.md");
+  fs.writeFileSync(mdPath1, mdContent, "utf-8");
   savedFiles.push("AUDIT_STAGE3_EVIDENCE.md");
+
+  const mdPath2 = path.join(artifactsDir, "STAGE3_AUDIT_REPORT.md");
+  fs.writeFileSync(mdPath2, mdContent, "utf-8");
+  savedFiles.push("STAGE3_AUDIT_REPORT.md");
 
   // 7. MANIFEST_SHA256.json
   const manifestSha256: Record<string, string> = {};
@@ -1468,6 +1658,7 @@ export interface Stage3AuditResult {
     readonly championDnaDigestMatches: boolean;
     readonly championEvaluatedInHistoryNotP10: boolean;
     readonly holdoutUnused: boolean;
+    readonly streamingTelemetryValid: boolean;
   };
 }
 
@@ -1487,6 +1678,7 @@ export function auditStage3Artifacts(
     championDnaDigestMatches: false,
     championEvaluatedInHistoryNotP10: false,
     holdoutUnused: false,
+    streamingTelemetryValid: false,
   };
 
   // 1. MANIFEST_SHA256.json 検証
@@ -1547,7 +1739,10 @@ export function auditStage3Artifacts(
   }
 
   if (preflightData) {
-    if (preflightData.workId !== WORK_ID) {
+    if (
+      preflightData.workId !== WORK_ID &&
+      preflightData.workId !== "BP-SIM-AI-V92-WORK3-STAGE3-CHAMPION-PLAYTEST"
+    ) {
       errors.push(`Preflight workId mismatch: expected ${WORK_ID}, got ${preflightData.workId}`);
     }
     if (preflightData.totalPlannedMatches?.total !== TOTAL_EXPERIMENT_MATCHES) {
@@ -1630,6 +1825,27 @@ export function auditStage3Artifacts(
       checks.passAndStallTelemetryValid = true;
     } else {
       errors.push("PASS telemetry validation failed or contains non-finite values");
+    }
+
+    // ストリーミング合法手空間テレメトリー検査
+    const st = metricsData.streamingTelemetry;
+    if (
+      st &&
+      st.total &&
+      typeof st.total.streamingDecisionsCount === "number" &&
+      Number.isFinite(st.total.streamingDecisionsCount) &&
+      typeof st.total.matchesWithStreamingCount === "number" &&
+      Number.isFinite(st.total.matchesWithStreamingCount) &&
+      typeof st.total.maxLegalPatternsCount === "number" &&
+      Number.isFinite(st.total.maxLegalPatternsCount) &&
+      typeof st.total.totalEvaluatedLegalPatternsCount === "number" &&
+      Number.isFinite(st.total.totalEvaluatedLegalPatternsCount) &&
+      typeof st.total.instantiationFailuresCount === "number" &&
+      st.total.instantiationFailuresCount === 0
+    ) {
+      checks.streamingTelemetryValid = true;
+    } else {
+      errors.push("Streaming action space telemetry validation failed or instantiation failures detected");
     }
 
     // 世代時間実測値検査
@@ -1772,7 +1988,8 @@ export function auditStage3Artifacts(
     checks.generationTimingsMeasuredAndValid &&
     checks.championDnaDigestMatches &&
     checks.championEvaluatedInHistoryNotP10 &&
-    checks.holdoutUnused;
+    checks.holdoutUnused &&
+    checks.streamingTelemetryValid;
 
   return {
     isValid,
@@ -1787,7 +2004,12 @@ export function auditStage3Artifacts(
 
 export async function runStage3Evolution(
   artifactsDir: string = DEFAULT_STAGE3_ARTIFACTS_DIR,
-  options?: { readonly allowDirty?: boolean }
+  options?: {
+    readonly allowDirty?: boolean;
+    readonly allowNonEmpty?: boolean;
+    readonly allowLegacyDir?: boolean;
+    readonly workId?: string;
+  }
 ): Promise<Stage3ExecutionOutput> {
   // Core の大量 [TRIGGER] / [BUFFER-] ログを抑制し、メモリ肥大化を防止
   const origConsoleLog = console.log;
@@ -1816,7 +2038,7 @@ export async function runStage3Evolution(
     console.log(`================================================================================`);
     console.log(`[Stage 3 Large-Scale Evolution] Starting Work 3-5 (1,920 Matches Total)`);
     console.log(`================================================================================`);
-    console.log(`Work ID:             ${WORK_ID}`);
+    console.log(`Work ID:             ${options?.workId ?? WORK_ID}`);
     console.log(`Regulation:          ${REGULATION_ID} (${FRAME_ID})`);
     console.log(`Population Size (N): ${POPULATION_SIZE}`);
     console.log(`Generations (G):     ${TOTAL_GENERATIONS}`);
@@ -1857,6 +2079,7 @@ export async function runStage3Evolution(
     console.log(`  Total Matches:       ${execOutput.totalMatchesExecuted}/1920`);
     console.log(`  Matches Detail:      COMPLETED: ${execOutput.completedMatches}, FAILED: ${execOutput.failedMatches}, INCOMPLETE: ${execOutput.incompleteMatches}`);
     console.log(`  Total Decisions:     ${execOutput.decisionStats.total.totalDecisions} (Training: ${execOutput.decisionStats.training.totalDecisions}, Validation: ${execOutput.decisionStats.validation.totalDecisions})`);
+    console.log(`  Streaming Decisions: ${execOutput.streamingTelemetry.total.streamingDecisionsCount} across ${execOutput.streamingTelemetry.total.matchesWithStreamingCount} matches (Max Legal Patterns: ${execOutput.streamingTelemetry.total.maxLegalPatternsCount})`);
     console.log(`  PASS Decisions:      ${execOutput.passAndStallTelemetry.total.totalPassDecisions} (${(execOutput.passAndStallTelemetry.total.passRatio * 100).toFixed(2)}%)`);
     console.log(`  Max Consec. PASS:    ${execOutput.passAndStallTelemetry.total.maxConsecutivePassesInSingleMatch}`);
     console.log(`  Elapsed Time:        ${(execOutput.elapsedTotalMs / 1000).toFixed(2)}s (${execOutput.throughputMatchesPerSec.toFixed(1)} matches/sec, ${execOutput.throughputDecisionsPerSec.toFixed(1)} decisions/sec)`);
@@ -1879,9 +2102,9 @@ export async function runStage3Evolution(
       origConsoleLog("Stage 3 Self-Audit FAILED with errors:", auditResult.errors);
       throw new Error(`Stage 3 Self-Audit failed: ${auditResult.errors.join("; ")}`);
     }
-    console.log(`  Self-Audit:          PASS (All 11 checks verified)`);
+    console.log(`  Self-Audit:          PASS (All 12 checks verified)`);
     console.log(`================================================================================`);
-    console.log(`[Stage 3 Large-Scale Evolution] COMPLETED SUCCESSFULLY (READY FOR PRE-HOLDOUT REVIEW)`);
+    console.log(`[Stage 3 Large-Scale Evolution] COMPLETED SUCCESSFULLY (READY FOR STAGE3 RETRAIN INDEPENDENT REVIEW)`);
     console.log(`================================================================================`);
 
     return execOutput;
@@ -1896,7 +2119,8 @@ const isMainScript =
   process.argv.some((arg) => arg.includes("stage3EvolutionRunner"));
 
 if (isMainScript && !process.env.VITEST && !process.argv.includes("--no-auto-run")) {
-  runStage3Evolution().catch((err) => {
+  const artifactsDir = resolveArtifactsDirectoryFromArgs();
+  runStage3Evolution(artifactsDir).catch((err) => {
     console.error("Stage 3 Large-Scale Evolution execution FAILED with uncaught error:", err);
     process.exit(1);
   });

@@ -18,6 +18,10 @@ import {
   HOLDOUT_SEEDS_COUNT,
   TOTAL_HOLDOUT_MATCHES,
   REQUIRED_STAGE3_AUDIT_FILES,
+  DEFAULT_STAGE3_ARTIFACTS_DIR,
+  LEGACY_STAGE3_ARTIFACTS_DIR,
+  validateArtifactsDirectory,
+  resolveArtifactsDirectoryFromArgs,
   generateStage3SeedPlan,
   deriveStage3TrainingSeedsByEngine,
   assertNoSeedCollisions,
@@ -211,6 +215,38 @@ function createMockValidStage3Fixture(fixtureDir: string) {
         exceptionOrIncompleteMatches: 0,
       },
     },
+    streamingTelemetry: {
+      total: {
+        streamingDecisionsCount: 1500,
+        matchesWithStreamingCount: 300,
+        maxLegalPatternsCount: 1024,
+        totalEvaluatedLegalPatternsCount: 500000,
+        streamingEvaluationTotalElapsedMs: "UNMEASURED",
+        instantiationFailuresCount: 0,
+        appliedStreamingIndicesSummary: { "0": 1000, "1": 500 },
+        uncompletedMatchesCount: 0,
+      },
+      training: {
+        streamingDecisionsCount: 1000,
+        matchesWithStreamingCount: 200,
+        maxLegalPatternsCount: 1024,
+        totalEvaluatedLegalPatternsCount: 350000,
+        streamingEvaluationTotalElapsedMs: "UNMEASURED",
+        instantiationFailuresCount: 0,
+        appliedStreamingIndicesSummary: { "0": 700, "1": 300 },
+        uncompletedMatchesCount: 0,
+      },
+      validation: {
+        streamingDecisionsCount: 500,
+        matchesWithStreamingCount: 100,
+        maxLegalPatternsCount: 512,
+        totalEvaluatedLegalPatternsCount: 150000,
+        streamingEvaluationTotalElapsedMs: "UNMEASURED",
+        instantiationFailuresCount: 0,
+        appliedStreamingIndicesSummary: { "0": 300, "1": 200 },
+        uncompletedMatchesCount: 0,
+      },
+    },
     elapsedTotalMs: 120000.0,
     generationTimings,
     generationTimingStatus: "MEASURED",
@@ -256,6 +292,7 @@ function createMockValidStage3Fixture(fixtureDir: string) {
     },
     decisionStats: metrics.decisionStats,
     passAndStallTelemetry: metrics.passAndStallTelemetry,
+    streamingTelemetry: metrics.streamingTelemetry,
     timings: {
       elapsedTotalMs: 120000.0,
       generationTimings,
@@ -271,8 +308,9 @@ function createMockValidStage3Fixture(fixtureDir: string) {
     "utf-8"
   );
 
-  // 6. AUDIT_STAGE3_EVIDENCE.md
+  // 6. AUDIT_STAGE3_EVIDENCE.md & STAGE3_AUDIT_REPORT.md
   fs.writeFileSync(path.join(fixtureDir, "AUDIT_STAGE3_EVIDENCE.md"), "# Mock Audit MD", "utf-8");
+  fs.writeFileSync(path.join(fixtureDir, "STAGE3_AUDIT_REPORT.md"), "# Mock Audit Report MD", "utf-8");
 
   // 7. MANIFEST_SHA256.json
   const manifestSha256: Record<string, string> = {};
@@ -532,6 +570,82 @@ describe("Stage 3 Large-Scale Evolution Runner (Work 3-5)", () => {
       const audit = auditStage3Artifacts(tempDir);
       expect(audit.isValid).toBe(false);
       expect(audit.checks.championEvaluatedInHistoryNotP10).toBe(false);
+    });
+
+    it("ストリーミング実体化失敗が存在する場合は FAIL (Fail-Closed)", () => {
+      createMockValidStage3Fixture(tempDir);
+      const metricsPath = path.join(tempDir, "campaign-stage3-evolution-metrics.json");
+      const metrics = JSON.parse(fs.readFileSync(metricsPath, "utf-8"));
+      metrics.streamingTelemetry.total.instantiationFailuresCount = 1;
+      fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2), "utf-8");
+
+      const manifestPath = path.join(tempDir, "MANIFEST_SHA256.json");
+      const manifestObj = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+      manifestObj["campaign-stage3-evolution-metrics.json"] = computeFileSha256(metricsPath);
+      fs.writeFileSync(manifestPath, JSON.stringify(manifestObj, null, 2), "utf-8");
+
+      const audit = auditStage3Artifacts(tempDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.checks.streamingTelemetryValid).toBe(false);
+    });
+
+    it("ストリーミングテレメトリーが欠落している場合は FAIL", () => {
+      createMockValidStage3Fixture(tempDir);
+      const metricsPath = path.join(tempDir, "campaign-stage3-evolution-metrics.json");
+      const metrics = JSON.parse(fs.readFileSync(metricsPath, "utf-8"));
+      delete metrics.streamingTelemetry;
+      fs.writeFileSync(metricsPath, JSON.stringify(metrics, null, 2), "utf-8");
+
+      const manifestPath = path.join(tempDir, "MANIFEST_SHA256.json");
+      const manifestObj = JSON.parse(fs.readFileSync(manifestPath, "utf-8"));
+      manifestObj["campaign-stage3-evolution-metrics.json"] = computeFileSha256(metricsPath);
+      fs.writeFileSync(manifestPath, JSON.stringify(manifestObj, null, 2), "utf-8");
+
+      const audit = auditStage3Artifacts(tempDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.checks.streamingTelemetryValid).toBe(false);
+    });
+  });
+
+  describe("5. 出力先ディレクトリ安全性・原本保護 (Fail-Closed)", () => {
+    it("旧原本ディレクトリを指定した場合は即座に例外をスローすること", () => {
+      expect(() => {
+        validateArtifactsDirectory(LEGACY_STAGE3_ARTIFACTS_DIR);
+      }).toThrow(/Legacy artifacts must be strictly protected/);
+    });
+
+    it("非空ディレクトリを指定した場合は即座に例外をスローすること", () => {
+      const nonEmptyDir = path.join(tempDir, "non-empty");
+      fs.mkdirSync(nonEmptyDir, { recursive: true });
+      fs.writeFileSync(path.join(nonEmptyDir, "existing.txt"), "data", "utf-8");
+
+      expect(() => {
+        validateArtifactsDirectory(nonEmptyDir);
+      }).toThrow(/Output directory must be newly created or empty/);
+    });
+
+    it("空ディレクトリまたは存在しない新規ディレクトリは通過すること", () => {
+      const emptyDir = path.join(tempDir, "empty");
+      fs.mkdirSync(emptyDir, { recursive: true });
+      expect(() => {
+        validateArtifactsDirectory(emptyDir);
+      }).not.toThrow();
+
+      const newDir = path.join(tempDir, "brand-new");
+      expect(() => {
+        validateArtifactsDirectory(newDir);
+      }).not.toThrow();
+    });
+
+    it("CLI引数および環境変数から出力先を解決できること", () => {
+      const customPath = path.resolve(process.cwd(), "custom-out");
+      expect(resolveArtifactsDirectoryFromArgs(["--output-dir", "custom-out"])).toBe(customPath);
+
+      process.env.STAGE3_ARTIFACTS_DIR = "env-out";
+      expect(resolveArtifactsDirectoryFromArgs([])).toBe(path.resolve(process.cwd(), "env-out"));
+      delete process.env.STAGE3_ARTIFACTS_DIR;
+
+      expect(resolveArtifactsDirectoryFromArgs([])).toBe(DEFAULT_STAGE3_ARTIFACTS_DIR);
     });
   });
 });
