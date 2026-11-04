@@ -7,6 +7,7 @@ import { CostResolver } from "../rules/CostResolver";
 import { ActionRequestValidator } from "../rules/ActionRequestValidator";
 import { ActionCostEvaluator } from "../rules/ActionCostEvaluator";
 import { resolveKeyCardSourceZone, getKeyCardsFromSource } from "../rules/keyCardUtils";
+import { PatternInstantiationError } from "../../domain/decision/PatternInstantiationError";
 
 /**
  * 選択された LegalPattern の検証、復元、および ActionRequest の構築を行うクラス。
@@ -30,10 +31,20 @@ export class PatternExecutor {
     // 1. レスポンスの検証
     this.validateResponse(request, response);
 
-    const pattern = (request.blockAssignmentStream && (!request.patterns || request.patterns.length === 0))
-      ? request.blockAssignmentStream.instantiatePatternAt(response.selectedPatternRef)?.pattern
+    const isStreaming = Boolean(
+      request.blockAssignmentStream && (!request.patterns || request.patterns.length === 0)
+    );
+    const pattern = isStreaming
+      ? request.blockAssignmentStream!.instantiatePatternAt(response.selectedPatternRef)?.pattern
       : request.patterns[response.selectedPatternRef];
     if (!pattern) {
+      if (isStreaming) {
+        throw new PatternInstantiationError(
+          response.selectedPatternRef,
+          request.blockAssignmentStream?.patternCount,
+          `選択されたストリーミングパターンの実体化に失敗しました: ${response.selectedPatternRef}`
+        );
+      }
       throw new Error(`選択されたパターンの取得に失敗しました: ${response.selectedPatternRef}`);
     }
     if (pattern.kind === "PASS") {

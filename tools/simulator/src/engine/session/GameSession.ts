@@ -19,6 +19,9 @@ import {
 import { GameSessionSnapshotCodec } from "./GameSessionSnapshotCodec";
 import { GraveTopCoordinator } from "../rules/GraveTopCoordinator";
 import { hasUnitLabel, isLegalBlockerCandidate } from "../rules/characterUtils";
+import { PatternInstantiationError } from "../../domain/decision/PatternInstantiationError";
+
+export { PatternInstantiationError };
 
 /**
  * 即時誘発アクションの効果実行完了後、墓地TOP選択待ちを表す汎用ステップID
@@ -83,6 +86,8 @@ export class GameSession {
   public resolvingContext?: any;
   public passTracker: PassTracker;
   public logRecorder: MatchLogRecorder;
+  /** ストリーミング合法手の実体化失敗回数（テレメトリー実測用） */
+  public instantiationFailuresCount = 0;
   private triggerCoordinator: TriggerProcessingCoordinator;
   private matchStartedRecorded = false;
   private lastRecordedTurnPlayer?: string;
@@ -772,7 +777,10 @@ export class GameSession {
         response.selectedPatternRef
       );
       if (!preInstantiated) {
-        throw new Error(
+        this.instantiationFailuresCount++;
+        throw new PatternInstantiationError(
+          response.selectedPatternRef,
+          this.pendingDecision.blockAssignmentStream!.patternCount,
           `ストリーミングインデックス ${response.selectedPatternRef} の事前実体化に失敗しました。`
         );
       }

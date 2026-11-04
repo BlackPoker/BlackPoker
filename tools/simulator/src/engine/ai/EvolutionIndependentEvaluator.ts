@@ -49,6 +49,7 @@ import { SimulationRunner } from "../simulation/SimulationRunner";
 import { BatchMatchContext, BatchSimulationOptions } from "../../domain/simulation/BatchSimulationTypes";
 import { SemanticSHA256 } from "./SemanticSHA256";
 import { deriveSeed } from "../random/DeterministicShuffle";
+import { PatternInstantiationError } from "../../domain/decision/PatternInstantiationError";
 
 // =============================================================================
 // 数理統計ユーティリティ (純粋 TypeScript 実装)
@@ -362,6 +363,13 @@ export class EvolutionIndependentEvaluator {
       const candDraw0 = simResult0.winner === "draw" || (!simResult0.winner && simResult0.completed);
       const candLost0 = simResult0.winner === "p2";
 
+      const instFailures0 =
+        typeof simResult0.instantiationFailures === "number"
+          ? simResult0.instantiationFailures
+          : typeof (session0 as any)?.instantiationFailuresCount === "number"
+          ? (session0 as any).instantiationFailuresCount
+          : "UNMEASURED";
+
       leg0Outcome = {
         legIndex: 0,
         candidateSeat: "p1",
@@ -377,8 +385,12 @@ export class EvolutionIndependentEvaluator {
         failed: false,
         incomplete: !simResult0.completed,
         finalStateHash: simResult0.finalStateHash,
+        instantiationFailures: instFailures0,
       };
     } catch (err: any) {
+      const isInstFailure =
+        err instanceof PatternInstantiationError || (err as any)?.name === "PatternInstantiationError";
+      const instFailures0 = isInstFailure ? 1 : 0;
       leg0Outcome = {
         legIndex: 0,
         candidateSeat: "p1",
@@ -392,6 +404,7 @@ export class EvolutionIndependentEvaluator {
         reason: `Leg 0 exception: ${err?.message ?? String(err)}`,
         failed: true,
         incomplete: false,
+        instantiationFailures: instFailures0,
       };
     }
 
@@ -429,6 +442,13 @@ export class EvolutionIndependentEvaluator {
       const candDraw1 = simResult1.winner === "draw" || (!simResult1.winner && simResult1.completed);
       const candLost1 = simResult1.winner === "p1";
 
+      const instFailures1 =
+        typeof simResult1.instantiationFailures === "number"
+          ? simResult1.instantiationFailures
+          : typeof (session1 as any)?.instantiationFailuresCount === "number"
+          ? (session1 as any).instantiationFailuresCount
+          : "UNMEASURED";
+
       leg1Outcome = {
         legIndex: 1,
         candidateSeat: "p2",
@@ -444,8 +464,12 @@ export class EvolutionIndependentEvaluator {
         failed: false,
         incomplete: !simResult1.completed,
         finalStateHash: simResult1.finalStateHash,
+        instantiationFailures: instFailures1,
       };
     } catch (err: any) {
+      const isInstFailure =
+        err instanceof PatternInstantiationError || (err as any)?.name === "PatternInstantiationError";
+      const instFailures1 = isInstFailure ? 1 : 0;
       leg1Outcome = {
         legIndex: 1,
         candidateSeat: "p2",
@@ -459,6 +483,7 @@ export class EvolutionIndependentEvaluator {
         reason: `Leg 1 exception: ${err?.message ?? String(err)}`,
         failed: true,
         incomplete: false,
+        instantiationFailures: instFailures1,
       };
     }
 

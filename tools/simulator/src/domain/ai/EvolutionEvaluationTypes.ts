@@ -140,6 +140,8 @@ export interface PairedLegOutcome {
   readonly failed: boolean;
   readonly incomplete: boolean;
   readonly finalStateHash?: string;
+  /** ストリーミング合法手実体化失敗の発生回数 (テレメトリー実測値、未計測時は UNMEASURED) */
+  readonly instantiationFailures?: number | "UNMEASURED";
 }
 
 export interface PairedMatchResult {

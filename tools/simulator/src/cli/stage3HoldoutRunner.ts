@@ -166,7 +166,7 @@ export interface HoldoutIndividualMatchOutcome {
   readonly failed: boolean;
   readonly incomplete: boolean;
   readonly reachedDecisionLimit: boolean;
-  readonly instantiationFailures: number;
+  readonly instantiationFailures: number | "UNMEASURED";
   readonly finalStateHash?: string;
 }
 
@@ -179,12 +179,13 @@ export interface HoldoutEvaluationOutput {
   readonly failedMatches: number;
   readonly incompleteMatches: number;
   readonly matchesReachingDecisionLimit: number;
-  readonly totalInstantiationFailures: number;
+  readonly totalInstantiationFailures: number | "UNMEASURED";
   readonly totalDecisions: number;
   readonly maxDecisionsInSingleMatch: number;
   readonly minDecisionsInSingleMatch: number;
   readonly executionElapsedMs: number;
   readonly certificationStatus: HoldoutCertificationStatus;
+  readonly effectiveImprovementStatus: "IMPROVEMENT_VERIFIED" | "IMPROVEMENT_UNVERIFIED" | "CONFIRMED_REGRESSION";
 }
 
 export interface SaveHoldoutArtifactsResult {
@@ -203,7 +204,7 @@ export interface AuditHoldoutResult {
   readonly failedMatches: number;
   readonly incompleteMatches: number;
   readonly matchesReachingDecisionLimit: number;
-  readonly totalInstantiationFailures: number;
+  readonly totalInstantiationFailures: number | "UNMEASURED";
   readonly candidateDigest: string;
   readonly candidateDigestMatches: boolean;
   readonly oldChampionDigest: string;
@@ -298,14 +299,45 @@ export function loadChampionDNA(params: {
     throw new Error(`[Fail-Closed] Failed to parse checkpoint JSON "${checkpointPath}": ${err?.message ?? String(err)}`);
   }
 
-  // 1. Checkpoint 内部チェックサム検証 (完全性保証)
-  if (verifyCheckpointChecksum && checkpoint.checksum && typeof checkpoint.checksum === "string") {
+  // 1. Checkpoint 内部チェックサム検証 (完全性保証 & 改ざん防止)
+  if (verifyCheckpointChecksum) {
+    if (!checkpoint.checksum || typeof checkpoint.checksum !== "string") {
+      throw new Error(
+        `[Fail-Closed] Checkpoint checksum missing or invalid type in "${checkpointPath}". Expected 64-character SHA-256 hex string.`
+      );
+    }
+    const checksumRegex = /^[a-f0-9]{64}$/i;
+    if (!checksumRegex.test(checkpoint.checksum)) {
+      throw new Error(
+        `[Fail-Closed] Checkpoint checksum format invalid in "${checkpointPath}": expected 64-char hex string, got "${checkpoint.checksum}"`
+      );
+    }
     const { checksum, ...stateWithoutChecksum } = checkpoint;
     const computedChecksum = EvolutionCampaignManager.computeCheckpointChecksum(stateWithoutChecksum);
     if (computedChecksum !== checksum) {
       throw new Error(
         `[Fail-Closed] Checkpoint checksum mismatch in "${checkpointPath}": expected "${computedChecksum}", found "${checksum}" (tampering or corruption detected)`
       );
+    }
+
+    // 原本 Manifest が同階層に存在する場合、Checkpoint ファイル自体の SHA-256 も照合 (実験由来の確認)
+    const manifestPath = path.join(path.dirname(checkpointPath), "MANIFEST_SHA256.json");
+    if (fs.existsSync(manifestPath)) {
+      try {
+        const manifestObj = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
+        const baseName = path.basename(checkpointPath);
+        const expectedFileSha = manifestObj[baseName];
+        if (expectedFileSha && typeof expectedFileSha === "string") {
+          const actualFileSha = computeFileSha256(checkpointPath);
+          if (actualFileSha !== expectedFileSha) {
+            throw new Error(
+              `[Fail-Closed] Manifest SHA-256 mismatch for "${checkpointPath}": expected "${expectedFileSha}", got "${actualFileSha}"`
+            );
+          }
+        }
+      } catch (err: any) {
+        if (err.message.startsWith("[Fail-Closed]")) throw err;
+      }
     }
   }
 
@@ -429,7 +461,7 @@ export function computeHoldoutCertification(params: {
   failedMatches: number;
   incompleteMatches: number;
   matchesReachingDecisionLimit: number;
-  totalInstantiationFailures: number;
+  totalInstantiationFailures: number | "UNMEASURED";
   totalMatches: number;
   expectedMatches: number;
 }): {
@@ -461,7 +493,7 @@ export function computeHoldoutCertification(params: {
   if (!isExecutionValid) {
     return {
       certificationStatus: "INVALID_EVIDENCE",
-      effectiveImprovementStatus: "CONFIRMED_REGRESSION",
+      effectiveImprovementStatus: "IMPROVEMENT_UNVERIFIED",
       baselineSuperior: false,
       referenceSuperiorityVerified: false,
       referenceNonInferiorityVerified: false,
@@ -682,7 +714,7 @@ export function executeHoldoutEvaluation(params: {
   let failedMatches = 0;
   let incompleteMatches = 0;
   let matchesReachingDecisionLimit = 0;
-  const totalInstantiationFailures = 0; // 実体化失敗は Core 側で検証・計測（本対戦では 0 件）
+  let totalInstantiationFailures: number | "UNMEASURED" = 0;
 
   for (const pair of evalResult.pairs) {
     const oppDef = opponents.find((o) => o.opponentId === pair.opponentId);
@@ -692,6 +724,15 @@ export function executeHoldoutEvaluation(params: {
     const reached1 = pair.leg1.totalDecisions >= maxDecisionsPerMatch;
     if (reached0) matchesReachingDecisionLimit++;
     if (reached1) matchesReachingDecisionLimit++;
+
+    const instFailures0 = pair.leg0.instantiationFailures ?? "UNMEASURED";
+    const instFailures1 = pair.leg1.instantiationFailures ?? "UNMEASURED";
+
+    if (instFailures0 === "UNMEASURED" || instFailures1 === "UNMEASURED") {
+      totalInstantiationFailures = "UNMEASURED";
+    } else if (typeof totalInstantiationFailures === "number") {
+      totalInstantiationFailures += instFailures0 + instFailures1;
+    }
 
     // Leg 0
     const leg0Outcome: HoldoutIndividualMatchOutcome = {
@@ -715,7 +756,7 @@ export function executeHoldoutEvaluation(params: {
       failed: pair.leg0.failed,
       incomplete: pair.leg0.incomplete,
       reachedDecisionLimit: reached0,
-      instantiationFailures: 0,
+      instantiationFailures: instFailures0,
       finalStateHash: pair.leg0.finalStateHash,
     };
     allIndividualOutcomes.push(leg0Outcome);
@@ -742,7 +783,7 @@ export function executeHoldoutEvaluation(params: {
       failed: pair.leg1.failed,
       incomplete: pair.leg1.incomplete,
       reachedDecisionLimit: reached1,
-      instantiationFailures: 0,
+      instantiationFailures: instFailures1,
       finalStateHash: pair.leg1.finalStateHash,
     };
     allIndividualOutcomes.push(leg1Outcome);
@@ -785,6 +826,7 @@ export function executeHoldoutEvaluation(params: {
     minDecisionsInSingleMatch: minDecisions,
     executionElapsedMs: elapsedMs,
     certificationStatus: cert.certificationStatus,
+    effectiveImprovementStatus: cert.effectiveImprovementStatus,
   };
 }
 
@@ -925,7 +967,7 @@ export function saveHoldoutArtifacts(
     totalInstantiationFailures: output.totalInstantiationFailures,
     certificationStatus: output.certificationStatus,
     evidenceStatus: output.evaluationResult.evidenceStatus,
-    improvementStatus: output.evaluationResult.improvementStatus,
+    improvementStatus: output.effectiveImprovementStatus,
     baselineSuperior: output.evaluationResult.baselineSuperior,
     championImproved: output.evaluationResult.championImproved,
     allTargetsMet: output.evaluationResult.allTargetsMet,
@@ -1053,7 +1095,7 @@ export function auditHoldoutArtifacts(
   let failedMatches = 0;
   let incompleteMatches = 0;
   let matchesReachingDecisionLimit = 0;
-  let totalInstantiationFailures = 0;
+  let totalInstantiationFailures: number | "UNMEASURED" = 0;
 
   // 期待される試合数・ペア数設定
   const expectedMatches = executionMode === "EXECUTE" ? 240 : executionMode === "SMOKE" ? 16 : -1;
@@ -1074,18 +1116,75 @@ export function auditHoldoutArtifacts(
     "holdout-stage3-gen5-champion",
   ];
   const observedSeeds = new Set<number>();
+  const observedMatchIds = new Set<string>();
   const observedPairsKey = new Set<string>();
   const opponentMatchCounts: Record<string, number> = {};
+  const pairMap = new Map<number, { leg0?: HoldoutIndividualMatchOutcome; leg1?: HoldoutIndividualMatchOutcome }>();
 
   for (const m of outcomes) {
+    // 状態矛盾チェック: completed=false かつ failed=false かつ incomplete=false は論理破綻として即拒否
+    if (!m.completed && !m.failed && !m.incomplete) {
+      errors.push(`Match ${m.matchId} has contradictory state: completed=false, failed=false, incomplete=false`);
+    }
+
     if (m.completed) completedMatches++;
     if (m.failed) failedMatches++;
     if (m.incomplete) incompleteMatches++;
     if (m.reachedDecisionLimit) matchesReachingDecisionLimit++;
-    totalInstantiationFailures += m.instantiationFailures ?? 0;
 
-    observedSeeds.add(m.matchSeed);
-    opponentMatchCounts[m.opponentId] = (opponentMatchCounts[m.opponentId] ?? 0) + 1;
+    // 実体化失敗テレメトリーの厳格監査
+    if (m.instantiationFailures === "UNMEASURED") {
+      errors.push(`Match ${m.matchId} has UNMEASURED instantiation failures`);
+      totalInstantiationFailures = "UNMEASURED";
+    } else if (typeof m.instantiationFailures === "number") {
+      if (m.instantiationFailures > 0) {
+        errors.push(`Match ${m.matchId} detected ${m.instantiationFailures} core instantiation failure(s)`);
+      }
+      if (typeof totalInstantiationFailures === "number") {
+        totalInstantiationFailures += m.instantiationFailures;
+      }
+    } else {
+      errors.push(`Match ${m.matchId} has invalid instantiationFailures type: ${typeof m.instantiationFailures}`);
+    }
+
+    // matchId 一意性
+    if (!m.matchId || typeof m.matchId !== "string") {
+      errors.push(`Match has missing or invalid matchId`);
+    } else if (observedMatchIds.has(m.matchId)) {
+      errors.push(`Duplicate matchId detected: "${m.matchId}"`);
+    } else {
+      observedMatchIds.add(m.matchId);
+    }
+
+    // 勝者と candidateWon, candidateLost, candidateDraw の整合性検証
+    const wonCount = (m.candidateWon ? 1 : 0) + (m.candidateLost ? 1 : 0) + (m.candidateDraw ? 1 : 0);
+    if (m.completed && wonCount !== 1) {
+      errors.push(
+        `Match ${m.matchId} has contradictory candidate outcome flags: won=${m.candidateWon}, lost=${m.candidateLost}, draw=${m.candidateDraw}`
+      );
+    }
+
+    if (m.candidateWon) {
+      const expectedWinner = m.candidateSeat;
+      if (m.winner !== expectedWinner) {
+        errors.push(
+          `Match ${m.matchId} winner mismatch: candidateWon=true but winner="${m.winner}" (expected "${expectedWinner}")`
+        );
+      }
+    } else if (m.candidateLost) {
+      const expectedWinner = m.opponentSeat;
+      if (m.winner !== expectedWinner) {
+        errors.push(
+          `Match ${m.matchId} winner mismatch: candidateLost=true but winner="${m.winner}" (expected "${expectedWinner}")`
+        );
+      }
+    } else if (m.candidateDraw) {
+      if (m.winner !== "draw" && m.winner !== undefined) {
+        errors.push(
+          `Match ${m.matchId} winner mismatch: candidateDraw=true but winner="${m.winner}" (expected "draw")`
+        );
+      }
+    }
 
     // 座席反転契約の検証
     if (m.legIndex === 0) {
@@ -1100,6 +1199,20 @@ export function auditHoldoutArtifacts(
       errors.push(`Match ${m.matchId} has invalid legIndex: ${m.legIndex}`);
     }
 
+    // ペアマップ登録と重複 Leg チェック
+    const p = pairMap.get(m.pairIndex) ?? {};
+    if (m.legIndex === 0) {
+      if (p.leg0) errors.push(`Duplicate Leg 0 for pairIndex ${m.pairIndex}`);
+      p.leg0 = m;
+    } else if (m.legIndex === 1) {
+      if (p.leg1) errors.push(`Duplicate Leg 1 for pairIndex ${m.pairIndex}`);
+      p.leg1 = m;
+    }
+    pairMap.set(m.pairIndex, p);
+
+    observedSeeds.add(m.matchSeed);
+    opponentMatchCounts[m.opponentId] = (opponentMatchCounts[m.opponentId] ?? 0) + 1;
+
     // ペア一意性キー
     const pairKey = `${m.opponentId}-seed-${m.matchSeed}-leg-${m.legIndex}`;
     if (observedPairsKey.has(pairKey)) {
@@ -1109,7 +1222,29 @@ export function auditHoldoutArtifacts(
     }
   }
 
-  // 4. 相手構成および Seed 構成の網羅性照合
+  // 4. ペア構造および対応一致の完全性検証
+  if (expectedPairs !== -1 && pairMap.size !== expectedPairs) {
+    errors.push(`Total unique pairIndex count mismatch: expected ${expectedPairs}, got ${pairMap.size}`);
+  }
+
+  for (const [pIdx, pair] of pairMap.entries()) {
+    if (!pair.leg0 || !pair.leg1) {
+      errors.push(`Pair ${pIdx} is incomplete: leg0=${!!pair.leg0}, leg1=${!!pair.leg1}`);
+      continue;
+    }
+    if (pair.leg0.matchSeed !== pair.leg1.matchSeed) {
+      errors.push(
+        `Pair ${pIdx} matchSeed mismatch: Leg 0 has ${pair.leg0.matchSeed}, Leg 1 has ${pair.leg1.matchSeed}`
+      );
+    }
+    if (pair.leg0.opponentId !== pair.leg1.opponentId) {
+      errors.push(
+        `Pair ${pIdx} opponentId mismatch: Leg 0 has ${pair.leg0.opponentId}, Leg 1 has ${pair.leg1.opponentId}`
+      );
+    }
+  }
+
+  // 相手構成および Seed 構成の網羅性照合
   if (executionMode === "EXECUTE") {
     // 4相手の試合数照合 (各60試合)
     for (const oppId of expectedOpponentIds) {
@@ -1129,19 +1264,43 @@ export function auditHoldoutArtifacts(
         errors.push(`Unexpected match seed observed: ${s} (only 95001..95030 permitted in EXECUTE mode)`);
       }
     }
+
+    if (completedMatches !== 240) errors.push(`completedMatches mismatch: expected 240, got ${completedMatches}`);
+    if (failedMatches > 0) errors.push(`Detected ${failedMatches} failed match(es)`);
+    if (incompleteMatches > 0) errors.push(`Detected ${incompleteMatches} incomplete match(es)`);
+    if (matchesReachingDecisionLimit > 0) {
+      errors.push(`Detected ${matchesReachingDecisionLimit} match(es) reaching decision limit`);
+    }
+    if (totalInstantiationFailures !== 0) {
+      errors.push(`Detected non-zero or unmeasured core instantiation failures: ${totalInstantiationFailures}`);
+    }
+  } else if (executionMode === "SMOKE") {
+    for (const oppId of expectedOpponentIds) {
+      const cnt = opponentMatchCounts[oppId] ?? 0;
+      if (cnt !== 4) {
+        errors.push(`Opponent "${oppId}" matches count mismatch for SMOKE: expected 4, got ${cnt}`);
+      }
+    }
+    const expectedSeedSet = new Set(expectedSeeds);
+    if (observedSeeds.size !== 2) {
+      errors.push(`Unique match seeds count mismatch for SMOKE: expected 2, got ${observedSeeds.size}`);
+    }
+    for (const s of observedSeeds) {
+      if (!expectedSeedSet.has(s)) {
+        errors.push(`Unexpected match seed observed in SMOKE: ${s}`);
+      }
+    }
+    if (failedMatches > 0) errors.push(`Detected ${failedMatches} failed match(es) in SMOKE`);
+    if (incompleteMatches > 0) errors.push(`Detected ${incompleteMatches} incomplete match(es) in SMOKE`);
+    if (matchesReachingDecisionLimit > 0) {
+      errors.push(`Detected ${matchesReachingDecisionLimit} match(es) reaching decision limit in SMOKE`);
+    }
+    if (totalInstantiationFailures !== 0) {
+      errors.push(`Detected non-zero or unmeasured core instantiation failures in SMOKE: ${totalInstantiationFailures}`);
+    }
   }
 
-  // 5. 健全性検証 (失敗・未完・上限到達・実体化失敗は 0 件必須)
-  if (failedMatches > 0) errors.push(`Detected ${failedMatches} failed match(es)`);
-  if (incompleteMatches > 0) errors.push(`Detected ${incompleteMatches} incomplete match(es)`);
-  if (matchesReachingDecisionLimit > 0) {
-    errors.push(`Detected ${matchesReachingDecisionLimit} match(es) reaching decision limit`);
-  }
-  if (totalInstantiationFailures > 0) {
-    errors.push(`Detected ${totalInstantiationFailures} core instantiation failure(s)`);
-  }
-
-  // 6. Evidence JSON の照合
+  // 5. Evidence JSON の照合
   const evidencePath = path.join(artifactsDir, "holdout-evaluation-evidence.json");
   const evidenceJson = JSON.parse(fs.readFileSync(evidencePath, "utf8"));
 
@@ -1173,57 +1332,186 @@ export function auditHoldoutArtifacts(
     );
   }
 
-  // 7. 統計サマリーの独立再計算と照合
-  if (evalSummary && evalSummary.opponents) {
-    for (const [oppId, oppSummary] of Object.entries(evalSummary.opponents as Record<string, any>)) {
-      // 当該対戦相手の全ペアスコアを個別 Outcomes から再構成
-      const pairMap = new Map<number, { leg0?: HoldoutIndividualMatchOutcome; leg1?: HoldoutIndividualMatchOutcome }>();
-      for (const m of outcomes) {
-        if (m.opponentId === oppId) {
-          const p = pairMap.get(m.pairIndex) ?? {};
-          if (m.legIndex === 0) p.leg0 = m;
-          if (m.legIndex === 1) p.leg1 = m;
-          pairMap.set(m.pairIndex, p);
-        }
-      }
+  // 6. 統計サマリーの個別 Outcome からの完全独立再計算と照合
+  const recalculatedOpponentSummaries: Record<string, any> = {};
 
-      const recalculatedScores: number[] = [];
-      for (const [pIdx, p] of pairMap.entries()) {
-        if (p.leg0 && p.leg1 && p.leg0.completed && p.leg1.completed) {
-          const s0 = p.leg0.candidateWon ? 1.0 : p.leg0.candidateDraw ? 0.5 : 0.0;
-          const s1 = p.leg1.candidateWon ? 1.0 : p.leg1.candidateDraw ? 0.5 : 0.0;
-          recalculatedScores.push((s0 + s1) / 2.0);
-        }
+  for (const oppId of expectedOpponentIds) {
+    const oppPairs: { pIdx: number; leg0: HoldoutIndividualMatchOutcome; leg1: HoldoutIndividualMatchOutcome }[] = [];
+    for (const [pIdx, pair] of pairMap.entries()) {
+      if (pair.leg0?.opponentId === oppId && pair.leg1?.opponentId === oppId) {
+        oppPairs.push({ pIdx, leg0: pair.leg0, leg1: pair.leg1 });
       }
+    }
 
-      if (recalculatedScores.length > 0) {
-        const n = recalculatedScores.length;
-        const mean = recalculatedScores.reduce((a, b) => a + b, 0) / n;
-        if (Math.abs(mean - oppSummary.meanPairScore) > 1e-9) {
-          errors.push(
-            `Statistical mismatch for "${oppId}": recalculated mean (${mean}) does not match saved mean (${oppSummary.meanPairScore})`
-          );
-        }
+    const pairScores: number[] = [];
+    let oppFailedPairs = 0;
+    let oppIncompletePairs = 0;
+
+    for (const p of oppPairs) {
+      if (p.leg0.failed || p.leg1.failed) {
+        oppFailedPairs++;
+      } else if (p.leg0.incomplete || p.leg1.incomplete || !p.leg0.completed || !p.leg1.completed) {
+        oppIncompletePairs++;
+      } else {
+        const s0 = p.leg0.candidateWon ? 1.0 : p.leg0.candidateDraw ? 0.5 : 0.0;
+        const s1 = p.leg1.candidateWon ? 1.0 : p.leg1.candidateDraw ? 0.5 : 0.0;
+        pairScores.push((s0 + s1) / 2.0);
       }
+    }
+
+    const targetWinRate =
+      oppId === "holdout-first-legal"
+        ? 0.85
+        : oppId === "holdout-seeded-random"
+        ? 0.75
+        : oppId === "holdout-zero-dna"
+        ? 0.70
+        : 0.50;
+
+    const stats = EvolutionIndependentEvaluator.computeStatistics({
+      pairScores,
+      failedCount: oppFailedPairs,
+      incompleteCount: oppIncompletePairs,
+      targetWinRate,
+      alpha: HOLDOUT_BONFERRONI_ALPHA,
+      minCompletedPairs: executionMode === "SMOKE" ? 2 : 5,
+    });
+
+    recalculatedOpponentSummaries[oppId] = stats;
+
+    // 保存されたサマリーとの照合
+    const savedOpp = evalSummary?.opponents?.[oppId];
+    if (!savedOpp) {
+      errors.push(`Opponent "${oppId}" missing in evaluationSummary.opponents`);
+      continue;
+    }
+
+    if (Math.abs(stats.meanPairScore - savedOpp.meanPairScore) > 1e-9) {
+      errors.push(
+        `Statistical mismatch for "${oppId}": recalculated mean (${stats.meanPairScore}) does not match saved mean (${savedOpp.meanPairScore})`
+      );
+    }
+    if (Math.abs(stats.sampleVariance - savedOpp.sampleVariance) > 1e-9) {
+      errors.push(
+        `Statistical mismatch for "${oppId}": recalculated variance (${stats.sampleVariance}) does not match saved variance (${savedOpp.sampleVariance})`
+      );
+    }
+    if (Math.abs(stats.standardError - savedOpp.standardError) > 1e-9) {
+      errors.push(
+        `Statistical mismatch for "${oppId}": recalculated standard error (${stats.standardError}) does not match saved standard error (${savedOpp.standardError})`
+      );
+    }
+    if (Math.abs(stats.confidenceInterval95.lower - (savedOpp.confidenceInterval95?.lower ?? 0)) > 1e-9) {
+      errors.push(
+        `Statistical mismatch for "${oppId}": recalculated CI95 lower (${stats.confidenceInterval95.lower}) does not match saved CI95 lower (${savedOpp.confidenceInterval95?.lower})`
+      );
+    }
+    if (Math.abs(stats.confidenceInterval95.upper - (savedOpp.confidenceInterval95?.upper ?? 0)) > 1e-9) {
+      errors.push(
+        `Statistical mismatch for "${oppId}": recalculated CI95 upper (${stats.confidenceInterval95.upper}) does not match saved CI95 upper (${savedOpp.confidenceInterval95?.upper})`
+      );
+    }
+    if (
+      Math.abs(stats.statisticalTest.oneSidedLowerBound - (savedOpp.statisticalTest?.oneSidedLowerBound ?? 0)) > 1e-9
+    ) {
+      errors.push(
+        `Statistical mismatch for "${oppId}": recalculated one-sided lower bound (${stats.statisticalTest.oneSidedLowerBound}) does not match saved (${savedOpp.statisticalTest?.oneSidedLowerBound})`
+      );
+    }
+    if (stats.targetMet !== savedOpp.targetMet) {
+      errors.push(`Target met mismatch for "${oppId}": recalculated ${stats.targetMet}, saved ${savedOpp.targetMet}`);
     }
   }
 
-  const allBaselineTargetsMet = evidenceJson.baselineSuperior === true;
-  const evidenceStatus = evidenceJson.evidenceStatus;
-  const improvementStatus = evidenceJson.improvementStatus;
-  const certificationStatus = evidenceJson.certificationStatus as HoldoutCertificationStatus;
+  // 7. 再計算結果からの判定再導出と認定値一貫性照合
+  const isExecutionValidRecalc =
+    completedMatches === (executionMode === "EXECUTE" ? 240 : 16) &&
+    failedMatches === 0 &&
+    incompleteMatches === 0 &&
+    matchesReachingDecisionLimit === 0 &&
+    totalInstantiationFailures === 0;
 
-  // 認定ステータスの妥当性判定
-  const refChampSummary = evalSummary?.opponents?.["holdout-stage3-gen5-champion"];
-  const referenceSuperiorityVerified =
-    !!refChampSummary &&
-    refChampSummary.meanPairScore > 0.50 &&
-    refChampSummary.statisticalTest.oneSidedLowerBound > 0.50;
+  const firstLegalStats = recalculatedOpponentSummaries["holdout-first-legal"];
+  const seededRandomStats = recalculatedOpponentSummaries["holdout-seeded-random"];
+  const zeroDnaStats = recalculatedOpponentSummaries["holdout-zero-dna"];
+  const refChampStats = recalculatedOpponentSummaries["holdout-stage3-gen5-champion"];
 
-  const referenceNonInferiorityVerified =
-    !!refChampSummary &&
-    refChampSummary.meanPairScore >= 0.50 &&
-    refChampSummary.statisticalTest.oneSidedLowerBound > 0.45;
+  const recalcBaselineSuperior =
+    isExecutionValidRecalc &&
+    !!firstLegalStats &&
+    firstLegalStats.meanPairScore >= 0.85 &&
+    firstLegalStats.statisticalTest.oneSidedLowerBound > 0.50 &&
+    !!seededRandomStats &&
+    seededRandomStats.meanPairScore >= 0.75 &&
+    seededRandomStats.statisticalTest.oneSidedLowerBound > 0.50 &&
+    !!zeroDnaStats &&
+    zeroDnaStats.meanPairScore >= 0.70 &&
+    zeroDnaStats.statisticalTest.oneSidedLowerBound > 0.50;
+
+  const recalcRefSuperiority =
+    isExecutionValidRecalc &&
+    !!refChampStats &&
+    refChampStats.meanPairScore > 0.50 &&
+    refChampStats.statisticalTest.oneSidedLowerBound > 0.50;
+
+  const recalcRefNonInferiority =
+    isExecutionValidRecalc &&
+    !!refChampStats &&
+    refChampStats.meanPairScore >= 0.50 &&
+    refChampStats.statisticalTest.oneSidedLowerBound > 0.45;
+
+  let recalculatedCertificationStatus: HoldoutCertificationStatus = "PERFORMANCE_UNVERIFIED";
+  let recalculatedImprovementStatus: "IMPROVEMENT_VERIFIED" | "IMPROVEMENT_UNVERIFIED" | "CONFIRMED_REGRESSION" =
+    "IMPROVEMENT_UNVERIFIED";
+
+  if (!isExecutionValidRecalc) {
+    recalculatedCertificationStatus = "INVALID_EVIDENCE";
+    recalculatedImprovementStatus = "IMPROVEMENT_UNVERIFIED"; // 不正・無効時は CONFIRMED_REGRESSION に自動変換しない
+  } else if (recalcBaselineSuperior && recalcRefSuperiority) {
+    recalculatedCertificationStatus = "SUPERIORITY_VERIFIED";
+    recalculatedImprovementStatus = "IMPROVEMENT_VERIFIED";
+  } else if (recalcBaselineSuperior && recalcRefNonInferiority) {
+    recalculatedCertificationStatus = "NON_INFERIORITY_VERIFIED";
+    recalculatedImprovementStatus = "IMPROVEMENT_UNVERIFIED"; // 非劣性のみ達成時は改善未証明
+  } else {
+    recalculatedCertificationStatus = "PERFORMANCE_UNVERIFIED";
+    recalculatedImprovementStatus = "IMPROVEMENT_UNVERIFIED";
+  }
+
+  // Evidence JSON の認定結果との完全照合 (そのまま信用せず独立再計算結果と突合)
+  if (evidenceJson.certificationStatus !== recalculatedCertificationStatus) {
+    errors.push(
+      `Certification status mismatch: recalculated "${recalculatedCertificationStatus}", but Evidence JSON contains "${evidenceJson.certificationStatus}"`
+    );
+  }
+  if (evidenceJson.improvementStatus !== recalculatedImprovementStatus) {
+    errors.push(
+      `Improvement status mismatch: recalculated "${recalculatedImprovementStatus}", but Evidence JSON contains "${evidenceJson.improvementStatus}"`
+    );
+  }
+  if (evidenceJson.baselineSuperior !== recalcBaselineSuperior) {
+    errors.push(
+      `Baseline superior mismatch: recalculated ${recalcBaselineSuperior}, but Evidence JSON contains ${evidenceJson.baselineSuperior}`
+    );
+  }
+
+  // 監査レポート (STAGE3_HOLDOUT_AUDIT_REPORT.md) との整合照合
+  const auditReportPath = path.join(artifactsDir, "STAGE3_HOLDOUT_AUDIT_REPORT.md");
+  if (fs.existsSync(auditReportPath)) {
+    const reportMd = fs.readFileSync(auditReportPath, "utf8");
+    if (!reportMd.includes(recalculatedCertificationStatus)) {
+      errors.push(
+        `STAGE3_HOLDOUT_AUDIT_REPORT.md does not contain expected certificationStatus "${recalculatedCertificationStatus}"`
+      );
+    }
+  }
+
+  const allBaselineTargetsMet = recalcBaselineSuperior;
+  const evidenceStatus = isExecutionValidRecalc ? "VALID" : "INVALID_EVIDENCE";
+  const improvementStatus = recalculatedImprovementStatus;
+  const certificationStatus = recalculatedCertificationStatus;
+  const referenceSuperiorityVerified = recalcRefSuperiority;
+  const referenceNonInferiorityVerified = recalcRefNonInferiority;
 
   return {
     isValid: errors.length === 0,

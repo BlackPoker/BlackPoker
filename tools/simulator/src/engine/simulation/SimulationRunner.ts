@@ -1,4 +1,4 @@
-import { GameSession } from "../session/GameSession";
+import { GameSession, PatternInstantiationError } from "../session/GameSession";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { DecisionPolicy, PolicyDescriptor } from "./DecisionPolicy";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
@@ -90,6 +90,8 @@ export interface SimulationResult {
   readonly matchLog?: CanonicalMatchLog;
   /** 受動的診断集計結果 (enableSemanticDiagnostics 有効時のみ付与) */
   readonly semanticDiagnostics?: SemanticDiagnosticResult;
+  /** ストリーミング合法手実体化失敗の発生回数 (テレメトリー実測値) */
+  readonly instantiationFailures?: number;
 }
 
 export interface SimulationOptions {
@@ -159,6 +161,7 @@ export class SimulationRunner {
           finalStateHash,
           matchLog: session.getMatchLog ? session.getMatchLog() : undefined,
           semanticDiagnostics: detector?.getResult(),
+          instantiationFailures: session.instantiationFailuresCount ?? 0,
         };
       }
 
@@ -331,6 +334,7 @@ export class SimulationRunner {
       finalStateHash,
       matchLog: session.getMatchLog ? session.getMatchLog() : undefined,
       semanticDiagnostics: detector?.getResult(),
+      instantiationFailures: session.instantiationFailuresCount ?? 0,
     };
   }
 }
