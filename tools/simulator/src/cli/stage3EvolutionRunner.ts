@@ -2120,7 +2120,7 @@ const isMainScript =
 
 if (isMainScript && !process.env.VITEST && !process.argv.includes("--no-auto-run")) {
   const artifactsDir = resolveArtifactsDirectoryFromArgs();
-  runStage3Evolution(artifactsDir).catch((err) => {
+  await runStage3Evolution(artifactsDir).catch((err) => {
     console.error("Stage 3 Large-Scale Evolution execution FAILED with uncaught error:", err);
     process.exit(1);
   });
