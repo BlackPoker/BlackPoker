@@ -285,8 +285,15 @@ export function loadChampionDNA(params: {
   expectedGenomeId: string;
   expectedDigest: string;
   verifyCheckpointChecksum?: boolean;
+  requireManifest?: boolean;
 }): DecisionDNA {
-  const { checkpointPath, expectedGenomeId, expectedDigest, verifyCheckpointChecksum = true } = params;
+  const {
+    checkpointPath,
+    expectedGenomeId,
+    expectedDigest,
+    verifyCheckpointChecksum = true,
+    requireManifest = false,
+  } = params;
   if (!fs.existsSync(checkpointPath)) {
     throw new Error(`[Fail-Closed] Checkpoint file not found: "${checkpointPath}"`);
   }
@@ -320,23 +327,46 @@ export function loadChampionDNA(params: {
       );
     }
 
-    // 原本 Manifest が同階層に存在する場合、Checkpoint ファイル自体の SHA-256 も照合 (実験由来の確認)
+    // 原本 Manifest の照合 (実験由来の確認)
+    // requireManifest=true の場合は不在時即エラー。存在する場合もパースエラー・SHA欠落・不一致を一切握りつぶさない。
     const manifestPath = path.join(path.dirname(checkpointPath), "MANIFEST_SHA256.json");
-    if (fs.existsSync(manifestPath)) {
+    const manifestExists = fs.existsSync(manifestPath);
+
+    if (requireManifest && !manifestExists) {
+      throw new Error(
+        `[Fail-Closed] Checkpoint manifest file not found: "${manifestPath}" (requireManifest is true)`
+      );
+    }
+
+    if (manifestExists) {
+      let manifestObj: any;
       try {
-        const manifestObj = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-        const baseName = path.basename(checkpointPath);
-        const expectedFileSha = manifestObj[baseName];
-        if (expectedFileSha && typeof expectedFileSha === "string") {
-          const actualFileSha = computeFileSha256(checkpointPath);
-          if (actualFileSha !== expectedFileSha) {
-            throw new Error(
-              `[Fail-Closed] Manifest SHA-256 mismatch for "${checkpointPath}": expected "${expectedFileSha}", got "${actualFileSha}"`
-            );
-          }
-        }
+        manifestObj = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
       } catch (err: any) {
-        if (err.message.startsWith("[Fail-Closed]")) throw err;
+        throw new Error(
+          `[Fail-Closed] Failed to parse checkpoint manifest JSON "${manifestPath}": ${err?.message ?? String(err)}`
+        );
+      }
+
+      if (!manifestObj || typeof manifestObj !== "object") {
+        throw new Error(
+          `[Fail-Closed] Invalid checkpoint manifest structure in "${manifestPath}"`
+        );
+      }
+
+      const baseName = path.basename(checkpointPath);
+      const expectedFileSha = manifestObj[baseName];
+      if (!expectedFileSha || typeof expectedFileSha !== "string") {
+        throw new Error(
+          `[Fail-Closed] Checkpoint SHA-256 entry for "${baseName}" missing or invalid in manifest "${manifestPath}"`
+        );
+      }
+
+      const actualFileSha = computeFileSha256(checkpointPath);
+      if (actualFileSha !== expectedFileSha) {
+        throw new Error(
+          `[Fail-Closed] Manifest SHA-256 mismatch for "${checkpointPath}": expected "${expectedFileSha}", got "${actualFileSha}"`
+        );
       }
     }
   }
@@ -1199,6 +1229,32 @@ export function auditHoldoutArtifacts(
       errors.push(`Match ${m.matchId} has invalid legIndex: ${m.legIndex}`);
     }
 
+    // pairIndex の型・整数・範囲および決定論的対応検証
+    if (typeof m.pairIndex !== "number" || !Number.isInteger(m.pairIndex)) {
+      errors.push(`Match ${m.matchId} has invalid pairIndex (not an integer): ${m.pairIndex}`);
+    } else if (expectedPairs !== -1 && (m.pairIndex < 0 || m.pairIndex >= expectedPairs)) {
+      errors.push(
+        `Match ${m.matchId} has out-of-range pairIndex ${m.pairIndex} for ${executionMode} mode (expected 0..${expectedPairs - 1})`
+      );
+    } else if (expectedPairs !== -1 && expectedSeeds.length > 0) {
+      const seedsPerOpp = expectedSeeds.length;
+      const expectedOppIdx = Math.floor(m.pairIndex / seedsPerOpp);
+      const expectedSeedIdx = m.pairIndex % seedsPerOpp;
+      const expectedOppIdForPair = expectedOpponentIds[expectedOppIdx];
+      const expectedSeedForPair = expectedSeeds[expectedSeedIdx];
+
+      if (m.opponentId !== expectedOppIdForPair) {
+        errors.push(
+          `Match ${m.matchId} pairIndex ${m.pairIndex} opponentId mismatch: expected "${expectedOppIdForPair}", got "${m.opponentId}"`
+        );
+      }
+      if (m.matchSeed !== expectedSeedForPair) {
+        errors.push(
+          `Match ${m.matchId} pairIndex ${m.pairIndex} matchSeed mismatch: expected ${expectedSeedForPair}, got ${m.matchSeed}`
+        );
+      }
+    }
+
     // ペアマップ登録と重複 Leg チェック
     const p = pairMap.get(m.pairIndex) ?? {};
     if (m.legIndex === 0) {
@@ -1223,14 +1279,28 @@ export function auditHoldoutArtifacts(
   }
 
   // 4. ペア構造および対応一致の完全性検証
-  if (expectedPairs !== -1 && pairMap.size !== expectedPairs) {
-    errors.push(`Total unique pairIndex count mismatch: expected ${expectedPairs}, got ${pairMap.size}`);
+  if (expectedPairs !== -1) {
+    if (pairMap.size !== expectedPairs) {
+      errors.push(`Total unique pairIndex count mismatch: expected ${expectedPairs}, got ${pairMap.size}`);
+    }
+    for (let expectedPIdx = 0; expectedPIdx < expectedPairs; expectedPIdx++) {
+      if (!pairMap.has(expectedPIdx)) {
+        errors.push(
+          `Missing pairIndex ${expectedPIdx} in individualOutcomes (all pairIndex 0..${expectedPairs - 1} must be present)`
+        );
+      }
+    }
   }
 
   for (const [pIdx, pair] of pairMap.entries()) {
     if (!pair.leg0 || !pair.leg1) {
       errors.push(`Pair ${pIdx} is incomplete: leg0=${!!pair.leg0}, leg1=${!!pair.leg1}`);
       continue;
+    }
+    if (pair.leg0.pairIndex !== pIdx || pair.leg1.pairIndex !== pIdx || pair.leg0.pairIndex !== pair.leg1.pairIndex) {
+      errors.push(
+        `Pair ${pIdx} pairIndex mismatch: Leg 0 has ${pair.leg0.pairIndex}, Leg 1 has ${pair.leg1.pairIndex}`
+      );
     }
     if (pair.leg0.matchSeed !== pair.leg1.matchSeed) {
       errors.push(
@@ -1379,47 +1449,130 @@ export function auditHoldoutArtifacts(
 
     recalculatedOpponentSummaries[oppId] = stats;
 
-    // 保存されたサマリーとの照合
-    const savedOpp = evalSummary?.opponents?.[oppId];
-    if (!savedOpp) {
-      errors.push(`Opponent "${oppId}" missing in evaluationSummary.opponents`);
-      continue;
-    }
+    // 統計値の型・有限性・範囲・存在検証ヘルパー
+    const validateFiniteMetric = (
+      sourceLabel: string,
+      metricName: string,
+      val: any,
+      min: number = 0.0,
+      max: number = 1.0
+    ): val is number => {
+      if (val === undefined || val === null) {
+        errors.push(`Statistical metric "${metricName}" is missing in ${sourceLabel} for "${oppId}"`);
+        return false;
+      }
+      if (typeof val !== "number" || !Number.isFinite(val)) {
+        errors.push(
+          `Statistical metric "${metricName}" in ${sourceLabel} for "${oppId}" is not a finite number: got ${val} (${typeof val})`
+        );
+        return false;
+      }
+      if (val < min - 1e-12 || val > max + 1e-12) {
+        errors.push(
+          `Statistical metric "${metricName}" in ${sourceLabel} for "${oppId}" out of range [${min}, ${max}]: got ${val}`
+        );
+        return false;
+      }
+      return true;
+    };
 
-    if (Math.abs(stats.meanPairScore - savedOpp.meanPairScore) > 1e-9) {
-      errors.push(
-        `Statistical mismatch for "${oppId}": recalculated mean (${stats.meanPairScore}) does not match saved mean (${savedOpp.meanPairScore})`
-      );
-    }
-    if (Math.abs(stats.sampleVariance - savedOpp.sampleVariance) > 1e-9) {
-      errors.push(
-        `Statistical mismatch for "${oppId}": recalculated variance (${stats.sampleVariance}) does not match saved variance (${savedOpp.sampleVariance})`
-      );
-    }
-    if (Math.abs(stats.standardError - savedOpp.standardError) > 1e-9) {
-      errors.push(
-        `Statistical mismatch for "${oppId}": recalculated standard error (${stats.standardError}) does not match saved standard error (${savedOpp.standardError})`
-      );
-    }
-    if (Math.abs(stats.confidenceInterval95.lower - (savedOpp.confidenceInterval95?.lower ?? 0)) > 1e-9) {
-      errors.push(
-        `Statistical mismatch for "${oppId}": recalculated CI95 lower (${stats.confidenceInterval95.lower}) does not match saved CI95 lower (${savedOpp.confidenceInterval95?.lower})`
-      );
-    }
-    if (Math.abs(stats.confidenceInterval95.upper - (savedOpp.confidenceInterval95?.upper ?? 0)) > 1e-9) {
-      errors.push(
-        `Statistical mismatch for "${oppId}": recalculated CI95 upper (${stats.confidenceInterval95.upper}) does not match saved CI95 upper (${savedOpp.confidenceInterval95?.upper})`
-      );
-    }
-    if (
-      Math.abs(stats.statisticalTest.oneSidedLowerBound - (savedOpp.statisticalTest?.oneSidedLowerBound ?? 0)) > 1e-9
-    ) {
-      errors.push(
-        `Statistical mismatch for "${oppId}": recalculated one-sided lower bound (${stats.statisticalTest.oneSidedLowerBound}) does not match saved (${savedOpp.statisticalTest?.oneSidedLowerBound})`
-      );
-    }
-    if (stats.targetMet !== savedOpp.targetMet) {
-      errors.push(`Target met mismatch for "${oppId}": recalculated ${stats.targetMet}, saved ${savedOpp.targetMet}`);
+    const verifyOpponentSummaryObject = (sourceLabel: string, savedOpp: any) => {
+      if (!savedOpp || typeof savedOpp !== "object") {
+        errors.push(`Opponent "${oppId}" missing or invalid in ${sourceLabel}`);
+        return;
+      }
+
+      const validMean = validateFiniteMetric(sourceLabel, "meanPairScore", savedOpp.meanPairScore, 0.0, 1.0);
+      const validVar = validateFiniteMetric(sourceLabel, "sampleVariance", savedOpp.sampleVariance, 0.0, 1.0);
+      const validSE = validateFiniteMetric(sourceLabel, "standardError", savedOpp.standardError, 0.0, 1.0);
+
+      let validCILower = false;
+      let validCIUpper = false;
+      if (!savedOpp.confidenceInterval95 || typeof savedOpp.confidenceInterval95 !== "object") {
+        errors.push(`Statistical object "confidenceInterval95" is missing or invalid in ${sourceLabel} for "${oppId}"`);
+      } else {
+        validCILower = validateFiniteMetric(
+          sourceLabel,
+          "confidenceInterval95.lower",
+          savedOpp.confidenceInterval95.lower,
+          0.0,
+          1.0
+        );
+        validCIUpper = validateFiniteMetric(
+          sourceLabel,
+          "confidenceInterval95.upper",
+          savedOpp.confidenceInterval95.upper,
+          0.0,
+          1.0
+        );
+        if (validCILower && validCIUpper && savedOpp.confidenceInterval95.lower > savedOpp.confidenceInterval95.upper + 1e-12) {
+          errors.push(
+            `Invalid confidenceInterval95 bounds in ${sourceLabel} for "${oppId}": lower (${savedOpp.confidenceInterval95.lower}) > upper (${savedOpp.confidenceInterval95.upper})`
+          );
+        }
+      }
+
+      let validLowerBound = false;
+      if (!savedOpp.statisticalTest || typeof savedOpp.statisticalTest !== "object") {
+        errors.push(`Statistical object "statisticalTest" is missing or invalid in ${sourceLabel} for "${oppId}"`);
+      } else {
+        validLowerBound = validateFiniteMetric(
+          sourceLabel,
+          "statisticalTest.oneSidedLowerBound",
+          savedOpp.statisticalTest.oneSidedLowerBound,
+          0.0,
+          1.0
+        );
+      }
+
+      if (typeof savedOpp.targetMet !== "boolean") {
+        errors.push(`Statistical flag "targetMet" is missing or not boolean in ${sourceLabel} for "${oppId}"`);
+      }
+
+      if (validMean && Math.abs(stats.meanPairScore - savedOpp.meanPairScore) > 1e-9) {
+        errors.push(
+          `Statistical mismatch in ${sourceLabel} for "${oppId}": recalculated mean (${stats.meanPairScore}) does not match saved mean (${savedOpp.meanPairScore})`
+        );
+      }
+      if (validVar && Math.abs(stats.sampleVariance - savedOpp.sampleVariance) > 1e-9) {
+        errors.push(
+          `Statistical mismatch in ${sourceLabel} for "${oppId}": recalculated variance (${stats.sampleVariance}) does not match saved variance (${savedOpp.sampleVariance})`
+        );
+      }
+      if (validSE && Math.abs(stats.standardError - savedOpp.standardError) > 1e-9) {
+        errors.push(
+          `Statistical mismatch in ${sourceLabel} for "${oppId}": recalculated standard error (${stats.standardError}) does not match saved standard error (${savedOpp.standardError})`
+        );
+      }
+      if (validCILower && Math.abs(stats.confidenceInterval95.lower - savedOpp.confidenceInterval95.lower) > 1e-9) {
+        errors.push(
+          `Statistical mismatch in ${sourceLabel} for "${oppId}": recalculated CI95 lower (${stats.confidenceInterval95.lower}) does not match saved CI95 lower (${savedOpp.confidenceInterval95.lower})`
+        );
+      }
+      if (validCIUpper && Math.abs(stats.confidenceInterval95.upper - savedOpp.confidenceInterval95.upper) > 1e-9) {
+        errors.push(
+          `Statistical mismatch in ${sourceLabel} for "${oppId}": recalculated CI95 upper (${stats.confidenceInterval95.upper}) does not match saved CI95 upper (${savedOpp.confidenceInterval95.upper})`
+        );
+      }
+      if (
+        validLowerBound &&
+        Math.abs(stats.statisticalTest.oneSidedLowerBound - savedOpp.statisticalTest.oneSidedLowerBound) > 1e-9
+      ) {
+        errors.push(
+          `Statistical mismatch in ${sourceLabel} for "${oppId}": recalculated one-sided lower bound (${stats.statisticalTest.oneSidedLowerBound}) does not match saved (${savedOpp.statisticalTest.oneSidedLowerBound})`
+        );
+      }
+      if (typeof savedOpp.targetMet === "boolean" && stats.targetMet !== savedOpp.targetMet) {
+        errors.push(
+          `Target met mismatch in ${sourceLabel} for "${oppId}": recalculated ${stats.targetMet}, saved ${savedOpp.targetMet}`
+        );
+      }
+    };
+
+    // 保存されたサマリー (evaluationSummary.opponents および evidenceJson.opponentsSummary) との照合
+    verifyOpponentSummaryObject("evaluationSummary.opponents", evalSummary?.opponents?.[oppId]);
+    if (evidenceJson?.opponentsSummary) {
+      verifyOpponentSummaryObject("evidenceJson.opponentsSummary", evidenceJson.opponentsSummary[oppId]);
     }
   }
 
@@ -1685,6 +1838,7 @@ export async function runStage3Holdout(options: {
     expectedGenomeId: CANDIDATE_CHAMPION_GENOME_ID,
     expectedDigest: CANDIDATE_CHAMPION_EXPECTED_DIGEST,
     verifyCheckpointChecksum: true,
+    requireManifest: true,
   });
 
   console.log(`Loading Old Champion DNA from "${oldChampPath}"...`);
@@ -1693,6 +1847,7 @@ export async function runStage3Holdout(options: {
     expectedGenomeId: OLD_CHAMPION_GENOME_ID,
     expectedDigest: OLD_CHAMPION_EXPECTED_DIGEST,
     verifyCheckpointChecksum: true,
+    requireManifest: true,
   });
 
   console.log(`Generating ZeroDNA...`);

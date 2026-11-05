@@ -6,6 +6,7 @@
  */
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import * as fs from "fs";
+import * as os from "os";
 import * as path from "path";
 import {
   CANDIDATE_CHAMPION_EXPECTED_DIGEST,
@@ -105,11 +106,18 @@ interface Mutations {
   evidence?: (e: any) => void;
 }
 
+let cachedBaseOutcomes: Outcome[] | null = null;
+let cachedBaseSummary: Record<string, any> | null = null;
+
 function writeFixture(dir: string, mut: Mutations = {}): string {
   fs.rmSync(dir, { recursive: true, force: true });
   fs.mkdirSync(dir, { recursive: true });
-  const outcomes = buildOutcomes();
-  const summary = buildSummary(outcomes); // 破壊前の正しい統計
+  if (!cachedBaseOutcomes || !cachedBaseSummary) {
+    cachedBaseOutcomes = buildOutcomes();
+    cachedBaseSummary = buildSummary(cachedBaseOutcomes);
+  }
+  const outcomes = structuredClone(cachedBaseOutcomes);
+  const summary = structuredClone(cachedBaseSummary); // 破壊前の正しい統計
   mut.outcomes?.(outcomes);
   mut.summary?.(summary);
 
@@ -157,8 +165,8 @@ function writeFixture(dir: string, mut: Mutations = {}): string {
   return dir;
 }
 
-describe("Holdout 合成 240 試合 Fixture 監査 (R2)", () => {
-  const tmp = path.resolve(".artifacts/test-stage3-holdout-synthetic-temp");
+describe("Holdout 合成 240 試合 Fixture 監査 (R2/R3)", () => {
+  const tmp = path.join(os.tmpdir(), "test-stage3-holdout-synthetic-temp");
   beforeAll(() => {
     fs.mkdirSync(tmp, { recursive: true });
   });
@@ -195,6 +203,100 @@ describe("Holdout 合成 240 試合 Fixture 監査 (R2)", () => {
       },
     });
     expect(r.isValid).toBe(false);
+  });
+
+  it("全試合の pairIndex を一律 +1 シフトした場合 (1〜120) は範囲外および 0 欠落で FAIL", () => {
+    const r = audit("pairidx-shift-plus1", {
+      outcomes: (o) => {
+        for (const m of o) {
+          m.pairIndex += 1;
+        }
+      },
+    });
+    expect(r.isValid).toBe(false);
+    expect(r.errors.some((e) => e.includes("out-of-range pairIndex 120") || e.includes("Missing pairIndex 0"))).toBe(
+      true
+    );
+  });
+
+  it("2 ペア間で pairIndex を入れ替えた場合 (0..119 が揃っていても Seed/Opponent 対応不一致) は FAIL", () => {
+    const r = audit("pairidx-swap", {
+      outcomes: (o) => {
+        for (const m of o) {
+          if (m.pairIndex === 0) {
+            m.pairIndex = 1;
+          } else if (m.pairIndex === 1) {
+            m.pairIndex = 0;
+          }
+        }
+      },
+    });
+    expect(r.isValid).toBe(false);
+    expect(r.errors.some((e) => e.includes("matchSeed mismatch"))).toBe(true);
+  });
+
+  it("異なる対戦相手間で pairIndex を入れ替えた場合 (pairIndex 0 と 30 のスワップ) は opponentId 対応不一致で FAIL", () => {
+    const r = audit("pairidx-opp-swap", {
+      outcomes: (o) => {
+        for (const m of o) {
+          if (m.pairIndex === 0) {
+            m.pairIndex = 30;
+          } else if (m.pairIndex === 30) {
+            m.pairIndex = 0;
+          }
+        }
+      },
+    });
+    expect(r.isValid).toBe(false);
+    expect(r.errors.some((e) => e.includes("opponentId mismatch"))).toBe(true);
+  });
+
+  it("保存サマリーから sampleVariance プロパティが削除された場合 (undefined との NaN 比較すり抜け防止) は FAIL", () => {
+    const r = audit("missing-variance", {
+      summary: (s) => {
+        delete s["holdout-stage3-gen5-champion"].sampleVariance;
+      },
+    });
+    expect(r.isValid).toBe(false);
+    expect(r.errors.some((e) => e.includes('Statistical metric "sampleVariance" is missing'))).toBe(true);
+  });
+
+  it("保存サマリーから standardError や confidenceInterval95.lower、oneSidedLowerBound が欠落・null の場合は FAIL", () => {
+    const r1 = audit("missing-se", {
+      summary: (s) => {
+        delete s["holdout-first-legal"].standardError;
+      },
+    });
+    expect(r1.isValid).toBe(false);
+    expect(r1.errors.some((e) => e.includes('Statistical metric "standardError" is missing'))).toBe(true);
+
+    const r2 = audit("null-ci-lower", {
+      summary: (s) => {
+        s["holdout-seeded-random"].confidenceInterval95.lower = null;
+      },
+    });
+    expect(r2.isValid).toBe(false);
+    expect(r2.errors.some((e) => e.includes('Statistical metric "confidenceInterval95.lower" is missing'))).toBe(true);
+
+    const r3 = audit("missing-lowerbound", {
+      summary: (s) => {
+        delete s["holdout-zero-dna"].statisticalTest.oneSidedLowerBound;
+      },
+    });
+    expect(r3.isValid).toBe(false);
+    expect(r3.errors.some((e) => e.includes('Statistical metric "statisticalTest.oneSidedLowerBound" is missing'))).toBe(
+      true
+    );
+  });
+
+  it("保存サマリーの統計値が範囲外 (1.5 や -0.1) または非数値型の場合は FAIL", () => {
+    const r = audit("out-of-range-mean", {
+      summary: (s) => {
+        s["holdout-first-legal"].meanPairScore = 1.5;
+      },
+    });
+    expect(r.isValid).toBe(false);
+    expect(r.errors.some((e) => e.includes("out of range"))).toBe(true);
   });
 
   it("勝者と Candidate 勝敗フラグが不一致なら FAIL", () => {
@@ -323,8 +425,11 @@ describe("Holdout 合成 240 試合 Fixture 監査 (R2)", () => {
       valid = { ...state, checksum: EvolutionCampaignManager.computeCheckpointChecksum(state) };
     });
 
-    const load = (obj: any) => {
-      fs.mkdirSync(path.dirname(cpPath), { recursive: true });
+    const load = (obj: any, requireManifest: boolean = false) => {
+      const cpDir = path.dirname(cpPath);
+      const manifestPath = path.join(cpDir, "MANIFEST_SHA256.json");
+      if (fs.existsSync(manifestPath)) fs.unlinkSync(manifestPath);
+      fs.mkdirSync(cpDir, { recursive: true });
       fs.writeFileSync(cpPath, JSON.stringify(obj));
       return () =>
         loadChampionDNA({
@@ -332,6 +437,7 @@ describe("Holdout 合成 240 試合 Fixture 監査 (R2)", () => {
           expectedGenomeId: "cp-g",
           expectedDigest: digest,
           verifyCheckpointChecksum: true,
+          requireManifest,
         });
     };
 
@@ -347,6 +453,34 @@ describe("Holdout 合成 240 試合 Fixture 監査 (R2)", () => {
     });
     it("checksum 不一致は例外", () => {
       expect(load({ ...valid, checksum: "0".repeat(64) })).toThrow(/checksum mismatch/);
+    });
+    it("requireManifest: true で MANIFEST_SHA256.json が存在しない場合は Fail-Closed 例外", () => {
+      expect(load(valid, true)).toThrow(/Checkpoint manifest file not found/);
+    });
+    it("MANIFEST_SHA256.json が構文エラー (壊れた JSON) の場合、握りつぶさずに Fail-Closed 例外", () => {
+      const fn = load(valid, false);
+      const manifestPath = path.join(path.dirname(cpPath), "MANIFEST_SHA256.json");
+      fs.writeFileSync(manifestPath, "{ invalid json !!!", "utf8");
+      expect(fn).toThrow(/Failed to parse checkpoint manifest JSON/);
+    });
+    it("MANIFEST_SHA256.json 内に Checkpoint ファイルの SHA エントリが欠落している場合、握りつぶさずに Fail-Closed 例外", () => {
+      const fn = load(valid, false);
+      const manifestPath = path.join(path.dirname(cpPath), "MANIFEST_SHA256.json");
+      fs.writeFileSync(manifestPath, JSON.stringify({ "other-file.json": "1234" }), "utf8");
+      expect(fn).toThrow(/Checkpoint SHA-256 entry for "cp.json" missing/);
+    });
+    it("MANIFEST_SHA256.json の SHA が不一致の場合、Fail-Closed 例外", () => {
+      const fn = load(valid, true);
+      const manifestPath = path.join(path.dirname(cpPath), "MANIFEST_SHA256.json");
+      fs.writeFileSync(manifestPath, JSON.stringify({ "cp.json": "f".repeat(64) }), "utf8");
+      expect(fn).toThrow(/Manifest SHA-256 mismatch/);
+    });
+    it("MANIFEST_SHA256.json の SHA が一致している場合、requireManifest: true で PASS", () => {
+      const fn = load(valid, true);
+      const manifestPath = path.join(path.dirname(cpPath), "MANIFEST_SHA256.json");
+      const actualSha = computeFileSha256(cpPath);
+      fs.writeFileSync(manifestPath, JSON.stringify({ "cp.json": actualSha }), "utf8");
+      expect(fn()).toBeDefined();
     });
   });
 });
