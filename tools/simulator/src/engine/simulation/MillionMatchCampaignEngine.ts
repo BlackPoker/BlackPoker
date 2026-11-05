@@ -92,6 +92,36 @@ export class UnauthorizedScaleExecutionError extends Error {
   }
 }
 
+export class ConcurrentCampaignLockError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "ConcurrentCampaignLockError";
+  }
+}
+
+export class FaultInjectionAbortError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "FaultInjectionAbortError";
+  }
+}
+
+export type CheckpointBoundaryFaultInjection =
+  | "STOP_DURING_CHUNK_WRITE_TMP"
+  | "STOP_AFTER_CHUNK_COMMIT_BEFORE_CHECKPOINT"
+  | "STOP_DURING_CHECKPOINT_TMP_WRITE";
+
+export function gcdBigInt(a: bigint, b: bigint): bigint {
+  let x = a < 0n ? -a : a;
+  let y = b < 0n ? -b : b;
+  while (y !== 0n) {
+    const t = y;
+    y = x % y;
+    x = t;
+  }
+  return x;
+}
+
 // =============================================================================
 // ハッシュユーティリティ
 // =============================================================================
@@ -117,9 +147,9 @@ export function derivePlayerSeed(matchSeed: number, seat: "p1" | "p2"): number {
 // =============================================================================
 
 export const QUALITY_AUDIT_SEED_RANGE_START = 100_000_001 as const;
-export const AI_EVOLUTION_SEED_RANGE_START = 200_000_001 as const;
+export const AI_EVOLUTION_SEED_RANGE_START = 350_000_001 as const; // Stage 3 FNV-1a 660 Training Seeds が 1件も存在しない完全クリーンな 10M 領域 [350000001..360000000]
 export const DEDICATED_SEED_RANGE_SIZE = 10_000_000 as const; // 1,000万ペア = 2,000万試合対応
-export const AFFINE_COPRIME_MULTIPLIER = 3_245_284_3 as const; // 素数: gcd(32452843, 10000000) = 1
+export const AFFINE_COPRIME_MULTIPLIER = 32_452_843 as const; // 素数: gcd(32452843, 10000000) = 1
 
 export const RESERVED_FUTURE_HOLDOUT_RANGE = {
   start: 900_000_001,
@@ -159,6 +189,16 @@ export class MillionMatchSeedAllocator {
       (purpose === "QUALITY_AUDIT" ? QUALITY_AUDIT_SEED_RANGE_START : AI_EVOLUTION_SEED_RANGE_START);
     const rangeSize = DEDICATED_SEED_RANGE_SIZE;
     const rangeEnd = rangeStart + rangeSize - 1;
+
+    // 数学的全単射条件 gcd(A, M) = 1 のランタイム検証
+    if (!Number.isInteger(AFFINE_COPRIME_MULTIPLIER) || AFFINE_COPRIME_MULTIPLIER <= 0) {
+      throw new Error(`[Fail-Closed] AFFINE_COPRIME_MULTIPLIER must be a positive integer`);
+    }
+    if (gcdBigInt(BigInt(AFFINE_COPRIME_MULTIPLIER), BigInt(rangeSize)) !== 1n) {
+      throw new Error(
+        `[Fail-Closed] AFFINE_COPRIME_MULTIPLIER (${AFFINE_COPRIME_MULTIPLIER}) is not coprime to rangeSize (${rangeSize})`
+      );
+    }
 
     // 過去実験の保護対象 Seed 群および Holdout Seed 群を構築
     this.forbiddenSeedSet = MillionMatchSeedAllocator.buildProtectedHistoricalSeedSet(additionalForbiddenSeeds);
@@ -939,6 +979,13 @@ export interface MillionMatchCampaignOptions {
   readonly isGitClean: boolean;
   /** テスト用: 指定ペア数完了時点で意図的に中断させるフック */
   readonly stopAfterPairsForTest?: number;
+  /** テスト用: チャンク保存・Checkpoint 更新境界での障害注入フック */
+  readonly faultInjectionForTest?: {
+    readonly targetChunkIndex: number;
+    readonly faultType: CheckpointBoundaryFaultInjection;
+  };
+  /** テスト用: 非決定的な並列完了順序を検証するため Leg 0 / Leg 1 の完了順序を反転させるフラグ */
+  readonly invertConcurrencyCompletionOrderForTest?: boolean;
   /** 10万・100万試合ロック解除用トークン (本Workでは未承認のため使用禁止) */
   readonly scaleApprovalToken?: string;
 }
@@ -1035,6 +1082,8 @@ export class MillionMatchCampaignEngine {
       gitCommitSha,
       isGitClean,
       stopAfterPairsForTest,
+      faultInjectionForTest,
+      invertConcurrencyCompletionOrderForTest,
       scaleApprovalToken,
     } = options;
 
@@ -1089,8 +1138,52 @@ export class MillionMatchCampaignEngine {
     const anomaliesDir = path.join(outputDir, "anomalies");
     const samplesDir = path.join(outputDir, "samples");
     const checkpointPath = path.join(outputDir, "checkpoint.json");
+    const lockFilePath = path.join(outputDir, "campaign.lock");
 
-    const mem0 = process.memoryUsage();
+    // 同一キャンペーン (outputDir) の二重起動防止ロック取得 (PLAN_ONLY 以外)
+    let lockFd: number | undefined;
+    if (executionMode !== "PLAN_ONLY") {
+      fs.mkdirSync(outputDir, { recursive: true });
+      try {
+        lockFd = fs.openSync(lockFilePath, "wx");
+        fs.writeSync(
+          lockFd,
+          JSON.stringify({
+            campaignId,
+            pid: process.pid,
+            acquiredAt: new Date().toISOString(),
+          }),
+          0,
+          "utf8"
+        );
+      } catch (err: any) {
+        if (err?.code === "EEXIST") {
+          throw new ConcurrentCampaignLockError(
+            `[Fail-Closed] Campaign "${campaignId}" is already running or locked at "${lockFilePath}". Concurrent duplicate execution is prohibited.`
+          );
+        }
+        throw err;
+      }
+    }
+
+    const releaseCampaignLock = () => {
+      if (lockFd !== undefined) {
+        try {
+          fs.closeSync(lockFd);
+        } catch {}
+        lockFd = undefined;
+      }
+      if (executionMode !== "PLAN_ONLY") {
+        try {
+          if (fs.existsSync(lockFilePath)) {
+            fs.rmSync(lockFilePath, { force: true });
+          }
+        } catch {}
+      }
+    };
+
+    try {
+      const mem0 = process.memoryUsage();
     let agg: StreamingAggregatorState;
     let completedChunks: ChunkManifestEntry[] = [];
     let startPairIndex = 0;
@@ -1188,6 +1281,9 @@ export class MillionMatchCampaignEngine {
             fs.rmSync(path.join(chunksDir, f), { force: true });
           }
         }
+      }
+      if (fs.existsSync(`${checkpointPath}.tmp`)) {
+        fs.rmSync(`${checkpointPath}.tmp`, { force: true });
       }
 
       agg = structuredClone(loadedCkpt.aggregatorState);
@@ -1306,8 +1402,30 @@ export class MillionMatchCampaignEngine {
         const tmpChunkPath = `${chunkFullPath}.tmp`;
 
         const content = currentChunkLines.join("\n") + "\n";
+
+        if (
+          faultInjectionForTest &&
+          faultInjectionForTest.targetChunkIndex === chunkIndex &&
+          faultInjectionForTest.faultType === "STOP_DURING_CHUNK_WRITE_TMP"
+        ) {
+          fs.writeFileSync(tmpChunkPath, content.slice(0, Math.max(10, Math.floor(content.length / 2))), "utf8");
+          throw new FaultInjectionAbortError(
+            `[Fault Injection] Simulated crash during chunk tmp write at chunkIndex=${chunkIndex}`
+          );
+        }
+
         fs.writeFileSync(tmpChunkPath, content, "utf8");
         fs.renameSync(tmpChunkPath, chunkFullPath);
+
+        if (
+          faultInjectionForTest &&
+          faultInjectionForTest.targetChunkIndex === chunkIndex &&
+          faultInjectionForTest.faultType === "STOP_AFTER_CHUNK_COMMIT_BEFORE_CHECKPOINT"
+        ) {
+          throw new FaultInjectionAbortError(
+            `[Fault Injection] Simulated crash after chunk commit before checkpoint update at chunkIndex=${chunkIndex}`
+          );
+        }
 
         const stat = fs.statSync(chunkFullPath);
         const sha256 = computeFileSha256(chunkFullPath);
@@ -1393,7 +1511,24 @@ export class MillionMatchCampaignEngine {
       });
 
       const tmpCkptPath = `${checkpointPath}.tmp`;
-      fs.writeFileSync(tmpCkptPath, JSON.stringify(ckptState, null, 2), "utf8");
+      const serializedCkpt = JSON.stringify(ckptState, null, 2);
+      const justCommittedChunkIndex = completedChunks.length - 1;
+      if (
+        faultInjectionForTest &&
+        faultInjectionForTest.targetChunkIndex === justCommittedChunkIndex &&
+        faultInjectionForTest.faultType === "STOP_DURING_CHECKPOINT_TMP_WRITE"
+      ) {
+        fs.writeFileSync(
+          tmpCkptPath,
+          serializedCkpt.slice(0, Math.max(10, Math.floor(serializedCkpt.length / 2))),
+          "utf8"
+        );
+        throw new FaultInjectionAbortError(
+          `[Fault Injection] Simulated crash during checkpoint.json.tmp write at chunkIndex=${justCommittedChunkIndex}`
+        );
+      }
+
+      fs.writeFileSync(tmpCkptPath, serializedCkpt, "utf8");
       fs.renameSync(tmpCkptPath, checkpointPath);
 
       if (!process.env.VITEST) {
@@ -1477,19 +1612,35 @@ export class MillionMatchCampaignEngine {
         };
 
         // maxConcurrency = 2 の場合はペアの Leg 0 と Leg 1 を Promise.all で並行評価
-        let res0: SingleMatchExecutionResult;
-        let res1: SingleMatchExecutionResult;
+        let batchResults: SingleMatchExecutionResult[];
         if (maxConcurrency === 2) {
-          [res0, res1] = await Promise.all([
-            Promise.resolve().then(() => executeSingleInstrumentedMatch(leg0Input)),
-            Promise.resolve().then(() => executeSingleInstrumentedMatch(leg1Input)),
-          ]);
+          if (invertConcurrencyCompletionOrderForTest) {
+            // 非決定的な完了順序 (Leg 1 が先に完了して返るケース) をシミュレート
+            const [r1, r0] = await Promise.all([
+              Promise.resolve().then(() => executeSingleInstrumentedMatch(leg1Input)),
+              new Promise<SingleMatchExecutionResult>((resolve) =>
+                setImmediate(() => resolve(executeSingleInstrumentedMatch(leg0Input)))
+              ),
+            ]);
+            batchResults = [r1, r0];
+          } else {
+            batchResults = await Promise.all([
+              Promise.resolve().then(() => executeSingleInstrumentedMatch(leg0Input)),
+              Promise.resolve().then(() => executeSingleInstrumentedMatch(leg1Input)),
+            ]);
+          }
         } else {
-          res0 = executeSingleInstrumentedMatch(leg0Input);
-          res1 = executeSingleInstrumentedMatch(leg1Input);
+          batchResults = [
+            executeSingleInstrumentedMatch(leg0Input),
+            executeSingleInstrumentedMatch(leg1Input),
+          ];
         }
 
-        // 逐次集計更新 (Leg 0, Leg 1 の順で決定論的に更新)
+        // 並列完了順序にかかわらず、必ず matchIndex 昇順 (Leg 0 -> Leg 1) に正規化ソートして確定・集計
+        batchResults.sort((a, b) => a.outcomeRecord.matchIndex - b.outcomeRecord.matchIndex);
+        const [res0, res1] = batchResults;
+
+        // 逐次集計更新 (matchIndex 昇順で決定論的に更新)
         for (const res of [res0, res1]) {
           MillionMatchCampaignEngine.updateAggregatorWithSingleMatch(agg, res, anomaliesDir);
           currentChunkLines.push(JSON.stringify(res.outcomeRecord));
@@ -1528,6 +1679,9 @@ export class MillionMatchCampaignEngine {
       checkpointState: finalCheckpoint,
       haltedEarlyForTest,
     };
+    } finally {
+      releaseCampaignLock();
+    }
   }
 
   /**

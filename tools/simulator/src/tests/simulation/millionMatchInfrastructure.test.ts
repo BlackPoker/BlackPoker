@@ -32,6 +32,13 @@ import {
   CheckpointIntegrityError,
   ChunkIntegrityError,
   UnauthorizedScaleExecutionError,
+  ConcurrentCampaignLockError,
+  FaultInjectionAbortError,
+  DEDICATED_SEED_RANGE_SIZE,
+  AFFINE_COPRIME_MULTIPLIER,
+  QUALITY_AUDIT_SEED_RANGE_START,
+  AI_EVOLUTION_SEED_RANGE_START,
+  gcdBigInt,
   executeSingleInstrumentedMatch,
   derivePlayerSeed,
 } from "../../engine/simulation/MillionMatchCampaignEngine";
@@ -120,7 +127,13 @@ describe("BlackPoker Work 4-1 — Million Match Simulation Infrastructure", () =
       );
     });
 
-    it("50万ペア (100万試合) 規模の Seed 空間で数学的全単射により衝突ゼロであり、QUALITY_AUDIT と AI_EVOLUTION の空間が完全分離されていること", () => {
+    it("50万ペア (100万試合) 全件で Seed が一切重複せず、gcd(A, M) = 1・許容範囲・QUALITY_AUDIT / AI_EVOLUTION 空間非重複・既存 Stage 3 全履歴との非衝突を満たすこと", () => {
+      // 1. Modulus M = 10_000_000 と ストライド A = 32_452_843 の数学的整合確認
+      expect(DEDICATED_SEED_RANGE_SIZE).toBe(10_000_000);
+      expect(AFFINE_COPRIME_MULTIPLIER).toBe(32_452_843);
+      expect(Number.isSafeInteger(AFFINE_COPRIME_MULTIPLIER)).toBe(true);
+      expect(gcdBigInt(BigInt(AFFINE_COPRIME_MULTIPLIER), BigInt(DEDICATED_SEED_RANGE_SIZE))).toBe(1n);
+
       const allocAudit = new MillionMatchSeedAllocator({
         purpose: "QUALITY_AUDIT",
         campaignSeed: 20261106,
@@ -132,21 +145,44 @@ describe("BlackPoker Work 4-1 — Million Match Simulation Infrastructure", () =
         totalPlannedPairs: 500_000,
       });
 
+      // 2. QUALITY_AUDIT (100,000,001..110,000,000) と AI_EVOLUTION (350,000,001..360,000,000) の完全分離確認
+      expect(allocAudit.spec.rangeStart).toBe(QUALITY_AUDIT_SEED_RANGE_START);
+      expect(allocAudit.spec.rangeEnd).toBe(110_000_000);
+      expect(allocEvo.spec.rangeStart).toBe(AI_EVOLUTION_SEED_RANGE_START);
+      expect(allocEvo.spec.rangeEnd).toBe(360_000_000);
       expect(allocAudit.spec.rangeEnd).toBeLessThan(allocEvo.spec.rangeStart);
 
-      // 先頭 10,000 ペアの Seed が完全に一意かつ順序非依存で取得できることを確認
-      const sampleCount = 10_000;
-      const seen = new Set<number>();
-      for (let p = 0; p < sampleCount; p++) {
-        const s = allocAudit.getPairSeed(p);
-        expect(seen.has(s)).toBe(false);
-        seen.add(s);
+      // 3. 既存 Stage 3 の Training (660ペア), Validation (94001..94015), Holdout (95001..95030), Smoke (99951..99952) 全履歴をロードし、
+      //    生成される 500,000 ペアの Seed (QUALITY_AUDIT および AI_EVOLUTION 双方) と 1 件も衝突しないことを完全検証
+      const historicalSet = MillionMatchSeedAllocator.buildProtectedHistoricalSeedSet();
+      expect(historicalSet.size).toBeGreaterThanOrEqual(660 + 15 + 30 + 2);
+
+      // 4. 500,000 ペア (1,000,000 試合) 全件を実際に生成し、ビットマップ (Uint8Array) で重複ゼロ・許容範囲内・Stage 3 全履歴との非衝突を完全検証
+      const bitmapAudit = new Uint8Array(DEDICATED_SEED_RANGE_SIZE);
+      const bitmapEvo = new Uint8Array(DEDICATED_SEED_RANGE_SIZE);
+      for (let p = 0; p < 500_000; p++) {
+        const sAudit = allocAudit.getPairSeed(p);
+        expect(sAudit).toBeGreaterThanOrEqual(allocAudit.spec.rangeStart);
+        expect(sAudit).toBeLessThanOrEqual(allocAudit.spec.rangeEnd);
+        expect(historicalSet.has(sAudit)).toBe(false);
+        const offsetAudit = sAudit - allocAudit.spec.rangeStart;
+        expect(bitmapAudit[offsetAudit]).toBe(0);
+        bitmapAudit[offsetAudit] = 1;
+
+        const sEvo = allocEvo.getPairSeed(p);
+        expect(sEvo).toBeGreaterThanOrEqual(allocEvo.spec.rangeStart);
+        expect(sEvo).toBeLessThanOrEqual(allocEvo.spec.rangeEnd);
+        expect(historicalSet.has(sEvo)).toBe(false);
+        const offsetEvo = sEvo - allocEvo.spec.rangeStart;
+        expect(bitmapEvo[offsetEvo]).toBe(0);
+        bitmapEvo[offsetEvo] = 1;
       }
-      // 逆順アクセスでも同一の Seed が返ること (並列処理順序非依存)
-      expect(allocAudit.getPairSeed(9999)).toBe(
-        allocAudit.getPairSeed(9999)
-      );
-      expect(allocAudit.getPairSeed(0)).not.toBe(allocEvo.getPairSeed(0));
+
+      // 5. 並列実行順序が変わっても Seed と 試合 ID が一切変わらないこと
+      const indices = [0, 1, 250_000, 499_999];
+      const forwardSeeds = indices.map((p) => allocAudit.getPairSeed(p));
+      const reverseSeeds = [...indices].reverse().map((p) => allocAudit.getPairSeed(p)).reverse();
+      expect(reverseSeeds).toEqual(forwardSeeds);
     });
   });
 
@@ -377,6 +413,161 @@ describe("BlackPoker Work 4-1 — Million Match Simulation Infrastructure", () =
       const auditTampered = auditMillionMatchArtifacts(tamperChunkDir);
       expect(auditTampered.isValid).toBe(false);
       expect(auditTampered.errors.some((e) => e.includes("SHA-256 mismatch"))).toBe(true);
+    });
+
+    it("チャンク保存と Checkpoint 更新の3つの境界障害 (途中停止) から Resume した際、試合の欠落・重複なく連続実行と Logical Result Digest が完全一致すること", async () => {
+      const unbrokenDir = path.join(tmpRoot, "run-unbroken-12");
+      const expectedDigest = JSON.parse(
+        fs.readFileSync(path.join(unbrokenDir, "campaign-evidence.json"), "utf8")
+      ).logicalResultDigest;
+      const expectedChunkHashes = JSON.parse(
+        fs.readFileSync(path.join(unbrokenDir, "campaign-evidence.json"), "utf8")
+      ).chunksManifest.map((c: any) => c.sha256);
+
+      const faultScenarios = [
+        "STOP_DURING_CHUNK_WRITE_TMP",
+        "STOP_AFTER_CHUNK_COMMIT_BEFORE_CHECKPOINT",
+        "STOP_DURING_CHECKPOINT_TMP_WRITE",
+      ] as const;
+
+      for (const faultType of faultScenarios) {
+        const faultDir = path.join(tmpRoot, `fault-${faultType}`);
+        const sessionFactory = createFastDeterministicSessionFactory();
+
+        // chunkIndex = 1 (2番目のチャンク: 5〜8試合目) の保存境界で障害注入
+        await expect(
+          MillionMatchCampaignEngine.runCampaign({
+            workId: WORK4_WORK_ID,
+            campaignId: "test-resume-parity",
+            purpose: "QUALITY_AUDIT",
+            stage: "CUSTOM_PILOT",
+            executionMode: "PILOT",
+            totalPlannedMatches: 12,
+            campaignSeed: 777001,
+            regulationId: "standard-pack",
+            frameId: "pack",
+            rulePackageVersion: "1.0.0",
+            featureSchemaVersion: 6,
+            rulePackage,
+            matchups: testMatchups,
+            policyResolver: testPolicyResolver,
+            sessionFactory,
+            outputDir: faultDir,
+            maxDecisionsPerMatch: 80,
+            chunkSizeMatches: 4,
+            maxConcurrency: 2,
+            gitCommitSha: "498fae6a4f65cd04c5c5fe28b6fd0aa9169bdef4",
+            isGitClean: true,
+            faultInjectionForTest: {
+              targetChunkIndex: 1,
+              faultType,
+            },
+          })
+        ).rejects.toThrow(FaultInjectionAbortError);
+
+        // 障害停止後、直前の確定済み Checkpoint (chunkIndex = 0: 4試合完了時点) から Resume して完走
+        const recovered = await MillionMatchCampaignEngine.runCampaign({
+          workId: WORK4_WORK_ID,
+          campaignId: "test-resume-parity",
+          purpose: "QUALITY_AUDIT",
+          stage: "CUSTOM_PILOT",
+          executionMode: "RESUME",
+          totalPlannedMatches: 12,
+          campaignSeed: 777001,
+          regulationId: "standard-pack",
+          frameId: "pack",
+          rulePackageVersion: "1.0.0",
+          featureSchemaVersion: 6,
+          rulePackage,
+          matchups: testMatchups,
+          policyResolver: testPolicyResolver,
+          sessionFactory,
+          outputDir: faultDir,
+          maxDecisionsPerMatch: 80,
+          chunkSizeMatches: 4,
+          maxConcurrency: 2,
+          gitCommitSha: "498fae6a4f65cd04c5c5fe28b6fd0aa9169bdef4",
+          isGitClean: true,
+        });
+        saveMillionMatchArtifacts(recovered.evidence, faultDir);
+
+        expect(recovered.evidence.logicalResultDigest).toBe(expectedDigest);
+        expect(recovered.evidence.chunksManifest.map((c) => c.sha256)).toEqual(expectedChunkHashes);
+
+        const audit = auditMillionMatchArtifacts(faultDir);
+        expect(audit.isValid).toBe(true);
+        expect(audit.verifiedMatchesCount).toBe(12);
+      }
+    });
+
+    it("同一キャンペーンの二重起動を ConcurrentCampaignLockError で即座に拒否し、非決定的な並列完了順序でも Logical Result Digest が完全一致すること", async () => {
+      const lockDir = path.join(tmpRoot, "duplicate-lock-test");
+      fs.mkdirSync(lockDir, { recursive: true });
+      fs.writeFileSync(
+        path.join(lockDir, "campaign.lock"),
+        JSON.stringify({ campaignId: "dup-test", pid: process.pid }),
+        "utf8"
+      );
+
+      await expect(
+        MillionMatchCampaignEngine.runCampaign({
+          workId: WORK4_WORK_ID,
+          campaignId: "dup-test",
+          purpose: "QUALITY_AUDIT",
+          stage: "CUSTOM_PILOT",
+          executionMode: "PILOT",
+          totalPlannedMatches: 4,
+          campaignSeed: 777001,
+          regulationId: "standard-pack",
+          frameId: "pack",
+          rulePackageVersion: "1.0.0",
+          featureSchemaVersion: 6,
+          rulePackage,
+          matchups: testMatchups,
+          policyResolver: testPolicyResolver,
+          sessionFactory: createFastDeterministicSessionFactory(),
+          outputDir: lockDir,
+          maxDecisionsPerMatch: 80,
+          chunkSizeMatches: 4,
+          maxConcurrency: 2,
+          gitCommitSha: "498fae6a4f65cd04c5c5fe28b6fd0aa9169bdef4",
+          isGitClean: true,
+        })
+      ).rejects.toThrow(ConcurrentCampaignLockError);
+
+      // 非決定的な並列完了順序 (Leg 1 が Leg 0 より先に完了して返るケース) でも matchIndex 順ソートにより Digest が完全一致すること
+      const unbrokenDir = path.join(tmpRoot, "run-unbroken-12");
+      const expectedDigest = JSON.parse(
+        fs.readFileSync(path.join(unbrokenDir, "campaign-evidence.json"), "utf8")
+      ).logicalResultDigest;
+
+      const invertedOrderDir = path.join(tmpRoot, "inverted-concurrency-order-12");
+      const invertedRes = await MillionMatchCampaignEngine.runCampaign({
+        workId: WORK4_WORK_ID,
+        campaignId: "test-resume-parity",
+        purpose: "QUALITY_AUDIT",
+        stage: "CUSTOM_PILOT",
+        executionMode: "PILOT",
+        totalPlannedMatches: 12,
+        campaignSeed: 777001,
+        regulationId: "standard-pack",
+        frameId: "pack",
+        rulePackageVersion: "1.0.0",
+        featureSchemaVersion: 6,
+        rulePackage,
+        matchups: testMatchups,
+        policyResolver: testPolicyResolver,
+        sessionFactory: createFastDeterministicSessionFactory(),
+        outputDir: invertedOrderDir,
+        maxDecisionsPerMatch: 80,
+        chunkSizeMatches: 4,
+        maxConcurrency: 2,
+        gitCommitSha: "498fae6a4f65cd04c5c5fe28b6fd0aa9169bdef4",
+        isGitClean: true,
+        invertConcurrencyCompletionOrderForTest: true,
+      });
+
+      expect(invertedRes.evidence.logicalResultDigest).toBe(expectedDigest);
     });
   });
 
