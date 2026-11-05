@@ -30,6 +30,7 @@ import {
   EvolutionCampaignTelemetry,
   RuleCoverageReport,
   StreamingAggregatorState,
+  ExecutionSessionHistoryEntry,
   MillionMatchCheckpointState,
   MillionMatchCampaignEvidence,
   MatchupQualityStats,
@@ -977,6 +978,12 @@ export interface MillionMatchCampaignOptions {
   readonly maxConcurrency?: 1 | 2;
   readonly gitCommitSha: string;
   readonly isGitClean: boolean;
+  /** 1回の実行セッションで追加実行する最大試合数 (偶数・座席反転ペア境界で正常停止) */
+  readonly sessionMatchLimit?: number;
+  /** 1回の実行セッションの実行時間上限 (分・座席反転ペア境界で Checkpoint 保存して正常停止) */
+  readonly timeBudgetMinutes?: number;
+  /** テスト用: 擬似経過時間を返し timeBudgetMinutes 到達を決定論的に検証するためのクロック関数 */
+  readonly customWallClockElapsedMsForTest?: (pairsExecutedInThisSession: number) => number;
   /** テスト用: 指定ペア数完了時点で意図的に中断させるフック */
   readonly stopAfterPairsForTest?: number;
   /** テスト用: チャンク保存・Checkpoint 更新境界での障害注入フック */
@@ -1031,19 +1038,25 @@ export class MillionMatchCampaignEngine {
 
   /**
    * 10万試合・100万試合の未承認実行を阻止する安全ロック機構 (Section 2, 4, 10)
+   *
+   * ただし、時間分割・試合数分割実行 (--session-match-limit 等) において、
+   * キャンペーン累計実行試合数 (newlyExecutedCap = completedMatchesSoFar + sessionMatchLimit) が
+   * 10,000 試合以下に制限されている場合は、100万試合キャンペーン計画の一部としての分割実行・検証を許可する。
    */
   public static assertScaleExecutionAuthorized(
     totalPlannedMatches: number,
     executionMode: LargeScaleExecutionMode,
-    scaleApprovalToken?: string
+    scaleApprovalToken?: string,
+    effectiveCumulativeCapInThisSession?: number
   ): void {
     if (executionMode === "PLAN_ONLY") {
       return;
     }
-    if (totalPlannedMatches > 10_000) {
+    const checkCount = effectiveCumulativeCapInThisSession ?? totalPlannedMatches;
+    if (checkCount > 10_000) {
       if (scaleApprovalToken !== "APPROVED_STAGE_C_OR_D_INDEPENDENT_REVIEW_TOKEN") {
         throw new UnauthorizedScaleExecutionError(
-          `[Fail-Closed Safety Gate] Execution of ${totalPlannedMatches} matches (> 10,000 limit for Work 4-1 Stage A/B) is LOCKED until formal Stage C/D independent review approval.`
+          `[Fail-Closed Safety Gate] Execution reaching ${checkCount} matches (> 10,000 limit for Work 4-1 Stage A/B) is LOCKED until formal Stage C/D independent review approval.`
         );
       }
     }
@@ -1081,6 +1094,9 @@ export class MillionMatchCampaignEngine {
       maxConcurrency = 2,
       gitCommitSha,
       isGitClean,
+      sessionMatchLimit,
+      timeBudgetMinutes,
+      customWallClockElapsedMsForTest,
       stopAfterPairsForTest,
       faultInjectionForTest,
       invertConcurrencyCompletionOrderForTest,
@@ -1098,6 +1114,20 @@ export class MillionMatchCampaignEngine {
         `[Fail-Closed] chunkSizeMatches must be a positive even integer, got ${chunkSizeMatches}`
       );
     }
+    if (sessionMatchLimit !== undefined) {
+      if (!Number.isInteger(sessionMatchLimit) || sessionMatchLimit <= 0 || sessionMatchLimit % 2 !== 0) {
+        throw new Error(
+          `[Fail-Closed] sessionMatchLimit must be a positive even integer (seat-swapped pairs), got ${sessionMatchLimit}`
+        );
+      }
+    }
+    if (timeBudgetMinutes !== undefined) {
+      if (typeof timeBudgetMinutes !== "number" || !Number.isFinite(timeBudgetMinutes) || timeBudgetMinutes <= 0) {
+        throw new Error(
+          `[Fail-Closed] timeBudgetMinutes must be a positive number, got ${timeBudgetMinutes}`
+        );
+      }
+    }
     if (maxConcurrency !== 1 && maxConcurrency !== 2) {
       throw new Error(
         `[Fail-Closed] maxConcurrency must be 1 or 2 in initial Million-Match infrastructure, got ${maxConcurrency}`
@@ -1106,13 +1136,6 @@ export class MillionMatchCampaignEngine {
     if (matchups.length === 0) {
       throw new Error(`[Fail-Closed] At least one matchup pairing must be defined`);
     }
-
-    // 2. 10万・100万試合ロック機構の検証
-    MillionMatchCampaignEngine.assertScaleExecutionAuthorized(
-      totalPlannedMatches,
-      executionMode,
-      scaleApprovalToken
-    );
 
     const totalPlannedPairs = totalPlannedMatches / 2;
     const seedAllocator = new MillionMatchSeedAllocator({
@@ -1206,6 +1229,9 @@ export class MillionMatchCampaignEngine {
     let peakRssBytes = mem0.rss;
     let peakHeapUsedBytes = mem0.heapUsed;
     let gcInvocationsCount = 0;
+    let sessionHistory: ExecutionSessionHistoryEntry[] = [];
+    let preloadedPartialChunkLines: string[] = [];
+    let preloadedPartialChunkStartMatchIndex: number | undefined;
 
     // 3. RESUME モード時の Checkpoint 読み込みと厳格整合性検証
     if (executionMode === "RESUME") {
@@ -1303,6 +1329,20 @@ export class MillionMatchCampaignEngine {
       peakRssBytes = loadedCkpt.peakRssBytes;
       peakHeapUsedBytes = loadedCkpt.peakHeapUsedBytes;
       gcInvocationsCount = loadedCkpt.gcInvocationsCount;
+      sessionHistory = loadedCkpt.sessionHistory ? [...loadedCkpt.sessionHistory] : [];
+
+      // 前回セッションが時間上限等でチャンク途中のペア境界で一時停止していた場合、
+      // 末尾の部分チャンクを引き継いで追記することで、連続実行時と同一のチャンク分割・SHA-256を保証する
+      if (completedChunks.length > 0 && startPairIndex < totalPlannedPairs) {
+        const lastChunk = completedChunks[completedChunks.length - 1];
+        if (lastChunk.matchCount < chunkSizeMatches) {
+          const lastChunkFullPath = path.join(outputDir, lastChunk.relativePath);
+          const rawText = fs.readFileSync(lastChunkFullPath, "utf8").trim();
+          preloadedPartialChunkLines = rawText ? rawText.split("\n") : [];
+          preloadedPartialChunkStartMatchIndex = lastChunk.startMatchIndex;
+          completedChunks.pop();
+        }
+      }
     } else {
       agg = createInitialAggregatorState(matchups);
       memorySamples.push({
@@ -1312,6 +1352,18 @@ export class MillionMatchCampaignEngine {
         heapTotalBytes: mem0.heapTotal,
       });
     }
+
+    // 2. スケールロック安全ゲート (10,000試合超の累計実行を防止)
+    const effectiveCumulativeCapInThisSession =
+      sessionMatchLimit !== undefined
+        ? Math.min(totalPlannedMatches, startPairIndex * 2 + sessionMatchLimit)
+        : totalPlannedMatches;
+    MillionMatchCampaignEngine.assertScaleExecutionAuthorized(
+      totalPlannedMatches,
+      executionMode,
+      scaleApprovalToken,
+      effectiveCumulativeCapInThisSession
+    );
 
     if (executionMode !== "PLAN_ONLY") {
       fs.mkdirSync(chunksDir, { recursive: true });
@@ -1383,9 +1435,11 @@ export class MillionMatchCampaignEngine {
 
     const runStartWall = performance.now();
     const runStartCpu = process.cpuUsage();
-    let currentChunkLines: string[] = [];
-    let currentChunkStartMatchIndex = startPairIndex * 2;
+    let currentChunkLines: string[] = [...preloadedPartialChunkLines];
+    let currentChunkStartMatchIndex = preloadedPartialChunkStartMatchIndex ?? startPairIndex * 2;
     let haltedEarlyForTest = false;
+    let pairsExecutedInSession = 0;
+    const sessionStartMatchIndex = startPairIndex * 2;
 
     // 既出 MatchId ウィンドウチェック (直近チャンク内の重複 ID 防止)
     const recentMatchIds = new Set<string>();
@@ -1508,6 +1562,7 @@ export class MillionMatchCampaignEngine {
         peakRssBytes,
         peakHeapUsedBytes,
         gcInvocationsCount,
+        sessionHistory,
       });
 
       const tmpCkptPath = `${checkpointPath}.tmp`;
@@ -1541,11 +1596,14 @@ export class MillionMatchCampaignEngine {
     };
 
     const pairsPerChunk = chunkSizeMatches / 2;
+    let lastCompletedPairsInLoop = startPairIndex;
+    let sessionStopReason: ExecutionSessionHistoryEntry["stopReason"] | undefined;
 
     try {
       for (let pairIndex = startPairIndex; pairIndex < totalPlannedPairs; pairIndex++) {
         if (stopAfterPairsForTest !== undefined && pairIndex >= stopAfterPairsForTest) {
           haltedEarlyForTest = true;
+          sessionStopReason = "TEST_EARLY_STOP";
           break;
         }
 
@@ -1650,14 +1708,48 @@ export class MillionMatchCampaignEngine {
         MillionMatchCampaignEngine.updateAggregatorWithPair(agg, matchup.matchupId, res0.outcomeRecord, res1.outcomeRecord);
 
         const completedPairsNow = pairIndex + 1;
-        if (completedPairsNow % pairsPerChunk === 0 || completedPairsNow === totalPlannedPairs) {
+        lastCompletedPairsInLoop = completedPairsNow;
+        pairsExecutedInSession++;
+
+        // 座席反転ペア完了後の安全な境界で、セッション終了条件 (完走 / 試合数上限 / 時間予算上限) を判定
+        const sessionElapsedNowMs = customWallClockElapsedMsForTest
+          ? customWallClockElapsedMsForTest(pairsExecutedInSession)
+          : performance.now() - runStartWall;
+
+        if (completedPairsNow === totalPlannedPairs) {
+          sessionStopReason = "CAMPAIGN_COMPLETED";
+        } else if (sessionMatchLimit !== undefined && pairsExecutedInSession * 2 >= sessionMatchLimit) {
+          sessionStopReason = "SESSION_MATCH_LIMIT_REACHED";
+        } else if (timeBudgetMinutes !== undefined && sessionElapsedNowMs >= timeBudgetMinutes * 60 * 1000) {
+          sessionStopReason = "TIME_BUDGET_REACHED";
+        }
+
+        if (sessionStopReason !== undefined) {
+          sessionHistory.push({
+            sessionIndex: sessionHistory.length,
+            executionMode,
+            startMatchIndex: sessionStartMatchIndex,
+            endMatchIndex: completedPairsNow * 2 - 1,
+            addedMatchesCount: pairsExecutedInSession * 2,
+            cumulativeMatchesCount: completedPairsNow * 2,
+            sessionElapsedMs: sessionElapsedNowMs,
+            stopReason: sessionStopReason,
+            sessionMatchLimit,
+            timeBudgetMinutes,
+            timestamp: new Date().toISOString(),
+          });
+          flushChunkAndSaveCheckpoint(completedPairsNow);
+          break;
+        }
+
+        if (currentChunkLines.length >= chunkSizeMatches) {
           flushChunkAndSaveCheckpoint(completedPairsNow);
         }
       }
 
-      // 端数チャンクが残っている場合 (テスト中断時など) もフラッシュが必要な場合のみ処理
+      // 端数チャンクが残っている場合 (テスト中断時以外) はフラッシュして Checkpoint 保存
       if (!haltedEarlyForTest && currentChunkLines.length > 0) {
-        flushChunkAndSaveCheckpoint(totalPlannedPairs);
+        flushChunkAndSaveCheckpoint(lastCompletedPairsInLoop);
       }
     } finally {
       console.log = origConsoleLog;
@@ -2118,6 +2210,8 @@ export class MillionMatchCampaignEngine {
 
     const campaignStatus: MillionMatchCampaignEvidence["campaignStatus"] = hasCriticalError
       ? "FAILED_CRITICAL_ANOMALY"
+      : executedMatches < options.totalPlannedMatches
+      ? "PARTIAL_SESSION_PAUSED"
       : agg.suspectedStallMatchesCount > 0 || agg.incompleteMatches > 0
       ? "COMPLETED_WITH_STALL_SUSPICIONS"
       : "COMPLETED_CLEAN";
@@ -2160,6 +2254,7 @@ export class MillionMatchCampaignEngine {
       maxConcurrency: options.maxConcurrency ?? 2,
       logicalResultDigest,
       campaignStatus,
+      sessionHistory: checkpointState.sessionHistory,
       seedSpace: checkpointState.seedSpace,
       matchups: options.matchups,
       chunksManifest: checkpointState.completedChunks,

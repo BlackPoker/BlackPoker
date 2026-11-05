@@ -476,6 +476,23 @@ export interface StreamingAggregatorState {
 }
 
 /**
+ * 分割実行セッション履歴エントリ (時間分割・試合数分割実行の追跡用)
+ */
+export interface ExecutionSessionHistoryEntry {
+  readonly sessionIndex: number;
+  readonly executionMode: LargeScaleExecutionMode;
+  readonly startMatchIndex: number;
+  readonly endMatchIndex: number;
+  readonly addedMatchesCount: number;
+  readonly cumulativeMatchesCount: number;
+  readonly sessionElapsedMs: number;
+  readonly stopReason: "CAMPAIGN_COMPLETED" | "SESSION_MATCH_LIMIT_REACHED" | "TIME_BUDGET_REACHED" | "TEST_EARLY_STOP";
+  readonly sessionMatchLimit?: number;
+  readonly timeBudgetMinutes?: number;
+  readonly timestamp: string;
+}
+
+/**
  * アトミック Checkpoint 状態 (Section 6)
  */
 export interface MillionMatchCheckpointState {
@@ -510,6 +527,7 @@ export interface MillionMatchCheckpointState {
   readonly maxCheckpointSaveMs: number;
   readonly resumedCount: number;
   readonly lastResumeElapsedMs: number | "UNMEASURED";
+  readonly sessionHistory?: readonly ExecutionSessionHistoryEntry[];
   readonly memorySamples: readonly {
     readonly matchIndex: number;
     readonly rssBytes: number;
@@ -548,7 +566,12 @@ export interface MillionMatchCampaignEvidence {
   readonly maxConcurrency: number;
   /** 実行タイミングに依存しない純粋な論理結果の SHA-256 Digest (中断Resumeと無中断実行の一致証明用) */
   readonly logicalResultDigest: string;
-  readonly campaignStatus: "COMPLETED_CLEAN" | "COMPLETED_WITH_STALL_SUSPICIONS" | "FAILED_CRITICAL_ANOMALY";
+  readonly campaignStatus:
+    | "COMPLETED_CLEAN"
+    | "PARTIAL_SESSION_PAUSED"
+    | "COMPLETED_WITH_STALL_SUSPICIONS"
+    | "FAILED_CRITICAL_ANOMALY";
+  readonly sessionHistory?: readonly ExecutionSessionHistoryEntry[];
   readonly seedSpace: SeedSpaceSpec;
   readonly matchups: readonly MatchupPairingSpec[];
   readonly chunksManifest: readonly ChunkManifestEntry[];

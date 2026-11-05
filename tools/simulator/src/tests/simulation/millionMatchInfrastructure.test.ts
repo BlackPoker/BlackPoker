@@ -714,6 +714,29 @@ describe("BlackPoker Work 4-1 — Million Match Simulation Infrastructure", () =
       expect(() => parseLargeScaleCliArgs(["--pilot", "--matches", "1001"])).toThrow(/positive even integer/);
       // concurrency > 2 はエラー
       expect(() => parseLargeScaleCliArgs(["--pilot", "--concurrency", "4"])).toThrow(/must be 1 or 2/);
+
+      // --session-match-limit と --time-budget-minutes の解析
+      const sliced = parseLargeScaleCliArgs([
+        "--resume",
+        "--output-dir",
+        ".artifacts/custom-session-test",
+        "--session-match-limit",
+        "10000",
+        "--time-budget-minutes",
+        "120",
+      ]);
+      expect(sliced.mode).toBe("RESUME");
+      expect(sliced.sessionMatchLimit).toBe(10000);
+      expect(sliced.timeBudgetMinutes).toBe(120);
+
+      // 奇数の --session-match-limit はエラー
+      expect(() => parseLargeScaleCliArgs(["--pilot", "--session-match-limit", "999"])).toThrow(
+        /positive even integer/
+      );
+      // 0 以下の --time-budget-minutes はエラー
+      expect(() => parseLargeScaleCliArgs(["--pilot", "--time-budget-minutes", "0"])).toThrow(
+        /positive number/
+      );
     });
   });
 
@@ -768,6 +791,266 @@ describe("BlackPoker Work 4-1 — Million Match Simulation Infrastructure", () =
       expect(res.evidence.chunksManifest.length).toBe(4);
       expect(res.evidence.performance.executedMatches).toBe(24);
       expect(res.evidence.performance.memory.memorySamples.length).toBeGreaterThanOrEqual(4);
+    });
+  });
+
+  describe("7. 時間分割・試合数分割実行 (--session-match-limit / --time-budget-minutes) と多段階 Resume 検証", () => {
+    it("sessionMatchLimit により3セッションに分割して中断・再開を繰り返し、連続実行と完全一致する Logical Result Digest になること", async () => {
+      const continuousDir = path.join(tmpRoot, "run-unbroken-12");
+      const continuousEvidence = JSON.parse(
+        fs.readFileSync(path.join(continuousDir, "campaign-evidence.json"), "utf8")
+      );
+
+      const multiSessionDir = path.join(tmpRoot, "multi-session-match-limit-12");
+      const baseOptions = {
+        workId: WORK4_WORK_ID,
+        campaignId: "test-resume-parity",
+        purpose: "QUALITY_AUDIT" as const,
+        stage: "CUSTOM_PILOT" as const,
+        totalPlannedMatches: 12,
+        campaignSeed: 777001,
+        regulationId: "standard-pack",
+        frameId: "pack",
+        rulePackageVersion: "1.0.0",
+        featureSchemaVersion: 6,
+        rulePackage,
+        matchups: testMatchups,
+        policyResolver: testPolicyResolver,
+        sessionFactory: createFastDeterministicSessionFactory(),
+        outputDir: multiSessionDir,
+        maxDecisionsPerMatch: 80,
+        chunkSizeMatches: 4,
+        maxConcurrency: 2 as const,
+        gitCommitSha: "498fae6a4f65cd04c5c5fe28b6fd0aa9169bdef4",
+        isGitClean: true,
+      };
+
+      // Session 1: 0 -> 4 試合 (PARTIAL_SESSION_PAUSED)
+      const s1 = await MillionMatchCampaignEngine.runCampaign({
+        ...baseOptions,
+        executionMode: "PILOT",
+        sessionMatchLimit: 4,
+      });
+      expect(s1.evidence.campaignStatus).toBe("PARTIAL_SESSION_PAUSED");
+      expect(s1.evidence.performance.executedMatches).toBe(4);
+      expect(s1.checkpointState.completedMatchesCount).toBe(4);
+      expect(s1.checkpointState.sessionHistory?.length).toBe(1);
+      expect(s1.checkpointState.sessionHistory?.[0].stopReason).toBe("SESSION_MATCH_LIMIT_REACHED");
+      saveMillionMatchArtifacts(s1.evidence, multiSessionDir);
+      expect(auditMillionMatchArtifacts(multiSessionDir).isValid).toBe(true);
+
+      // Session 2: 4 -> 8 試合 (PARTIAL_SESSION_PAUSED)
+      const s2 = await MillionMatchCampaignEngine.runCampaign({
+        ...baseOptions,
+        executionMode: "RESUME",
+        sessionMatchLimit: 4,
+      });
+      expect(s2.evidence.campaignStatus).toBe("PARTIAL_SESSION_PAUSED");
+      expect(s2.evidence.performance.executedMatches).toBe(8);
+      expect(s2.checkpointState.completedMatchesCount).toBe(8);
+      expect(s2.checkpointState.sessionHistory?.length).toBe(2);
+      expect(s2.checkpointState.sessionHistory?.[1].startMatchIndex).toBe(4);
+      expect(s2.checkpointState.sessionHistory?.[1].endMatchIndex).toBe(7);
+      expect(s2.checkpointState.sessionHistory?.[1].stopReason).toBe("SESSION_MATCH_LIMIT_REACHED");
+      saveMillionMatchArtifacts(s2.evidence, multiSessionDir);
+      expect(auditMillionMatchArtifacts(multiSessionDir).isValid).toBe(true);
+
+      // Session 3: 8 -> 12 試合完走 (continuousEvidence と同じ campaignStatus)
+      const s3 = await MillionMatchCampaignEngine.runCampaign({
+        ...baseOptions,
+        executionMode: "RESUME",
+        sessionMatchLimit: 4,
+      });
+      expect(s3.evidence.campaignStatus).toBe(continuousEvidence.campaignStatus);
+      expect(s3.evidence.performance.executedMatches).toBe(12);
+      expect(s3.checkpointState.completedMatchesCount).toBe(12);
+      expect(s3.checkpointState.sessionHistory?.length).toBe(3);
+      expect(s3.checkpointState.sessionHistory?.[2].stopReason).toBe("CAMPAIGN_COMPLETED");
+      saveMillionMatchArtifacts(s3.evidence, multiSessionDir);
+
+      const finalAudit = auditMillionMatchArtifacts(multiSessionDir);
+      expect(finalAudit.isValid).toBe(true);
+      expect(finalAudit.verifiedMatchesCount).toBe(12);
+
+      // 連続実行した run-unbroken-12 と Logical Result Digest・チャンク SHA-256・Coverage が完全一致すること
+      expect(s3.evidence.logicalResultDigest).toBe(continuousEvidence.logicalResultDigest);
+      expect(s3.evidence.chunksManifest.map((c) => c.sha256)).toEqual(
+        continuousEvidence.chunksManifest.map((c: any) => c.sha256)
+      );
+      expect(s3.evidence.ruleCoverage.executedActionCounts).toEqual(
+        continuousEvidence.ruleCoverage.executedActionCounts
+      );
+      expect(s3.evidence.gameQuality.seatWinRates).toEqual(
+        continuousEvidence.gameQuality.seatWinRates
+      );
+    });
+
+    it("timeBudgetMinutes によりチャンク途中の座席反転ペア境界で安全停止・再開し、連続実行と完全一致する Logical Result Digest になること", async () => {
+      const continuousDir = path.join(tmpRoot, "run-unbroken-12");
+      const continuousEvidence = JSON.parse(
+        fs.readFileSync(path.join(continuousDir, "campaign-evidence.json"), "utf8")
+      );
+
+      const timeBudgetDir = path.join(tmpRoot, "multi-session-time-budget-12");
+      const baseOptions = {
+        workId: WORK4_WORK_ID,
+        campaignId: "test-resume-parity",
+        purpose: "QUALITY_AUDIT" as const,
+        stage: "CUSTOM_PILOT" as const,
+        totalPlannedMatches: 12,
+        campaignSeed: 777001,
+        regulationId: "standard-pack",
+        frameId: "pack",
+        rulePackageVersion: "1.0.0",
+        featureSchemaVersion: 6,
+        rulePackage,
+        matchups: testMatchups,
+        policyResolver: testPolicyResolver,
+        sessionFactory: createFastDeterministicSessionFactory(),
+        outputDir: timeBudgetDir,
+        maxDecisionsPerMatch: 80,
+        chunkSizeMatches: 4, // 2ペアで1チャンク
+        maxConcurrency: 2 as const,
+        gitCommitSha: "498fae6a4f65cd04c5c5fe28b6fd0aa9169bdef4",
+        isGitClean: true,
+      };
+
+      // Session 1: 1ペア (2試合 = チャンクの半分) 完了時点で時間上限 (1分) に到達して安全停止
+      const t1 = await MillionMatchCampaignEngine.runCampaign({
+        ...baseOptions,
+        executionMode: "PILOT",
+        timeBudgetMinutes: 1,
+        customWallClockElapsedMsForTest: (pairsInSession) => pairsInSession * 60_000,
+      });
+      expect(t1.evidence.campaignStatus).toBe("PARTIAL_SESSION_PAUSED");
+      expect(t1.evidence.performance.executedMatches).toBe(2); // 座席反転ペア (2試合) が分断されていないこと
+      expect(t1.checkpointState.sessionHistory?.[0].stopReason).toBe("TIME_BUDGET_REACHED");
+      saveMillionMatchArtifacts(t1.evidence, timeBudgetDir);
+      expect(auditMillionMatchArtifacts(timeBudgetDir).isValid).toBe(true);
+
+      // Session 2: 2ペア (4試合) 追加して計6試合 (チャンク0を4試合に完成させ、チャンク1を2試合まで書き込み) で時間上限停止
+      const t2 = await MillionMatchCampaignEngine.runCampaign({
+        ...baseOptions,
+        executionMode: "RESUME",
+        timeBudgetMinutes: 2,
+        customWallClockElapsedMsForTest: (pairsInSession) => pairsInSession * 60_000,
+      });
+      expect(t2.evidence.campaignStatus).toBe("PARTIAL_SESSION_PAUSED");
+      expect(t2.evidence.performance.executedMatches).toBe(6);
+      expect(t2.checkpointState.sessionHistory?.[1].stopReason).toBe("TIME_BUDGET_REACHED");
+      saveMillionMatchArtifacts(t2.evidence, timeBudgetDir);
+      expect(auditMillionMatchArtifacts(timeBudgetDir).isValid).toBe(true);
+
+      // Session 3: 残り3ペア (6試合) を実行して計12試合完走
+      const t3 = await MillionMatchCampaignEngine.runCampaign({
+        ...baseOptions,
+        executionMode: "RESUME",
+        timeBudgetMinutes: 10,
+        customWallClockElapsedMsForTest: (pairsInSession) => pairsInSession * 60_000,
+      });
+      expect(t3.evidence.campaignStatus).toBe(continuousEvidence.campaignStatus);
+      expect(t3.evidence.performance.executedMatches).toBe(12);
+      expect(t3.checkpointState.sessionHistory?.length).toBe(3);
+      expect(t3.checkpointState.sessionHistory?.[2].stopReason).toBe("CAMPAIGN_COMPLETED");
+      saveMillionMatchArtifacts(t3.evidence, timeBudgetDir);
+
+      const finalAudit = auditMillionMatchArtifacts(timeBudgetDir);
+      expect(finalAudit.isValid).toBe(true);
+
+      // チャンク途中のペア境界で一時停止・再開しても、最終的なチャンク分割と Logical Result Digest が連続実行と 100% 一致すること
+      expect(t3.evidence.chunksManifest.length).toBe(3);
+      expect(t3.evidence.chunksManifest.map((c) => c.matchCount)).toEqual([4, 4, 4]);
+      expect(t3.evidence.chunksManifest.map((c) => c.sha256)).toEqual(
+        continuousEvidence.chunksManifest.map((c: any) => c.sha256)
+      );
+      expect(t3.evidence.logicalResultDigest).toBe(continuousEvidence.logicalResultDigest);
+    });
+
+    it("セッション再開時に AI・DNA・Seed・ルール・実験設定が1箇所でも変更されていた場合は Fail-Closed で停止すること", async () => {
+      const tamperSessionDir = path.join(tmpRoot, "session-tamper-check");
+      const baseOptions = {
+        workId: WORK4_WORK_ID,
+        campaignId: "tamper-session-test",
+        purpose: "QUALITY_AUDIT" as const,
+        stage: "CUSTOM_PILOT" as const,
+        totalPlannedMatches: 8,
+        campaignSeed: 777009,
+        regulationId: "standard-pack",
+        frameId: "pack",
+        rulePackageVersion: "1.0.0",
+        featureSchemaVersion: 6,
+        rulePackage,
+        matchups: testMatchups,
+        policyResolver: testPolicyResolver,
+        sessionFactory: createFastDeterministicSessionFactory(),
+        outputDir: tamperSessionDir,
+        maxDecisionsPerMatch: 60,
+        chunkSizeMatches: 4,
+        maxConcurrency: 2 as const,
+        gitCommitSha: "498fae6a4f65cd04c5c5fe28b6fd0aa9169bdef4",
+        isGitClean: true,
+      };
+
+      // Session 1: 4試合まで実行して一時停止
+      await MillionMatchCampaignEngine.runCampaign({
+        ...baseOptions,
+        executionMode: "PILOT",
+        sessionMatchLimit: 4,
+      });
+
+      // 1. Seed 変更 -> Fail-Closed
+      await expect(
+        MillionMatchCampaignEngine.runCampaign({
+          ...baseOptions,
+          executionMode: "RESUME",
+          campaignSeed: 777010,
+        })
+      ).rejects.toThrow(CheckpointIntegrityError);
+
+      // 2. AI / DNA Digest 変更 -> Fail-Closed
+      const modifiedMatchups: MatchupPairingSpec[] = [
+        {
+          ...testMatchups[0],
+          agentA: {
+            ...testMatchups[0].agentA,
+            dnaDigest: "tampered_dna_digest_0000000000000000000000000000",
+          },
+        },
+      ];
+      await expect(
+        MillionMatchCampaignEngine.runCampaign({
+          ...baseOptions,
+          executionMode: "RESUME",
+          matchups: modifiedMatchups,
+        })
+      ).rejects.toThrow(CheckpointIntegrityError);
+
+      // 3. ルールバージョン変更 -> Fail-Closed
+      await expect(
+        MillionMatchCampaignEngine.runCampaign({
+          ...baseOptions,
+          executionMode: "RESUME",
+          rulePackageVersion: "9.9.9",
+        })
+      ).rejects.toThrow(CheckpointIntegrityError);
+
+      // 4. 意思決定上限変更 -> Fail-Closed
+      await expect(
+        MillionMatchCampaignEngine.runCampaign({
+          ...baseOptions,
+          executionMode: "RESUME",
+          maxDecisionsPerMatch: 400,
+        })
+      ).rejects.toThrow(CheckpointIntegrityError);
+
+      // 5. Git Commit SHA 変更 -> Fail-Closed
+      await expect(
+        MillionMatchCampaignEngine.runCampaign({
+          ...baseOptions,
+          executionMode: "RESUME",
+          gitCommitSha: "0000000000000000000000000000000000000000",
+        })
+      ).rejects.toThrow(CheckpointIntegrityError);
     });
   });
 });

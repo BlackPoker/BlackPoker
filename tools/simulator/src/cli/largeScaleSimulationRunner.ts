@@ -742,6 +742,8 @@ export interface ParsedLargeScaleCliArgs {
   readonly campaignSeed: number;
   readonly campaignId: string;
   readonly outputDir: string;
+  readonly sessionMatchLimit?: number;
+  readonly timeBudgetMinutes?: number;
   readonly reproduceSeed?: number;
   readonly p1PolicyId?: string;
   readonly p2PolicyId?: string;
@@ -756,13 +758,15 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
   let reproduceSeed: number | undefined;
   let p1PolicyId: string | undefined;
   let p2PolicyId: string | undefined;
-  let purpose: CampaignPurpose = "QUALITY_AUDIT";
+  let purpose: CampaignPurpose | undefined;
   let matches: number | undefined;
-  let chunkSize: number = DEFAULT_CHUNK_SIZE_MATCHES;
+  let chunkSize: number | undefined;
   let concurrency: 1 | 2 = 2;
   let campaignSeed: number = DEFAULT_CAMPAIGN_SEED;
   let campaignId: string | undefined;
   let outputDir: string | undefined;
+  let sessionMatchLimit: number | undefined;
+  let timeBudgetMinutes: number | undefined;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -786,6 +790,20 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
       chunkSize = parseInt(args[++i], 10);
       if (!Number.isInteger(chunkSize) || chunkSize <= 0 || chunkSize % 2 !== 0) {
         throw new Error(`[Fail-Closed] --chunk-size must be a positive even integer, got "${args[i]}"`);
+      }
+    } else if (arg === "--session-match-limit") {
+      sessionMatchLimit = parseInt(args[++i], 10);
+      if (!Number.isInteger(sessionMatchLimit) || sessionMatchLimit <= 0 || sessionMatchLimit % 2 !== 0) {
+        throw new Error(
+          `[Fail-Closed] --session-match-limit must be a positive even integer (seat-swapped pairs), got "${args[i]}"`
+        );
+      }
+    } else if (arg === "--time-budget-minutes") {
+      timeBudgetMinutes = parseFloat(args[++i]);
+      if (!Number.isFinite(timeBudgetMinutes) || timeBudgetMinutes <= 0) {
+        throw new Error(
+          `[Fail-Closed] --time-budget-minutes must be a positive number, got "${args[i]}"`
+        );
       }
     } else if (arg === "--concurrency") {
       const c = parseInt(args[++i], 10);
@@ -813,7 +831,7 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
   if (reproduceSeed !== undefined) {
     return {
       mode: "PILOT",
-      purpose,
+      purpose: purpose ?? "QUALITY_AUDIT",
       matches: 2,
       chunkSize: 2,
       concurrency: 1,
@@ -841,6 +859,22 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
   }
 
   const mode = activeModes[0];
+
+  // RESUME モード時に outputDir の既存 checkpoint.json があれば、未指定パラメータを自動復元
+  if (mode === "RESUME" && outputDir) {
+    const ckptPath = path.join(path.resolve(outputDir), "checkpoint.json");
+    if (fs.existsSync(ckptPath)) {
+      try {
+        const existingCkpt: MillionMatchCheckpointState = JSON.parse(fs.readFileSync(ckptPath, "utf8"));
+        if (matches === undefined) matches = existingCkpt.totalPlannedMatches;
+        if (chunkSize === undefined) chunkSize = existingCkpt.chunkSizeMatches;
+        if (purpose === undefined) purpose = existingCkpt.purpose;
+        if (campaignId === undefined) campaignId = existingCkpt.campaignId;
+      } catch {}
+    }
+  }
+
+  const resolvedPurpose: CampaignPurpose = purpose ?? "QUALITY_AUDIT";
   const resolvedMatches =
     matches ??
     (mode === "PLAN_ONLY"
@@ -849,22 +883,24 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
       ? 100
       : 1_000);
 
-  const resolvedChunkSize = Math.min(chunkSize, resolvedMatches);
+  const resolvedChunkSize = Math.min(chunkSize ?? DEFAULT_CHUNK_SIZE_MATCHES, resolvedMatches);
   const resolvedCampaignId =
     campaignId ??
-    `work4-${purpose.toLowerCase().replace("_", "-")}-${mode.toLowerCase()}-${resolvedMatches}`;
+    `work4-${resolvedPurpose.toLowerCase().replace("_", "-")}-${mode.toLowerCase()}-${resolvedMatches}`;
   const resolvedOutputDir =
     outputDir ?? `.artifacts/${resolvedCampaignId}`;
 
   return {
     mode,
-    purpose,
+    purpose: resolvedPurpose,
     matches: resolvedMatches,
     chunkSize: resolvedChunkSize,
     concurrency,
     campaignSeed,
     campaignId: resolvedCampaignId,
     outputDir: resolvedOutputDir,
+    sessionMatchLimit,
+    timeBudgetMinutes,
   };
 }
 
@@ -877,6 +913,12 @@ export async function runLargeScaleCli(parsed: ParsedLargeScaleCliArgs): Promise
   console.log(`Matches:       ${parsed.matches.toLocaleString()} (${(parsed.matches / 2).toLocaleString()} pairs)`);
   console.log(`Chunk Size:    ${parsed.chunkSize} matches`);
   console.log(`Concurrency:   ${parsed.concurrency}`);
+  if (parsed.sessionMatchLimit !== undefined) {
+    console.log(`Session Limit: ${parsed.sessionMatchLimit.toLocaleString()} matches`);
+  }
+  if (parsed.timeBudgetMinutes !== undefined) {
+    console.log(`Time Budget:   ${parsed.timeBudgetMinutes} minutes`);
+  }
   console.log(`Output Dir:    ${parsed.outputDir}`);
 
   const gitInfo = checkGitCleanliness();
@@ -956,6 +998,8 @@ export async function runLargeScaleCli(parsed: ParsedLargeScaleCliArgs): Promise
     maxConcurrency: parsed.concurrency,
     gitCommitSha: gitInfo.headCommitSha,
     isGitClean: gitInfo.isClean,
+    sessionMatchLimit: parsed.sessionMatchLimit,
+    timeBudgetMinutes: parsed.timeBudgetMinutes,
   });
 
   if (parsed.mode === "PLAN_ONLY") {
