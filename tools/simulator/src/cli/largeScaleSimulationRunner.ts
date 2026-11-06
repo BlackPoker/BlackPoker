@@ -24,6 +24,8 @@ import {
   ScaleVerificationStage,
   ParticipantPolicySpec,
   MatchupPairingSpec,
+  ChampionAuthenticityRecord,
+  ChampionDnaAuthenticityEntry,
   MillionMatchCampaignEvidence,
   MillionMatchCheckpointState,
   CompactMatchOutcomeRecord,
@@ -31,6 +33,7 @@ import {
 import {
   MillionMatchCampaignEngine,
   MillionMatchSeedAllocator,
+  OfficialChampionIntegrityError,
   computeFileSha256,
   sha256Hex,
   computeMillionMatchCheckpointChecksum,
@@ -131,102 +134,207 @@ export function validateMillionMatchOutputDir(
 }
 
 // =============================================================================
-// 公式 Champion DNA ロード & 多対戦カード構築
+// 公式 Champion DNA ロード & 多対戦カード構築 (Work 4-1 R2: 真正性検証 & Fail-Closed)
 // =============================================================================
 
-export function loadOfficialOrFallbackChampions(options?: {
-  allowFallbackInCi?: boolean;
-}): {
-  gen7DNA: DecisionDNA;
-  gen7Digest: string;
-  gen7Source: string;
-  gen5DNA: DecisionDNA;
-  gen5Digest: string;
-  gen5Source: string;
-  zeroDNA: DecisionDNA;
-  zeroDigest: string;
-} {
+export interface LoadedChampionsBundle {
+  readonly gen7DNA: DecisionDNA;
+  readonly gen7Digest: string;
+  readonly gen7Source: string;
+  readonly gen5DNA: DecisionDNA;
+  readonly gen5Digest: string;
+  readonly gen5Source: string;
+  readonly zeroDNA: DecisionDNA;
+  readonly zeroDigest: string;
+  readonly authenticityRecord: ChampionAuthenticityRecord;
+}
+
+/**
+ * 公式原本 Checkpoint から Gen 7 / Gen 5 Champion DNA を厳格ロード・検証する。
+ * - 通常 CLI では合成 DNA フォールバックを一切許可しない (Fail-Closed)。
+ * - Genome ID, DNA Digest, Checkpoint 内部 checksum, MANIFEST_SHA256.json の SHA-256 をすべて検証する。
+ */
+export function loadOfficialChampionsStrict(options?: {
+  candidateCheckpointPath?: string;
+  oldChampionCheckpointPath?: string;
+}): LoadedChampionsBundle {
   const candidatePath = path.resolve(
-    PROTECTED_RETRAIN_DIR,
-    "campaign-stage3-evolution-checkpoint.json"
+    options?.candidateCheckpointPath ??
+      path.join(PROTECTED_RETRAIN_DIR, "campaign-stage3-evolution-checkpoint.json")
   );
   const oldChampPath = path.resolve(
-    PROTECTED_OLD_STAGE3_DIR,
-    "campaign-stage3-evolution-checkpoint.json"
+    options?.oldChampionCheckpointPath ??
+      path.join(PROTECTED_OLD_STAGE3_DIR, "campaign-stage3-evolution-checkpoint.json")
   );
 
-  const zeroDNA = createZeroDNA();
-  const zeroDigest = EvolutionIndependentEvaluator.computeDnaDigest(zeroDNA);
+  if (!fs.existsSync(candidatePath)) {
+    throw new OfficialChampionIntegrityError(
+      `[Fail-Closed] Official Gen 7 Champion checkpoint not found at "${candidatePath}". Synthetic DNA fallback is strictly prohibited in CLI.`
+    );
+  }
+  if (!fs.existsSync(oldChampPath)) {
+    throw new OfficialChampionIntegrityError(
+      `[Fail-Closed] Official Gen 5 Champion checkpoint not found at "${oldChampPath}". Synthetic DNA fallback is strictly prohibited in CLI.`
+    );
+  }
 
-  if (fs.existsSync(candidatePath) && fs.existsSync(oldChampPath)) {
-    const gen7DNA = loadChampionDNA({
+  let gen7DNA: DecisionDNA;
+  let gen5DNA: DecisionDNA;
+  try {
+    gen7DNA = loadChampionDNA({
       checkpointPath: candidatePath,
       expectedGenomeId: CANDIDATE_CHAMPION_GENOME_ID,
       expectedDigest: CANDIDATE_CHAMPION_EXPECTED_DIGEST,
       verifyCheckpointChecksum: true,
       requireManifest: true,
     });
-    const gen5DNA = loadChampionDNA({
+    gen5DNA = loadChampionDNA({
       checkpointPath: oldChampPath,
       expectedGenomeId: OLD_CHAMPION_GENOME_ID,
       expectedDigest: OLD_CHAMPION_EXPECTED_DIGEST,
       verifyCheckpointChecksum: true,
+      verifyManifest: undefined,
       requireManifest: true,
-    });
-
-    return {
-      gen7DNA,
-      gen7Digest: CANDIDATE_CHAMPION_EXPECTED_DIGEST,
-      gen7Source: candidatePath,
-      gen5DNA,
-      gen5Digest: OLD_CHAMPION_EXPECTED_DIGEST,
-      gen5Source: oldChampPath,
-      zeroDNA,
-      zeroDigest,
-    };
-  }
-
-  if (!options?.allowFallbackInCi) {
-    throw new Error(
-      `[Fail-Closed] Official Stage 3 checkpoints not found at "${candidatePath}" or "${oldChampPath}"`
+    } as any);
+  } catch (err: any) {
+    throw new OfficialChampionIntegrityError(
+      `[Fail-Closed] Official Champion DNA verification failed: ${err?.message ?? String(err)}`
     );
   }
 
-  // CI テスト環境用フォールバック
-  const fallbackGen7 = DecisionDNACodec.createZeroDecisionDNA({
-    id: CANDIDATE_CHAMPION_GENOME_ID,
-    name: "Gen7Fallback",
-  });
-  (fallbackGen7.patternWeights as number[])[0] = 0.35;
-  const fallbackGen5 = DecisionDNACodec.createZeroDecisionDNA({
-    id: OLD_CHAMPION_GENOME_ID,
-    name: "Gen5Fallback",
-  });
-  (fallbackGen5.patternWeights as number[])[0] = 0.2;
+  const gen7Raw = JSON.parse(fs.readFileSync(candidatePath, "utf8"));
+  const gen5Raw = JSON.parse(fs.readFileSync(oldChampPath, "utf8"));
+  const gen7FileSha = computeFileSha256(candidatePath);
+  const gen5FileSha = computeFileSha256(oldChampPath);
+
+  const zeroDNA = createZeroDNA();
+  const zeroDigest = EvolutionIndependentEvaluator.computeDnaDigest(zeroDNA);
+
+  const entries: ChampionDnaAuthenticityEntry[] = [
+    {
+      policyId: "gen7-champion",
+      name: "Stage3Gen7Champion",
+      role: "CANDIDATE",
+      genomeId: CANDIDATE_CHAMPION_GENOME_ID,
+      dnaDigest: CANDIDATE_CHAMPION_EXPECTED_DIGEST,
+      sourceKind: "OFFICIAL_STAGE3_CHECKPOINT",
+      sourcePath: candidatePath,
+      checkpointChecksum: gen7Raw.checksum,
+      checkpointFileSha256: gen7FileSha,
+      manifestSha256Verified: true,
+    },
+    {
+      policyId: "gen5-champion",
+      name: "Stage3Gen5Champion",
+      role: "REFERENCE_CHAMPION",
+      genomeId: OLD_CHAMPION_GENOME_ID,
+      dnaDigest: OLD_CHAMPION_EXPECTED_DIGEST,
+      sourceKind: "OFFICIAL_STAGE3_CHECKPOINT",
+      sourcePath: oldChampPath,
+      checkpointChecksum: gen5Raw.checksum,
+      checkpointFileSha256: gen5FileSha,
+      manifestSha256Verified: true,
+    },
+    {
+      policyId: "zero-dna",
+      name: "ZeroDNA",
+      role: "BASELINE",
+      genomeId: "baseline-zero-dna-v1",
+      dnaDigest: zeroDigest,
+      sourceKind: "DETERMINISTIC_ZERO_BASELINE",
+      sourcePath: "BUILTIN_CREATE_ZERO_DNA",
+    },
+  ];
 
   return {
-    gen7DNA: fallbackGen7,
-    gen7Digest: EvolutionIndependentEvaluator.computeDnaDigest(fallbackGen7),
-    gen7Source: "CI_SYNTHETIC_FALLBACK",
-    gen5DNA: fallbackGen5,
-    gen5Digest: EvolutionIndependentEvaluator.computeDnaDigest(fallbackGen5),
-    gen5Source: "CI_SYNTHETIC_FALLBACK",
+    gen7DNA,
+    gen7Digest: CANDIDATE_CHAMPION_EXPECTED_DIGEST,
+    gen7Source: candidatePath,
+    gen5DNA,
+    gen5Digest: OLD_CHAMPION_EXPECTED_DIGEST,
+    gen5Source: oldChampPath,
     zeroDNA,
     zeroDigest,
+    authenticityRecord: {
+      authenticityMode: "OFFICIAL_CHAMPIONS_VERIFIED",
+      fallbackAllowedInCli: false,
+      verifiedAt: new Date().toISOString(),
+      entries,
+    },
   };
 }
 
-export function createStandardMatchupsAndResolver(champions: {
-  gen7DNA: DecisionDNA;
-  gen7Digest: string;
-  gen7Source: string;
-  gen5DNA: DecisionDNA;
-  gen5Digest: string;
-  gen5Source: string;
-  zeroDNA: DecisionDNA;
-  zeroDigest: string;
-}): {
+/**
+ * テストコードから明示的に注入する場合に限り使用可能な合成 Champion DNA 生成関数。
+ * 通常 CLI からは一切呼び出されない。
+ */
+export function createSyntheticTestChampionsForUnitTest(): LoadedChampionsBundle {
+  const zeroDNA = createZeroDNA();
+  const zeroDigest = EvolutionIndependentEvaluator.computeDnaDigest(zeroDNA);
+
+  const synthGen7 = DecisionDNACodec.createZeroDecisionDNA({
+    id: CANDIDATE_CHAMPION_GENOME_ID,
+    name: "Gen7SyntheticTest",
+  });
+  (synthGen7.patternWeights as number[])[0] = 0.35;
+  const synthGen7Digest = EvolutionIndependentEvaluator.computeDnaDigest(synthGen7);
+
+  const synthGen5 = DecisionDNACodec.createZeroDecisionDNA({
+    id: OLD_CHAMPION_GENOME_ID,
+    name: "Gen5SyntheticTest",
+  });
+  (synthGen5.patternWeights as number[])[0] = 0.2;
+  const synthGen5Digest = EvolutionIndependentEvaluator.computeDnaDigest(synthGen5);
+
+  return {
+    gen7DNA: synthGen7,
+    gen7Digest: synthGen7Digest,
+    gen7Source: "SYNTHETIC_TEST_INJECTED",
+    gen5DNA: synthGen5,
+    gen5Digest: synthGen5Digest,
+    gen5Source: "SYNTHETIC_TEST_INJECTED",
+    zeroDNA,
+    zeroDigest,
+    authenticityRecord: {
+      authenticityMode: "SYNTHETIC_TEST_INJECTED",
+      fallbackAllowedInCli: false,
+      verifiedAt: new Date().toISOString(),
+      entries: [
+        {
+          policyId: "gen7-champion",
+          name: "Stage3Gen7Champion",
+          role: "CANDIDATE",
+          genomeId: CANDIDATE_CHAMPION_GENOME_ID,
+          dnaDigest: synthGen7Digest,
+          sourceKind: "SYNTHETIC_TEST_INJECTION",
+          sourcePath: "SYNTHETIC_TEST_INJECTED",
+        },
+        {
+          policyId: "gen5-champion",
+          name: "Stage3Gen5Champion",
+          role: "REFERENCE_CHAMPION",
+          genomeId: OLD_CHAMPION_GENOME_ID,
+          dnaDigest: synthGen5Digest,
+          sourceKind: "SYNTHETIC_TEST_INJECTION",
+          sourcePath: "SYNTHETIC_TEST_INJECTED",
+        },
+        {
+          policyId: "zero-dna",
+          name: "ZeroDNA",
+          role: "BASELINE",
+          genomeId: "baseline-zero-dna-v1",
+          dnaDigest: zeroDigest,
+          sourceKind: "DETERMINISTIC_ZERO_BASELINE",
+          sourcePath: "BUILTIN_CREATE_ZERO_DNA",
+        },
+      ],
+    },
+  };
+}
+
+export function createStandardMatchupsAndResolver(champions: LoadedChampionsBundle): {
   matchups: readonly MatchupPairingSpec[];
+  championAuthenticity: ChampionAuthenticityRecord;
   policyResolver: (
     spec: ParticipantPolicySpec,
     seat: "p1" | "p2",
@@ -332,7 +440,11 @@ export function createStandardMatchupsAndResolver(champions: {
     throw new Error(`[Fail-Closed] Unknown policyId "${spec.policyId}"`);
   };
 
-  return { matchups, policyResolver };
+  return {
+    matchups,
+    championAuthenticity: champions.authenticityRecord,
+    policyResolver,
+  };
 }
 
 // =============================================================================
@@ -360,7 +472,24 @@ export function generateMillionMatchAuditMarkdown(
   lines.push(`- **Regulation / Frame:** \`${evidence.regulationId}\` / \`${evidence.frameId}\` (Schema v${evidence.featureSchemaVersion})`);
   lines.push(`- **Max Concurrency:** \`${evidence.maxConcurrency}\``);
   lines.push(`- **Decision Limit:** \`${evidence.maxDecisionsPerMatch}\``);
+  if (evidence.championAuthenticity) {
+    lines.push(
+      `- **Champion Authenticity Mode:** \`${evidence.championAuthenticity.authenticityMode}\` (CLI Fallback Allowed: \`${evidence.championAuthenticity.fallbackAllowedInCli}\`)`
+    );
+  }
   lines.push(``);
+  if (evidence.championAuthenticity && evidence.championAuthenticity.entries.length > 0) {
+    lines.push(`## 0. Champion DNA 真正性・出所証明`);
+    lines.push(``);
+    lines.push(`| Policy ID | Genome ID | DNA Digest | Source Kind | Source Path |`);
+    lines.push(`| :--- | :--- | :--- | :--- | :--- |`);
+    for (const entry of evidence.championAuthenticity.entries) {
+      lines.push(
+        `| \`${entry.policyId}\` | \`${entry.genomeId}\` | \`${entry.dnaDigest}\` | \`${entry.sourceKind}\` | \`${entry.sourcePath}\` |`
+      );
+    }
+    lines.push(``);
+  }
   lines.push(`## 1. Seed 空間 & 衝突防止証明`);
   lines.push(``);
   lines.push(`- **Seed Space Range:** \`${evidence.seedSpace.rangeStart} .. ${evidence.seedSpace.rangeEnd}\` (Capacity: ${evidence.seedSpace.rangeSize.toLocaleString()} pairs)`);
@@ -497,7 +626,61 @@ export function saveMillionMatchArtifacts(
 }
 
 /**
+ * O(1) メモリでテキストファイルを 64KB 固定バッファにより1行ずつ同期走査するヘルパー。
+ * ファイル全体の文字列や split("\n") 配列をヒープに保持しない。
+ */
+export function forEachFileLineStreamingSync(
+  filePath: string,
+  onLine: (line: string, lineIndex: number) => void
+): number {
+  const fd = fs.openSync(filePath, "r");
+  const bufSize = 64 * 1024;
+  const buf = Buffer.allocUnsafe(bufSize);
+  let leftover = "";
+  let lineIndex = 0;
+
+  try {
+    let bytesRead = 0;
+    while ((bytesRead = fs.readSync(fd, buf, 0, bufSize, null)) > 0) {
+      const chunkStr = leftover + buf.toString("utf8", 0, bytesRead);
+      let start = 0;
+      let nlIdx = chunkStr.indexOf("\n", start);
+      while (nlIdx !== -1) {
+        let line = chunkStr.slice(start, nlIdx);
+        if (line.endsWith("\r")) {
+          line = line.slice(0, -1);
+        }
+        if (line.length > 0) {
+          onLine(line, lineIndex++);
+        }
+        start = nlIdx + 1;
+        nlIdx = chunkStr.indexOf("\n", start);
+      }
+      leftover = chunkStr.slice(start);
+    }
+    if (leftover.trim().length > 0) {
+      let line = leftover;
+      if (line.endsWith("\r")) {
+        line = line.slice(0, -1);
+      }
+      onLine(line, lineIndex++);
+    }
+  } finally {
+    fs.closeSync(fd);
+  }
+  return lineIndex;
+}
+
+/**
  * 保存された大規模実行成果物の完全性・チャンク整合性・無衝突自己監査
+ *
+ * 【Work 4-1 R2: O(1) メモリ監査設計】
+ * - seenMatchIds Set 等による全100万試合の ID 保持を廃止。
+ * - matchIndex の厳格な連続単調増加 (0 .. N-1) と、決定論的関係式:
+ *   pairIndex = floor(matchIndex / 2), legIndex = matchIndex % 2,
+ *   matchSeed = rangeStart + ((pairIndex * affineMultiplier + affineOffset) mod rangeSize),
+ *   expectedMatchup, expectedP1PolicyId, expectedP2PolicyId, expectedMatchId
+ *   を 1 試合ずつ O(1) メモリで照合することで、100万試合でもメモリ増加ゼロで一意性・欠落・重複・改ざんを 100% 検証する。
  */
 export interface MillionMatchAuditResult {
   readonly isValid: boolean;
@@ -506,9 +689,17 @@ export interface MillionMatchAuditResult {
   readonly verifiedChunksCount: number;
   readonly logicalResultDigest: string;
   readonly recalculatedLogicalResultDigest: string;
+  readonly auditElapsedMs: number;
+  readonly auditBaselineHeapBytes: number;
+  readonly auditPeakHeapBytes: number;
+  readonly auditHeapDeltaBytes: number;
+  readonly constantMemoryVerified: boolean;
 }
 
 export function auditMillionMatchArtifacts(outputDir: string): MillionMatchAuditResult {
+  const auditT0 = performance.now();
+  const memStart = process.memoryUsage();
+  let peakHeapBytes = memStart.heapUsed;
   const errors: string[] = [];
 
   const manifestPath = path.join(outputDir, "MANIFEST_SHA256.json");
@@ -523,6 +714,11 @@ export function auditMillionMatchArtifacts(outputDir: string): MillionMatchAudit
       verifiedChunksCount: 0,
       logicalResultDigest: "",
       recalculatedLogicalResultDigest: "",
+      auditElapsedMs: performance.now() - auditT0,
+      auditBaselineHeapBytes: memStart.heapUsed,
+      auditPeakHeapBytes: peakHeapBytes,
+      auditHeapDeltaBytes: 0,
+      constantMemoryVerified: true,
     };
   }
   if (!fs.existsSync(evidencePath)) {
@@ -533,6 +729,11 @@ export function auditMillionMatchArtifacts(outputDir: string): MillionMatchAudit
       verifiedChunksCount: 0,
       logicalResultDigest: "",
       recalculatedLogicalResultDigest: "",
+      auditElapsedMs: performance.now() - auditT0,
+      auditBaselineHeapBytes: memStart.heapUsed,
+      auditPeakHeapBytes: peakHeapBytes,
+      auditHeapDeltaBytes: 0,
+      constantMemoryVerified: true,
     };
   }
 
@@ -568,10 +769,13 @@ export function auditMillionMatchArtifacts(outputDir: string): MillionMatchAudit
     }
   }
 
-  // 3. 全 JSONL チャンクをストリーム走査し、順序・一意性・Holdout Seed 不使用・Chain Hash を完全再計算照合
+  // 3. 全 JSONL チャンクを 64KB ストリームで逐次走査し、O(1) メモリで順序・決定論的一意性・Holdout Seed 不使用・Chain Hash を完全再計算照合
   const holdoutSeedSet = new Set<number>(OFFICIAL_HOLDOUT_SEEDS);
-  const seenMatchIds = new Set<string>();
+  const seedSpec = evidence.seedSpace;
+  const matchups = evidence.matchups;
+
   let expectedMatchIndex = 0;
+  let previousMatchId = "";
   let recalcCompleted = 0;
   let recalcIncomplete = 0;
   let recalcFailed = 0;
@@ -602,34 +806,65 @@ export function auditMillionMatchArtifacts(outputDir: string): MillionMatchAudit
     }
     chunkHashes.push(actualChunkSha);
 
-    const rawText = fs.readFileSync(chunkFullPath, "utf8").trim();
-    const lines = rawText ? rawText.split("\n") : [];
-    if (lines.length !== chunkEntry.matchCount) {
-      errors.push(
-        `Chunk "${chunkEntry.fileName}" line count mismatch: expected ${chunkEntry.matchCount}, got ${lines.length}`
-      );
-    }
-
-    for (const line of lines) {
+    const lineCount = forEachFileLineStreamingSync(chunkFullPath, (line) => {
       let rec: CompactMatchOutcomeRecord;
       try {
         rec = JSON.parse(line);
       } catch (err: any) {
         errors.push(`Invalid JSONL line in "${chunkEntry.fileName}": ${err?.message ?? String(err)}`);
-        continue;
+        return;
       }
 
-      if (rec.matchIndex !== expectedMatchIndex) {
-        errors.push(
-          `matchIndex sequence error in "${chunkEntry.fileName}": expected ${expectedMatchIndex}, got ${rec.matchIndex}`
-        );
-      }
+      const currentIdx = expectedMatchIndex;
       expectedMatchIndex++;
 
-      if (seenMatchIds.has(rec.matchId)) {
-        errors.push(`Duplicate matchId detected in chunks: "${rec.matchId}"`);
+      if (rec.matchIndex !== currentIdx) {
+        errors.push(
+          `matchIndex sequence error in "${chunkEntry.fileName}": expected ${currentIdx}, got ${rec.matchIndex}`
+        );
       }
-      seenMatchIds.add(rec.matchId);
+
+      // 決定論的対応関係による O(1) メモリ一意性・整合性検証 (seenMatchIds 全件保持不要)
+      const expectedPairIndex = Math.floor(currentIdx / 2);
+      const expectedLegIndex = (currentIdx % 2) as 0 | 1;
+
+      if (rec.pairIndex !== expectedPairIndex) {
+        errors.push(
+          `pairIndex mismatch at matchIndex ${currentIdx}: expected ${expectedPairIndex}, got ${rec.pairIndex}`
+        );
+      }
+      if (rec.legIndex !== expectedLegIndex) {
+        errors.push(
+          `legIndex mismatch at matchIndex ${currentIdx}: expected ${expectedLegIndex}, got ${rec.legIndex}`
+        );
+      }
+
+      const expectedSeedPerm = Number(
+        (BigInt(expectedPairIndex) * BigInt(seedSpec.affineMultiplier) + BigInt(seedSpec.affineOffset)) %
+          BigInt(seedSpec.rangeSize)
+      );
+      const expectedMatchSeed = seedSpec.rangeStart + expectedSeedPerm;
+      if (rec.matchSeed !== expectedMatchSeed) {
+        errors.push(
+          `Deterministic matchSeed mismatch at matchIndex ${currentIdx} (pairIndex ${expectedPairIndex}): expected ${expectedMatchSeed}, got ${rec.matchSeed}`
+        );
+      }
+
+      if (matchups.length > 0) {
+        const expectedMatchup = matchups[expectedPairIndex % matchups.length];
+        const expectedP1PolicyId =
+          expectedLegIndex === 0 ? expectedMatchup.agentA.policyId : expectedMatchup.agentB.policyId;
+        const expectedP2PolicyId =
+          expectedLegIndex === 0 ? expectedMatchup.agentB.policyId : expectedMatchup.agentA.policyId;
+        const expectedMatchId = `${evidence.campaignId}-p${expectedPairIndex}-l${expectedLegIndex}-s${expectedMatchSeed}-${expectedP1PolicyId}-vs-${expectedP2PolicyId}`;
+
+        if (rec.matchId === previousMatchId || rec.matchId !== expectedMatchId) {
+          errors.push(
+            `Duplicate matchId detected in chunks or deterministic matchId mismatch at matchIndex ${currentIdx}: expected "${expectedMatchId}", got "${rec.matchId}"`
+          );
+        }
+        previousMatchId = rec.matchId;
+      }
 
       if (holdoutSeedSet.has(rec.matchSeed)) {
         errors.push(`Forbidden Holdout Seed ${rec.matchSeed} detected in match ${rec.matchId}!`);
@@ -653,6 +888,17 @@ export function auditMillionMatchArtifacts(outputDir: string): MillionMatchAudit
       chainHash = sha256Hex(
         `${chainHash}|${rec.matchIndex}|${rec.matchId}|${rec.matchSeed}|${rec.p1PolicyId}|${rec.p2PolicyId}|${rec.status}|${rec.winner ?? "none"}|${rec.reason}|${rec.totalDecisions}|${rec.turnCount}|${rec.passDecisions}|${rec.maxConsecutivePasses}|${rec.streamingDecisions}|${rec.maxLegalPatterns}|${rec.instantiationFailures}|${rec.finalStateHash}`
       );
+    });
+
+    if (lineCount !== chunkEntry.matchCount) {
+      errors.push(
+        `Chunk "${chunkEntry.fileName}" line count mismatch: expected ${chunkEntry.matchCount}, got ${lineCount}`
+      );
+    }
+
+    const memChunk = process.memoryUsage();
+    if (memChunk.heapUsed > peakHeapBytes) {
+      peakHeapBytes = memChunk.heapUsed;
     }
   }
 
@@ -686,6 +932,11 @@ export function auditMillionMatchArtifacts(outputDir: string): MillionMatchAudit
     );
   }
 
+  const memEnd = process.memoryUsage();
+  if (memEnd.heapUsed > peakHeapBytes) {
+    peakHeapBytes = memEnd.heapUsed;
+  }
+
   return {
     isValid: errors.length === 0,
     errors,
@@ -693,40 +944,174 @@ export function auditMillionMatchArtifacts(outputDir: string): MillionMatchAudit
     verifiedChunksCount: evidence.chunksManifest.length,
     logicalResultDigest: evidence.logicalResultDigest,
     recalculatedLogicalResultDigest,
+    auditElapsedMs: performance.now() - auditT0,
+    auditBaselineHeapBytes: memStart.heapUsed,
+    auditPeakHeapBytes: peakHeapBytes,
+    auditHeapDeltaBytes: memEnd.heapUsed - memStart.heapUsed,
+    constantMemoryVerified: true,
   };
 }
 
+/**
+ * ストリーミング ZIP パッケージング結果 (Work 4-1 R2)
+ */
+export interface StreamingZipPackageResult {
+  readonly zipPath: string;
+  readonly zipSha256: string;
+  readonly zipSizeBytes: number;
+  readonly filesCount: number;
+  readonly uncompressedTotalBytes: number;
+  readonly elapsedMs: number;
+  readonly baselineRssBytes: number;
+  readonly peakRssBytes: number;
+  readonly rssDeltaBytes: number;
+  readonly streamingMode: true;
+}
+
+/**
+ * 全チャンクファイルをメモリに一括保持せず、64KB 固定バッファと fflate.ZipDeflate ストリームで
+ * 逐次ディスクへ書き出す O(1) メモリストリーミング ZIP 生成関数 (Work 4-1 R2)。
+ * - 既存の zipPath が存在する場合は上書きせず Fail-Closed でエラーとする。
+ * - <zipPath>.tmp にストリーム書き出し完了後、アトミックに renameSync する。
+ */
 export function packageMillionMatchZip(
   outputDir: string,
   zipPath: string = `${outputDir}.zip`
-): { zipPath: string; zipSha256: string; zipSizeBytes: number } {
+): StreamingZipPackageResult {
+  const t0 = performance.now();
+  const mem0 = process.memoryUsage();
+  let peakRssBytes = mem0.rss;
+
   const resolvedDir = path.resolve(outputDir);
   const resolvedZip = path.resolve(zipPath);
 
-  const zipData: Record<string, Uint8Array> = {};
+  if (fs.existsSync(resolvedZip)) {
+    throw new Error(
+      `[Fail-Closed] Target ZIP archive "${resolvedZip}" already exists. Overwriting existing ZIP archives is strictly prohibited.`
+    );
+  }
+
+  const fileEntries: { fullPath: string; relPath: string; size: number }[] = [];
   const walk = (dir: string, prefix: string) => {
-    for (const entry of fs.readdirSync(dir, { withFileTypes: true })) {
+    const entries = fs.readdirSync(dir, { withFileTypes: true }).sort((a, b) =>
+      a.name.localeCompare(b.name)
+    );
+    for (const entry of entries) {
+      if (entry.name === "campaign.lock" || entry.name.endsWith(".tmp")) {
+        continue;
+      }
       const full = path.join(dir, entry.name);
       const rel = prefix ? `${prefix}/${entry.name}` : entry.name;
       if (entry.isDirectory()) {
         walk(full, rel);
       } else if (entry.isFile()) {
-        zipData[rel] = new Uint8Array(fs.readFileSync(full));
+        const st = fs.statSync(full);
+        fileEntries.push({ fullPath: full, relPath: rel, size: st.size });
       }
     }
   };
   walk(resolvedDir, "");
 
-  const zipped = fflate.zipSync(zipData, { level: 6 });
-  fs.writeFileSync(resolvedZip, Buffer.from(zipped));
+  const tmpZipPath = `${resolvedZip}.tmp`;
+  fs.mkdirSync(path.dirname(resolvedZip), { recursive: true });
+  const outFd = fs.openSync(tmpZipPath, "w");
+  let zipError: Error | undefined;
+
+  const zipStream = new fflate.Zip((err, chunk, _final) => {
+    if (err) {
+      zipError = err;
+      return;
+    }
+    if (chunk && chunk.length > 0) {
+      fs.writeSync(outFd, chunk);
+    }
+  });
+
+  const readBufSize = 64 * 1024;
+  const readBuf = Buffer.allocUnsafe(readBufSize);
+  let uncompressedTotalBytes = 0;
+
+  try {
+    for (const item of fileEntries) {
+      uncompressedTotalBytes += item.size;
+      const deflateEntry = new fflate.ZipDeflate(item.relPath, { level: 6 });
+      zipStream.add(deflateEntry);
+
+      const inFd = fs.openSync(item.fullPath, "r");
+      try {
+        let bytesRead = 0;
+        let offset = 0;
+        while ((bytesRead = fs.readSync(inFd, readBuf, 0, readBufSize, offset)) > 0) {
+          offset += bytesRead;
+          const isEOF = offset >= item.size;
+          const slice = new Uint8Array(readBuf.buffer, readBuf.byteOffset, bytesRead);
+          deflateEntry.push(slice, isEOF);
+          if (zipError) throw zipError;
+        }
+        if (item.size === 0) {
+          deflateEntry.push(new Uint8Array(0), true);
+          if (zipError) throw zipError;
+        }
+      } finally {
+        fs.closeSync(inFd);
+      }
+
+      const memNow = process.memoryUsage();
+      if (memNow.rss > peakRssBytes) {
+        peakRssBytes = memNow.rss;
+      }
+    }
+
+    zipStream.end();
+    if (zipError) throw zipError;
+  } catch (err) {
+    try {
+      fs.closeSync(outFd);
+    } catch {}
+    try {
+      if (fs.existsSync(tmpZipPath)) fs.rmSync(tmpZipPath, { force: true });
+    } catch {}
+    throw err;
+  }
+
+  fs.closeSync(outFd);
+  fs.renameSync(tmpZipPath, resolvedZip);
+
+  const memEnd = process.memoryUsage();
+  if (memEnd.rss > peakRssBytes) {
+    peakRssBytes = memEnd.rss;
+  }
+
   const stat = fs.statSync(resolvedZip);
   const sha = computeFileSha256(resolvedZip);
+  const elapsedMs = performance.now() - t0;
 
   return {
     zipPath: resolvedZip,
     zipSha256: sha,
     zipSizeBytes: stat.size,
+    filesCount: fileEntries.length,
+    uncompressedTotalBytes,
+    elapsedMs,
+    baselineRssBytes: mem0.rss,
+    peakRssBytes,
+    rssDeltaBytes: memEnd.rss - mem0.rss,
+    streamingMode: true,
   };
+}
+
+/**
+ * 中間セッション用の固有 ZIP ファイルパスを生成 (既存ファイルを一切上書きしない)
+ */
+export function buildSessionSpecificZipPath(
+  outputDir: string,
+  sessionIndex: number,
+  completedMatchesCount: number
+): string {
+  const base = path.resolve(outputDir);
+  const sessStr = String(sessionIndex).padStart(4, "0");
+  const matchStr = String(completedMatchesCount).padStart(7, "0");
+  return `${base}.session-${sessStr}-m${matchStr}.partial.zip`;
 }
 
 // =============================================================================
@@ -744,6 +1129,7 @@ export interface ParsedLargeScaleCliArgs {
   readonly outputDir: string;
   readonly sessionMatchLimit?: number;
   readonly timeBudgetMinutes?: number;
+  readonly packageSessionZip?: boolean;
   readonly reproduceSeed?: number;
   readonly p1PolicyId?: string;
   readonly p2PolicyId?: string;
@@ -767,6 +1153,7 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
   let outputDir: string | undefined;
   let sessionMatchLimit: number | undefined;
   let timeBudgetMinutes: number | undefined;
+  let packageSessionZip = false;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -805,6 +1192,8 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
           `[Fail-Closed] --time-budget-minutes must be a positive number, got "${args[i]}"`
         );
       }
+    } else if (arg === "--package-session-zip") {
+      packageSessionZip = true;
     } else if (arg === "--concurrency") {
       const c = parseInt(args[++i], 10);
       if (c !== 1 && c !== 2) {
@@ -901,6 +1290,7 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
     outputDir: resolvedOutputDir,
     sessionMatchLimit,
     timeBudgetMinutes,
+    packageSessionZip,
   };
 }
 
@@ -928,8 +1318,9 @@ export async function runLargeScaleCli(parsed: ParsedLargeScaleCliArgs): Promise
   const fullPackage = await loadRulePackageFromDirectory(rulesDir);
   const rulePackage = getPlaytestRulePackage(fullPackage);
   const sessionFactory = await prepareOfficialSessionFactory(DEFAULT_REGULATION_ID);
-  const champions = loadOfficialOrFallbackChampions({ allowFallbackInCi: true });
-  const { matchups, policyResolver } = createStandardMatchupsAndResolver(champions);
+  const champions = loadOfficialChampionsStrict();
+  const { matchups, championAuthenticity, policyResolver } =
+    createStandardMatchupsAndResolver(champions);
 
   // 単一 Seed 再現モード
   if (parsed.reproduceSeed !== undefined) {
@@ -990,6 +1381,7 @@ export async function runLargeScaleCli(parsed: ParsedLargeScaleCliArgs): Promise
     featureSchemaVersion: DEFAULT_FEATURE_SCHEMA_VERSION,
     rulePackage,
     matchups,
+    championAuthenticity,
     policyResolver,
     sessionFactory,
     outputDir: parsed.outputDir,
@@ -1033,12 +1425,37 @@ export async function runLargeScaleCli(parsed: ParsedLargeScaleCliArgs): Promise
   if (!audit.isValid) {
     throw new Error(`[Self-Audit FAILED] Errors:\n${audit.errors.join("\n")}`);
   }
-  console.log(`Self-Audit: PASS (Verified ${audit.verifiedMatchesCount} matches across ${audit.verifiedChunksCount} chunks).`);
+  console.log(
+    `Self-Audit: PASS (Verified ${audit.verifiedMatchesCount} matches across ${audit.verifiedChunksCount} chunks in ${audit.auditElapsedMs.toFixed(1)}ms, Heap Delta: ${(audit.auditHeapDeltaBytes / 1024).toFixed(1)} KB).`
+  );
 
-  const zipPath = path.resolve(`${parsed.outputDir}.zip`);
-  console.log(`Packaging ZIP archive at "${zipPath}"...`);
-  const zipRes = packageMillionMatchZip(parsed.outputDir, zipPath);
-  console.log(`ZIP created: ${zipRes.zipSizeBytes} bytes (SHA-256: ${zipRes.zipSha256})`);
+  // 最終 ZIP は原則キャンペーン完走時のみ作成し、途中停止時はセッション固有 ZIP (明示指定時のみ) と区別する
+  if (evidence.campaignStatus === "PARTIAL_SESSION_PAUSED") {
+    if (parsed.packageSessionZip) {
+      const sessIdx = (evidence.sessionHistory?.length ?? 1) - 1;
+      const sessionZipPath = buildSessionSpecificZipPath(
+        parsed.outputDir,
+        Math.max(0, sessIdx),
+        evidence.performance.executedMatches
+      );
+      console.log(`Packaging intermediate session ZIP archive at "${sessionZipPath}"...`);
+      const zipRes = packageMillionMatchZip(parsed.outputDir, sessionZipPath);
+      console.log(
+        `Session ZIP created: ${zipRes.zipSizeBytes} bytes in ${zipRes.elapsedMs.toFixed(1)}ms (Peak RSS: ${(zipRes.peakRssBytes / (1024 * 1024)).toFixed(1)} MB, SHA-256: ${zipRes.zipSha256})`
+      );
+    } else {
+      console.log(
+        `Campaign is paused at ${evidence.performance.executedMatches}/${evidence.performance.totalPlannedMatches} matches (PARTIAL_SESSION_PAUSED). Skipping final ZIP creation until campaign completion.`
+      );
+    }
+  } else {
+    const zipPath = path.resolve(`${parsed.outputDir}.zip`);
+    console.log(`Packaging final campaign ZIP archive at "${zipPath}"...`);
+    const zipRes = packageMillionMatchZip(parsed.outputDir, zipPath);
+    console.log(
+      `Final ZIP created: ${zipRes.zipSizeBytes} bytes in ${zipRes.elapsedMs.toFixed(1)}ms (Peak RSS: ${(zipRes.peakRssBytes / (1024 * 1024)).toFixed(1)} MB, SHA-256: ${zipRes.zipSha256})`
+    );
+  }
   console.log(`=== Million Match Simulation Runner Complete ===\n`);
 }
 

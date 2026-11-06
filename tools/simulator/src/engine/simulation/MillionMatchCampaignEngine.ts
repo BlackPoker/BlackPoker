@@ -20,6 +20,7 @@ import {
   ScaleVerificationStage,
   ParticipantPolicySpec,
   MatchupPairingSpec,
+  ChampionAuthenticityRecord,
   CompactMatchOutcomeRecord,
   ChunkManifestEntry,
   AnomalyCategory,
@@ -97,6 +98,13 @@ export class ConcurrentCampaignLockError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "ConcurrentCampaignLockError";
+  }
+}
+
+export class OfficialChampionIntegrityError extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = "OfficialChampionIntegrityError";
   }
 }
 
@@ -965,6 +973,7 @@ export interface MillionMatchCampaignOptions {
   readonly featureSchemaVersion: number;
   readonly rulePackage: RulePackage;
   readonly matchups: readonly MatchupPairingSpec[];
+  readonly championAuthenticity?: ChampionAuthenticityRecord;
   readonly policyResolver: (
     spec: ParticipantPolicySpec,
     seat: "p1" | "p2",
@@ -1012,9 +1021,18 @@ export class MillionMatchCampaignEngine {
     maxDecisionsPerMatch: number;
     chunkSizeMatches: number;
     matchups: readonly MatchupPairingSpec[];
+    championAuthenticity?: ChampionAuthenticityRecord;
   }): string {
     return sha256Hex(
       JSON.stringify({
+        championAuthenticity: (options.championAuthenticity?.entries ?? []).map((e) => ({
+          policyId: e.policyId,
+          genomeId: e.genomeId,
+          dnaDigest: e.dnaDigest,
+          sourceKind: e.sourceKind,
+          checkpointChecksum: e.checkpointChecksum ?? null,
+          checkpointFileSha256: e.checkpointFileSha256 ?? null,
+        })),
         purpose: options.purpose,
         totalPlannedMatches: options.totalPlannedMatches,
         campaignSeed: options.campaignSeed,
@@ -1086,6 +1104,7 @@ export class MillionMatchCampaignEngine {
       featureSchemaVersion,
       rulePackage,
       matchups,
+      championAuthenticity,
       policyResolver,
       sessionFactory,
       outputDir,
@@ -1155,6 +1174,7 @@ export class MillionMatchCampaignEngine {
       maxDecisionsPerMatch,
       chunkSizeMatches,
       matchups,
+      championAuthenticity,
     });
 
     const chunksDir = path.join(outputDir, "chunks");
@@ -1394,6 +1414,7 @@ export class MillionMatchCampaignEngine {
         nextMatchIndex: 0,
         seedSpace: seedAllocator.spec,
         matchups,
+        championAuthenticity,
         completedChunks: [],
         aggregatorState: agg,
         accumulatedElapsedMs: 0,
@@ -1546,6 +1567,7 @@ export class MillionMatchCampaignEngine {
         nextMatchIndex: completedMatchesNow,
         seedSpace: seedAllocator.spec,
         matchups,
+        championAuthenticity,
         completedChunks,
         aggregatorState: agg,
         accumulatedElapsedMs: accumulatedElapsedMs + wallNow,
@@ -2255,6 +2277,7 @@ export class MillionMatchCampaignEngine {
       logicalResultDigest,
       campaignStatus,
       sessionHistory: checkpointState.sessionHistory,
+      championAuthenticity: checkpointState.championAuthenticity ?? options.championAuthenticity,
       seedSpace: checkpointState.seedSpace,
       matchups: options.matchups,
       chunksManifest: checkpointState.completedChunks,

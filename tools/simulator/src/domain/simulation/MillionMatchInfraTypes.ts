@@ -69,6 +69,32 @@ export interface MatchupPairingSpec {
 }
 
 /**
+ * 参加 DNA / Policy の真正性・出所証明エントリ (Work 4-1 R2)
+ */
+export interface ChampionDnaAuthenticityEntry {
+  readonly policyId: string;
+  readonly name: string;
+  readonly role: ParticipantPolicySpec["role"];
+  readonly genomeId: string;
+  readonly dnaDigest: string;
+  readonly sourceKind: "OFFICIAL_STAGE3_CHECKPOINT" | "SYNTHETIC_TEST_INJECTION" | "DETERMINISTIC_ZERO_BASELINE";
+  readonly sourcePath: string;
+  readonly checkpointChecksum?: string;
+  readonly checkpointFileSha256?: string;
+  readonly manifestSha256Verified?: boolean;
+}
+
+/**
+ * キャンペーン全体で使用された Champion DNA 真正性監査情報 (Work 4-1 R2)
+ */
+export interface ChampionAuthenticityRecord {
+  readonly authenticityMode: "OFFICIAL_CHAMPIONS_VERIFIED" | "SYNTHETIC_TEST_INJECTED";
+  readonly fallbackAllowedInCli: false;
+  readonly verifiedAt: string;
+  readonly entries: readonly ChampionDnaAuthenticityEntry[];
+}
+
+/**
  * 通常試合用のコンパクト Outcome レコード (JSONL 1行 = 1試合)
  *
  * 【O(1) メモリ・省容量契約】
@@ -517,6 +543,7 @@ export interface MillionMatchCheckpointState {
   readonly nextMatchIndex: number;
   readonly seedSpace: SeedSpaceSpec;
   readonly matchups: readonly MatchupPairingSpec[];
+  readonly championAuthenticity?: ChampionAuthenticityRecord;
   readonly completedChunks: readonly ChunkManifestEntry[];
   readonly aggregatorState: StreamingAggregatorState;
   readonly accumulatedElapsedMs: number;
@@ -572,6 +599,7 @@ export interface MillionMatchCampaignEvidence {
     | "COMPLETED_WITH_STALL_SUSPICIONS"
     | "FAILED_CRITICAL_ANOMALY";
   readonly sessionHistory?: readonly ExecutionSessionHistoryEntry[];
+  readonly championAuthenticity?: ChampionAuthenticityRecord;
   readonly seedSpace: SeedSpaceSpec;
   readonly matchups: readonly MatchupPairingSpec[];
   readonly chunksManifest: readonly ChunkManifestEntry[];

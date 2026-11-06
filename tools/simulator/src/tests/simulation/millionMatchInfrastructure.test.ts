@@ -16,6 +16,7 @@ import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
+import * as fflate from "fflate";
 import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { getPlaytestRulePackage } from "../../engine/rules/RulePackageSelector";
 import { RulePackage } from "../../domain/rules/RulePackage";
@@ -33,6 +34,7 @@ import {
   ChunkIntegrityError,
   UnauthorizedScaleExecutionError,
   ConcurrentCampaignLockError,
+  OfficialChampionIntegrityError,
   FaultInjectionAbortError,
   DEDICATED_SEED_RANGE_SIZE,
   AFFINE_COPRIME_MULTIPLIER,
@@ -45,10 +47,21 @@ import {
 import {
   WORK4_WORK_ID,
   validateMillionMatchOutputDir,
+  loadOfficialChampionsStrict,
+  createSyntheticTestChampionsForUnitTest,
+  createStandardMatchupsAndResolver,
   saveMillionMatchArtifacts,
   auditMillionMatchArtifacts,
+  packageMillionMatchZip,
+  buildSessionSpecificZipPath,
   parseLargeScaleCliArgs,
 } from "../../cli/largeScaleSimulationRunner";
+import {
+  CANDIDATE_CHAMPION_GENOME_ID,
+  CANDIDATE_CHAMPION_EXPECTED_DIGEST,
+  OLD_CHAMPION_GENOME_ID,
+  OLD_CHAMPION_EXPECTED_DIGEST,
+} from "../../cli/stage3HoldoutRunner";
 import { MatchupPairingSpec, ParticipantPolicySpec } from "../../domain/simulation/MillionMatchInfraTypes";
 
 describe("BlackPoker Work 4-1 — Million Match Simulation Infrastructure", () => {
@@ -1051,6 +1064,268 @@ describe("BlackPoker Work 4-1 — Million Match Simulation Infrastructure", () =
           gitCommitSha: "0000000000000000000000000000000000000000",
         })
       ).rejects.toThrow(CheckpointIntegrityError);
+    });
+  });
+
+  describe("8. Work 4-1 R2: Champion DNA 真正性・ストリーミング ZIP・O(1) メモリ監査・並列実態検証", () => {
+    it("公式 Checkpoint が存在しない場合はフォールバックせず OfficialChampionIntegrityError で Fail-Closed 停止し、明示注入時のみ SYNTHETIC_TEST_INJECTED として Evidence に記録されること", async () => {
+      // 1. 存在しないパスを指定した場合、テスト用 DNA へフォールバックせず即座に OfficialChampionIntegrityError を投げること
+      expect(() =>
+        loadOfficialChampionsStrict({
+          candidateCheckpointPath: path.join(tmpRoot, "non-existent-gen7-ckpt.json"),
+          oldChampionCheckpointPath: path.join(tmpRoot, "non-existent-gen5-ckpt.json"),
+        })
+      ).toThrow(OfficialChampionIntegrityError);
+
+      // 2. ローカル環境に公式 Stage 3 原本が存在する場合は、Genome ID / DNA Digest / Checksum / Manifest SHA-256 を検証して OFFICIAL_CHAMPIONS_VERIFIED でロードできること
+      const officialGen7Path = path.resolve(
+        ".artifacts/stage3-full-action-retrain-r1/campaign-stage3-evolution-checkpoint.json"
+      );
+      const officialGen5Path = path.resolve(
+        ".artifacts/stage3-evolution/campaign-stage3-evolution-checkpoint.json"
+      );
+      if (fs.existsSync(officialGen7Path) && fs.existsSync(officialGen5Path)) {
+        const officialBundle = loadOfficialChampionsStrict();
+        expect(officialBundle.authenticityRecord.authenticityMode).toBe("OFFICIAL_CHAMPIONS_VERIFIED");
+        expect(officialBundle.authenticityRecord.fallbackAllowedInCli).toBe(false);
+        expect(officialBundle.gen7Digest).toBe(CANDIDATE_CHAMPION_EXPECTED_DIGEST);
+        expect(officialBundle.gen5Digest).toBe(OLD_CHAMPION_EXPECTED_DIGEST);
+        expect(officialBundle.authenticityRecord.entries[0].genomeId).toBe(CANDIDATE_CHAMPION_GENOME_ID);
+        expect(officialBundle.authenticityRecord.entries[1].genomeId).toBe(OLD_CHAMPION_GENOME_ID);
+        expect(officialBundle.authenticityRecord.entries[0].manifestSha256Verified).toBe(true);
+        expect(officialBundle.authenticityRecord.entries[1].manifestSha256Verified).toBe(true);
+      }
+
+      // 3. 単体テストコードで明示注入した場合のみ SYNTHETIC_TEST_INJECTED が記録されること
+      const synthBundle = createSyntheticTestChampionsForUnitTest();
+      expect(synthBundle.authenticityRecord.authenticityMode).toBe("SYNTHETIC_TEST_INJECTED");
+      expect(synthBundle.authenticityRecord.fallbackAllowedInCli).toBe(false);
+      const { matchups, championAuthenticity, policyResolver } =
+        createStandardMatchupsAndResolver(synthBundle);
+
+      const authDir = path.join(tmpRoot, "champion-auth-evidence-test");
+      const runRes = await MillionMatchCampaignEngine.runCampaign({
+        workId: WORK4_WORK_ID,
+        campaignId: "auth-record-test",
+        purpose: "QUALITY_AUDIT",
+        stage: "CUSTOM_PILOT",
+        executionMode: "PILOT",
+        totalPlannedMatches: 4,
+        campaignSeed: 777123,
+        regulationId: "standard-pack",
+        frameId: "pack",
+        rulePackageVersion: "1.0.0",
+        featureSchemaVersion: 6,
+        rulePackage,
+        matchups,
+        championAuthenticity,
+        policyResolver,
+        sessionFactory: createFastDeterministicSessionFactory(),
+        outputDir: authDir,
+        maxDecisionsPerMatch: 60,
+        chunkSizeMatches: 4,
+        maxConcurrency: 2,
+        gitCommitSha: "32ec29d55a83e23a3f367a1ba19c3a76bbcbe67a",
+        isGitClean: true,
+      });
+
+      expect(runRes.evidence.championAuthenticity).toBeDefined();
+      expect(runRes.evidence.championAuthenticity?.authenticityMode).toBe("SYNTHETIC_TEST_INJECTED");
+      expect(runRes.evidence.championAuthenticity?.entries.length).toBe(3);
+      expect(runRes.checkpointState.championAuthenticity?.authenticityMode).toBe("SYNTHETIC_TEST_INJECTED");
+    });
+
+    it("ストリーミング ZIP 生成が Peak RSS・所要時間を計測し、既存 ZIP の上書きを拒否し、セッション固有 ZIP 名を生成できること", () => {
+      const targetDir = path.join(tmpRoot, "run-unbroken-12");
+      const zipPath = path.join(tmpRoot, "streaming-test-archive.zip");
+
+      const zipRes = packageMillionMatchZip(targetDir, zipPath);
+      expect(zipRes.streamingMode).toBe(true);
+      expect(zipRes.zipSizeBytes).toBeGreaterThan(0);
+      expect(zipRes.filesCount).toBeGreaterThanOrEqual(8);
+      expect(zipRes.uncompressedTotalBytes).toBeGreaterThan(zipRes.zipSizeBytes);
+      expect(zipRes.elapsedMs).toBeGreaterThan(0);
+      expect(zipRes.peakRssBytes).toBeGreaterThan(0);
+      expect(zipRes.zipSha256).toMatch(/^[a-f0-9]{64}$/);
+
+      // 生成された ZIP を実際に展開してファイルが破損なく復元できることを検証
+      const unzipped = fflate.unzipSync(new Uint8Array(fs.readFileSync(zipPath)));
+      expect(unzipped["campaign-evidence.json"]).toBeDefined();
+      expect(unzipped["MANIFEST_SHA256.json"]).toBeDefined();
+      expect(unzipped["chunks/outcomes-chunk-00000.jsonl"]).toBeDefined();
+
+      // 同一パスへの再作成（上書き）は Fail-Closed で拒否されること
+      expect(() => packageMillionMatchZip(targetDir, zipPath)).toThrow(/already exists/);
+
+      // 中間セッション用固有 ZIP 名がセッション番号・試合数を含み衝突しないこと
+      const s0Zip = buildSessionSpecificZipPath(targetDir, 0, 10000);
+      const s1Zip = buildSessionSpecificZipPath(targetDir, 1, 20000);
+      expect(s0Zip).not.toBe(s1Zip);
+      expect(s0Zip.endsWith(".session-0000-m0010000.partial.zip")).toBe(true);
+      expect(s1Zip.endsWith(".session-0001-m0020000.partial.zip")).toBe(true);
+    });
+
+    it("auditMillionMatchArtifacts が seenMatchIds 全件保持なしで pairIndex / legIndex / matchSeed / matchId 改ざんを検出し、O(1) メモリで動作すること", () => {
+      const baseDir = path.join(tmpRoot, "run-unbroken-12");
+      const tamperSeedDir = path.join(tmpRoot, "tamper-deterministic-seed");
+      fs.cpSync(baseDir, tamperSeedDir, { recursive: true });
+
+      // チャンク内の matchSeed と pairIndex を改ざん
+      const chunk0Path = path.join(tamperSeedDir, "chunks", "outcomes-chunk-00000.jsonl");
+      const lines = fs.readFileSync(chunk0Path, "utf8").trim().split("\n");
+      const rec2 = JSON.parse(lines[2]);
+      rec2.pairIndex = 999;
+      rec2.matchSeed = 100000999;
+      lines[2] = JSON.stringify(rec2);
+      fs.writeFileSync(chunk0Path, lines.join("\n") + "\n", "utf8");
+
+      const audit = auditMillionMatchArtifacts(tamperSeedDir);
+      expect(audit.isValid).toBe(false);
+      expect(audit.constantMemoryVerified).toBe(true);
+      expect(audit.errors.some((e) => e.includes("pairIndex mismatch"))).toBe(true);
+      expect(audit.errors.some((e) => e.includes("Deterministic matchSeed mismatch"))).toBe(true);
+    });
+
+    it("Champion DNA Digest / Checkpoint SHA-256 が変更された状態の Resume は CheckpointIntegrityError で Fail-Closed 停止すること", async () => {
+      const synth = createSyntheticTestChampionsForUnitTest();
+      const { matchups, championAuthenticity, policyResolver } = createStandardMatchupsAndResolver(synth);
+      const dir = path.join(tmpRoot, "resume-auth-tamper");
+      const base = {
+        workId: WORK4_WORK_ID,
+        campaignId: "resume-auth-tamper",
+        purpose: "QUALITY_AUDIT" as const,
+        stage: "CUSTOM_PILOT" as const,
+        totalPlannedMatches: 8,
+        campaignSeed: 777321,
+        regulationId: "standard-pack",
+        frameId: "pack",
+        rulePackageVersion: "1.0.0",
+        featureSchemaVersion: 6,
+        rulePackage,
+        matchups,
+        championAuthenticity,
+        policyResolver,
+        sessionFactory: createFastDeterministicSessionFactory(),
+        outputDir: dir,
+        maxDecisionsPerMatch: 60,
+        chunkSizeMatches: 4,
+        maxConcurrency: 1 as const,
+        gitCommitSha: "32ec29d55a83e23a3f367a1ba19c3a76bbcbe67a",
+        isGitClean: true,
+      };
+      await MillionMatchCampaignEngine.runCampaign({ ...base, executionMode: "PILOT", sessionMatchLimit: 4 });
+      const tampered = {
+        ...championAuthenticity,
+        entries: championAuthenticity.entries.map((e, i) =>
+          i === 0 ? { ...e, checkpointFileSha256: "f".repeat(64) } : e
+        ),
+      };
+      await expect(
+        MillionMatchCampaignEngine.runCampaign({
+          ...base,
+          championAuthenticity: tampered,
+          executionMode: "RESUME",
+        })
+      ).rejects.toThrow(CheckpointIntegrityError);
+    });
+
+    it("concurrency=1 と concurrency=2 の実行で CPU 時間 / 実時間比および Logical Result Digest 完全一致を検証すること", async () => {
+      const sessionFactory = createFastDeterministicSessionFactory();
+      const runConc = async (conc: 1 | 2) => {
+        const dir = path.join(tmpRoot, `conc-bench-${conc}`);
+        const res = await MillionMatchCampaignEngine.runCampaign({
+          workId: WORK4_WORK_ID,
+          campaignId: "conc-bench",
+          purpose: "QUALITY_AUDIT",
+          stage: "CUSTOM_PILOT",
+          executionMode: "BENCHMARK",
+          totalPlannedMatches: 24,
+          campaignSeed: 888999,
+          regulationId: "standard-pack",
+          frameId: "pack",
+          rulePackageVersion: "1.0.0",
+          featureSchemaVersion: 6,
+          rulePackage,
+          matchups: testMatchups,
+          policyResolver: testPolicyResolver,
+          sessionFactory,
+          outputDir: dir,
+          maxDecisionsPerMatch: 80,
+          chunkSizeMatches: 24,
+          maxConcurrency: conc,
+          gitCommitSha: "32ec29d55a83e23a3f367a1ba19c3a76bbcbe67a",
+          isGitClean: true,
+        });
+        return res.evidence;
+      };
+
+      const ev1 = await runConc(1);
+      const ev2 = await runConc(2);
+
+      // 並列設定 (1 vs 2) にかかわらず Seed・勝敗・Logical Result Digest が 100% 一致すること
+      expect(ev1.logicalResultDigest).toBe(ev2.logicalResultDigest);
+      expect(ev1.gameQuality.seatWinRates).toEqual(ev2.gameQuality.seatWinRates);
+
+      // ローカルに Stage A / Stage B 原本が存在する場合は O(1) 監査とストリーミング ZIP 性能を計測出力
+      const stageADir = path.resolve(".artifacts/work4-stage-a-1k");
+      const stageBDir = path.resolve(".artifacts/work4-stage-b-10k");
+      if (fs.existsSync(stageADir) && fs.existsSync(stageBDir)) {
+        const auditA = auditMillionMatchArtifacts(stageADir);
+        const auditB = auditMillionMatchArtifacts(stageBDir);
+        expect(auditA.isValid).toBe(true);
+        expect(auditB.isValid).toBe(true);
+
+        const zipA = packageMillionMatchZip(stageADir, path.join(tmpRoot, "stage-a-stream-test.zip"));
+        const zipB = packageMillionMatchZip(stageBDir, path.join(tmpRoot, "stage-b-stream-test.zip"));
+        expect(zipA.streamingMode).toBe(true);
+        expect(zipB.streamingMode).toBe(true);
+
+        console.info(
+          "[R2_TELEMETRY_SUMMARY]",
+          JSON.stringify({
+            auditA: {
+              elapsedMs: auditA.auditElapsedMs,
+              heapDeltaBytes: auditA.auditHeapDeltaBytes,
+              peakHeapBytes: auditA.auditPeakHeapBytes,
+            },
+            auditB: {
+              elapsedMs: auditB.auditElapsedMs,
+              heapDeltaBytes: auditB.auditHeapDeltaBytes,
+              peakHeapBytes: auditB.auditPeakHeapBytes,
+            },
+            zipA: {
+              elapsedMs: zipA.elapsedMs,
+              zipSizeBytes: zipA.zipSizeBytes,
+              uncompressedTotalBytes: zipA.uncompressedTotalBytes,
+              baselineRssBytes: zipA.baselineRssBytes,
+              peakRssBytes: zipA.peakRssBytes,
+              rssDeltaBytes: zipA.rssDeltaBytes,
+            },
+            zipB: {
+              elapsedMs: zipB.elapsedMs,
+              zipSizeBytes: zipB.zipSizeBytes,
+              uncompressedTotalBytes: zipB.uncompressedTotalBytes,
+              baselineRssBytes: zipB.baselineRssBytes,
+              peakRssBytes: zipB.peakRssBytes,
+              rssDeltaBytes: zipB.rssDeltaBytes,
+            },
+            concurrencyBench: {
+              c1: {
+                elapsedMs: ev1.performance.totalElapsedMs,
+                mps: ev1.performance.matchesPerSecond,
+                totalCpuMs: ev1.performance.cpu.totalCpuTimeMs,
+                cpuUtilPct: ev1.performance.cpu.cpuUtilizationPercent,
+              },
+              c2: {
+                elapsedMs: ev2.performance.totalElapsedMs,
+                mps: ev2.performance.matchesPerSecond,
+                totalCpuMs: ev2.performance.cpu.totalCpuTimeMs,
+                cpuUtilPct: ev2.performance.cpu.cpuUtilizationPercent,
+              },
+            },
+          })
+        );
+      }
     });
   });
 });
