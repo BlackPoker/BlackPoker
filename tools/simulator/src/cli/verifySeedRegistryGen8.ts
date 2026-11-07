@@ -3,7 +3,7 @@ import * as path from "path";
 
 export interface SeedRangeAllocation {
   readonly purpose: string;
-  readonly status: "USED" | "PROTECTED_LOCKED" | "ALLOCATED_FOR_PRODUCTION" | "RESERVED_FOR_FUTURE_HOLDOUT";
+  readonly status: "USED" | "PROTECTED_LOCKED" | "ALLOCATED_FOR_PRODUCTION" | "RESERVED_FOR_FUTURE_HOLDOUT" | "TEST_ONLY";
   readonly startSeed: number;
   readonly endSeed: number;
   readonly allocatedSpan: number;
@@ -120,6 +120,15 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     actualUsedCount: 0,
     description: "本番学習完了後の正式評価・Holdout 用に将来割り当て予定の完全隔離 Seed (現在未実行・完全保護中・実使用 0 個)",
   },
+  {
+    purpose: "Gen 8 Holdout Harness Real Core Small-Scale Test",
+    status: "TEST_ONLY",
+    startSeed: 360001,
+    endSeed: 360050,
+    allocatedSpan: 50,
+    actualUsedCount: 50,
+    description: "Work 4-4 R3 実 Core 対戦ハーネス検証用小規模テスト Seed (2〜10 pairs)。本番 Holdout (350001〜350300) と完全隔離",
+  },
 ];
 
 /**
@@ -166,6 +175,10 @@ export function reconstructActualUsedSeedSets(): Record<string, Set<number>> {
   const futureHoldout = new Set<number>();
   for (let s = 350001; s <= 350300; s++) futureHoldout.add(s);
 
+  // 9. Gen 8 Holdout Harness Small-Scale Test (50 seeds)
+  const smallScaleTest = new Set<number>();
+  for (let s = 360001; s <= 360050; s++) smallScaleTest.add(s);
+
   return {
     "Stage 3 Holdout": stage3Holdout,
     "Gen 7 Diagnostic": diagnostic,
@@ -175,6 +188,7 @@ export function reconstructActualUsedSeedSets(): Record<string, Set<number>> {
     "Gen 8 Training": productionTraining,
     "Gen 8 Validation": productionValidation,
     "Gen 8 Future Holdout": futureHoldout,
+    "Holdout Harness Test": smallScaleTest,
   };
 }
 

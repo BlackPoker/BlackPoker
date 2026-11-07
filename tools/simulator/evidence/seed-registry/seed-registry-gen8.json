@@ -1,9 +1,9 @@
 {
-  "timestamp": "2026-11-07T06:03:32.420Z",
+  "timestamp": "2026-11-07T06:48:14.413Z",
   "auditStatus": "PASS",
   "collisionErrors": 0,
   "registrySummary": {
-    "totalCriticalSpans": 8,
+    "totalCriticalSpans": 9,
     "trainingAllocatedSpan": 18066,
     "trainingActualUsedCount": 660,
     "validationAllocatedSpan": 9360,
@@ -119,6 +119,15 @@
       "allocatedSpan": 300,
       "actualUsedCount": 0,
       "description": "本番学習完了後の正式評価・Holdout 用に将来割り当て予定の完全隔離 Seed (現在未実行・完全保護中・実使用 0 個)"
+    },
+    {
+      "purpose": "Gen 8 Holdout Harness Real Core Small-Scale Test",
+      "status": "TEST_ONLY",
+      "startSeed": 360001,
+      "endSeed": 360050,
+      "allocatedSpan": 50,
+      "actualUsedCount": 50,
+      "description": "Work 4-4 R3 実 Core 対戦ハーネス検証用小規模テスト Seed (2〜10 pairs)。本番 Holdout (350001〜350300) と完全隔離"
     }
   ]
 }

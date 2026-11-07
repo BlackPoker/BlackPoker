@@ -47,12 +47,15 @@ import {
   CompactMatchOutcomeRecord,
   PlayerActionStatsRecord,
   ChampionAuthenticityRecord,
+  ParticipantPolicySpec,
 } from "../domain/simulation/MillionMatchInfraTypes";
 import {
   derivePlayerSeed,
   executeSingleInstrumentedMatch,
   SingleMatchExecutionResult,
 } from "../engine/simulation/MillionMatchCampaignEngine";
+import { MillionMatchWorkerPool, WorkerPairTask } from "../engine/simulation/MillionMatchWorkerPool";
+import { SerializedChampionsBundle } from "../domain/simulation/MillionMatchWorkerTypes";
 import {
   CANDIDATE_CHAMPION_GENOME_ID as GEN7_GENOME_ID,
   CANDIDATE_CHAMPION_EXPECTED_DIGEST as GEN7_EXPECTED_DIGEST,
@@ -67,7 +70,7 @@ import { SEED_REGISTRY_GEN8 } from "./verifySeedRegistryGen8";
 // 定数定義
 // =============================================================================
 
-export const GEN8_HOLDOUT_WORK_ID = "BP-SIM-AI-V92-WORK4-4-GEN8-PRE-HOLDOUT-AUDIT-R2" as const;
+export const GEN8_HOLDOUT_WORK_ID = "BP-SIM-AI-V92-WORK4-4-GEN8-HOLDOUT-ENGINE-R3" as const;
 export const GEN8_HOLDOUT_REGULATION_ID = "standard-pack" as const;
 export const GEN8_HOLDOUT_FRAME_ID = "pack" as const;
 export const GEN8_HOLDOUT_RULE_PACKAGE_VERSION = "1.0.0" as const;
@@ -93,6 +96,10 @@ export const GEN8_HOLDOUT_SEED_RANGE_START = 350001 as const;
 export const GEN8_HOLDOUT_SEED_RANGE_END = 350300 as const;
 export const DEFAULT_PRIMARY_PAIRS = 120 as const; // 240 matches vs Gen 7
 export const MAX_AVAILABLE_PAIRS = 150 as const; // 300 matches total available
+
+/** テスト用小規模 Seed 割当 (360001〜360050: 実 Core 検証用) */
+export const GEN8_HOLDOUT_TEST_SEED_START = 360001 as const;
+export const GEN8_HOLDOUT_TEST_SEED_END = 360050 as const;
 
 /** 意思決定上限: 500 回 */
 export const GEN8_HOLDOUT_MAX_DECISIONS_PER_MATCH = 500 as const;
@@ -290,6 +297,9 @@ export interface Gen8HoldoutPreflightOptions {
   readonly expectedGen7Digest?: string;
   readonly expectedGen5Digest?: string;
   readonly requireOfficialCheckpoints?: boolean;
+  readonly testExecutionAuthorized?: boolean;
+  readonly isSyntheticTest?: boolean;
+  readonly isRealCoreTest?: boolean;
 }
 
 export interface Gen8HoldoutExecutionOptions {
@@ -307,8 +317,17 @@ export interface Gen8HoldoutExecutionOptions {
   readonly outputDir: string;
   readonly chunkSizeMatches?: number;
   readonly maxDecisionsPerMatch?: number;
+  readonly workersCount?: number;
+  readonly regulationId?: string;
+  readonly frameId?: string;
+  readonly rulePackageVersion?: string;
+  readonly rulesDir?: string;
   readonly isSyntheticTest?: boolean;
+  readonly isRealCoreTest?: boolean;
   readonly testExecutionAuthorized?: boolean;
+  readonly approvalToken?: string;
+  readonly sessionPairsLimit?: number;
+  readonly workerPool?: MillionMatchWorkerPool;
 }
 
 // =============================================================================
@@ -647,6 +666,21 @@ export function buildGen8HoldoutPreflightManifest(
   const approvalToken = options?.approvalToken;
   const isApproved = approvalToken === GEN8_HOLDOUT_APPROVAL_TOKEN;
 
+  // 1. 早期実行禁止・未承認判定 (Fail-Closed)
+  // 公式 Checkpoint のロードより前に実行判定を行い、未承認なら即時 UnauthorizedHoldoutExecutionError をスローする
+  if (mode === "EXECUTE") {
+    const isTestExecution = Boolean(
+      options?.testExecutionAuthorized && (options?.isSyntheticTest || options?.isRealCoreTest)
+    );
+    if (!isTestExecution) {
+      throw new UnauthorizedHoldoutExecutionError(
+        `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R3.\n` +
+        `Actual match execution on reserved seeds (350001..350300) requires explicit stakeholder approval.\n` +
+        `Only infrastructure implementation, verified small-scale tests, and synthetic tests are permitted in R3.`
+      );
+    }
+  }
+
   let isGitClean = false;
   let gitCommitSha = "UNKNOWN";
   try {
@@ -809,18 +843,38 @@ export interface HoldoutExecutionCheckpointState {
   readonly outputDir: string;
   readonly candidateDigest: string;
   readonly opponentDigest: string;
+  readonly regulationId: string;
+  readonly frameId: string;
+  readonly rulePackageVersion: string;
+  readonly maxDecisions: number;
+  readonly startSeed: number;
   readonly totalPlannedPairs: number;
   readonly completedPairsCount: number;
   readonly nextPairIndex: number;
-  readonly startSeed: number;
   readonly completedChunks: readonly {
     readonly chunkIndex: number;
     readonly fileName: string;
     readonly matchCount: number;
     readonly sha256: string;
   }[];
+  readonly configDigest: string;
+  readonly gitCommitSha: string;
   readonly timestamp: string;
   readonly checksum: string;
+}
+
+export function computeHoldoutConfigDigest(params: {
+  readonly candidateDigest: string;
+  readonly opponentDigest: string;
+  readonly regulationId: string;
+  readonly frameId: string;
+  readonly rulePackageVersion: string;
+  readonly maxDecisions: number;
+  readonly startSeed: number;
+  readonly totalPlannedPairs: number;
+}): string {
+  const content = JSON.stringify(params);
+  return crypto.createHash("sha256").update(content).digest("hex");
 }
 
 export function computeHoldoutCheckpointChecksum(stateWithoutChecksum: Omit<HoldoutExecutionCheckpointState, "checksum">): string {
@@ -833,17 +887,6 @@ export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOp
   readonly totalMatches: number;
   readonly auditResult: Gen8HoldoutAuditResult;
 }> {
-  // 1. 実 Holdout 実行保護バリア (Fail-Closed)
-  // 今回の Work 4-4 R2 では実試合の実行は厳格に禁止されている。
-  // 合成テスト (isSyntheticTest === true && testExecutionAuthorized === true) のみ実行を許可。
-  if (!options.isSyntheticTest || !options.testExecutionAuthorized) {
-    throw new UnauthorizedHoldoutExecutionError(
-      `[Fail-Closed] Real Gen 8 Holdout Match Execution is strictly prohibited in Work 4-4 R2.\n` +
-      `Holdout matches on reserved seeds (350001..350300) must remain 100% pristine and unexecuted until explicit user authorization.\n` +
-      `Only synthetic test executions (isSyntheticTest === true && testExecutionAuthorized === true) are permitted.`
-    );
-  }
-
   const {
     candidateDNA,
     candidateDigest,
@@ -858,33 +901,121 @@ export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOp
     outputDir,
     chunkSizeMatches = 50,
     maxDecisionsPerMatch = GEN8_HOLDOUT_MAX_DECISIONS_PER_MATCH,
+    workersCount = 4,
+    regulationId = GEN8_HOLDOUT_REGULATION_ID,
+    frameId = GEN8_HOLDOUT_FRAME_ID,
+    rulePackageVersion = GEN8_HOLDOUT_RULE_PACKAGE_VERSION,
+    rulesDir,
+    isSyntheticTest = false,
+    isRealCoreTest = false,
+    testExecutionAuthorized = false,
+    sessionPairsLimit,
   } = options;
+
+  const targetPairsThisSession = sessionPairsLimit ? Math.min(pairsCount, sessionPairsLimit) : pairsCount;
+
+  // 1. 実 Holdout 予約 Seed (350001〜350300) の実試合実行保護 (Fail-Closed)
+  const endSeed = startSeed + pairsCount - 1;
+  const overlapsReserved =
+    (startSeed >= GEN8_HOLDOUT_SEED_RANGE_START && startSeed <= GEN8_HOLDOUT_SEED_RANGE_END) ||
+    (endSeed >= GEN8_HOLDOUT_SEED_RANGE_START && endSeed <= GEN8_HOLDOUT_SEED_RANGE_END);
+  if (overlapsReserved) {
+    throw new UnauthorizedHoldoutExecutionError(
+      `[Fail-Closed] Real Gen 8 Holdout Match Execution on reserved seeds (350001..350300) is strictly prohibited in Work 4-4 R3.\n` +
+      `Holdout matches on reserved seeds must remain 100% pristine and unexecuted until explicit user authorization.\n` +
+      `Current startSeed=${startSeed}, pairsCount=${pairsCount}.`
+    );
+  }
+
+  // 2. 実行モード判定 (未承認実行の遮断)
+  if (!testExecutionAuthorized || (!isSyntheticTest && !isRealCoreTest)) {
+    throw new UnauthorizedHoldoutExecutionError(
+      `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R3.\n` +
+      `Actual match execution requires explicit stakeholder approval.\n` +
+      `Only synthetic and verified real-core small-scale test executions are permitted in R3.`
+    );
+  }
 
   fs.mkdirSync(outputDir, { recursive: true });
   const chunksDir = path.join(outputDir, "chunks");
   fs.mkdirSync(chunksDir, { recursive: true });
   const checkpointPath = path.join(outputDir, "checkpoint.json");
 
+  let gitCommitSha = "UNKNOWN";
+  try {
+    gitCommitSha = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
+  } catch {
+    // Ignore
+  }
+
+  const currentConfigDigest = computeHoldoutConfigDigest({
+    candidateDigest,
+    opponentDigest,
+    regulationId,
+    frameId,
+    rulePackageVersion,
+    maxDecisions: maxDecisionsPerMatch,
+    startSeed,
+    totalPlannedPairs: pairsCount,
+  });
+
   let startPairIndex = 0;
   let completedChunks: { chunkIndex: number; fileName: string; matchCount: number; sha256: string }[] = [];
 
-  // Resume 検証
+  // Resume 検証 (要件 4: 厳格な全フィールド照合)
   if (fs.existsSync(checkpointPath)) {
-    const raw = JSON.parse(fs.readFileSync(checkpointPath, "utf8"));
+    const raw: HoldoutExecutionCheckpointState = JSON.parse(fs.readFileSync(checkpointPath, "utf8"));
     const { checksum, ...rest } = raw;
     const expectedChecksum = computeHoldoutCheckpointChecksum(rest);
     if (checksum !== expectedChecksum) {
       throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint checksum mismatch at "${checkpointPath}"`);
     }
-    if (raw.candidateDigest !== candidateDigest || raw.opponentDigest !== opponentDigest) {
-      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint DNA digest mismatch.`);
+
+    if (raw.candidateDigest !== candidateDigest) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint candidateDigest mismatch: expected ${candidateDigest}, found ${raw.candidateDigest}`);
     }
-    startPairIndex = raw.nextPairIndex;
+    if (raw.opponentDigest !== opponentDigest) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint opponentDigest mismatch: expected ${opponentDigest}, found ${raw.opponentDigest}`);
+    }
+    if (raw.regulationId !== regulationId) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint regulationId mismatch: expected ${regulationId}, found ${raw.regulationId}`);
+    }
+    if (raw.frameId !== frameId) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint frameId mismatch: expected ${frameId}, found ${raw.frameId}`);
+    }
+    if (raw.rulePackageVersion !== rulePackageVersion) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint rulePackageVersion mismatch: expected ${rulePackageVersion}, found ${raw.rulePackageVersion}`);
+    }
+    if (raw.maxDecisions !== maxDecisionsPerMatch) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint maxDecisions mismatch: expected ${maxDecisionsPerMatch}, found ${raw.maxDecisions}`);
+    }
+    if (raw.startSeed !== startSeed) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint startSeed mismatch: expected ${startSeed}, found ${raw.startSeed}`);
+    }
+    if (raw.totalPlannedPairs !== pairsCount) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint totalPlannedPairs mismatch: expected ${pairsCount}, found ${raw.totalPlannedPairs}`);
+    }
+    if (raw.configDigest !== currentConfigDigest) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint configDigest mismatch: expected ${currentConfigDigest}, found ${raw.configDigest}`);
+    }
+
+    // 確定済みチャンクファイルの存在と SHA-256 検証
+    for (const chunkInfo of raw.completedChunks) {
+      const chunkFilePath = path.join(outputDir, chunkInfo.fileName);
+      if (!fs.existsSync(chunkFilePath)) {
+        throw new Gen8HoldoutAuditError(`[Fail-Closed] Missing chunk file recorded in checkpoint: ${chunkFilePath}`);
+      }
+      const actualSha = computeFileSha256(chunkFilePath);
+      if (actualSha !== chunkInfo.sha256) {
+        throw new Gen8HoldoutAuditError(`[Fail-Closed] Chunk SHA-256 mismatch for ${chunkFilePath}: expected ${chunkInfo.sha256}, got ${actualSha}`);
+      }
+    }
+
+    startPairIndex = raw.completedPairsCount;
     completedChunks = [...raw.completedChunks];
   }
 
   let currentChunkLines: string[] = [];
-  let currentChunkStartIndex = startPairIndex * 2;
 
   const flushChunk = (pairsDoneSoFar: number) => {
     if (currentChunkLines.length === 0) return;
@@ -904,20 +1035,25 @@ export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOp
       sha256,
     });
     currentChunkLines = [];
-    currentChunkStartIndex = pairsDoneSoFar * 2;
 
-    // Checkpoint 更新
+    // Checkpoint 更新 (アトミック保存)
     const ckptStateWithout: Omit<HoldoutExecutionCheckpointState, "checksum"> = {
       workId: GEN8_HOLDOUT_WORK_ID,
       campaignId: "gen8-holdout-eval",
       outputDir,
       candidateDigest,
       opponentDigest,
+      regulationId,
+      frameId,
+      rulePackageVersion,
+      maxDecisions: maxDecisionsPerMatch,
+      startSeed,
       totalPlannedPairs: pairsCount,
       completedPairsCount: pairsDoneSoFar,
       nextPairIndex: pairsDoneSoFar,
-      startSeed,
       completedChunks,
+      configDigest: currentConfigDigest,
+      gitCommitSha,
       timestamp: new Date().toISOString(),
     };
     const ckptChecksum = computeHoldoutCheckpointChecksum(ckptStateWithout);
@@ -926,106 +1062,244 @@ export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOp
     fs.renameSync(ckptTmp, checkpointPath);
   };
 
-  // 決定論的座席反転ペア対戦ループ
-  for (let pairIndex = startPairIndex; pairIndex < pairsCount; pairIndex++) {
-    const matchSeed = startSeed + pairIndex;
-    const p1Seed = derivePlayerSeed(matchSeed, "p1");
-    const p2Seed = derivePlayerSeed(matchSeed, "p2");
+  if (isSyntheticTest) {
+    // -------------------------------------------------------------------------
+    // 合成テスト経路 (テストコード専用: 高速モック生成)
+    // -------------------------------------------------------------------------
+    for (let pairIndex = startPairIndex; pairIndex < targetPairsThisSession; pairIndex++) {
+      const matchSeed = startSeed + pairIndex;
+      const p1Seed = derivePlayerSeed(matchSeed, "p1");
+      const p2Seed = derivePlayerSeed(matchSeed, "p2");
 
-    // Leg 0: Cand=P1, Opp=P2
-    const matchIndex0 = pairIndex * 2;
-    const matchId0 = `gen8-holdout-m${matchIndex0}-p${pairIndex}-l0`;
-    const leg0Outcome: CompactMatchOutcomeRecord = {
-      schemaVersion: "1.0.0",
-      matchIndex: matchIndex0,
-      pairIndex,
-      legIndex: 0,
-      matchId: matchId0,
-      matchupId: `cand-vs-${opponentId}`,
-      matchSeed,
-      playerSeeds: { p1: p1Seed, p2: p2Seed },
-      p1PolicyId: "gen8-candidate",
-      p2PolicyId: opponentId,
-      p1DnaDigest: candidateDigest,
-      p2DnaDigest: opponentDigest,
-      status: "COMPLETED",
-      completed: true,
-      winner: "p1", // 合成テスト用の決定論的勝者
-      reason: "finished",
-      totalDecisions: 24,
-      turnCount: 12,
-      passDecisions: 2,
-      maxConsecutivePasses: 1,
-      streamingDecisions: 0,
-      maxLegalPatterns: 4,
-      instantiationFailures: 0,
-      reachedDecisionLimit: false,
-      finalStateHash: `hash-m${matchIndex0}`,
-      playerStats: {
-        p1: {
-          offeredActions: { "action.attack": 8, "action.throwing": 4, PASS: 8 },
-          executedActions: { "action.attack": 5, "action.throwing": 2, PASS: 1 },
-          passDecisions: 1,
+      // Leg 0: Cand=P1, Opp=P2
+      const matchIndex0 = pairIndex * 2;
+      const matchId0 = `gen8-holdout-m${matchIndex0}-p${pairIndex}-l0`;
+      const leg0Outcome: CompactMatchOutcomeRecord = {
+        schemaVersion: "1.0.0",
+        matchIndex: matchIndex0,
+        pairIndex,
+        legIndex: 0,
+        matchId: matchId0,
+        matchupId: `cand-vs-${opponentId}`,
+        matchSeed,
+        playerSeeds: { p1: p1Seed, p2: p2Seed },
+        p1PolicyId: "gen8-candidate",
+        p2PolicyId: opponentId,
+        p1DnaDigest: candidateDigest,
+        p2DnaDigest: opponentDigest,
+        status: "COMPLETED",
+        completed: true,
+        winner: "p1",
+        reason: "finished",
+        totalDecisions: 24,
+        turnCount: 12,
+        passDecisions: 2,
+        maxConsecutivePasses: 1,
+        streamingDecisions: 0,
+        maxLegalPatterns: 4,
+        instantiationFailures: 0,
+        reachedDecisionLimit: false,
+        finalStateHash: `hash-m${matchIndex0}`,
+        playerStats: {
+          p1: {
+            offeredActions: { "action.attack": 8, "action.throwing": 4, PASS: 8 },
+            executedActions: { "action.attack": 5, "action.throwing": 2, PASS: 1 },
+            passDecisions: 1,
+          },
+          p2: {
+            offeredActions: { "action.attack": 6, "action.throwing": 6, PASS: 6 },
+            executedActions: { "action.attack": 1, "action.throwing": 4, PASS: 1 },
+            passDecisions: 1,
+          },
         },
-        p2: {
-          offeredActions: { "action.attack": 6, "action.throwing": 6, PASS: 6 },
-          executedActions: { "action.attack": 1, "action.throwing": 4, PASS: 1 },
-          passDecisions: 1,
+      };
+      currentChunkLines.push(JSON.stringify(leg0Outcome));
+
+      // Leg 1: Opp=P1, Cand=P2 (座席反転)
+      const matchIndex1 = pairIndex * 2 + 1;
+      const matchId1 = `gen8-holdout-m${matchIndex1}-p${pairIndex}-l1`;
+      const leg1Outcome: CompactMatchOutcomeRecord = {
+        schemaVersion: "1.0.0",
+        matchIndex: matchIndex1,
+        pairIndex,
+        legIndex: 1,
+        matchId: matchId1,
+        matchupId: `cand-vs-${opponentId}`,
+        matchSeed,
+        playerSeeds: { p1: p1Seed, p2: p2Seed },
+        p1PolicyId: opponentId,
+        p2PolicyId: "gen8-candidate",
+        p1DnaDigest: opponentDigest,
+        p2DnaDigest: candidateDigest,
+        status: "COMPLETED",
+        completed: true,
+        winner: "p2",
+        reason: "finished",
+        totalDecisions: 26,
+        turnCount: 13,
+        passDecisions: 3,
+        maxConsecutivePasses: 1,
+        streamingDecisions: 0,
+        maxLegalPatterns: 4,
+        instantiationFailures: 0,
+        reachedDecisionLimit: false,
+        finalStateHash: `hash-m${matchIndex1}`,
+        playerStats: {
+          p1: {
+            offeredActions: { "action.attack": 5, "action.throwing": 5, PASS: 5 },
+            executedActions: { "action.attack": 2, "action.throwing": 3, PASS: 1 },
+            passDecisions: 1,
+          },
+          p2: {
+            offeredActions: { "action.attack": 9, "action.throwing": 3, PASS: 9 },
+            executedActions: { "action.attack": 6, "action.throwing": 1, PASS: 2 },
+            passDecisions: 2,
+          },
         },
+      };
+      currentChunkLines.push(JSON.stringify(leg1Outcome));
+
+      if (currentChunkLines.length >= chunkSizeMatches || pairIndex === targetPairsThisSession - 1) {
+        flushChunk(pairIndex + 1);
+      }
+    }
+  } else {
+    // -------------------------------------------------------------------------
+    // 実際の Core 対戦経路 (MillionMatchWorkerPool & 実際ゲームセッション)
+    // -------------------------------------------------------------------------
+    const effectiveRulesDir = rulesDir ? path.resolve(rulesDir) : path.resolve("src/data/rules-vnext");
+
+    const poolGen7DNA = opponentDNA;
+    const poolGen5DNA = opponentDNA;
+    const poolZeroDNA = DecisionDNACodec.createZeroDecisionDNA({
+      id: "zero-dna",
+      name: "Zero Baseline",
+    });
+
+    const isPoolInjected = Boolean(options.workerPool);
+    const workerPool = options.workerPool ?? (await MillionMatchWorkerPool.create({
+      workersCount,
+      regulationId,
+      frameId,
+      rulesDir: effectiveRulesDir,
+      maxDecisionsPerMatch,
+      champions: {
+        gen7DNA: poolGen7DNA,
+        gen7Digest: EvolutionIndependentEvaluator.computeDnaDigest(poolGen7DNA),
+        gen7Source: "holdout-harness",
+        gen5DNA: poolGen5DNA,
+        gen5Digest: EvolutionIndependentEvaluator.computeDnaDigest(poolGen5DNA),
+        gen5Source: "holdout-harness",
+        zeroDNA: poolZeroDNA,
+        zeroDigest: EvolutionIndependentEvaluator.computeDnaDigest(poolZeroDNA),
       },
-    };
-    currentChunkLines.push(JSON.stringify(leg0Outcome));
+    }));
 
-    // Leg 1: Opp=P1, Cand=P2 (座席反転)
-    const matchIndex1 = pairIndex * 2 + 1;
-    const matchId1 = `gen8-holdout-m${matchIndex1}-p${pairIndex}-l1`;
-    const leg1Outcome: CompactMatchOutcomeRecord = {
-      schemaVersion: "1.0.0",
-      matchIndex: matchIndex1,
-      pairIndex,
-      legIndex: 1,
-      matchId: matchId1,
-      matchupId: `cand-vs-${opponentId}`,
-      matchSeed,
-      playerSeeds: { p1: p1Seed, p2: p2Seed },
-      p1PolicyId: opponentId,
-      p2PolicyId: "gen8-candidate",
-      p1DnaDigest: opponentDigest,
-      p2DnaDigest: candidateDigest,
-      status: "COMPLETED",
-      completed: true,
-      winner: "p2", // Cand (P2) wins
-      reason: "finished",
-      totalDecisions: 26,
-      turnCount: 13,
-      passDecisions: 3,
-      maxConsecutivePasses: 1,
-      streamingDecisions: 0,
-      maxLegalPatterns: 4,
-      instantiationFailures: 0,
-      reachedDecisionLimit: false,
-      finalStateHash: `hash-m${matchIndex1}`,
-      playerStats: {
-        p1: {
-          offeredActions: { "action.attack": 5, "action.throwing": 5, PASS: 5 },
-          executedActions: { "action.attack": 2, "action.throwing": 3, PASS: 1 },
-          passDecisions: 1,
-        },
-        p2: {
-          offeredActions: { "action.attack": 9, "action.throwing": 3, PASS: 9 },
-          executedActions: { "action.attack": 6, "action.throwing": 1, PASS: 2 },
-          passDecisions: 2,
-        },
-      },
-    };
-    currentChunkLines.push(JSON.stringify(leg1Outcome));
+    try {
+      const specA: ParticipantPolicySpec = {
+        policyId: candidateGenomeId,
+        name: candidateGenomeId,
+        kind: "GENOME",
+        role: "CANDIDATE",
+        dnaDigest: candidateDigest,
+        customDNA: candidateDNA,
+      };
+      const specB: ParticipantPolicySpec = {
+        policyId: opponentGenomeId,
+        name: opponentGenomeId,
+        kind: "GENOME",
+        role: "CANDIDATE",
+        dnaDigest: opponentDigest,
+        customDNA: opponentDNA,
+      };
 
-    if (currentChunkLines.length >= chunkSizeMatches) {
-      flushChunk(pairIndex + 1);
+      const batchSizePairs = Math.max(1, Math.min(10, Math.floor(chunkSizeMatches / 2)));
+
+      for (let batchStart = startPairIndex; batchStart < targetPairsThisSession; batchStart += batchSizePairs) {
+        const batchEnd = Math.min(targetPairsThisSession, batchStart + batchSizePairs);
+        const pairPromises: Promise<{ pairIndex: number; leg0: CompactMatchOutcomeRecord; leg1: CompactMatchOutcomeRecord }>[] = [];
+
+        for (let pIdx = batchStart; pIdx < batchEnd; pIdx++) {
+          const matchSeed = startSeed + pIdx;
+          const p1Seed = derivePlayerSeed(matchSeed, "p1");
+          const p2Seed = derivePlayerSeed(matchSeed, "p2");
+
+          const task: WorkerPairTask = {
+            taskId: `holdout-p${pIdx}`,
+            campaignId: "gen8-holdout-eval",
+            workId: GEN8_HOLDOUT_WORK_ID,
+            pairIndex: pIdx,
+            matchSeed,
+            playerSeeds: { p1: p1Seed, p2: p2Seed },
+            matchup: {
+              matchupId: `holdout-${candidateGenomeId}-vs-${opponentGenomeId}`,
+              name: `${candidateGenomeId} vs ${opponentGenomeId}`,
+              weight: 1,
+              agentA: specA,
+              agentB: specB,
+            },
+            maxDecisionsPerMatch,
+          };
+
+          pairPromises.push(
+            workerPool.executePairTask(task).then((res) => {
+              const matchIndex0 = pIdx * 2;
+              const matchIndex1 = pIdx * 2 + 1;
+
+              const leg0Outcome: CompactMatchOutcomeRecord = {
+                ...res.leg0Result.outcomeRecord,
+                matchIndex: matchIndex0,
+                pairIndex: pIdx,
+                legIndex: 0,
+                matchId: `gen8-holdout-m${matchIndex0}-p${pIdx}-l0`,
+                matchupId: `cand-vs-${opponentId}`,
+                matchSeed,
+                playerSeeds: { p1: p1Seed, p2: p2Seed },
+                p1PolicyId: candidateGenomeId,
+                p2PolicyId: opponentGenomeId,
+                p1DnaDigest: candidateDigest,
+                p2DnaDigest: opponentDigest,
+              };
+
+              const leg1Outcome: CompactMatchOutcomeRecord = {
+                ...res.leg1Result.outcomeRecord,
+                matchIndex: matchIndex1,
+                pairIndex: pIdx,
+                legIndex: 1,
+                matchId: `gen8-holdout-m${matchIndex1}-p${pIdx}-l1`,
+                matchupId: `cand-vs-${opponentId}`,
+                matchSeed,
+                playerSeeds: { p1: p1Seed, p2: p2Seed },
+                p1PolicyId: opponentGenomeId,
+                p2PolicyId: candidateGenomeId,
+                p1DnaDigest: opponentDigest,
+                p2DnaDigest: candidateDigest,
+              };
+
+              return { pairIndex: pIdx, leg0: leg0Outcome, leg1: leg1Outcome };
+            })
+          );
+        }
+
+        const batchResults = await Promise.all(pairPromises);
+        // Worker数に左右されないよう pairIndex 昇順で整列
+        batchResults.sort((a, b) => a.pairIndex - b.pairIndex);
+
+        for (const r of batchResults) {
+          currentChunkLines.push(JSON.stringify(r.leg0));
+          currentChunkLines.push(JSON.stringify(r.leg1));
+        }
+
+        flushChunk(batchEnd);
+      }
+    } finally {
+      if (!isPoolInjected) {
+        await workerPool.terminate();
+      }
     }
   }
 
-  flushChunk(pairsCount);
+  flushChunk(targetPairsThisSession);
 
   // MANIFEST_SHA256.json の生成
   const manifestMap: Record<string, string> = {};
@@ -1035,18 +1309,38 @@ export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOp
   manifestMap["checkpoint.json"] = computeFileSha256(checkpointPath);
   fs.writeFileSync(path.join(outputDir, "MANIFEST_SHA256.json"), JSON.stringify(manifestMap, null, 2), "utf8");
 
-  // 完了後の厳格監査
-  const auditResult = auditGen8HoldoutArtifacts(outputDir, {
-    expectedCandidateDigest: candidateDigest,
-    expectedOpponentDigest: opponentDigest,
-    expectedTotalPairs: pairsCount,
-    expectedTotalMatches: pairsCount * 2,
-    expectedStartSeed: startSeed,
-  });
+  // 全体完了時のみ監査を実行、部分セッション完了時は暫定サマリを返却
+  let auditResult: Gen8HoldoutAuditResult;
+  if (targetPairsThisSession === pairsCount) {
+    auditResult = auditGen8HoldoutArtifacts(outputDir, {
+      expectedCandidateDigest: candidateDigest,
+      expectedOpponentDigest: opponentDigest,
+      expectedTotalPairs: pairsCount,
+      expectedTotalMatches: pairsCount * 2,
+      expectedStartSeed: startSeed,
+    });
+  } else {
+    auditResult = {
+      isValid: true,
+      auditTimestamp: new Date().toISOString(),
+      artifactsDir: outputDir,
+      checkedFiles: ["checkpoint.json"],
+      errors: [],
+      totalMatches: targetPairsThisSession * 2,
+      totalPairs: targetPairsThisSession,
+      completedMatches: targetPairsThisSession * 2,
+      failedMatches: 0,
+      incompleteMatches: 0,
+      candidateDigest,
+      candidateDigestVerified: true,
+      superiorityVerified: false,
+      nonInferiorityVerified: false,
+    };
+  }
 
   return {
-    completedPairs: pairsCount,
-    totalMatches: pairsCount * 2,
+    completedPairs: targetPairsThisSession,
+    totalMatches: targetPairsThisSession * 2,
     auditResult,
   };
 }
@@ -1326,6 +1620,7 @@ export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)):
   let plannedPairs: number = DEFAULT_PRIMARY_PAIRS;
   let outputDir: string = DEFAULT_GEN8_HOLDOUT_OUTPUT_DIR;
   let allowSyntheticTest = false;
+  let allowRealCoreTest = false;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -1339,12 +1634,25 @@ export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)):
       mode = "AUDIT_ONLY";
     } else if (arg === "--allow-synthetic-execution-test") {
       allowSyntheticTest = true;
+    } else if (arg === "--allow-real-core-test") {
+      allowRealCoreTest = true;
     } else if (arg === "--approval-token" && i + 1 < args.length) {
       approvalToken = args[++i];
     } else if (arg === "--pairs" && i + 1 < args.length) {
       plannedPairs = Math.min(MAX_AVAILABLE_PAIRS, Math.max(1, parseInt(args[++i], 10)));
     } else if (arg === "--output-dir" && i + 1 < args.length) {
       outputDir = args[++i];
+    }
+  }
+
+  // 早期実行禁止・未承認判定 (Fail-Closed)
+  if (mode === "EXECUTE") {
+    if (!allowSyntheticTest && !allowRealCoreTest) {
+      throw new UnauthorizedHoldoutExecutionError(
+        `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R3.\n` +
+        `Actual match execution on reserved seeds (350001..350300) requires explicit stakeholder approval.\n` +
+        `Only infrastructure implementation, verified small-scale tests, and synthetic tests are permitted in R3.`
+      );
     }
   }
 

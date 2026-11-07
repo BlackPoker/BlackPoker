@@ -14,9 +14,11 @@ import {
   GEN8_HOLDOUT_APPROVAL_TOKEN,
   GEN8_HOLDOUT_SEED_RANGE_START,
   GEN8_HOLDOUT_SEED_RANGE_END,
+  GEN8_HOLDOUT_TEST_SEED_START,
   DEFAULT_PRIMARY_PAIRS,
   UnauthorizedHoldoutExecutionError,
   Gen8CandidateIntegrityError,
+  Gen8HoldoutAuditError,
   loadGen8PrimaryCandidate,
   buildGen8HoldoutPreflightManifest,
   computePairScore,
@@ -32,6 +34,7 @@ import { CompactMatchOutcomeRecord } from "../../domain/simulation/MillionMatchI
 import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec";
 import { EvolutionIndependentEvaluator } from "../../engine/ai/EvolutionIndependentEvaluator";
 import { EvolutionCampaignManager } from "../../engine/ai/EvolutionCampaignManager";
+import { MillionMatchWorkerPool } from "../../engine/simulation/MillionMatchWorkerPool";
 
 // =============================================================================
 // テスト用 Fixture 生成ヘルパー (CI 環境でも再現可能)
@@ -185,15 +188,15 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
     it("should fail closed when official checkpoints are required but absent", () => {
       expect(() =>
         buildGen8HoldoutPreflightManifest({
-          executionMode: "EXECUTE",
+          executionMode: "PLAN_ONLY",
           requireOfficialCheckpoints: true,
           gen7CheckpointPath: path.join(tmpRoot, "non-existent-official.json"),
         })
       ).toThrow(Gen8CandidateIntegrityError);
     });
 
-    it("should refuse real Holdout execution even with approval token (Work 4-4 R2 Fail-Closed)", async () => {
-      // 承認トークンがコード内に定義されていることだけを実行承認とは見なさない
+    it("should refuse real Holdout execution even with approval token (Work 4-4 R3 Fail-Closed)", async () => {
+      // 承認トークンがコード内に定義されていることだけを実行承認とは見なさない (公式 Checkpoint ロード前に即時遮断)
       await expect(runGen8HoldoutCli(["--execute"])).rejects.toThrow(
         UnauthorizedHoldoutExecutionError
       );
@@ -378,7 +381,7 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
         opponentDNA: oppDna,
         opponentDigest: oppDigest,
         pairsCount: 2, // 2 pairs = 4 matches
-        startSeed: 350001,
+        startSeed: GEN8_HOLDOUT_TEST_SEED_START,
         outputDir: outDir,
         chunkSizeMatches: 2,
         isSyntheticTest: true,
@@ -401,14 +404,15 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
       const oppDna = createMockDna("opp", 0.4);
       const oppDigest = EvolutionIndependentEvaluator.computeDnaDigest(oppDna);
 
-      // Part 1: Run 1 pair (2 matches)
+      // Part 1: Run 1 pair (2 matches) out of 2 planned pairs
       await executeGen8HoldoutCampaign({
         candidateDNA: candDna,
         candidateDigest: candDigest,
         opponentDNA: oppDna,
         opponentDigest: oppDigest,
-        pairsCount: 1,
-        startSeed: 350001,
+        pairsCount: 2,
+        sessionPairsLimit: 1,
+        startSeed: GEN8_HOLDOUT_TEST_SEED_START,
         outputDir: outDir,
         chunkSizeMatches: 2,
         isSyntheticTest: true,
@@ -422,7 +426,7 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
         opponentDNA: oppDna,
         opponentDigest: oppDigest,
         pairsCount: 2,
-        startSeed: 350001,
+        startSeed: GEN8_HOLDOUT_TEST_SEED_START,
         outputDir: outDir,
         chunkSizeMatches: 2,
         isSyntheticTest: true,
@@ -545,6 +549,7 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
 
       const res = auditGen8HoldoutArtifacts(testDir, {
         expectedCandidateDigest: GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST,
+        expectedStartSeed: GEN8_HOLDOUT_TEST_SEED_START,
       });
       expect(res.isValid).toBe(false);
       expect(res.candidateDigestVerified).toBe(false);
@@ -563,7 +568,7 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
         legIndex: 0,
         matchId: "m0",
         matchupId: "test",
-        matchSeed: 350001,
+        matchSeed: GEN8_HOLDOUT_TEST_SEED_START,
         playerSeeds: { p1: 1, p2: 2 },
         p1PolicyId: "gen8-cand",
         p2PolicyId: "gen7",
@@ -594,6 +599,7 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
 
       const res = auditGen8HoldoutArtifacts(testDir, {
         expectedCandidateDigest: GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST,
+        expectedStartSeed: GEN8_HOLDOUT_TEST_SEED_START,
       });
       expect(res.isValid).toBe(false);
       expect(res.errors.some((e) => e.includes("Incomplete seat-inverted pair"))).toBe(true);
@@ -610,7 +616,7 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
         legIndex: 0,
         matchId: "m0",
         matchupId: "test",
-        matchSeed: 350001,
+        matchSeed: GEN8_HOLDOUT_TEST_SEED_START,
         playerSeeds: { p1: 1, p2: 2 },
         p1PolicyId: "gen8-cand",
         p2PolicyId: "gen7",
@@ -641,9 +647,241 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
 
       const res = auditGen8HoldoutArtifacts(testDir, {
         expectedCandidateDigest: GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST,
+        expectedStartSeed: GEN8_HOLDOUT_TEST_SEED_START,
       });
       expect(res.isValid).toBe(false);
       expect(res.errors.some((e) => e.includes("Invalid winner value"))).toBe(true);
     });
+  });
+
+  describe("5. 実 Core 統合 & 小規模テスト & Checkpoint/Resume 厳格検証 (Work 4-4 R3)", () => {
+    const candDna = loadGen8PrimaryCandidate();
+    const candDigest = GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST;
+    const testGen7Dna = createMockDna("gen-000007-offspring-000007", 0.77);
+    const testGen7Digest = EvolutionIndependentEvaluator.computeDnaDigest(testGen7Dna);
+
+    let pool1Worker: MillionMatchWorkerPool;
+    let pool2Workers: MillionMatchWorkerPool;
+
+    beforeAll(async () => {
+      const poolZero = DecisionDNACodec.createZeroDecisionDNA({
+        id: "zero-dna",
+        name: "Zero Baseline",
+      });
+      const champions = {
+        gen7DNA: testGen7Dna,
+        gen7Digest: testGen7Digest,
+        gen7Source: "test",
+        gen5DNA: testGen7Dna,
+        gen5Digest: testGen7Digest,
+        gen5Source: "test",
+        zeroDNA: poolZero,
+        zeroDigest: EvolutionIndependentEvaluator.computeDnaDigest(poolZero),
+      };
+
+      pool1Worker = await MillionMatchWorkerPool.create({
+        workersCount: 1,
+        regulationId: "standard-pack",
+        frameId: "pack",
+        rulesDir: path.resolve("src/data/rules-vnext"),
+        maxDecisionsPerMatch: 500,
+        champions,
+      });
+
+      pool2Workers = await MillionMatchWorkerPool.create({
+        workersCount: 2,
+        regulationId: "standard-pack",
+        frameId: "pack",
+        rulesDir: path.resolve("src/data/rules-vnext"),
+        maxDecisionsPerMatch: 500,
+        champions,
+      });
+    }, 60000);
+
+    afterAll(async () => {
+      if (pool1Worker) await pool1Worker.terminate();
+      if (pool2Workers) await pool2Workers.terminate();
+    });
+
+    it("should strictly refuse execution on reserved holdout seeds (350001..350300) even for real-core tests", async () => {
+      const testDir = path.join(tmpRoot, "refuse-reserved-seed");
+      await expect(
+        executeGen8HoldoutCampaign({
+          candidateDNA: candDna,
+          candidateDigest: candDigest,
+          opponentDNA: testGen7Dna,
+          opponentDigest: testGen7Digest,
+          pairsCount: 2,
+          startSeed: GEN8_HOLDOUT_SEED_RANGE_START, // 350001 (保護領域)
+          outputDir: testDir,
+          isRealCoreTest: true,
+          testExecutionAuthorized: true,
+        })
+      ).rejects.toThrow(UnauthorizedHoldoutExecutionError);
+    });
+
+    it("should execute real Core matches with MillionMatchWorkerPool on test seeds (360001) and produce valid audited evidence", async () => {
+      const testDir = path.join(tmpRoot, "real-core-small-test");
+      const res = await executeGen8HoldoutCampaign({
+        candidateDNA: candDna,
+        candidateDigest: candDigest,
+        opponentDNA: testGen7Dna,
+        opponentDigest: testGen7Digest,
+        pairsCount: 2, // 2 pairs = 4 matches
+        startSeed: 360001,
+        outputDir: testDir,
+        chunkSizeMatches: 10,
+        workerPool: pool2Workers,
+        isRealCoreTest: true,
+        testExecutionAuthorized: true,
+      });
+
+      expect(res.completedPairs).toBe(2);
+      expect(res.totalMatches).toBe(4);
+      expect(res.auditResult.isValid).toBe(true);
+      expect(res.auditResult.errors.length).toBe(0);
+      expect(res.auditResult.completedMatches).toBe(4);
+
+      // JSONL から実際の Core 結果が記録されていることを検証
+      const chunkFile = path.join(testDir, "chunks", "outcomes-chunk-00000.jsonl");
+      expect(fs.existsSync(chunkFile)).toBe(true);
+      const lines = fs.readFileSync(chunkFile, "utf8").trim().split("\n");
+      expect(lines.length).toBe(4);
+
+      const m0: CompactMatchOutcomeRecord = JSON.parse(lines[0]);
+      expect(m0.status).toBe("COMPLETED");
+      expect(m0.completed).toBe(true);
+      expect(["p1", "p2", "draw"]).toContain(m0.winner);
+      expect(m0.finalStateHash).toBeDefined();
+      expect(m0.finalStateHash.length).toBeGreaterThan(0);
+      // 固定 State Hash ではなく Core の実 State Hash であること
+      expect(m0.finalStateHash.startsWith("hash-m")).toBe(false);
+      // プレイヤー別アクション統計が実際に記録されていること
+      expect(m0.playerStats).toBeDefined();
+      expect(m0.playerStats?.p1.passDecisions).toBeDefined();
+      expect(m0.playerStats?.p1.executedActions).toBeDefined();
+    }, 30000);
+
+    it("should produce deterministic identical results between 1 Worker and 2 Workers", async () => {
+      const dir1Worker = path.join(tmpRoot, "workers-1");
+      const dir2Workers = path.join(tmpRoot, "workers-2");
+
+      const res1 = await executeGen8HoldoutCampaign({
+        candidateDNA: candDna,
+        candidateDigest: candDigest,
+        opponentDNA: testGen7Dna,
+        opponentDigest: testGen7Digest,
+        pairsCount: 1, // 1 pair = 2 matches (Leg 0 & Leg 1)
+        startSeed: 360010,
+        outputDir: dir1Worker,
+        chunkSizeMatches: 10,
+        workerPool: pool1Worker,
+        isRealCoreTest: true,
+        testExecutionAuthorized: true,
+      });
+
+      const res2 = await executeGen8HoldoutCampaign({
+        candidateDNA: candDna,
+        candidateDigest: candDigest,
+        opponentDNA: testGen7Dna,
+        opponentDigest: testGen7Digest,
+        pairsCount: 1,
+        startSeed: 360010,
+        outputDir: dir2Workers,
+        chunkSizeMatches: 10,
+        workerPool: pool2Workers,
+        isRealCoreTest: true,
+        testExecutionAuthorized: true,
+      });
+
+      expect(res1.auditResult.isValid).toBe(true);
+      expect(res2.auditResult.isValid).toBe(true);
+
+      const chunk1 = fs.readFileSync(path.join(dir1Worker, "chunks", "outcomes-chunk-00000.jsonl"), "utf8");
+      const chunk2 = fs.readFileSync(path.join(dir2Workers, "chunks", "outcomes-chunk-00000.jsonl"), "utf8");
+      expect(chunk1).toBe(chunk2);
+    }, 30000);
+
+    it("should resume seamlessly from checkpoint without match loss or duplication", async () => {
+      const resumeDir = path.join(tmpRoot, "real-core-resume");
+
+      // 1 回目: 2 pairs 予定中、1 pair のみ実行 (chunkSize: 2 = 1 pair で chunk 生成)
+      await executeGen8HoldoutCampaign({
+        candidateDNA: candDna,
+        candidateDigest: candDigest,
+        opponentDNA: testGen7Dna,
+        opponentDigest: testGen7Digest,
+        pairsCount: 2,
+        sessionPairsLimit: 1,
+        startSeed: 360020,
+        outputDir: resumeDir,
+        chunkSizeMatches: 2,
+        workerPool: pool1Worker,
+        isRealCoreTest: true,
+        testExecutionAuthorized: true,
+      });
+
+      const ckpt1 = JSON.parse(fs.readFileSync(path.join(resumeDir, "checkpoint.json"), "utf8"));
+      expect(ckpt1.completedPairsCount).toBe(1);
+      expect(ckpt1.completedChunks.length).toBe(1);
+
+      // 2 回目: 残り 1 pair を Resume 実行して 2 pairs (4 matches) 完了
+      const resResume = await executeGen8HoldoutCampaign({
+        candidateDNA: candDna,
+        candidateDigest: candDigest,
+        opponentDNA: testGen7Dna,
+        opponentDigest: testGen7Digest,
+        pairsCount: 2,
+        startSeed: 360020,
+        outputDir: resumeDir,
+        chunkSizeMatches: 2,
+        workerPool: pool1Worker,
+        isRealCoreTest: true,
+        testExecutionAuthorized: true,
+      });
+
+      expect(resResume.completedPairs).toBe(2);
+      expect(resResume.totalMatches).toBe(4);
+      expect(resResume.auditResult.isValid).toBe(true);
+      expect(resResume.auditResult.completedMatches).toBe(4);
+    }, 30000);
+
+    it("should fail closed on corrupted chunk SHA or altered checkpoint config", async () => {
+      const corruptDir = path.join(tmpRoot, "corrupt-resume");
+      await executeGen8HoldoutCampaign({
+        candidateDNA: candDna,
+        candidateDigest: candDigest,
+        opponentDNA: testGen7Dna,
+        opponentDigest: testGen7Digest,
+        pairsCount: 2,
+        sessionPairsLimit: 1,
+        startSeed: 360030,
+        outputDir: corruptDir,
+        chunkSizeMatches: 2,
+        workerPool: pool1Worker,
+        isRealCoreTest: true,
+        testExecutionAuthorized: true,
+      });
+
+      // チャンク改竄 (末尾に空白追加)
+      const chunkFile = path.join(corruptDir, "chunks", "outcomes-chunk-00000.jsonl");
+      fs.appendFileSync(chunkFile, "\n", "utf8");
+
+      await expect(
+        executeGen8HoldoutCampaign({
+          candidateDNA: candDna,
+          candidateDigest: candDigest,
+          opponentDNA: testGen7Dna,
+          opponentDigest: testGen7Digest,
+          pairsCount: 2,
+          startSeed: 360030,
+          outputDir: corruptDir,
+          chunkSizeMatches: 2,
+          workerPool: pool1Worker,
+          isRealCoreTest: true,
+          testExecutionAuthorized: true,
+        })
+      ).rejects.toThrow(Gen8HoldoutAuditError);
+    }, 30000);
   });
 });
