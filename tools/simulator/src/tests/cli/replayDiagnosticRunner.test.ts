@@ -115,7 +115,7 @@ describe("replayDiagnosticRunner CLI Tests (Work 4-6 R3)", () => {
       seatControllers: createSeatControllers("humanVsAi", "p1", "gen8-champion-candidate"),
       currentStep: step,
       rawState: session.state,
-      canonicalMatchLog: (session as any).logRecorder,
+      canonicalMatchLog: (session as any).logRecorder?.getMatchLog ? (session as any).logRecorder.getMatchLog() : (session as any).logRecorder,
       decisionTranscript: transcript,
     });
 
@@ -124,7 +124,7 @@ describe("replayDiagnosticRunner CLI Tests (Work 4-6 R3)", () => {
     const tempPath = path.join(tempDir, "temp-fixture-diagnostic.json");
     fs.writeFileSync(tempPath, JSON.stringify(bundle, null, 2), "utf-8");
 
-    const code = await runDiagnosticReplayCli(["--file", tempPath, "--allow-test-fixture"]);
+    const code = await runDiagnosticReplayCli(["--file", tempPath, "--allow-test-fixture", "--allow-build-mismatch"]);
     expect(code).toBe(0);
   });
 

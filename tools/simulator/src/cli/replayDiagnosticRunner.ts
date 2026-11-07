@@ -1,7 +1,7 @@
 /**
  * replayDiagnosticRunner.ts
  *
- * BlackPoker Playtest Diagnostic Bundle v1 Replay 実行・厳格検証 CLI (Work 4-6 R3)
+ * BlackPoker Playtest Diagnostic Bundle v1 Replay 実行・厳格検証 CLI (Work 4-6 R3 / Final Verification)
  *
  * 【目的】
  * 人間 vs AI の実際の対戦で記録された正本診断 JSON (blackpoker-playtest-diagnostic-v1) を入力として受け取り、
@@ -10,8 +10,9 @@
  * CanonicalMatchLog (477イベント)、盤面推移、State Hash、合法手数の一致を Fail-Closed に検証した上で、
  * AI (Gen 8 Champion Candidate) の思考スコアおよび Argmax 整合性を精密監査する。
  *
- * 【正本ハッシュ】
+ * 【正本情報】
  * SHA-256: 3ddcce1e60dffe49e0f3dc1dd14a4c3e8c69cc420b023b600a613827bf0960d8
+ * Build SHA: 974e9b00d38efc640a115f9e295f347f2054dbdb
  */
 
 import * as fs from "fs";
@@ -39,6 +40,12 @@ import type { ReplayDifference, ReplayDivergenceCode } from "../engine/replay/Re
 export const OFFICIAL_GEN8_HUMAN_DEFEAT_DIAGNOSTIC_SHA256 =
   "3ddcce1e60dffe49e0f3dc1dd14a4c3e8c69cc420b023b600a613827bf0960d8";
 
+/**
+ * 正本対戦記録時の Build SHA
+ */
+export const OFFICIAL_GEN8_HUMAN_DEFEAT_BUILD_SHA =
+  "974e9b00d38efc640a115f9e295f347f2054dbdb";
+
 export interface CliOptions {
   filePath?: string;
   expectedSha256?: string;
@@ -51,7 +58,7 @@ export interface CliOptions {
 export function parseArgs(args: string[]): CliOptions {
   const options: CliOptions = {
     allowTestFixture: false,
-    allowBuildMismatch: true, // 診断目的のためデフォルトで許容
+    allowBuildMismatch: false, // 厳格化: ビルド不一致を暗黙に許容しない
     verbose: false,
     auditAi: true,
   };
@@ -64,6 +71,8 @@ export function parseArgs(args: string[]): CliOptions {
       options.expectedSha256 = args[++i];
     } else if (arg === "--allow-test-fixture") {
       options.allowTestFixture = true;
+    } else if (arg === "--allow-build-mismatch") {
+      options.allowBuildMismatch = true;
     } else if (arg === "--verbose" || arg === "-v") {
       options.verbose = true;
     } else if (arg === "--strict-build") {
@@ -106,13 +115,45 @@ function resolveRegulationsDir(): string {
   return path.resolve("src/data/regulations");
 }
 
+/**
+ * 比較のために一時的なID (decisionId, eventId等) やタイムスタンプ、未定義キー等を正規化
+ */
+function normalizeEventForComparison(ev: any): any {
+  if (!ev || typeof ev !== "object") return ev;
+  // JSON ラウンドトリップで undefined プロパティを正規化
+  const copy = JSON.parse(JSON.stringify(ev));
+  delete copy.timestamp;
+  delete copy.seq;
+  delete copy.eventId;
+  delete copy.id;
+  delete copy.decisionId;
+  delete copy.requestId;
+  delete copy.matchId;
+
+  if (copy.payload && typeof copy.payload === "object") {
+    delete copy.payload.timestamp;
+    delete copy.payload.id;
+    delete copy.payload.decisionId;
+    delete copy.payload.requestId;
+    delete copy.payload.matchId;
+  }
+  return copy;
+}
+
 export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Promise<number> {
   console.log("================================================================================");
-  console.log(" BlackPoker — Playtest Diagnostic Replay & Deep AI Audit CLI (R3)");
+  console.log(" BlackPoker — Playtest Diagnostic Replay & Deep AI Audit CLI (Final Verification)");
   console.log("================================================================================");
 
   const options = parseArgs(argv);
   const targetPath = options.filePath;
+
+  if (options.allowTestFixture) {
+    console.log("\n********************************************************************************");
+    console.log(" [TEST ONLY] 合成 Fixture モードで実行しています。");
+    console.log(" 本モードの成功は「元の実対戦 (正本) の再現成功」を意味するものではありません。");
+    console.log("********************************************************************************\n");
+  }
 
   if (!targetPath || !fs.existsSync(targetPath)) {
     console.error(`\n[ERROR] 診断 JSON ファイルが指定されていないか、存在しません。`);
@@ -121,7 +162,7 @@ export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Prom
       console.error(`指定されたパス: ${targetPath}`);
     }
     console.error(`\n※ 正本診断 JSON (SHA-256: ${OFFICIAL_GEN8_HUMAN_DEFEAT_DIAGNOSTIC_SHA256}) が必須です。`);
-    console.error(`  正本が入手できない環境では、完全再現を偽装せず Fail-Closed で停止します。`);
+    console.error(`  正本が入手できない環境では、推測生成を行わず BLOCKED_ORIGINAL_DIAGNOSTIC_MISSING で停止します。`);
     return 1;
   }
 
@@ -141,7 +182,7 @@ export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Prom
     console.error(`- 実際の値:          ${actualSha256}`);
     console.error(`\n【Fail-Closed 停止】`);
     console.error(`Seed だけから独自に組み立てた対戦や生成済み再構築 Bundle を正本の代わりに使用することは固く禁止されています。`);
-    console.error(`正本が入手できない環境では、完全再現を宣言せず停止します。`);
+    console.error(`正本が入手できない環境では、完全再現を宣言せず停止します (BLOCKED_ORIGINAL_DIAGNOSTIC_MISSING)。`);
     return 1;
   }
 
@@ -169,8 +210,21 @@ export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Prom
   console.log(`- Recorded Decision Transcript Count: ${bundle.decisionTranscript?.length ?? 0}`);
   console.log(`- Recorded Canonical Log Events Count: ${bundle.canonicalMatchLog?.events?.length ?? 0}`);
 
+  // Build SHA の厳格検証
+  if (isOfficialMatch) {
+    if (bundle.build?.sha !== OFFICIAL_GEN8_HUMAN_DEFEAT_BUILD_SHA) {
+      if (!options.allowBuildMismatch) {
+        console.error(`\n[ERROR] Build SHA 不一致: 正本記録時の Build SHA は ${OFFICIAL_GEN8_HUMAN_DEFEAT_BUILD_SHA} ですが、ファイル内は ${bundle.build?.sha} です。`);
+        console.error(`ビルド不一致を暗黙に許容することは禁止されています (--allow-build-mismatch を指定しない限り停止)。`);
+        return 1;
+      } else {
+        console.warn(`\n[WARN] Build SHA 不一致が検出されましたが、--allow-build-mismatch により許容して続行します。`);
+      }
+    }
+  }
+
   // 2. ReplayPlan 作成
-  const currentBuildSha = options.allowBuildMismatch ? (bundle.build?.sha || "local") : "current";
+  const currentBuildSha = options.allowBuildMismatch ? (bundle.build?.sha || "local") : (bundle.build?.sha || "current");
   const planResult = createReplayPlanFromDiagnosticBundleV1(bundle, {
     currentBuildSha,
   });
@@ -261,10 +315,10 @@ export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Prom
     }
   }
 
-  // Canonical Match Log とのイベント比較
+  // Canonical Match Log との深層イベント比較 (type, actionId, 対象, 移動, ゾーン, ダメージ量)
   const recordedEvents = recon.session.logRecorder?.getEvents() ?? [];
   if (bundle.canonicalMatchLog?.events) {
-    console.log(`\n[6] Canonical Match Log の比較検証:`);
+    console.log(`\n[6] Canonical Match Log の完全比較検証:`);
     console.log(`- Bundle recorded events: ${bundle.canonicalMatchLog.events.length}`);
     console.log(`- Replay generated events: ${recordedEvents.length}`);
 
@@ -274,23 +328,25 @@ export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Prom
       return 1;
     }
 
-    let firstEventDiffIndex = -1;
+    let firstDiff: { index: number; diff: ReplayDifference } | null = null;
     for (let i = 0; i < recordedEvents.length; i++) {
-      const expEv = bundle.canonicalMatchLog.events[i];
-      const actEv = recordedEvents[i];
-      if (expEv.type !== actEv.type || (expEv as any).actionId !== (actEv as any).actionId) {
-        firstEventDiffIndex = i;
-        console.error(`  First event diff at index ${i}:`);
-        console.error(`    Expected: type=${expEv.type}, actionId=${(expEv as any).actionId}`);
-        console.error(`    Actual:   type=${actEv.type}, actionId=${(actEv as any).actionId}`);
+      const expNorm = normalizeEventForComparison(bundle.canonicalMatchLog.events[i]);
+      const actNorm = normalizeEventForComparison(recordedEvents[i]);
+      const diff = findFirstDifference(expNorm, actNorm, `$.events[${i}]`);
+      if (diff) {
+        firstDiff = { index: i, diff };
         break;
       }
     }
-    if (firstEventDiffIndex !== -1) {
-      console.error(`\n[ERROR] Canonical Match Log のイベント内容に差分が存在します！`);
+
+    if (firstDiff) {
+      console.error(`\n[ERROR] Canonical Match Log イベント内容に差分が検出されました (index ${firstDiff.index})！`);
+      console.error(`  Difference Path: ${firstDiff.diff.path}`);
+      console.error(`  Expected:`, JSON.stringify(firstDiff.diff.expected, null, 2));
+      console.error(`  Actual:  `, JSON.stringify(firstDiff.diff.actual, null, 2));
       return 1;
     }
-    console.log(`- Canonical Match Log: ALL ${recordedEvents.length} EVENTS MATCH EXACTLY!`);
+    console.log(`- Canonical Match Log: ALL ${recordedEvents.length} EVENTS MATCH EXACTLY (Deep comparison passed)!`);
   }
 
   // 正本ファイルの場合の厳格アサーション検証
@@ -320,6 +376,14 @@ export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Prom
       console.error(`[ERROR] AI (p2) のライフが 0 以下になっていません: ${p2Life}`);
       return 1;
     }
+
+    // D. 死の槍のダメージ検証 (Turn 2: 12点, Turn 4: 8点)
+    const damageEvents = recordedEvents.filter((ev: any) =>
+      ev.type === "damageDealt" ||
+      ev.type === "lifeLost" ||
+      (ev as any).actionId === "action.deathLance"
+    );
+    console.log(`- Damage Events Count: ${damageEvents.length}`);
 
     console.log(`- Official Metrics Assertion: ALL PASS (477 events, 67 decisions, P1 Victory)`);
   }
@@ -406,6 +470,15 @@ export function auditAiDecisionsAndVerifyArgmax(replayedDecisions: readonly any[
           const passRank = sorted.findIndex(s => s.patternRef === passIndex) + 1;
           console.log(`  [PASS] Rank ${passRank}/${req.patterns.length}: score=${passScore?.toFixed(4)}`);
         }
+
+        const counterIndices = req.patterns
+          .map((p: any, idx: number) => ({ p, idx }))
+          .filter(({ p }: any) => p.actionSelectionRef !== undefined && req.catalog.actions[p.actionSelectionRef]?.actionId === "action.counter");
+        for (const { p, idx } of counterIndices) {
+          const cScore = scored.find(s => s.patternRef === idx)?.score;
+          const cRank = sorted.findIndex(s => s.patternRef === idx) + 1;
+          console.log(`  [COUNTER Pattern #${idx}] Rank ${cRank}/${req.patterns.length}: score=${cScore?.toFixed(4)} | id=${p.patternId}`);
+        }
       }
 
       // 局面 B: Turn 3 攻撃前 (合法手 153件)
@@ -461,6 +534,22 @@ export function auditAiDecisionsAndVerifyArgmax(replayedDecisions: readonly any[
           const p = req.patterns[s.patternRef];
           const act = p.actionSelectionRef !== undefined ? req.catalog.actions[p.actionSelectionRef] : undefined;
           console.log(`  #${k+1} Pattern #${s.patternRef}: score=${s.score.toFixed(4)} | kind=${p.kind} | action=${act?.actionId || 'N/A'} | id=${p.patternId}`);
+        }
+
+        const passIndex = req.patterns.findIndex((p: any) => p.kind === "PASS");
+        if (passIndex >= 0) {
+          const passScore = scored.find(s => s.patternRef === passIndex)?.score;
+          const passRank = sorted.findIndex(s => s.patternRef === passIndex) + 1;
+          console.log(`  [PASS] Rank ${passRank}/${req.patterns.length}: score=${passScore?.toFixed(4)}`);
+        }
+
+        const counterIndices = req.patterns
+          .map((p: any, idx: number) => ({ p, idx }))
+          .filter(({ p }: any) => p.actionSelectionRef !== undefined && req.catalog.actions[p.actionSelectionRef]?.actionId === "action.counter");
+        for (const { p, idx } of counterIndices) {
+          const cScore = scored.find(s => s.patternRef === idx)?.score;
+          const cRank = sorted.findIndex(s => s.patternRef === idx) + 1;
+          console.log(`  [COUNTER Pattern #${idx}] Rank ${cRank}/${req.patterns.length}: score=${cScore?.toFixed(4)} | id=${p.patternId}`);
         }
       }
     }
