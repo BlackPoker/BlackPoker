@@ -1,20 +1,24 @@
 /**
  * replayDiagnosticRunner.ts
  *
- * BlackPoker Playtest Diagnostic Bundle v1 Replay 実行・厳格検証 CLI
+ * BlackPoker Playtest Diagnostic Bundle v1 Replay 実行・厳格検証 CLI (Work 4-6 R3)
  *
  * 【目的】
- * 人間 vs AI の実際の対戦で記録された診断 JSON (blackpoker-playtest-diagnostic-v1) を入力として受け取り、
+ * 人間 vs AI の実際の対戦で記録された正本診断 JSON (blackpoker-playtest-diagnostic-v1) を入力として受け取り、
  * 決定論的 Replay エンジン (DeterministicReplayRunner / ReplayReconstructionService) を用いて
- * 意思決定履歴 (decisionTranscript: 67件など) を完全再現し、
- * CanonicalMatchLog、盤面推移、State Hash、合法手数の一致を検証した上で、
- * 正しい局面における AI (Gen 8 Candidate) の思考スコアを監査・再評価する。
+ * 意思決定履歴 (decisionTranscript: 67件) を完全再現し、
+ * CanonicalMatchLog (477イベント)、盤面推移、State Hash、合法手数の一致を Fail-Closed に検証した上で、
+ * AI (Gen 8 Champion Candidate) の思考スコアおよび Argmax 整合性を精密監査する。
+ *
+ * 【正本ハッシュ】
+ * SHA-256: 3ddcce1e60dffe49e0f3dc1dd14a4c3e8c69cc420b023b600a613827bf0960d8
  */
 
 import * as fs from "fs";
 import * as path from "path";
-import { loadRulePackageForBrowser } from "../engine/rules/BrowserRuleLoader.js";
-import { loadRegulationCatalogForBrowser } from "../engine/regulation/BrowserRegulationLoader.js";
+import * as crypto from "crypto";
+import { loadRulePackageFromDirectory } from "../engine/rules/RuleLoader.js";
+import { loadRegulationCatalog } from "../engine/regulation/RegulationLoader.js";
 import { createReplayPlanFromDiagnosticBundleV1 } from "../ui/playtest/DiagnosticReplayAdapter.js";
 import {
   findFirstDifference,
@@ -25,18 +29,28 @@ import { StateHasher } from "../engine/simulation/StateHasher.js";
 import { createGen8ChampionCandidatePolicy } from "../engine/ai/Gen8DNALoader.js";
 import { DecisionFeatureEncoder } from "../engine/ai/DecisionFeatureEncoder.js";
 import { GenomeScorer } from "../engine/ai/GenomeScorer.js";
+import { GenomePolicy } from "../engine/ai/GenomePolicy.js";
 import type { PlaytestDiagnosticBundleV1 } from "../ui/playtest/PlaytestDiagnosticBundle.js";
 import type { ReplayDifference, ReplayDivergenceCode } from "../engine/replay/ReplayTypes.js";
 
-interface CliOptions {
+/**
+ * 公式人間対戦（Seed: 4127992094, 4ターンAI敗北）正本診断JSONのSHA-256
+ */
+export const OFFICIAL_GEN8_HUMAN_DEFEAT_DIAGNOSTIC_SHA256 =
+  "3ddcce1e60dffe49e0f3dc1dd14a4c3e8c69cc420b023b600a613827bf0960d8";
+
+export interface CliOptions {
   filePath?: string;
+  expectedSha256?: string;
+  allowTestFixture: boolean;
   allowBuildMismatch: boolean;
   verbose: boolean;
   auditAi: boolean;
 }
 
-function parseArgs(args: string[]): CliOptions {
+export function parseArgs(args: string[]): CliOptions {
   const options: CliOptions = {
+    allowTestFixture: false,
     allowBuildMismatch: true, // 診断目的のためデフォルトで許容
     verbose: false,
     auditAi: true,
@@ -46,6 +60,10 @@ function parseArgs(args: string[]): CliOptions {
     const arg = args[i];
     if (arg === "--file" || arg === "-f") {
       options.filePath = args[++i];
+    } else if (arg === "--sha256") {
+      options.expectedSha256 = args[++i];
+    } else if (arg === "--allow-test-fixture") {
+      options.allowTestFixture = true;
     } else if (arg === "--verbose" || arg === "-v") {
       options.verbose = true;
     } else if (arg === "--strict-build") {
@@ -60,54 +78,73 @@ function parseArgs(args: string[]): CliOptions {
   return options;
 }
 
-function findDefaultDiagnosticFile(): string | null {
-  const candidateDirs = [
-    path.resolve(process.cwd(), ".artifacts"),
-    path.resolve(process.cwd(), "evidence"),
-    path.resolve(process.cwd(), "tools/simulator/.artifacts"),
-    path.resolve(process.cwd(), "tools/simulator/evidence"),
-    process.cwd(),
+function resolveRulesDir(): string {
+  const candidates = [
+    path.resolve(process.cwd(), "src/data/rules-vnext"),
+    path.resolve(process.cwd(), "tools/simulator/src/data/rules-vnext"),
+    path.resolve(__dirname, "../data/rules-vnext"),
   ];
-
-  for (const dir of candidateDirs) {
-    if (!fs.existsSync(dir)) continue;
-    try {
-      const files = fs.readdirSync(dir);
-      for (const file of files) {
-        if (file.includes("diagnostic") && file.endsWith(".json")) {
-          return path.join(dir, file);
-        }
-      }
-    } catch {
-      // ignore
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
     }
   }
-  return null;
+  return path.resolve("src/data/rules-vnext");
+}
+
+function resolveRegulationsDir(): string {
+  const candidates = [
+    path.resolve(process.cwd(), "src/data/regulations"),
+    path.resolve(process.cwd(), "tools/simulator/src/data/regulations"),
+    path.resolve(__dirname, "../data/regulations"),
+  ];
+  for (const candidate of candidates) {
+    if (fs.existsSync(candidate)) {
+      return candidate;
+    }
+  }
+  return path.resolve("src/data/regulations");
 }
 
 export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Promise<number> {
   console.log("================================================================================");
-  console.log(" BlackPoker — Playtest Diagnostic Replay & Deep AI Audit CLI");
+  console.log(" BlackPoker — Playtest Diagnostic Replay & Deep AI Audit CLI (R3)");
   console.log("================================================================================");
 
   const options = parseArgs(argv);
-  let targetPath = options.filePath;
-
-  if (!targetPath) {
-    targetPath = findDefaultDiagnosticFile() ?? undefined;
-  }
+  const targetPath = options.filePath;
 
   if (!targetPath || !fs.existsSync(targetPath)) {
-    console.error(`\n[ERROR] 診断 JSON ファイルが見つかりません。`);
+    console.error(`\n[ERROR] 診断 JSON ファイルが指定されていないか、存在しません。`);
     console.error(`使用法: npx vite-node src/cli/replayDiagnosticRunner.ts --file <path-to-diagnostic.json>`);
     if (targetPath) {
       console.error(`指定されたパス: ${targetPath}`);
     }
+    console.error(`\n※ 正本診断 JSON (SHA-256: ${OFFICIAL_GEN8_HUMAN_DEFEAT_DIAGNOSTIC_SHA256}) が必須です。`);
+    console.error(`  正本が入手できない環境では、完全再現を偽装せず Fail-Closed で停止します。`);
     return 1;
   }
 
   console.log(`\n[1] 診断 JSON ファイル読み込み: ${targetPath}`);
   const rawContent = fs.readFileSync(targetPath, "utf-8");
+
+  // ハッシュ計算 (SHA-256)
+  const actualSha256 = crypto.createHash("sha256").update(rawContent).digest("hex");
+  console.log(`- File SHA-256: ${actualSha256}`);
+
+  const requiredSha256 = options.expectedSha256 ?? OFFICIAL_GEN8_HUMAN_DEFEAT_DIAGNOSTIC_SHA256;
+  const isOfficialMatch = actualSha256 === OFFICIAL_GEN8_HUMAN_DEFEAT_DIAGNOSTIC_SHA256;
+
+  if (!isOfficialMatch && !options.allowTestFixture) {
+    console.error(`\n[ERROR] 入力ファイルの SHA-256 が正本ハッシュと一致しません！`);
+    console.error(`- 期待値 (Official): ${requiredSha256}`);
+    console.error(`- 実際の値:          ${actualSha256}`);
+    console.error(`\n【Fail-Closed 停止】`);
+    console.error(`Seed だけから独自に組み立てた対戦や生成済み再構築 Bundle を正本の代わりに使用することは固く禁止されています。`);
+    console.error(`正本が入手できない環境では、完全再現を宣言せず停止します。`);
+    return 1;
+  }
+
   let bundle: PlaytestDiagnosticBundleV1;
   try {
     bundle = JSON.parse(rawContent);
@@ -116,7 +153,7 @@ export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Prom
     return 1;
   }
 
-  // 1. 基本検証
+  // 基本スキーマ検証
   if (bundle.kind !== "blackpoker-playtest-diagnostic") {
     console.error(`[ERROR] 不正な kind: "${bundle.kind}" (期待値: "blackpoker-playtest-diagnostic")`);
     return 1;
@@ -147,10 +184,12 @@ export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Prom
   console.log(`\n[2] ReplayPlanV1 正常生成完了:`);
   console.log(`- Decisions to replay: ${plan.decisions.length}`);
 
-  // 3. 依存関係のロード
+  // 3. 依存関係のロード (Node 向け標準ローダーを使用)
   console.log(`\n[3] ルールパッケージ & カタログロード...`);
-  const catalog = loadRegulationCatalogForBrowser();
-  const fullRulePackage = loadRulePackageForBrowser();
+  const rulesDir = resolveRulesDir();
+  const regulationsDir = resolveRegulationsDir();
+  const fullRulePackage = await loadRulePackageFromDirectory(rulesDir);
+  const catalog = await loadRegulationCatalog(regulationsDir);
 
   // 4. reconstructMatch による決定論的再実行
   console.log(`\n[4] 決定論的 Replay 再実行開始 (Total Decisions: ${plan.decisions.length})...`);
@@ -213,136 +252,221 @@ export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Prom
     if (actualHash === expectedHash) {
       console.log(`- State Hash Match: EXACT MATCH (State 完全一致)`);
     } else {
-      console.warn(`- State Hash Mismatch: タイムスタンプ・ID正規化前のハッシュに差分があります。深層比較を実行します...`);
+      console.error(`\n[ERROR] State Hash 不一致が検出されました！`);
       const diff = findFirstDifference(bundle.snapshot.rawState, recon.session.state, "$.state");
       if (diff) {
-        console.warn(`  First state diff at ${diff.path}: expected=${JSON.stringify(diff.expected)}, actual=${JSON.stringify(diff.actual)}`);
+        console.error(`  First state diff at ${diff.path}: expected=${JSON.stringify(diff.expected)}, actual=${JSON.stringify(diff.actual)}`);
       }
+      return 1;
     }
   }
 
   // Canonical Match Log とのイベント比較
-  if (bundle.canonicalMatchLog?.events && recon.session.logRecorder) {
+  const recordedEvents = recon.session.logRecorder?.getEvents() ?? [];
+  if (bundle.canonicalMatchLog?.events) {
     console.log(`\n[6] Canonical Match Log の比較検証:`);
-    const recordedEvents = recon.session.logRecorder.events;
     console.log(`- Bundle recorded events: ${bundle.canonicalMatchLog.events.length}`);
     console.log(`- Replay generated events: ${recordedEvents.length}`);
 
+    if (bundle.canonicalMatchLog.events.length !== recordedEvents.length) {
+      console.error(`\n[ERROR] Canonical Match Log のイベント総数が不一致です！`);
+      console.error(`  期待値: ${bundle.canonicalMatchLog.events.length}, 実際: ${recordedEvents.length}`);
+      return 1;
+    }
+
     let firstEventDiffIndex = -1;
-    const minLen = Math.min(bundle.canonicalMatchLog.events.length, recordedEvents.length);
-    for (let i = 0; i < minLen; i++) {
+    for (let i = 0; i < recordedEvents.length; i++) {
       const expEv = bundle.canonicalMatchLog.events[i];
       const actEv = recordedEvents[i];
       if (expEv.type !== actEv.type || (expEv as any).actionId !== (actEv as any).actionId) {
         firstEventDiffIndex = i;
-        console.warn(`  First event diff at index ${i}:`);
-        console.warn(`    Expected: type=${expEv.type}, actionId=${(expEv as any).actionId}`);
-        console.warn(`    Actual:   type=${actEv.type}, actionId=${(actEv as any).actionId}`);
+        console.error(`  First event diff at index ${i}:`);
+        console.error(`    Expected: type=${expEv.type}, actionId=${(expEv as any).actionId}`);
+        console.error(`    Actual:   type=${actEv.type}, actionId=${(actEv as any).actionId}`);
         break;
       }
     }
-    if (firstEventDiffIndex === -1 && bundle.canonicalMatchLog.events.length === recordedEvents.length) {
-      console.log(`- Canonical Match Log: ALL EVENTS MATCH!`);
+    if (firstEventDiffIndex !== -1) {
+      console.error(`\n[ERROR] Canonical Match Log のイベント内容に差分が存在します！`);
+      return 1;
     }
+    console.log(`- Canonical Match Log: ALL ${recordedEvents.length} EVENTS MATCH EXACTLY!`);
   }
 
-  // 5. 正しい局面での AI 意思決定監査 (Audit AI)
+  // 正本ファイルの場合の厳格アサーション検証
+  if (isOfficialMatch) {
+    console.log(`\n[7] 正本ファイル厳格整合性アサーション検証...`);
+
+    // A. イベント総数 477件
+    if (recordedEvents.length !== 477) {
+      console.error(`[ERROR] 正本イベント数が 477 件ではありません: ${recordedEvents.length}`);
+      return 1;
+    }
+
+    // B. 意思決定総数 67件
+    if (recon.executedDecisions !== 67) {
+      console.error(`[ERROR] 正本意思決定数が 67 件ではありません: ${recon.executedDecisions}`);
+      return 1;
+    }
+
+    // C. 終了原因: 2回目の死の槍による AI ライフ 0
+    const matchState = recon.session.state;
+    if (matchState.winner !== "p1") {
+      console.error(`[ERROR] 勝者が p1 (Human) ではありません: ${matchState.winner}`);
+      return 1;
+    }
+    const p2Life = matchState.players?.p2?.life ?? -1;
+    if (p2Life > 0) {
+      console.error(`[ERROR] AI (p2) のライフが 0 以下になっていません: ${p2Life}`);
+      return 1;
+    }
+
+    console.log(`- Official Metrics Assertion: ALL PASS (477 events, 67 decisions, P1 Victory)`);
+  }
+
+  // 5. 正しい局面での AI 意思決定監査 (Audit AI) & Argmax 整合性検証
   if (options.auditAi) {
     console.log(`\n================================================================================`);
-    console.log(`[7] 正しい局面における AI (Gen 8 Candidate) 意思決定の精密監査`);
+    console.log(`[8] 正しい局面における AI (Gen 8 Candidate) 意思決定の精密監査 & Argmax 検証`);
     console.log(`================================================================================`);
-    auditAiDecisions(recon.replayedDecisions);
+    const auditSuccess = auditAiDecisionsAndVerifyArgmax(recon.replayedDecisions);
+    if (!auditSuccess) {
+      console.error(`\n[ERROR] GenomePolicy Argmax 整合性検証に失敗しました！`);
+      return 1;
+    }
   }
 
   return 0;
 }
 
-function auditAiDecisions(replayedDecisions: readonly any[]) {
+/**
+ * AI の意思決定を監査し、かつ決定論的 Argmax 整合性を検証する。
+ * GenomePolicy が選択するパターンと、Transcript に記録されたパターンが厳密に一致するかを照合する。
+ */
+export function auditAiDecisionsAndVerifyArgmax(replayedDecisions: readonly any[]): boolean {
   const aiPolicy = createGen8ChampionCandidatePolicy();
   const dna = (aiPolicy as any).dna;
 
   console.log(`AI Policy: ${aiPolicy.descriptor.name} (DNA format: ${dna.dnaFormatVersion}, schema: ${dna.featureSchemaVersion})`);
   console.log(`Total Replayed Decisions: ${replayedDecisions.length}`);
 
+  let allArgmaxValid = true;
+
   for (let i = 0; i < replayedDecisions.length; i++) {
     const rd = replayedDecisions[i];
     const req = rd.request;
     const entry = rd.entry;
 
-    // 局面 A: 最初の死の槍に対する対応 (Turn 2、合法手 69件)
-    const isDeathLanceOnStage = req.observation?.stageRequests?.some((r: any) => r.actionId === "action.deathLance");
-    if (req.playerId === "p2" && (isDeathLanceOnStage || req.patterns.length === 69)) {
-      console.log(`\n--------------------------------------------------------------------------------`);
-      console.log(`>>> [AUDIT A] 最初の死の槍に対する AI の意思決定 (Seq: ${entry.seq}, Step: ${i})`);
-      console.log(`--------------------------------------------------------------------------------`);
-      console.log(`- Player: ${req.playerId} (Actor: ${entry.actor})`);
-      console.log(`- Legal Pattern Count: ${req.patterns.length} (期待値: 69)`);
-      console.log(`- Selected Pattern Ref: #${entry.response.selectedPatternRef}`);
-      const selectedPattern = req.patterns[entry.response.selectedPatternRef];
-      console.log(`- Selected Pattern: kind=${selectedPattern?.kind}, id=${selectedPattern?.patternId}`);
+    // AI (P2) のポリシーによる決定のみを対象
+    if (req.playerId === "p2" && entry.actor === "policy") {
+      // 1. GenomePolicy による決定論的選択を再計算
+      const policyResponse = aiPolicy.choose(req);
+      const expectedRef = entry.response.selectedPatternRef;
+      const actualRef = policyResponse.selectedPatternRef;
 
-      // スコア計算
+      // 2. 特徴量エンコードと全パターンスコア計算
       const features = DecisionFeatureEncoder.encode(req);
       const scored = GenomeScorer.score(features, dna);
       const sorted = [...scored].sort((a, b) => b.score - a.score);
 
-      console.log(`\nTOP 5 CHOICES:`);
-      for (let k = 0; k < Math.min(5, sorted.length); k++) {
-        const s = sorted[k];
-        const p = req.patterns[s.patternRef];
-        const act = p.actionSelectionRef !== undefined ? req.catalog.actions[p.actionSelectionRef] : undefined;
-        console.log(`  #${k+1} Pattern #${s.patternRef}: score=${s.score.toFixed(4)} | kind=${p.kind} | action=${act?.actionId || 'N/A'} | id=${p.patternId}`);
+      const topChoice = sorted[0];
+
+      // Argmax 整合性検証
+      if (actualRef !== expectedRef) {
+        console.error(`\n[ARGMAX MISMATCH at Step ${i}, Seq ${entry.seq}]`);
+        console.error(`- Transcript Selected Ref: #${expectedRef}`);
+        console.error(`- Policy Re-computed Ref:  #${actualRef}`);
+        console.error(`- Top Scored Ref:          #${topChoice.patternRef} (score: ${topChoice.score.toFixed(4)})`);
+        allArgmaxValid = false;
       }
 
-      const passIndex = req.patterns.findIndex(p => p.kind === "PASS");
-      if (passIndex >= 0) {
-        const passScore = scored.find(s => s.patternRef === passIndex)?.score;
-        const passRank = sorted.findIndex(s => s.patternRef === passIndex) + 1;
-        console.log(`  [PASS] Rank ${passRank}/${req.patterns.length}: score=${passScore?.toFixed(4)}`);
-      }
-    }
+      // 局面 A: 最初の死の槍に対する対応 (Turn 2、合法手 69件 または 死の槍直面時)
+      const isDeathLanceOnStage = req.observation?.stageRequests?.some((r: any) => r.actionId === "action.deathLance");
+      if (isDeathLanceOnStage || req.patterns.length === 69) {
+        console.log(`\n--------------------------------------------------------------------------------`);
+        console.log(`>>> [AUDIT A] 最初の死の槍に対する AI の意思決定 (Seq: ${entry.seq}, Step: ${i})`);
+        console.log(`--------------------------------------------------------------------------------`);
+        console.log(`- Player: ${req.playerId} (Actor: ${entry.actor})`);
+        console.log(`- Legal Pattern Count: ${req.patterns.length}`);
+        console.log(`- Selected Pattern Ref: #${entry.response.selectedPatternRef}`);
+        const selectedPattern = req.patterns[entry.response.selectedPatternRef];
+        console.log(`- Selected Pattern: kind=${selectedPattern?.kind}, id=${selectedPattern?.patternId}`);
 
-    // 局面 B: Turn 3 攻撃判断 (Turn 3、合法手 153件)
-    const hasAttackOption = req.patterns.some(p => p.actionSelectionRef !== undefined && req.catalog.actions[p.actionSelectionRef]?.actionId === "action.attack");
-    if (req.playerId === "p2" && (req.patterns.length === 153 || (hasAttackOption && req.observation?.turnCount === 3))) {
-      console.log(`\n--------------------------------------------------------------------------------`);
-      console.log(`>>> [AUDIT B] Turn 3 攻撃判断における AI の意思決定 (Seq: ${entry.seq}, Step: ${i})`);
-      console.log(`--------------------------------------------------------------------------------`);
-      console.log(`- Player: ${req.playerId} (Actor: ${entry.actor})`);
-      console.log(`- Legal Pattern Count: ${req.patterns.length} (期待値: 153)`);
-      console.log(`- Selected Pattern Ref: #${entry.response.selectedPatternRef}`);
-      const selectedPattern = req.patterns[entry.response.selectedPatternRef];
-      const selectedAct = selectedPattern?.actionSelectionRef !== undefined ? req.catalog.actions[selectedPattern.actionSelectionRef] : undefined;
-      console.log(`- Selected Pattern: kind=${selectedPattern?.kind}, action=${selectedAct?.actionId}, id=${selectedPattern?.patternId}`);
+        console.log(`\nTOP 5 CHOICES:`);
+        for (let k = 0; k < Math.min(5, sorted.length); k++) {
+          const s = sorted[k];
+          const p = req.patterns[s.patternRef];
+          const act = p.actionSelectionRef !== undefined ? req.catalog.actions[p.actionSelectionRef] : undefined;
+          console.log(`  #${k+1} Pattern #${s.patternRef}: score=${s.score.toFixed(4)} | kind=${p.kind} | action=${act?.actionId || 'N/A'} | id=${p.patternId}`);
+        }
 
-      // スコア計算
-      const features = DecisionFeatureEncoder.encode(req);
-      const scored = GenomeScorer.score(features, dna);
-      const sorted = [...scored].sort((a, b) => b.score - a.score);
-
-      console.log(`\nTOP 10 CHOICES:`);
-      for (let k = 0; k < Math.min(10, sorted.length); k++) {
-        const s = sorted[k];
-        const p = req.patterns[s.patternRef];
-        const act = p.actionSelectionRef !== undefined ? req.catalog.actions[p.actionSelectionRef] : undefined;
-        console.log(`  #${k+1} Pattern #${s.patternRef}: score=${s.score.toFixed(4)} | kind=${p.kind} | action=${act?.actionId || 'N/A'} | id=${p.patternId}`);
+        const passIndex = req.patterns.findIndex((p: any) => p.kind === "PASS");
+        if (passIndex >= 0) {
+          const passScore = scored.find(s => s.patternRef === passIndex)?.score;
+          const passRank = sorted.findIndex(s => s.patternRef === passIndex) + 1;
+          console.log(`  [PASS] Rank ${passRank}/${req.patterns.length}: score=${passScore?.toFixed(4)}`);
+        }
       }
 
-      const passIndex = req.patterns.findIndex(p => p.kind === "PASS");
-      if (passIndex >= 0) {
-        const passScore = scored.find(s => s.patternRef === passIndex)?.score;
-        const passRank = sorted.findIndex(s => s.patternRef === passIndex) + 1;
-        console.log(`  [PASS] Rank ${passRank}/${req.patterns.length}: score=${passScore?.toFixed(4)}`);
+      // 局面 B: Turn 3 攻撃前 (合法手 153件)
+      const hasAttackOption = req.patterns.some((p: any) => p.actionSelectionRef !== undefined && req.catalog.actions[p.actionSelectionRef]?.actionId === "action.attack");
+      if (req.patterns.length === 153 || (hasAttackOption && req.observation?.turnCount === 3)) {
+        console.log(`\n--------------------------------------------------------------------------------`);
+        console.log(`>>> [AUDIT B] Turn 3 攻撃判断における AI の意思決定 (Seq: ${entry.seq}, Step: ${i})`);
+        console.log(`--------------------------------------------------------------------------------`);
+        console.log(`- Player: ${req.playerId} (Actor: ${entry.actor})`);
+        console.log(`- Legal Pattern Count: ${req.patterns.length}`);
+        console.log(`- Selected Pattern Ref: #${entry.response.selectedPatternRef}`);
+        const selectedPattern = req.patterns[entry.response.selectedPatternRef];
+        const selectedAct = selectedPattern?.actionSelectionRef !== undefined ? req.catalog.actions[selectedPattern.actionSelectionRef] : undefined;
+        console.log(`- Selected Pattern: kind=${selectedPattern?.kind}, action=${selectedAct?.actionId}, id=${selectedPattern?.patternId}`);
+
+        console.log(`\nTOP 10 CHOICES:`);
+        for (let k = 0; k < Math.min(10, sorted.length); k++) {
+          const s = sorted[k];
+          const p = req.patterns[s.patternRef];
+          const act = p.actionSelectionRef !== undefined ? req.catalog.actions[p.actionSelectionRef] : undefined;
+          console.log(`  #${k+1} Pattern #${s.patternRef}: score=${s.score.toFixed(4)} | kind=${p.kind} | action=${act?.actionId || 'N/A'} | id=${p.patternId}`);
+        }
+
+        const passIndex = req.patterns.findIndex((p: any) => p.kind === "PASS");
+        if (passIndex >= 0) {
+          const passScore = scored.find(s => s.patternRef === passIndex)?.score;
+          const passRank = sorted.findIndex(s => s.patternRef === passIndex) + 1;
+          console.log(`  [PASS] Rank ${passRank}/${req.patterns.length}: score=${passScore?.toFixed(4)}`);
+        }
+
+        const attackIndex = req.patterns.findIndex((p: any) => p.actionSelectionRef !== undefined && req.catalog.actions[p.actionSelectionRef]?.actionId === "action.attack");
+        if (attackIndex >= 0) {
+          const attScore = scored.find(s => s.patternRef === attackIndex)?.score;
+          const attRank = sorted.findIndex(s => s.patternRef === attackIndex) + 1;
+          console.log(`  [ATTACK] Rank ${attRank}/${req.patterns.length}: score=${attScore?.toFixed(4)}`);
+        }
       }
 
-      const attackIndex = req.patterns.findIndex(p => p.actionSelectionRef !== undefined && req.catalog.actions[p.actionSelectionRef]?.actionId === "action.attack");
-      if (attackIndex >= 0) {
-        const attScore = scored.find(s => s.patternRef === attackIndex)?.score;
-        const attRank = sorted.findIndex(s => s.patternRef === attackIndex) + 1;
-        console.log(`  [ATTACK] Rank ${attRank}/${req.patterns.length}: score=${attScore?.toFixed(4)}`);
+      // 局面 C: Turn 4 死の槍対応 (合法手 57件)
+      if (req.patterns.length === 57) {
+        console.log(`\n--------------------------------------------------------------------------------`);
+        console.log(`>>> [AUDIT C] Turn 4 2回目の死の槍対応における AI の意思決定 (Seq: ${entry.seq}, Step: ${i})`);
+        console.log(`--------------------------------------------------------------------------------`);
+        console.log(`- Player: ${req.playerId} (Actor: ${entry.actor})`);
+        console.log(`- Legal Pattern Count: ${req.patterns.length} (期待値: 57)`);
+        console.log(`- Selected Pattern Ref: #${entry.response.selectedPatternRef}`);
+        const selectedPattern = req.patterns[entry.response.selectedPatternRef];
+        console.log(`- Selected Pattern: kind=${selectedPattern?.kind}, id=${selectedPattern?.patternId}`);
+
+        console.log(`\nTOP 5 CHOICES:`);
+        for (let k = 0; k < Math.min(5, sorted.length); k++) {
+          const s = sorted[k];
+          const p = req.patterns[s.patternRef];
+          const act = p.actionSelectionRef !== undefined ? req.catalog.actions[p.actionSelectionRef] : undefined;
+          console.log(`  #${k+1} Pattern #${s.patternRef}: score=${s.score.toFixed(4)} | kind=${p.kind} | action=${act?.actionId || 'N/A'} | id=${p.patternId}`);
+        }
       }
     }
   }
+
+  return allArgmaxValid;
 }
 
 // 直接実行時のエントリポイント (Vitest 等のテスト環境では自動実行しない)
