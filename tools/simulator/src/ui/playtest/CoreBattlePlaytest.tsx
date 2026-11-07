@@ -74,6 +74,16 @@ import {
   createDecisionTranscriptEntry,
   createAutomatedDecisionTranscriptEntries,
 } from "./PlaytestDecisionTranscript";
+import { PlaytestFeedbackModal } from "./PlaytestFeedbackModal";
+import type { PlaytestHumanFeedbackEntryV1 } from "./PlaytestFeedbackTypes";
+import {
+  GEN8_CHAMPION_CANDIDATE_GENOME_ID,
+  GEN8_CHAMPION_CANDIDATE_EXPECTED_DIGEST,
+} from "../../engine/ai/Gen8DNALoader";
+import {
+  EVOLUTION_G1_BEST_GENOME_ID,
+  EVOLUTION_G1_BEST_FULL_DIGEST,
+} from "../../engine/ai/EvolutionDNALoader";
 import { downloadJsonFile } from "../utils/downloadJson";
 import { copyTextToClipboard } from "../utils/clipboard";
 import { ReplayVerifyModal } from "../replay/ReplayVerifyModal";
@@ -261,6 +271,10 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [restoredScenarioDefinition, setRestoredScenarioDefinition] = useState<ScenarioDefinitionV1 | null>(null);
   const [replayViewerInitialBundle, setReplayViewerInitialBundle] = useState<unknown | null>(null);
   const [replayViewerInitialSource, setReplayViewerInitialSource] = useState<ReplayViewerSource | null>(null);
+
+  // 人間の違和感フィードバック状態
+  const [feedbacks, setFeedbacks] = useState<PlaytestHumanFeedbackEntryV1[]>([]);
+  const [isFeedbackModalOpen, setIsFeedbackModalOpen] = useState<boolean>(false);
 
   const handleOpenReplayViewer = useCallback((bundle?: unknown, source: ReplayViewerSource = "json") => {
     setReplayViewerInitialBundle(bundle ?? null);
@@ -598,6 +612,7 @@ export const CoreBattlePlaytest: React.FC = () => {
       setPendingChallengeDefinition(undefined);
       setActiveChallenge(null);
       activeChallengeRef.current = null;
+      setFeedbacks([]);
       const env = overrideEnv ?? selectedEnvironmentId;
       const isOfficial = isOfficialEnvironment(env);
       const seed = overrideSeedInput ?? (
@@ -1494,6 +1509,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         canonicalMatchLog: session.getMatchLog(),
         currentStep,
         decisionTranscript: decisionTranscriptRef.current,
+        feedbacks,
         runtimeNotice: runtimeNotice || undefined,
       })
     );
@@ -1505,6 +1521,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     currentStep,
     traces,
     runtimeNotice,
+    feedbacks,
   ]);
 
   const handleDownloadDiagnostic = useCallback(() => {
@@ -2009,6 +2026,21 @@ export const CoreBattlePlaytest: React.FC = () => {
             Replay Viewer
           </button>
 
+          {activeMatch && activeMatchMode === "humanVsAi" && (
+            <button
+              onClick={() => setIsFeedbackModalOpen(true)}
+              className="px-2 py-0.5 text-[11px] font-bold rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-900 shadow-sm transition flex items-center gap-1 cursor-pointer"
+              title="AI行動の違和感を記録・共有します"
+            >
+              <span>🤔 違和感を記録</span>
+              {feedbacks.length > 0 && (
+                <span className="bg-blue-600 text-white px-1.5 py-0.2 rounded-full text-[10px]">
+                  {feedbacks.length}
+                </span>
+              )}
+            </button>
+          )}
+
           <button
             onClick={() => startNewGame()}
             className="px-2.5 py-0.5 text-[11px] font-bold rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white border border-zinc-800 shadow-sm transition"
@@ -2269,6 +2301,28 @@ export const CoreBattlePlaytest: React.FC = () => {
 
         {/* 右ペイン: PC用 操作パネル / 対戦ログ */}
         <div className="hidden lg:flex lg:col-span-5 flex-col gap-1.5 sticky top-12 max-h-[calc(100vh-3.5rem)]">
+          {/* AI 違和感フィードバックバー (Human vs AI 時) */}
+          {activeMatchMode === "humanVsAi" && (
+            <div className="flex items-center justify-between p-2 bg-blue-50 border border-blue-200 rounded text-xs font-mono">
+              <div className="flex items-center gap-1.5 font-bold text-blue-900">
+                <span>🤖</span>
+                <span>AI評価 (Human vs AI):</span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsFeedbackModalOpen(true)}
+                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold transition flex items-center gap-1.5 shadow-sm text-[11px] cursor-pointer"
+              >
+                <span>🤔 違和感を記録</span>
+                {feedbacks.length > 0 && (
+                  <span className="bg-white text-blue-900 px-1 rounded-full text-[10px]">
+                    {feedbacks.length}
+                  </span>
+                )}
+              </button>
+            </div>
+          )}
+
           {/* 判断要求パネル (Decision Panel) */}
           {isDesktop && (
             isHumanTurnWaiting ? (
@@ -2468,8 +2522,36 @@ export const CoreBattlePlaytest: React.FC = () => {
           onRestart={() => startNewGame()}
           onDownloadDiagnostic={activeMatch?.isScenario ? undefined : handleDownloadDiagnostic}
           onOpenReplayViewer={activeMatch?.isScenario ? undefined : handleOpenCurrentReplay}
+          onOpenFeedback={activeMatchMode === "humanVsAi" ? () => setIsFeedbackModalOpen(true) : undefined}
+          feedbackCount={feedbacks.length}
         />
       )}
+
+      {/* AI 違和感フィードバックモーダル */}
+      <PlaytestFeedbackModal
+        isOpen={isFeedbackModalOpen}
+        onClose={() => setIsFeedbackModalOpen(false)}
+        transcript={decisionTranscriptRef.current}
+        feedbacks={feedbacks}
+        onAddFeedback={(fb) => setFeedbacks((prev) => [...prev, fb])}
+        onDeleteFeedback={(id) => setFeedbacks((prev) => prev.filter((f) => f.feedbackId !== id))}
+        diagnosticBundle={buildCurrentDiagnosticBundle()}
+        matchSeed={activeMatch?.seed}
+        aiGenomeId={
+          activePlaytestSettings?.policyId === "gen8-champion-candidate"
+            ? GEN8_CHAMPION_CANDIDATE_GENOME_ID
+            : activePlaytestSettings?.policyId === "evolution-g1-best"
+            ? EVOLUTION_G1_BEST_GENOME_ID
+            : undefined
+        }
+        aiDnaDigest={
+          activePlaytestSettings?.policyId === "gen8-champion-candidate"
+            ? GEN8_CHAMPION_CANDIDATE_EXPECTED_DIGEST
+            : activePlaytestSettings?.policyId === "evolution-g1-best"
+            ? EVOLUTION_G1_BEST_FULL_DIGEST
+            : undefined
+        }
+      />
 
       {/* 6. Replay 検証モーダル */}
       <ReplayVerifyModal

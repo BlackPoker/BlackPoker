@@ -1,0 +1,36 @@
+{
+  "schemaVersion": 1,
+  "workId": "BP-SIM-AI-V92-WORK4-6-GEN8-HUMAN-PLAYTEST",
+  "sourceSha": "c7f618e6f5ca24f75ea7318bc2f526ef822d24e6",
+  "exportedAt": "2026-11-07T21:18:00.000Z",
+  "regulationId": "standard-pack",
+  "frameId": "pack",
+  "classification": "gen8-champion-candidate",
+  "verdictNote": "Gen 8 Candidate は完全未使用 Seed 240 試合の正式 Holdout において公式 Gen 7 Champion に対し勝率 61.25% (147勝93敗)、95% 信頼区間 [55.22%, 67.28%] を記録し、統計的優位性 (p = 0.0001663) を確立しました。",
+  "genome": {
+    "genomeId": "gen8-prod-g0-ind7-cross7",
+    "name": "Gen8-Production-Champion-Candidate",
+    "generation": 7,
+    "dnaFormatVersion": 1,
+    "featureSchemaVersion": 6,
+    "scoringModel": "linear-bilinear-v1",
+    "contextDimension": 165,
+    "patternDimension": 143,
+    "totalWeights": 23738,
+    "digests": {
+      "fullDnaDigest": "11fff0f578c92af376eece46ff90f9eba3785e59d0cf64d5eeffc7967946445e"
+    }
+  },
+  "holdoutPerformance": {
+    "totalMatches": 240,
+    "totalPairs": 120,
+    "wins": 147,
+    "losses": 93,
+    "draws": 0,
+    "winRate": 0.6125,
+    "pairScoreMean": 0.6125,
+    "ci95": [0.5522, 0.6728],
+    "superiorityEstablished": true,
+    "nonInferiorityEstablished": true
+  }
+}

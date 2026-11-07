@@ -5,6 +5,10 @@ import { GenomePolicy } from "../ai/GenomePolicy";
 import { DecisionDNACodec } from "../ai/DecisionDNACodec";
 import { createManualGenericGenomeDNA } from "../ai/BaselinePolicies";
 import { createEvolutionG1BestPolicy, EVOLUTION_G1_BEST_SUPPORTED_REGULATION_ID } from "../ai/EvolutionDNALoader";
+import {
+  createGen8ChampionCandidatePolicy,
+  GEN8_CHAMPION_CANDIDATE_SUPPORTED_REGULATION_ID,
+} from "../ai/Gen8DNALoader";
 import { BatchSimulationRunner } from "../simulation/BatchSimulationRunner";
 import { PlaytestPolicyId, PlaytestSeatControllers } from "./PlaytestSeatController";
 
@@ -70,6 +74,15 @@ export class PlaytestPolicyFactory {
           );
         }
         return createEvolutionG1BestPolicy();
+      }
+
+      case "gen8-champion-candidate": {
+        if (regulationId !== GEN8_CHAMPION_CANDIDATE_SUPPORTED_REGULATION_ID) {
+          throw new Error(
+            `Gen 8 Champion Candidate AI は公式レギュレーション ${GEN8_CHAMPION_CANDIDATE_SUPPORTED_REGULATION_ID} 専用です (現在の環境: ${regulationId ?? "undefined"})`
+          );
+        }
+        return createGen8ChampionCandidatePolicy();
       }
 
       default: {

@@ -8,6 +8,8 @@ export interface GameOverOverlayProps {
   onRestart: () => void;
   onDownloadDiagnostic?: () => void;
   onOpenReplayViewer?: () => void;
+  onOpenFeedback?: () => void;
+  feedbackCount?: number;
 }
 
 export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
@@ -18,6 +20,8 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
   onRestart,
   onDownloadDiagnostic,
   onOpenReplayViewer,
+  onOpenFeedback,
+  feedbackCount = 0,
 }) => {
   const [minimized, setMinimized] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -48,6 +52,36 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
         >
           結果表示
         </button>
+        {onOpenFeedback && (
+          <button
+            onClick={onOpenFeedback}
+            title="AI行動の違和感を記録・共有します"
+            className="px-2 py-1 text-[10px] font-bold bg-blue-50 hover:bg-blue-100 text-blue-900 rounded border border-blue-300 transition flex items-center gap-1"
+          >
+            <span>🤔 違和感記録</span>
+            {feedbackCount > 0 && <span className="bg-blue-600 text-white px-1 rounded-full text-[9px]">{feedbackCount}</span>}
+          </button>
+        )}
+        {onOpenFeedback && (
+          <button
+            onClick={onOpenFeedback}
+            className="w-full py-2 px-3 text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-900 rounded transition flex flex-col items-center justify-center gap-0.5 border border-blue-300 mb-2"
+          >
+            <div className="flex items-center gap-1.5 font-mono">
+              <span>🤔</span>
+              <span>AI違和感フィードバックを記録・共有</span>
+              {feedbackCount > 0 && (
+                <span className="bg-blue-600 text-white px-1.5 py-0.2 rounded-full text-[10px]">
+                  {feedbackCount}件
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] text-blue-700 font-normal">
+              ※ 非公開情報を含まない共有用JSONのエクスポートも可能です
+            </span>
+          </button>
+        )}
+
         {onDownloadDiagnostic && (
           <button
             onClick={onDownloadDiagnostic}
@@ -113,6 +147,26 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
             盤面を見る
           </button>
         </div>
+
+        {onOpenFeedback && (
+          <button
+            onClick={onOpenFeedback}
+            className="w-full py-2 px-3 text-xs font-bold bg-blue-50 hover:bg-blue-100 text-blue-900 rounded transition flex flex-col items-center justify-center gap-0.5 border border-blue-300 mb-2"
+          >
+            <div className="flex items-center gap-1.5 font-mono">
+              <span>🤔</span>
+              <span>AI違和感フィードバックを記録・共有</span>
+              {feedbackCount > 0 && (
+                <span className="bg-blue-600 text-white px-1.5 py-0.2 rounded-full text-[10px]">
+                  {feedbackCount}件
+                </span>
+              )}
+            </div>
+            <span className="text-[10px] text-blue-700 font-normal">
+              ※ 非公開情報を含まない共有用JSONのエクスポートも可能です
+            </span>
+          </button>
+        )}
 
         {onDownloadDiagnostic && (
           <button

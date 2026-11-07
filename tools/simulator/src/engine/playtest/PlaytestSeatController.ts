@@ -16,7 +16,8 @@ export type PlaytestPolicyId =
   | "seededRandom"
   | "manualGenericGenome"
   | "zeroGenome"
-  | "evolution-g1-best";
+  | "evolution-g1-best"
+  | "gen8-champion-candidate";
 
 /**
  * UI表示用メタデータ
@@ -77,6 +78,19 @@ export const PLAYTEST_POLICY_OPTIONS: readonly PlaytestPolicyOption[] = [
       dnaSchema: "v6",
       humanPerformance: "未評価",
       disclaimer: "※「9勝1敗」は同一世代母集団内での実験戦績であり、対人戦での一般的な強さを保証するものではありません。",
+    },
+  },
+  {
+    id: "gen8-champion-candidate",
+    label: "Gen 8 Champion Candidate（正式Holdout検証済み）",
+    description: "スタンダード＋パック向け進化AI。Gen 7との正式Holdout 240試合で147勝93敗。人間との対戦品質は評価中。",
+    supportedRegulationIds: ["standard-pack"],
+    evolutionDetails: {
+      generation: "Gen 8 (g0-ind7-cross7)",
+      baselineRecord: "正式Holdout 240試合 147勝93敗 (勝率61.25%, 95% CI [55.22%, 67.28%])",
+      dnaSchema: "v6",
+      humanPerformance: "評価中",
+      disclaimer: "※正式Holdout 240試合でGen 7に統計的優位性 (p = 0.0001663) を確立。人間対戦における戦術の自然さ・操作感は現在評価中です。",
     },
   },
 ];

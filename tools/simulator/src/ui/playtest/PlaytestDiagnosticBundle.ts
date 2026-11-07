@@ -10,8 +10,14 @@ import {
   EVOLUTION_G1_BEST_FEATURE_SCHEMA_VERSION,
   EVOLUTION_G1_BEST_FULL_DIGEST,
 } from "../../engine/ai/EvolutionDNALoader";
+import {
+  GEN8_CHAMPION_CANDIDATE_GENOME_ID,
+  GEN8_CHAMPION_CANDIDATE_FEATURE_SCHEMA_VERSION,
+  GEN8_CHAMPION_CANDIDATE_EXPECTED_DIGEST,
+} from "../../engine/ai/Gen8DNALoader";
 import { GameSessionStep } from "../../engine/session/GameSession";
 import type { PlaytestDecisionTranscriptEntryV1 } from "./PlaytestDecisionTranscript";
+import type { PlaytestHumanFeedbackEntryV1 } from "./PlaytestFeedbackTypes";
 import type { CardOccurrenceSelection } from "../../engine/regulation/SimulatorDeckProfileResolver";
 
 export type { PlaytestDecisionTranscriptEntryV1 };
@@ -99,6 +105,7 @@ export interface PlaytestDiagnosticBundleV1 {
   readonly canonicalMatchLog?: CanonicalMatchLog;
 
   readonly decisionTranscript: readonly PlaytestDecisionTranscriptEntryV1[];
+  readonly feedbacks?: readonly PlaytestHumanFeedbackEntryV1[];
 
   readonly snapshot: {
     readonly stateVersion?: number;
@@ -128,6 +135,7 @@ export interface BuildPlaytestDiagnosticBundleParams {
   readonly traces?: readonly unknown[];
   readonly canonicalMatchLog?: CanonicalMatchLog | null;
   readonly decisionTranscript?: readonly PlaytestDecisionTranscriptEntryV1[];
+  readonly feedbacks?: readonly PlaytestHumanFeedbackEntryV1[];
   readonly setupNotice?: SetupNotice | null;
   readonly runtimeNotice?: SetupNotice | null;
 }
@@ -152,6 +160,7 @@ export interface AssemblePlaytestDiagnosticBundleParamsInput {
   readonly canonicalMatchLog?: CanonicalMatchLog | null;
   readonly currentStep?: GameSessionStep | null;
   readonly decisionTranscript?: readonly PlaytestDecisionTranscriptEntryV1[];
+  readonly feedbacks?: readonly PlaytestHumanFeedbackEntryV1[];
   readonly setupNotice?: SetupNotice | null;
   readonly runtimeNotice?: SetupNotice | null;
 }
@@ -178,6 +187,7 @@ export function assemblePlaytestDiagnosticBundleParams(
     canonicalMatchLog: inputs.canonicalMatchLog,
     currentStep: inputs.currentStep,
     decisionTranscript: inputs.decisionTranscript,
+    feedbacks: inputs.feedbacks,
     setupNotice: inputs.setupNotice,
     runtimeNotice: inputs.runtimeNotice,
   };
@@ -275,6 +285,12 @@ export function buildPlaytestDiagnosticBundleV1(
               schemaVersion: EVOLUTION_G1_BEST_FEATURE_SCHEMA_VERSION,
               fullDnaDigest: EVOLUTION_G1_BEST_FULL_DIGEST,
             }
+          : params.activePlaytestSettings?.policyId === "gen8-champion-candidate"
+          ? {
+              genomeId: GEN8_CHAMPION_CANDIDATE_GENOME_ID,
+              schemaVersion: GEN8_CHAMPION_CANDIDATE_FEATURE_SCHEMA_VERSION,
+              fullDnaDigest: GEN8_CHAMPION_CANDIDATE_EXPECTED_DIGEST,
+            }
           : undefined,
 
       rareCardSelections: params.activePlaytestSettings?.rareCardSelections ?? params.activeMatch?.rareCardSelections,
@@ -298,6 +314,7 @@ export function buildPlaytestDiagnosticBundleV1(
     canonicalMatchLog: params.canonicalMatchLog ? JSON.parse(JSON.stringify(params.canonicalMatchLog)) : undefined,
 
     decisionTranscript: params.decisionTranscript ? [...params.decisionTranscript] : [],
+    feedbacks: params.feedbacks ? [...params.feedbacks] : undefined,
 
     snapshot: {
       stateVersion,
