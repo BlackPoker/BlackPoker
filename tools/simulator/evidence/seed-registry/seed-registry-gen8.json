@@ -1,14 +1,24 @@
 {
-  "timestamp": "2026-11-07T05:09:02.848Z",
+  "timestamp": "2026-11-07T06:03:32.420Z",
   "auditStatus": "PASS",
   "collisionErrors": 0,
+  "registrySummary": {
+    "totalCriticalSpans": 8,
+    "trainingAllocatedSpan": 18066,
+    "trainingActualUsedCount": 660,
+    "validationAllocatedSpan": 9360,
+    "validationActualUsedCount": 3600,
+    "futureHoldoutReservedSpan": 300,
+    "futureHoldoutActualUsedCount": 0
+  },
   "registry": [
     {
       "purpose": "Stage 3 Training",
       "status": "USED",
       "startSeed": 1,
       "endSeed": 50000,
-      "count": 50000,
+      "allocatedSpan": 50000,
+      "actualUsedCount": 50000,
       "description": "Stage 3 過去進化学習の訓練用 Seed 空間"
     },
     {
@@ -16,7 +26,8 @@
       "status": "USED",
       "startSeed": 1001,
       "endSeed": 1500,
-      "count": 500,
+      "allocatedSpan": 500,
+      "actualUsedCount": 500,
       "description": "大規模基盤 Stage A 検証用 Seed"
     },
     {
@@ -24,7 +35,8 @@
       "status": "USED",
       "startSeed": 10001,
       "endSeed": 15000,
-      "count": 5000,
+      "allocatedSpan": 5000,
+      "actualUsedCount": 5000,
       "description": "大規模基盤 Stage B 10K 完走用 Seed"
     },
     {
@@ -32,7 +44,8 @@
       "status": "USED",
       "startSeed": 70001,
       "endSeed": 70100,
-      "count": 100,
+      "allocatedSpan": 100,
+      "actualUsedCount": 100,
       "description": "Stage 3 過去進化学習の中間 Validation Seed"
     },
     {
@@ -40,7 +53,8 @@
       "status": "PROTECTED_LOCKED",
       "startSeed": 95001,
       "endSeed": 95030,
-      "count": 30,
+      "allocatedSpan": 30,
+      "actualUsedCount": 30,
       "description": "Work 3-7 で使用された公式 Holdout 240 試合 Seed (厳格保護・再利用禁止)"
     },
     {
@@ -48,7 +62,8 @@
       "status": "USED",
       "startSeed": 200001,
       "endSeed": 200030,
-      "count": 30,
+      "allocatedSpan": 30,
+      "actualUsedCount": 30,
       "description": "Work 4-3 Phase 1 診断 210 試合および H2H 60 試合で使用済み"
     },
     {
@@ -56,7 +71,8 @@
       "status": "USED",
       "startSeed": 210001,
       "endSeed": 211000,
-      "count": 1000,
+      "allocatedSpan": 1000,
+      "actualUsedCount": 1000,
       "description": "Work 4-3 Phase 2 パイロット探索 1,000 試合で使用済み"
     },
     {
@@ -64,7 +80,8 @@
       "status": "PROTECTED_LOCKED",
       "startSeed": 250001,
       "endSeed": 250120,
-      "count": 120,
+      "allocatedSpan": 120,
+      "actualUsedCount": 120,
       "description": "最終評価プロトコル確定まで完全未使用のまま保護される予約 Seed"
     },
     {
@@ -72,7 +89,8 @@
       "status": "USED",
       "startSeed": 280001,
       "endSeed": 280753,
-      "count": 753,
+      "allocatedSpan": 753,
+      "actualUsedCount": 753,
       "description": "Work 4-3 本番学習前の Fitness 比較実験 (96 試合) で使用された実 Seed 範囲"
     },
     {
@@ -80,24 +98,27 @@
       "status": "ALLOCATED_FOR_PRODUCTION",
       "startSeed": 300001,
       "endSeed": 318066,
-      "count": 18066,
-      "description": "Gen 8 本番進化学習 (10 世代 DRR) で実際に使用された訓練 Seed 空間 (300001 + gen*2000 + 0..65)"
+      "allocatedSpan": 18066,
+      "actualUsedCount": 660,
+      "description": "Gen 8 本番進化学習 (10 世代 x 66 pairs) で実際に使用された訓練 Seed 空間 (300001 + gen*2000 + 0..65)。割当幅 18,066 に対し実使用 660 個"
     },
     {
       "purpose": "Gen 8 Production Validation",
       "status": "ALLOCATED_FOR_PRODUCTION",
       "startSeed": 330001,
       "endSeed": 339360,
-      "count": 9360,
-      "description": "Gen 8 本番進化学習の Validation (10 世代 x 360 pairs) で実際に使用された Seed 空間 (330001 + gen*1000 + 0..359)"
+      "allocatedSpan": 9360,
+      "actualUsedCount": 3600,
+      "description": "Gen 8 本番進化学習の Validation (10 世代 x 360 pairs) で実際に使用された Seed 空間 (330001 + gen*1000 + 0..359)。割当幅 9,360 に対し実使用 3,600 個"
     },
     {
       "purpose": "Gen 8 Final Holdout (Future Unused)",
       "status": "RESERVED_FOR_FUTURE_HOLDOUT",
       "startSeed": 350001,
       "endSeed": 350300,
-      "count": 300,
-      "description": "本番学習完了後の正式評価・Holdout 用に将来割り当て予定の完全隔離 Seed (現在未実行・完全保護中)"
+      "allocatedSpan": 300,
+      "actualUsedCount": 0,
+      "description": "本番学習完了後の正式評価・Holdout 用に将来割り当て予定の完全隔離 Seed (現在未実行・完全保護中・実使用 0 個)"
     }
   ]
 }

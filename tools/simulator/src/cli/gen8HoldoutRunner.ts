@@ -1,7 +1,7 @@
 /**
- * BlackPoker Work 4-4 — Gen 8 Champion Official Holdout Evaluation Runner & Preflight Harness
+ * BlackPoker Work 4-4 R2 — Gen 8 Champion Official Holdout Evaluation Runner & Preflight Harness
  *
- * 【目的と保護原則 (Work 4-4)】
+ * 【目的と保護原則 (Work 4-4 R2)】
  * 1. Gen 8 本番進化学習 (8,520 試合完走) で導出された Primary Candidate:
  *    - Genome ID: gen8-prod-g0-ind7-cross7
  *    - DNA Digest: 11fff0f578c92af376eece46ff90f9eba3785e59d0cf64d5eeffc7967946445e
@@ -9,23 +9,29 @@
  *    厳格な座席反転ペア対戦・統計的検定・プレイヤー別アクション採択率集計基盤を提供する。
  *
  * 2. Holdout 未実行保護 (Fail-Closed):
- *    - 本 Work 4-4 では追加学習および正式 Holdout の実行は厳格に禁止されている。
- *    - 明示的な承認トークン (BP-GEN8-HOLDOUT-APPROVED-2026) なしでの --mode EXECUTE は
- *      UnauthorizedHoldoutExecutionError により即時 Fail-Closed 停止する。
- *    - デフォルト動作は --mode PLAN_ONLY (計画・事前検証・DNA真正性・Seed隔離監査のみ)。
+ *    - 本 Work 4-4 R2 では追加学習および正式 Holdout の実試合実行は厳格に禁止されている。
+ *    - 明示的な承認トークン (BP-GEN8-HOLDOUT-APPROVED-2026) が指定された場合でも、
+ *      正式レビュー承認前の実 Holdout 試合実行は Fail-Closed で拒絶する。
+ *    - 合成データ・テスト用 Fixture による単体テストのみが許可される。
  *
- * 3. 厳格な統計的検定プロトコル (Single-Hypothesis Gate):
+ * 3. 厳格な統計的検定プロトコル (Single-Hypothesis Gate & 感度分析):
  *    - 多重比較を排除するため、評価対象は Primary Candidate 1 個体に固定。
  *    - 対 Gen 7 Champion (現王者) との座席反転ペア (Leg 0: Cand=P1, Leg 1: Cand=P2) を
- *      観測単位 Xi in {0.0, 0.25, 0.5, 0.75, 1.0} とする。
+ *      独立観測単位 Xi in {0.0, 0.25, 0.5, 0.75, 1.0} とする。
  *    - 優位性認定条件: 両側 95% 信頼区間の下限値 > 0.50 (片側 p < 0.025)。
  *    - 非劣性認定条件: 両側 95% 信頼区間の下限値 > 0.45 (許容マージン Delta = 0.05)。
- *    - 必要サンプルサイズ: 120 ペア (240 試合) で想定勝率 p=0.65 に対する検出力 > 95% を担保。
+ *    - 検出力は真の勝率や分散の仮定に基づくモデル感度分析値として明記し、保証値とはしない。
+ *    - 標準誤差ゼロ (SE=0) などの境界条件を安全に処理。
  *
  * 4. プレイヤー別アクション集計の完全性:
  *    - executedActions / offeredActions を P1 / P2 (Candidate / Opponent) 別に分離記録。
  *    - 盤面攻撃 (Attack)、投擲 (Throwing)、PASS、召喚 (Summon) の機会数・実行数・採択率を
  *      Candidate と Opponent の双方について独立に計測・比較。
+ *
+ * 5. 全件 Evidence 監査 (12 大検証契約):
+ *    - 予定試合数・ペア数の完全一致、matchIndex 連続性、matchId 一意性、Seed 決定論性、
+ *      座席割当、全試合 DNA Digest、status===COMPLETED、Manifest SHA-256、
+ *      余剰/欠落チャンク検出、候補 DNA 真正性を厳格検証し、違反時は非ゼロ終了。
  */
 
 import * as fs from "fs";
@@ -35,11 +41,18 @@ import { execSync } from "child_process";
 import { DecisionDNA } from "../domain/ai/DecisionDNATypes";
 import { SemanticSHA256 } from "../engine/ai/SemanticSHA256";
 import { EvolutionIndependentEvaluator } from "../engine/ai/EvolutionIndependentEvaluator";
+import { EvolutionCampaignManager } from "../engine/ai/EvolutionCampaignManager";
+import { DecisionDNACodec } from "../engine/ai/DecisionDNACodec";
 import {
   CompactMatchOutcomeRecord,
   PlayerActionStatsRecord,
   ChampionAuthenticityRecord,
 } from "../domain/simulation/MillionMatchInfraTypes";
+import {
+  derivePlayerSeed,
+  executeSingleInstrumentedMatch,
+  SingleMatchExecutionResult,
+} from "../engine/simulation/MillionMatchCampaignEngine";
 import {
   CANDIDATE_CHAMPION_GENOME_ID as GEN7_GENOME_ID,
   CANDIDATE_CHAMPION_EXPECTED_DIGEST as GEN7_EXPECTED_DIGEST,
@@ -54,7 +67,7 @@ import { SEED_REGISTRY_GEN8 } from "./verifySeedRegistryGen8";
 // 定数定義
 // =============================================================================
 
-export const GEN8_HOLDOUT_WORK_ID = "BP-SIM-AI-V92-WORK4-4-GEN8-PRE-HOLDOUT-AUDIT" as const;
+export const GEN8_HOLDOUT_WORK_ID = "BP-SIM-AI-V92-WORK4-4-GEN8-PRE-HOLDOUT-AUDIT-R2" as const;
 export const GEN8_HOLDOUT_REGULATION_ID = "standard-pack" as const;
 export const GEN8_HOLDOUT_FRAME_ID = "pack" as const;
 export const GEN8_HOLDOUT_RULE_PACKAGE_VERSION = "1.0.0" as const;
@@ -154,6 +167,7 @@ export interface HoldoutStatisticalSummary {
   };
   readonly zScoreSuperiority: number;
   readonly pValueSuperiority: number;
+  readonly outcomeCategory: "SUPERIORITY_VERIFIED" | "NON_INFERIORITY_VERIFIED" | "CONFIRMED_REGRESSION" | "INCONCLUSIVE";
   readonly isSuperior: boolean; // lower > 0.50 (one-sided p < 0.025)
   readonly isNonInferior: boolean; // lower > 0.45 (margin Delta = 0.05)
 }
@@ -184,6 +198,11 @@ export interface HoldoutActionComparison {
   };
 }
 
+export interface PowerSensitivityEntry {
+  readonly assumedTrueWinRate: number;
+  readonly statisticalPower: number;
+}
+
 export interface Gen8HoldoutPreflightManifest {
   readonly workId: string;
   readonly status: "APPROVED_FOR_PREFLIGHT_PLANNING / EXECUTION_LOCKED";
@@ -192,7 +211,7 @@ export interface Gen8HoldoutPreflightManifest {
   readonly isGitClean: boolean;
   readonly executionMode: "PLAN_ONLY" | "DRY_RUN" | "EXECUTE" | "AUDIT_ONLY";
   readonly approvalTokenRequired: typeof GEN8_HOLDOUT_APPROVAL_TOKEN;
-  readonly approvalStatus: "NOT_APPROVED_EXECUTION_BLOCKED" | "APPROVED";
+  readonly approvalStatus: "NOT_APPROVED_EXECUTION_BLOCKED" | "APPROVED_FOR_TEST_ONLY";
   readonly candidateChampion: {
     readonly genomeId: string;
     readonly expectedDigest: string;
@@ -205,12 +224,14 @@ export interface Gen8HoldoutPreflightManifest {
     readonly expectedDigest: string;
     readonly verifiedDigest: string;
     readonly digestMatches: boolean;
+    readonly sourcePath: string;
   };
   readonly referenceAnchorGen5: {
     readonly genomeId: string;
     readonly expectedDigest: string;
     readonly verifiedDigest: string;
     readonly digestMatches: boolean;
+    readonly sourcePath: string;
   };
   readonly seedRange: {
     readonly startSeed: number;
@@ -226,12 +247,17 @@ export interface Gen8HoldoutPreflightManifest {
     readonly plannedMatches: number;
     readonly superiorityThreshold: "Two-sided 95% CI Lower Bound > 0.50 (one-sided p < 0.025)";
     readonly nonInferiorityThreshold: "Two-sided 95% CI Lower Bound > 0.45 (margin 0.05)";
-    readonly statisticalPowerForP065: number;
+    readonly powerSensitivityAnalysis: readonly PowerSensitivityEntry[];
+    readonly sensitivityCaveat: string;
   };
   readonly regressionBaselines: readonly {
     readonly opponentId: string;
     readonly role: string;
     readonly targetCriteria: string;
+    readonly plannedPairs: number;
+    readonly plannedMatches: number;
+    readonly startSeed: number;
+    readonly endSeed: number;
   }[];
 }
 
@@ -248,10 +274,41 @@ export interface Gen8HoldoutAuditResult {
   readonly incompleteMatches: number;
   readonly candidateDigest: string;
   readonly candidateDigestVerified: boolean;
-  readonly statisticalSummary: HoldoutStatisticalSummary;
-  readonly actionComparison: HoldoutActionComparison;
+  readonly statisticalSummary?: HoldoutStatisticalSummary;
+  readonly actionComparison?: HoldoutActionComparison;
   readonly superiorityVerified: boolean;
   readonly nonInferiorityVerified: boolean;
+}
+
+export interface Gen8HoldoutPreflightOptions {
+  readonly executionMode?: "PLAN_ONLY" | "DRY_RUN" | "EXECUTE" | "AUDIT_ONLY";
+  readonly approvalToken?: string;
+  readonly candidatePath?: string;
+  readonly plannedPairs?: number;
+  readonly gen7CheckpointPath?: string;
+  readonly gen5CheckpointPath?: string;
+  readonly expectedGen7Digest?: string;
+  readonly expectedGen5Digest?: string;
+  readonly requireOfficialCheckpoints?: boolean;
+}
+
+export interface Gen8HoldoutExecutionOptions {
+  readonly workId?: string;
+  readonly candidateDNA: DecisionDNA;
+  readonly candidateDigest: string;
+  readonly candidateGenomeId?: string;
+  readonly opponentDNA: DecisionDNA;
+  readonly opponentDigest: string;
+  readonly opponentGenomeId?: string;
+  readonly opponentId?: string;
+  readonly opponentName?: string;
+  readonly pairsCount: number;
+  readonly startSeed: number;
+  readonly outputDir: string;
+  readonly chunkSizeMatches?: number;
+  readonly maxDecisionsPerMatch?: number;
+  readonly isSyntheticTest?: boolean;
+  readonly testExecutionAuthorized?: boolean;
 }
 
 // =============================================================================
@@ -259,7 +316,7 @@ export interface Gen8HoldoutAuditResult {
 // =============================================================================
 
 /**
- * 標準正規分布累積分布関数 (CDF) の高精度多項式近似 (Abramowitz and Stegun 26.2.17)
+ * 標準正規分布累積分布関数 (CDF) の多項式近似 (Abramowitz and Stegun 26.2.17)
  */
 export function normalCdf(z: number): number {
   if (z < -8) return 0;
@@ -298,7 +355,33 @@ export function computePairScore(
 }
 
 /**
- * ペアスコア配列から Welford / 不偏分散による統計的要約を算出
+ * 検出力の感度分析 (仮定真勝率ごとのモデル計算)
+ */
+export function computeHoldoutPowerSensitivity(
+  pairsCount: number,
+  assumedWinRates: readonly number[] = [0.55, 0.60, 0.65, 0.70]
+): PowerSensitivityEntry[] {
+  const p0 = 0.50;
+  const z_crit = 1.95996; // two-sided 95% alpha=0.025 one-sided
+  const entries: PowerSensitivityEntry[] = [];
+
+  for (const p of assumedWinRates) {
+    const numerator = (p - p0) * Math.sqrt(pairsCount) - z_crit * Math.sqrt(p0 * (1 - p0));
+    const denominator = Math.sqrt(p * (1 - p));
+    const z_beta = numerator / denominator;
+    const power = normalCdf(z_beta);
+    entries.push({
+      assumedTrueWinRate: p,
+      statisticalPower: Number(power.toFixed(4)),
+    });
+  }
+
+  return entries;
+}
+
+/**
+ * ペアスコア配列から不偏分散による統計的要約を算出
+ * 標準誤差ゼロ (SE=0) 等の境界条件を安全にハンドリング
  */
 export function computeHoldoutStatistics(
   opponentId: string,
@@ -324,6 +407,7 @@ export function computeHoldoutStatistics(
       confidenceInterval95: { lower: 0, upper: 0 },
       zScoreSuperiority: 0,
       pValueSuperiority: 1.0,
+      outcomeCategory: "INCONCLUSIVE",
       isSuperior: false,
       isNonInferior: false,
     };
@@ -359,14 +443,44 @@ export function computeHoldoutStatistics(
   const standardError = Math.sqrt(sampleVariance / totalPairs);
 
   const zCritical95 = 1.959963984540054; // 1.96 for two-sided 95% CI
-  const lowerCI = Math.max(0, meanPairScore - zCritical95 * standardError);
-  const upperCI = Math.min(1, meanPairScore + zCritical95 * standardError);
+  let lowerCI = Math.max(0, meanPairScore - zCritical95 * standardError);
+  let upperCI = Math.min(1, meanPairScore + zCritical95 * standardError);
 
-  const zScoreSuperiority = standardError > 0 ? (meanPairScore - 0.50) / standardError : 0;
-  const pValueSuperiority = 1.0 - normalCdf(zScoreSuperiority);
+  let zScoreSuperiority = 0;
+  let pValueSuperiority = 0.5;
+
+  // 境界条件: 標準誤差ゼロ (全ペア同一スコアの場合)
+  if (standardError === 0) {
+    lowerCI = meanPairScore;
+    upperCI = meanPairScore;
+    if (meanPairScore > 0.50) {
+      zScoreSuperiority = 999;
+      pValueSuperiority = 0.0;
+    } else if (meanPairScore < 0.50) {
+      zScoreSuperiority = -999;
+      pValueSuperiority = 1.0;
+    } else {
+      zScoreSuperiority = 0;
+      pValueSuperiority = 0.5;
+    }
+  } else {
+    zScoreSuperiority = (meanPairScore - 0.50) / standardError;
+    pValueSuperiority = 1.0 - normalCdf(zScoreSuperiority);
+  }
 
   const isSuperior = lowerCI > 0.50;
   const isNonInferior = lowerCI > 0.50 - GEN8_NON_INFERIORITY_MARGIN; // > 0.45
+
+  let outcomeCategory: HoldoutStatisticalSummary["outcomeCategory"];
+  if (isSuperior) {
+    outcomeCategory = "SUPERIORITY_VERIFIED";
+  } else if (isNonInferior) {
+    outcomeCategory = "NON_INFERIORITY_VERIFIED";
+  } else if (upperCI < 0.50) {
+    outcomeCategory = "CONFIRMED_REGRESSION";
+  } else {
+    outcomeCategory = "INCONCLUSIVE";
+  }
 
   return {
     opponentId,
@@ -386,6 +500,7 @@ export function computeHoldoutStatistics(
     },
     zScoreSuperiority,
     pValueSuperiority,
+    outcomeCategory,
     isSuperior,
     isNonInferior,
   };
@@ -427,9 +542,7 @@ export function computePlayerActionComparison(
     const candStats = m.playerStats[candSeat];
     const oppStats = m.playerStats[oppSeat];
 
-    // Candidate 集計
     accumulatePlayerStats(candAccum, candStats);
-    // Opponent 集計
     accumulatePlayerStats(oppAccum, oppStats);
   }
 
@@ -527,12 +640,9 @@ export function loadGen8PrimaryCandidate(candidatePath?: string): DecisionDNA {
 // Preflight Manifest ビルダー
 // =============================================================================
 
-export function buildGen8HoldoutPreflightManifest(options?: {
-  executionMode?: "PLAN_ONLY" | "DRY_RUN" | "EXECUTE" | "AUDIT_ONLY";
-  approvalToken?: string;
-  candidatePath?: string;
-  plannedPairs?: number;
-}): Gen8HoldoutPreflightManifest {
+export function buildGen8HoldoutPreflightManifest(
+  options?: Gen8HoldoutPreflightOptions
+): Gen8HoldoutPreflightManifest {
   const mode = options?.executionMode ?? "PLAN_ONLY";
   const approvalToken = options?.approvalToken;
   const isApproved = approvalToken === GEN8_HOLDOUT_APPROVAL_TOKEN;
@@ -544,7 +654,7 @@ export function buildGen8HoldoutPreflightManifest(options?: {
     isGitClean = st.length === 0;
     gitCommitSha = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
   } catch {
-    // Git not available or not clean
+    // Git unavailable or working tree dirty
   }
 
   // Candidate 検証
@@ -552,8 +662,17 @@ export function buildGen8HoldoutPreflightManifest(options?: {
   const candDigest = SemanticSHA256.hash(JSON.stringify(candDna));
 
   // Anchor Champions 検証
-  const gen7CheckPath = path.resolve(".artifacts/stage3-full-action-retrain-r1/campaign-stage3-evolution-checkpoint.json");
-  const gen5CheckPath = path.resolve(".artifacts/stage3-evolution/campaign-stage3-evolution-checkpoint.json");
+  const gen7CheckPath = path.resolve(
+    options?.gen7CheckpointPath ??
+      ".artifacts/stage3-full-action-retrain-r1/campaign-stage3-evolution-checkpoint.json"
+  );
+  const gen5CheckPath = path.resolve(
+    options?.gen5CheckpointPath ??
+      ".artifacts/stage3-evolution/campaign-stage3-evolution-checkpoint.json"
+  );
+
+  const expectedGen7Digest = options?.expectedGen7Digest ?? GEN7_EXPECTED_DIGEST;
+  const expectedGen5Digest = options?.expectedGen5Digest ?? GEN5_EXPECTED_DIGEST;
 
   let gen7Digest = "FILE_NOT_FOUND";
   let gen5Digest = "FILE_NOT_FOUND";
@@ -563,13 +682,17 @@ export function buildGen8HoldoutPreflightManifest(options?: {
       const g7Dna = loadChampionDNA({
         checkpointPath: gen7CheckPath,
         expectedGenomeId: GEN7_GENOME_ID,
-        expectedDigest: GEN7_EXPECTED_DIGEST,
+        expectedDigest: expectedGen7Digest,
         verifyCheckpointChecksum: true,
       });
       gen7Digest = EvolutionIndependentEvaluator.computeDnaDigest(g7Dna);
     } catch (e: any) {
       gen7Digest = `ERROR:${e?.message}`;
     }
+  } else if (mode === "EXECUTE" || options?.requireOfficialCheckpoints) {
+    throw new Gen8CandidateIntegrityError(
+      `[Fail-Closed] Official Gen 7 Checkpoint not found at "${gen7CheckPath}". Execution is strictly blocked without official verified checkpoints.`
+    );
   }
 
   if (fs.existsSync(gen5CheckPath)) {
@@ -577,13 +700,17 @@ export function buildGen8HoldoutPreflightManifest(options?: {
       const g5Dna = loadChampionDNA({
         checkpointPath: gen5CheckPath,
         expectedGenomeId: GEN5_GENOME_ID,
-        expectedDigest: GEN5_EXPECTED_DIGEST,
+        expectedDigest: expectedGen5Digest,
         verifyCheckpointChecksum: true,
       });
       gen5Digest = EvolutionIndependentEvaluator.computeDnaDigest(g5Dna);
     } catch (e: any) {
       gen5Digest = `ERROR:${e?.message}`;
     }
+  } else if (mode === "EXECUTE" || options?.requireOfficialCheckpoints) {
+    throw new Gen8CandidateIntegrityError(
+      `[Fail-Closed] Official Gen 5 Checkpoint not found at "${gen5CheckPath}". Execution is strictly blocked without official verified checkpoints.`
+    );
   }
 
   // Seed Registry 検証
@@ -591,16 +718,7 @@ export function buildGen8HoldoutPreflightManifest(options?: {
   const collisionCount = 0; // verifySeedRegistryGen8 で数学的に無衝突実証済み
 
   const plannedPairs = options?.plannedPairs ?? DEFAULT_PRIMARY_PAIRS;
-
-  // 検出力計算 (想定勝率 p=0.65, H0: p0=0.50, alpha=0.025, N=120)
-  // z_beta = ( (p - p0)*sqrt(N) - 1.96*sqrt(p0*(1-p0)) ) / sqrt(p*(1-p))
-  const p = 0.65;
-  const p0 = 0.50;
-  const z_crit = 1.95996;
-  const numerator = (p - p0) * Math.sqrt(plannedPairs) - z_crit * Math.sqrt(p0 * (1 - p0));
-  const denominator = Math.sqrt(p * (1 - p));
-  const z_beta = numerator / denominator;
-  const statisticalPower = normalCdf(z_beta);
+  const powerAnalysis = computeHoldoutPowerSensitivity(plannedPairs, [0.55, 0.60, 0.65, 0.70]);
 
   return {
     workId: GEN8_HOLDOUT_WORK_ID,
@@ -610,7 +728,7 @@ export function buildGen8HoldoutPreflightManifest(options?: {
     isGitClean,
     executionMode: mode,
     approvalTokenRequired: GEN8_HOLDOUT_APPROVAL_TOKEN,
-    approvalStatus: isApproved ? "APPROVED" : "NOT_APPROVED_EXECUTION_BLOCKED",
+    approvalStatus: isApproved ? "APPROVED_FOR_TEST_ONLY" : "NOT_APPROVED_EXECUTION_BLOCKED",
     candidateChampion: {
       genomeId: GEN8_PRIMARY_CANDIDATE_GENOME_ID,
       expectedDigest: GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST,
@@ -620,15 +738,17 @@ export function buildGen8HoldoutPreflightManifest(options?: {
     },
     referenceAnchorGen7: {
       genomeId: GEN7_CHAMPION_GENOME_ID,
-      expectedDigest: GEN7_CHAMPION_EXPECTED_DIGEST,
+      expectedDigest: expectedGen7Digest,
       verifiedDigest: gen7Digest,
-      digestMatches: gen7Digest === GEN7_CHAMPION_EXPECTED_DIGEST,
+      digestMatches: gen7Digest === expectedGen7Digest,
+      sourcePath: gen7CheckPath,
     },
     referenceAnchorGen5: {
       genomeId: GEN5_CHAMPION_GENOME_ID,
-      expectedDigest: GEN5_CHAMPION_EXPECTED_DIGEST,
+      expectedDigest: expectedGen5Digest,
       verifiedDigest: gen5Digest,
-      digestMatches: gen5Digest === GEN5_CHAMPION_EXPECTED_DIGEST,
+      digestMatches: gen5Digest === expectedGen5Digest,
+      sourcePath: gen5CheckPath,
     },
     seedRange: {
       startSeed: GEN8_HOLDOUT_SEED_RANGE_START,
@@ -644,33 +764,309 @@ export function buildGen8HoldoutPreflightManifest(options?: {
       plannedMatches: plannedPairs * 2,
       superiorityThreshold: "Two-sided 95% CI Lower Bound > 0.50 (one-sided p < 0.025)",
       nonInferiorityThreshold: "Two-sided 95% CI Lower Bound > 0.45 (margin 0.05)",
-      statisticalPowerForP065: Number(statisticalPower.toFixed(4)),
+      powerSensitivityAnalysis: powerAnalysis,
+      sensitivityCaveat: "検出力 (Power) は仮定する真の勝率とペアスコア分散に依存するモデル計算値であり、保証値ではありません。",
     },
     regressionBaselines: [
       {
         opponentId: "gen5-champion",
         role: "OLD_CHAMPION_ANCHOR",
         targetCriteria: "Two-sided 95% CI Lower Bound > 0.60 (win rate >= 70%)",
+        plannedPairs: 10,
+        plannedMatches: 20,
+        startSeed: 350121,
+        endSeed: 350130,
       },
       {
         opponentId: "seeded-random",
         role: "BASELINE_RANDOM",
         targetCriteria: "Win rate >= 95.0%",
+        plannedPairs: 10,
+        plannedMatches: 20,
+        startSeed: 350131,
+        endSeed: 350140,
       },
       {
         opponentId: "first-legal",
         role: "BASELINE_FIRST_LEGAL",
         targetCriteria: "Win rate >= 98.0%",
+        plannedPairs: 10,
+        plannedMatches: 20,
+        startSeed: 350141,
+        endSeed: 350150,
       },
     ],
   };
 }
 
 // =============================================================================
-// Artifacts 監査ユーティリティ
+// 正式 Holdout 実行エンジン (テスト・合成実行対応 & 実試合未承認保護)
 // =============================================================================
 
-export function auditGen8HoldoutArtifacts(artifactsDir: string): Gen8HoldoutAuditResult {
+export interface HoldoutExecutionCheckpointState {
+  readonly workId: string;
+  readonly campaignId: string;
+  readonly outputDir: string;
+  readonly candidateDigest: string;
+  readonly opponentDigest: string;
+  readonly totalPlannedPairs: number;
+  readonly completedPairsCount: number;
+  readonly nextPairIndex: number;
+  readonly startSeed: number;
+  readonly completedChunks: readonly {
+    readonly chunkIndex: number;
+    readonly fileName: string;
+    readonly matchCount: number;
+    readonly sha256: string;
+  }[];
+  readonly timestamp: string;
+  readonly checksum: string;
+}
+
+export function computeHoldoutCheckpointChecksum(stateWithoutChecksum: Omit<HoldoutExecutionCheckpointState, "checksum">): string {
+  const content = JSON.stringify(stateWithoutChecksum);
+  return crypto.createHash("sha256").update(content).digest("hex");
+}
+
+export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOptions): Promise<{
+  readonly completedPairs: number;
+  readonly totalMatches: number;
+  readonly auditResult: Gen8HoldoutAuditResult;
+}> {
+  // 1. 実 Holdout 実行保護バリア (Fail-Closed)
+  // 今回の Work 4-4 R2 では実試合の実行は厳格に禁止されている。
+  // 合成テスト (isSyntheticTest === true && testExecutionAuthorized === true) のみ実行を許可。
+  if (!options.isSyntheticTest || !options.testExecutionAuthorized) {
+    throw new UnauthorizedHoldoutExecutionError(
+      `[Fail-Closed] Real Gen 8 Holdout Match Execution is strictly prohibited in Work 4-4 R2.\n` +
+      `Holdout matches on reserved seeds (350001..350300) must remain 100% pristine and unexecuted until explicit user authorization.\n` +
+      `Only synthetic test executions (isSyntheticTest === true && testExecutionAuthorized === true) are permitted.`
+    );
+  }
+
+  const {
+    candidateDNA,
+    candidateDigest,
+    candidateGenomeId = "gen8-prod-g0-ind7-cross7",
+    opponentDNA,
+    opponentDigest,
+    opponentGenomeId = "gen7-champion",
+    opponentId = "gen7-champion",
+    opponentName = "Stage3Gen7Champion",
+    pairsCount,
+    startSeed,
+    outputDir,
+    chunkSizeMatches = 50,
+    maxDecisionsPerMatch = GEN8_HOLDOUT_MAX_DECISIONS_PER_MATCH,
+  } = options;
+
+  fs.mkdirSync(outputDir, { recursive: true });
+  const chunksDir = path.join(outputDir, "chunks");
+  fs.mkdirSync(chunksDir, { recursive: true });
+  const checkpointPath = path.join(outputDir, "checkpoint.json");
+
+  let startPairIndex = 0;
+  let completedChunks: { chunkIndex: number; fileName: string; matchCount: number; sha256: string }[] = [];
+
+  // Resume 検証
+  if (fs.existsSync(checkpointPath)) {
+    const raw = JSON.parse(fs.readFileSync(checkpointPath, "utf8"));
+    const { checksum, ...rest } = raw;
+    const expectedChecksum = computeHoldoutCheckpointChecksum(rest);
+    if (checksum !== expectedChecksum) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint checksum mismatch at "${checkpointPath}"`);
+    }
+    if (raw.candidateDigest !== candidateDigest || raw.opponentDigest !== opponentDigest) {
+      throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint DNA digest mismatch.`);
+    }
+    startPairIndex = raw.nextPairIndex;
+    completedChunks = [...raw.completedChunks];
+  }
+
+  let currentChunkLines: string[] = [];
+  let currentChunkStartIndex = startPairIndex * 2;
+
+  const flushChunk = (pairsDoneSoFar: number) => {
+    if (currentChunkLines.length === 0) return;
+    const chunkIndex = completedChunks.length;
+    const fileName = `outcomes-chunk-${String(chunkIndex).padStart(5, "0")}.jsonl`;
+    const chunkPath = path.join(chunksDir, fileName);
+    const tmpPath = `${chunkPath}.tmp`;
+    const content = currentChunkLines.join("\n") + "\n";
+    fs.writeFileSync(tmpPath, content, "utf8");
+    fs.renameSync(tmpPath, chunkPath);
+
+    const sha256 = computeFileSha256(chunkPath);
+    completedChunks.push({
+      chunkIndex,
+      fileName: `chunks/${fileName}`,
+      matchCount: currentChunkLines.length,
+      sha256,
+    });
+    currentChunkLines = [];
+    currentChunkStartIndex = pairsDoneSoFar * 2;
+
+    // Checkpoint 更新
+    const ckptStateWithout: Omit<HoldoutExecutionCheckpointState, "checksum"> = {
+      workId: GEN8_HOLDOUT_WORK_ID,
+      campaignId: "gen8-holdout-eval",
+      outputDir,
+      candidateDigest,
+      opponentDigest,
+      totalPlannedPairs: pairsCount,
+      completedPairsCount: pairsDoneSoFar,
+      nextPairIndex: pairsDoneSoFar,
+      startSeed,
+      completedChunks,
+      timestamp: new Date().toISOString(),
+    };
+    const ckptChecksum = computeHoldoutCheckpointChecksum(ckptStateWithout);
+    const ckptTmp = `${checkpointPath}.tmp`;
+    fs.writeFileSync(ckptTmp, JSON.stringify({ ...ckptStateWithout, checksum: ckptChecksum }, null, 2), "utf8");
+    fs.renameSync(ckptTmp, checkpointPath);
+  };
+
+  // 決定論的座席反転ペア対戦ループ
+  for (let pairIndex = startPairIndex; pairIndex < pairsCount; pairIndex++) {
+    const matchSeed = startSeed + pairIndex;
+    const p1Seed = derivePlayerSeed(matchSeed, "p1");
+    const p2Seed = derivePlayerSeed(matchSeed, "p2");
+
+    // Leg 0: Cand=P1, Opp=P2
+    const matchIndex0 = pairIndex * 2;
+    const matchId0 = `gen8-holdout-m${matchIndex0}-p${pairIndex}-l0`;
+    const leg0Outcome: CompactMatchOutcomeRecord = {
+      schemaVersion: "1.0.0",
+      matchIndex: matchIndex0,
+      pairIndex,
+      legIndex: 0,
+      matchId: matchId0,
+      matchupId: `cand-vs-${opponentId}`,
+      matchSeed,
+      playerSeeds: { p1: p1Seed, p2: p2Seed },
+      p1PolicyId: "gen8-candidate",
+      p2PolicyId: opponentId,
+      p1DnaDigest: candidateDigest,
+      p2DnaDigest: opponentDigest,
+      status: "COMPLETED",
+      completed: true,
+      winner: "p1", // 合成テスト用の決定論的勝者
+      reason: "finished",
+      totalDecisions: 24,
+      turnCount: 12,
+      passDecisions: 2,
+      maxConsecutivePasses: 1,
+      streamingDecisions: 0,
+      maxLegalPatterns: 4,
+      instantiationFailures: 0,
+      reachedDecisionLimit: false,
+      finalStateHash: `hash-m${matchIndex0}`,
+      playerStats: {
+        p1: {
+          offeredActions: { "action.attack": 8, "action.throwing": 4, PASS: 8 },
+          executedActions: { "action.attack": 5, "action.throwing": 2, PASS: 1 },
+          passDecisions: 1,
+        },
+        p2: {
+          offeredActions: { "action.attack": 6, "action.throwing": 6, PASS: 6 },
+          executedActions: { "action.attack": 1, "action.throwing": 4, PASS: 1 },
+          passDecisions: 1,
+        },
+      },
+    };
+    currentChunkLines.push(JSON.stringify(leg0Outcome));
+
+    // Leg 1: Opp=P1, Cand=P2 (座席反転)
+    const matchIndex1 = pairIndex * 2 + 1;
+    const matchId1 = `gen8-holdout-m${matchIndex1}-p${pairIndex}-l1`;
+    const leg1Outcome: CompactMatchOutcomeRecord = {
+      schemaVersion: "1.0.0",
+      matchIndex: matchIndex1,
+      pairIndex,
+      legIndex: 1,
+      matchId: matchId1,
+      matchupId: `cand-vs-${opponentId}`,
+      matchSeed,
+      playerSeeds: { p1: p1Seed, p2: p2Seed },
+      p1PolicyId: opponentId,
+      p2PolicyId: "gen8-candidate",
+      p1DnaDigest: opponentDigest,
+      p2DnaDigest: candidateDigest,
+      status: "COMPLETED",
+      completed: true,
+      winner: "p2", // Cand (P2) wins
+      reason: "finished",
+      totalDecisions: 26,
+      turnCount: 13,
+      passDecisions: 3,
+      maxConsecutivePasses: 1,
+      streamingDecisions: 0,
+      maxLegalPatterns: 4,
+      instantiationFailures: 0,
+      reachedDecisionLimit: false,
+      finalStateHash: `hash-m${matchIndex1}`,
+      playerStats: {
+        p1: {
+          offeredActions: { "action.attack": 5, "action.throwing": 5, PASS: 5 },
+          executedActions: { "action.attack": 2, "action.throwing": 3, PASS: 1 },
+          passDecisions: 1,
+        },
+        p2: {
+          offeredActions: { "action.attack": 9, "action.throwing": 3, PASS: 9 },
+          executedActions: { "action.attack": 6, "action.throwing": 1, PASS: 2 },
+          passDecisions: 2,
+        },
+      },
+    };
+    currentChunkLines.push(JSON.stringify(leg1Outcome));
+
+    if (currentChunkLines.length >= chunkSizeMatches) {
+      flushChunk(pairIndex + 1);
+    }
+  }
+
+  flushChunk(pairsCount);
+
+  // MANIFEST_SHA256.json の生成
+  const manifestMap: Record<string, string> = {};
+  for (const c of completedChunks) {
+    manifestMap[c.fileName] = c.sha256;
+  }
+  manifestMap["checkpoint.json"] = computeFileSha256(checkpointPath);
+  fs.writeFileSync(path.join(outputDir, "MANIFEST_SHA256.json"), JSON.stringify(manifestMap, null, 2), "utf8");
+
+  // 完了後の厳格監査
+  const auditResult = auditGen8HoldoutArtifacts(outputDir, {
+    expectedCandidateDigest: candidateDigest,
+    expectedOpponentDigest: opponentDigest,
+    expectedTotalPairs: pairsCount,
+    expectedTotalMatches: pairsCount * 2,
+    expectedStartSeed: startSeed,
+  });
+
+  return {
+    completedPairs: pairsCount,
+    totalMatches: pairsCount * 2,
+    auditResult,
+  };
+}
+
+// =============================================================================
+// Artifacts 監査ユーティリティ (12 大検証契約)
+// =============================================================================
+
+export interface HoldoutAuditOptions {
+  expectedCandidateDigest?: string;
+  expectedOpponentDigest?: string;
+  expectedTotalPairs?: number;
+  expectedTotalMatches?: number;
+  expectedStartSeed?: number;
+}
+
+export function auditGen8HoldoutArtifacts(
+  artifactsDir: string,
+  options?: HoldoutAuditOptions
+): Gen8HoldoutAuditResult {
   const dir = path.resolve(artifactsDir);
   const checkedFiles: string[] = [];
   const errors: string[] = [];
@@ -679,40 +1075,61 @@ export function auditGen8HoldoutArtifacts(artifactsDir: string): Gen8HoldoutAudi
     throw new Gen8HoldoutAuditError(`[Fail-Closed] Holdout artifacts directory not found at "${dir}".`);
   }
 
-  // 1. MANIFEST_SHA256.json の存在とハッシュ照合
+  // 1. MANIFEST_SHA256.json の存在と中身検証
   const manifestPath = path.join(dir, "MANIFEST_SHA256.json");
+  let manifest: Record<string, string> = {};
   if (!fs.existsSync(manifestPath)) {
-    errors.push("MANIFEST_SHA256.json not found in artifacts directory.");
+    errors.push("[Audit Violation 10] MANIFEST_SHA256.json not found in artifacts directory.");
   } else {
     checkedFiles.push("MANIFEST_SHA256.json");
     try {
-      const manifest: Record<string, string> = JSON.parse(fs.readFileSync(manifestPath, "utf8"));
-      for (const [relFile, expectedSha] of Object.entries(manifest)) {
-        const fullPath = path.join(dir, relFile);
-        if (!fs.existsSync(fullPath)) {
-          errors.push(`Manifest referenced file missing: "${relFile}"`);
-        } else {
-          const actualSha = computeFileSha256(fullPath);
-          if (actualSha !== expectedSha) {
-            errors.push(`SHA-256 mismatch for "${relFile}": expected "${expectedSha}", got "${actualSha}"`);
+      const rawText = fs.readFileSync(manifestPath, "utf8").trim();
+      if (!rawText || rawText === "{}") {
+        errors.push("[Audit Violation 10] MANIFEST_SHA256.json is empty.");
+      } else {
+        manifest = JSON.parse(rawText);
+        for (const [relFile, expectedSha] of Object.entries(manifest)) {
+          const fullPath = path.join(dir, relFile);
+          if (!fs.existsSync(fullPath)) {
+            errors.push(`[Audit Violation 10] Manifest referenced file missing: "${relFile}"`);
+          } else {
+            const actualSha = computeFileSha256(fullPath);
+            if (actualSha !== expectedSha) {
+              errors.push(`[Audit Violation 10] SHA-256 mismatch for "${relFile}": expected "${expectedSha}", got "${actualSha}"`);
+            }
+            checkedFiles.push(relFile);
           }
-          checkedFiles.push(relFile);
         }
       }
     } catch (e: any) {
-      errors.push(`Failed to parse MANIFEST_SHA256.json: ${e?.message ?? String(e)}`);
+      errors.push(`[Audit Violation 10] Failed to parse MANIFEST_SHA256.json: ${e?.message ?? String(e)}`);
     }
   }
 
-  // 2. Chunks の JSONL 読み込み & スキーマ・ハッシュ・スコア再計算
+  // 2. Chunks ディレクトリの余剰ファイル・不整合検証
   const chunksDir = path.join(dir, "chunks");
   const allOutcomes: CompactMatchOutcomeRecord[] = [];
 
-  if (fs.existsSync(chunksDir)) {
-    const chunkFiles = fs.readdirSync(chunksDir).filter((f) => f.endsWith(".jsonl")).sort();
+  if (!fs.existsSync(chunksDir)) {
+    errors.push("[Audit Violation 11] chunks directory does not exist.");
+  } else {
+    const chunkFiles = fs.readdirSync(chunksDir);
     for (const cf of chunkFiles) {
+      if (cf.endsWith(".tmp")) {
+        errors.push(`[Audit Violation 11] Orphan temporary chunk file found: "${cf}"`);
+      }
+      const relPath = `chunks/${cf}`;
+      if (!cf.endsWith(".tmp") && !manifest[relPath]) {
+        errors.push(`[Audit Violation 11] Extra unindexed chunk file found: "${cf}"`);
+      }
+    }
+
+    const validJsonlFiles = chunkFiles.filter((f) => f.endsWith(".jsonl")).sort();
+    for (const cf of validJsonlFiles) {
       const cfPath = path.join(chunksDir, cf);
-      const lines = fs.readFileSync(cfPath, "utf8").trim().split("\n");
+      const rawChunk = fs.readFileSync(cfPath, "utf8").trim();
+      if (!rawChunk) continue;
+      const lines = rawChunk.split("\n");
       for (let lineIdx = 0; lineIdx < lines.length; lineIdx++) {
         const line = lines[lineIdx];
         if (!line) continue;
@@ -720,18 +1137,51 @@ export function auditGen8HoldoutArtifacts(artifactsDir: string): Gen8HoldoutAudi
           const rec: CompactMatchOutcomeRecord = JSON.parse(line);
           allOutcomes.push(rec);
         } catch (e: any) {
-          errors.push(`Corrupt JSONL in ${cf} line ${lineIdx + 1}: ${e?.message}`);
+          errors.push(`[Audit Violation 11] Corrupt JSONL in ${cf} line ${lineIdx + 1}: ${e?.message}`);
         }
       }
     }
   }
 
   const totalMatches = allOutcomes.length;
-  const completedMatches = allOutcomes.filter((m) => m.status === "COMPLETED").length;
-  const failedMatches = allOutcomes.filter((m) => m.status === "FAILED").length;
-  const incompleteMatches = allOutcomes.filter((m) => m.status === "INCOMPLETE").length;
+  if (totalMatches === 0) {
+    errors.push("[Audit Violation 1] Zero matches found in holdout artifacts.");
+  }
 
-  // 3. 座席反転ペアの結合とスコア集計
+  // 3. 予定試合数の完全一致
+  if (options?.expectedTotalMatches !== undefined && totalMatches !== options.expectedTotalMatches) {
+    errors.push(`[Audit Violation 1] Total matches count mismatch: expected ${options.expectedTotalMatches}, found ${totalMatches}`);
+  }
+
+  // 4. matchIndex 連続性と matchId 一意性
+  const seenMatchIds = new Set<string>();
+  const matchIndices = allOutcomes.map((m) => m.matchIndex).sort((a, b) => a - b);
+
+  for (let i = 0; i < matchIndices.length; i++) {
+    if (matchIndices[i] !== i) {
+      errors.push(`[Audit Violation 3] matchIndex gap or discontinuity at index ${i}: found ${matchIndices[i]}`);
+      break;
+    }
+  }
+
+  for (const m of allOutcomes) {
+    if (seenMatchIds.has(m.matchId)) {
+      errors.push(`[Audit Violation 4] Duplicate matchId detected: "${m.matchId}"`);
+    }
+    seenMatchIds.add(m.matchId);
+
+    // 5. status === COMPLETED 検証 (未完了試合の暗黙引き分け扱い禁止)
+    if (m.status !== "COMPLETED" || !m.completed) {
+      errors.push(`[Audit Violation 9] Incomplete match detected: matchIndex ${m.matchIndex} has status "${m.status}", completed=${m.completed}`);
+    }
+
+    // 勝者 ID の正当性
+    if (m.winner !== "p1" && m.winner !== "p2" && m.winner !== "draw") {
+      errors.push(`[Audit Violation 9] Invalid winner value "${m.winner}" in matchIndex ${m.matchIndex}`);
+    }
+  }
+
+  // 6. 座席反転ペアの完全性 & pairIndex / legIndex 正当性
   const pairsMap = new Map<number, { leg0?: CompactMatchOutcomeRecord; leg1?: CompactMatchOutcomeRecord }>();
   for (const m of allOutcomes) {
     let p = pairsMap.get(m.pairIndex);
@@ -739,20 +1189,58 @@ export function auditGen8HoldoutArtifacts(artifactsDir: string): Gen8HoldoutAudi
       p = {};
       pairsMap.set(m.pairIndex, p);
     }
-    if (m.legIndex === 0) p.leg0 = m;
-    else if (m.legIndex === 1) p.leg1 = m;
+    if (m.legIndex === 0) {
+      if (p.leg0) errors.push(`[Audit Violation 5] Duplicate legIndex 0 at pairIndex ${m.pairIndex}`);
+      p.leg0 = m;
+    } else if (m.legIndex === 1) {
+      if (p.leg1) errors.push(`[Audit Violation 5] Duplicate legIndex 1 at pairIndex ${m.pairIndex}`);
+      p.leg1 = m;
+    } else {
+      errors.push(`[Audit Violation 5] Invalid legIndex ${m.legIndex} at matchIndex ${m.matchIndex}`);
+    }
   }
 
   const pairRecords: PairedScoreRecord[] = [];
+  const startSeed = options?.expectedStartSeed ?? GEN8_HOLDOUT_SEED_RANGE_START;
+
   for (const [pairIndex, p] of pairsMap.entries()) {
     if (!p.leg0 || !p.leg1) {
-      errors.push(`Incomplete pairIndex ${pairIndex}: leg0=${Boolean(p.leg0)}, leg1=${Boolean(p.leg1)}`);
+      errors.push(`[Audit Violation 5] Incomplete seat-inverted pair at pairIndex ${pairIndex}: leg0=${Boolean(p.leg0)}, leg1=${Boolean(p.leg1)}`);
       continue;
     }
+
+    // 7. Seed 割当の決定論的一致
+    const expectedMatchSeed = startSeed + pairIndex;
+    if (p.leg0.matchSeed !== expectedMatchSeed || p.leg1.matchSeed !== expectedMatchSeed) {
+      errors.push(`[Audit Violation 6] Seed mismatch at pairIndex ${pairIndex}: expected ${expectedMatchSeed}, got leg0=${p.leg0.matchSeed}, leg1=${p.leg1.matchSeed}`);
+    }
+    const expectedP1Seed = derivePlayerSeed(expectedMatchSeed, "p1");
+    const expectedP2Seed = derivePlayerSeed(expectedMatchSeed, "p2");
+    if (p.leg0.playerSeeds.p1 !== expectedP1Seed || p.leg0.playerSeeds.p2 !== expectedP2Seed) {
+      errors.push(`[Audit Violation 6] Player seeds mismatch at pairIndex ${pairIndex} leg0`);
+    }
+
+    // 8. 座席割当検証 (Leg 0: Cand=P1, Leg 1: Cand=P2)
+    const leg0CandDigest = p.leg0.p1DnaDigest;
+    const leg1CandDigest = p.leg1.p2DnaDigest;
+    const expectedCandDigest = options?.expectedCandidateDigest ?? GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST;
+
+    if (leg0CandDigest !== expectedCandDigest || leg1CandDigest !== expectedCandDigest) {
+      errors.push(`[Audit Violation 7] Candidate seat/DNA mismatch at pairIndex ${pairIndex}: leg0.p1=${leg0CandDigest}, leg1.p2=${leg1CandDigest}`);
+    }
+
+    // 9. DNA Digest 検証
+    if (options?.expectedOpponentDigest) {
+      if (p.leg0.p2DnaDigest !== options.expectedOpponentDigest || p.leg1.p1DnaDigest !== options.expectedOpponentDigest) {
+        errors.push(`[Audit Violation 8] Opponent DNA digest mismatch at pairIndex ${pairIndex}`);
+      }
+    }
+
     const scores = computePairScore(
       (p.leg0.winner ?? "draw") as any,
       (p.leg1.winner ?? "draw") as any
     );
+
     pairRecords.push({
       pairIndex,
       seed: p.leg0.matchSeed,
@@ -771,24 +1259,38 @@ export function auditGen8HoldoutArtifacts(artifactsDir: string): Gen8HoldoutAudi
     });
   }
 
-  // 4. Primary 対戦相手 (Gen 7 Champion) に対する統計サマリー
-  const primaryPairs = pairRecords.filter((p) => p.opponentId.includes("gen7"));
-  const statSummary = computeHoldoutStatistics("gen7-champion", "Stage3Gen7Champion", primaryPairs);
+  // 10. 予定ペア数の完全一致
+  if (options?.expectedTotalPairs !== undefined && pairRecords.length !== options.expectedTotalPairs) {
+    errors.push(`[Audit Violation 2] Total pairs count mismatch: expected ${options.expectedTotalPairs}, found ${pairRecords.length}`);
+  }
 
-  // 5. プレイヤー別アクション採択率
-  const primaryMatches = allOutcomes.filter((m) => m.p1PolicyId.includes("gen7") || m.p2PolicyId.includes("gen7"));
-  const actionComparison = computePlayerActionComparison(primaryMatches, (m) => (m.legIndex === 0 ? "p1" : "p2"));
-
-  // 6. Candidate DNA Digest 照合
+  // 11. 候補 DNA 真正性検証
+  const expectedCandDigest = options?.expectedCandidateDigest ?? GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST;
   let candidateDigest = "UNRECORDED";
   let candidateDigestVerified = false;
+
   const firstCandDna = allOutcomes.find((m) => m.legIndex === 0)?.p1DnaDigest;
   if (firstCandDna) {
     candidateDigest = firstCandDna;
-    candidateDigestVerified = candidateDigest === GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST;
+    candidateDigestVerified = candidateDigest === expectedCandDigest;
+  }
+  if (!candidateDigestVerified) {
+    errors.push(`[Audit Violation 12] Candidate DNA Digest verification FAILED: expected "${expectedCandDigest}", recorded "${candidateDigest}"`);
   }
 
-  const isValid = errors.length === 0 && failedMatches === 0 && incompleteMatches === 0;
+  const statSummary = pairRecords.length > 0
+    ? computeHoldoutStatistics("gen7-champion", "Stage3Gen7Champion", pairRecords)
+    : undefined;
+
+  const actionComparison = allOutcomes.length > 0
+    ? computePlayerActionComparison(allOutcomes, (m) => (m.legIndex === 0 ? "p1" : "p2"))
+    : undefined;
+
+  const completedMatches = allOutcomes.filter((m) => m.status === "COMPLETED" && m.completed).length;
+  const failedMatches = allOutcomes.filter((m) => m.status === "FAILED").length;
+  const incompleteMatches = allOutcomes.filter((m) => m.status === "INCOMPLETE" || !m.completed).length;
+
+  const isValid = errors.length === 0 && candidateDigestVerified && failedMatches === 0 && incompleteMatches === 0 && totalMatches > 0;
 
   return {
     isValid,
@@ -805,8 +1307,8 @@ export function auditGen8HoldoutArtifacts(artifactsDir: string): Gen8HoldoutAudi
     candidateDigestVerified,
     statisticalSummary: statSummary,
     actionComparison,
-    superiorityVerified: statSummary.isSuperior,
-    nonInferiorityVerified: statSummary.isNonInferior,
+    superiorityVerified: statSummary?.isSuperior ?? false,
+    nonInferiorityVerified: statSummary?.isNonInferior ?? false,
   };
 }
 
@@ -816,13 +1318,14 @@ export function auditGen8HoldoutArtifacts(artifactsDir: string): Gen8HoldoutAudi
 
 export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)): Promise<void> {
   console.log("================================================================================");
-  console.log("BlackPoker Work 4-4 — Gen 8 Official Holdout Preflight & Evaluation Harness");
+  console.log("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Preflight & Evaluation Harness");
   console.log("================================================================================");
 
   let mode: "PLAN_ONLY" | "DRY_RUN" | "EXECUTE" | "AUDIT_ONLY" = "PLAN_ONLY";
   let approvalToken: string | undefined;
   let plannedPairs: number = DEFAULT_PRIMARY_PAIRS;
   let outputDir: string = DEFAULT_GEN8_HOLDOUT_OUTPUT_DIR;
+  let allowSyntheticTest = false;
 
   for (let i = 0; i < args.length; i++) {
     const arg = args[i];
@@ -834,6 +1337,8 @@ export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)):
       mode = "EXECUTE";
     } else if (arg === "--audit-only") {
       mode = "AUDIT_ONLY";
+    } else if (arg === "--allow-synthetic-execution-test") {
+      allowSyntheticTest = true;
     } else if (arg === "--approval-token" && i + 1 < args.length) {
       approvalToken = args[++i];
     } else if (arg === "--pairs" && i + 1 < args.length) {
@@ -877,19 +1382,23 @@ export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)):
   console.log(`Anchor Gen 5 Digest: ${manifest.referenceAnchorGen5.verifiedDigest}`);
   console.log(`Seed Range:         ${manifest.seedRange.startSeed} .. ${manifest.seedRange.endSeed} (${manifest.seedRange.totalAvailableSeeds} seeds)`);
   console.log(`Planned Matches:    ${manifest.hypothesisGate.plannedMatches} matches (${manifest.hypothesisGate.plannedPairs} pairs)`);
-  console.log(`Statistical Power:  ${(manifest.hypothesisGate.statisticalPowerForP065 * 100).toFixed(1)}% (assuming true win rate 65%)`);
   console.log(`Superiority Rule:   ${manifest.hypothesisGate.superiorityThreshold}`);
+  console.log(`Power Sensitivity:`);
+  for (const s of manifest.hypothesisGate.powerSensitivityAnalysis) {
+    console.log(`  - Assumed Win Rate ${(s.assumedTrueWinRate * 100).toFixed(0)}%: Power ${(s.statisticalPower * 100).toFixed(1)}%`);
+  }
+  console.log(`Note: ${manifest.hypothesisGate.sensitivityCaveat}`);
 
   if (mode === "EXECUTE") {
-    if (approvalToken !== GEN8_HOLDOUT_APPROVAL_TOKEN) {
+    // 承認トークンがコード内に定義されていることだけを実行承認とは見なさない
+    if (!allowSyntheticTest) {
       throw new UnauthorizedHoldoutExecutionError(
-        `[Fail-Closed] Gen 8 Holdout Execution is strictly prohibited in Work 4-4 without explicit approval token.\n` +
-        `Required token: "${GEN8_HOLDOUT_APPROVAL_TOKEN}". Received: "${approvalToken ?? "NONE"}".\n` +
-        `Audit must be approved before executing Holdout matches.`
+        `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R2.\n` +
+        `Actual match execution on reserved seeds (350001..350300) requires explicit stakeholder approval.\n` +
+        `Only infrastructure implementation and synthetic tests are permitted in R2.`
       );
     }
-    console.log(">>> Approval token verified. (Holdout execution logic unlocked)");
-    // Note: In Work 4-4, holdout execution is not requested, so we keep Fail-Closed barrier intact.
+    console.log(">>> Synthetic test execution mode active (test only).");
   } else {
     console.log("\n[PROTECTION ACTIVE] Execution mode is PLAN_ONLY. Zero matches executed. Holdout seeds remain 100% pristine and protected.");
   }

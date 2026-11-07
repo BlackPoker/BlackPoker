@@ -6,7 +6,8 @@ export interface SeedRangeAllocation {
   readonly status: "USED" | "PROTECTED_LOCKED" | "ALLOCATED_FOR_PRODUCTION" | "RESERVED_FOR_FUTURE_HOLDOUT";
   readonly startSeed: number;
   readonly endSeed: number;
-  readonly count: number;
+  readonly allocatedSpan: number;
+  readonly actualUsedCount: number;
   readonly description: string;
 }
 
@@ -16,7 +17,8 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     status: "USED",
     startSeed: 1,
     endSeed: 50000,
-    count: 50000,
+    allocatedSpan: 50000,
+    actualUsedCount: 50000,
     description: "Stage 3 過去進化学習の訓練用 Seed 空間",
   },
   {
@@ -24,7 +26,8 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     status: "USED",
     startSeed: 1001,
     endSeed: 1500,
-    count: 500,
+    allocatedSpan: 500,
+    actualUsedCount: 500,
     description: "大規模基盤 Stage A 検証用 Seed",
   },
   {
@@ -32,7 +35,8 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     status: "USED",
     startSeed: 10001,
     endSeed: 15000,
-    count: 5000,
+    allocatedSpan: 5000,
+    actualUsedCount: 5000,
     description: "大規模基盤 Stage B 10K 完走用 Seed",
   },
   {
@@ -40,7 +44,8 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     status: "USED",
     startSeed: 70001,
     endSeed: 70100,
-    count: 100,
+    allocatedSpan: 100,
+    actualUsedCount: 100,
     description: "Stage 3 過去進化学習の中間 Validation Seed",
   },
   {
@@ -48,7 +53,8 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     status: "PROTECTED_LOCKED",
     startSeed: 95001,
     endSeed: 95030,
-    count: 30,
+    allocatedSpan: 30,
+    actualUsedCount: 30,
     description: "Work 3-7 で使用された公式 Holdout 240 試合 Seed (厳格保護・再利用禁止)",
   },
   {
@@ -56,7 +62,8 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     status: "USED",
     startSeed: 200001,
     endSeed: 200030,
-    count: 30,
+    allocatedSpan: 30,
+    actualUsedCount: 30,
     description: "Work 4-3 Phase 1 診断 210 試合および H2H 60 試合で使用済み",
   },
   {
@@ -64,7 +71,8 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     status: "USED",
     startSeed: 210001,
     endSeed: 211000,
-    count: 1000,
+    allocatedSpan: 1000,
+    actualUsedCount: 1000,
     description: "Work 4-3 Phase 2 パイロット探索 1,000 試合で使用済み",
   },
   {
@@ -72,7 +80,8 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     status: "PROTECTED_LOCKED",
     startSeed: 250001,
     endSeed: 250120,
-    count: 120,
+    allocatedSpan: 120,
+    actualUsedCount: 120,
     description: "最終評価プロトコル確定まで完全未使用のまま保護される予約 Seed",
   },
   {
@@ -80,7 +89,8 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     status: "USED",
     startSeed: 280001,
     endSeed: 280753,
-    count: 753,
+    allocatedSpan: 753,
+    actualUsedCount: 753,
     description: "Work 4-3 本番学習前の Fitness 比較実験 (96 試合) で使用された実 Seed 範囲",
   },
   {
@@ -88,41 +98,95 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     status: "ALLOCATED_FOR_PRODUCTION",
     startSeed: 300001,
     endSeed: 318066,
-    count: 18066,
-    description: "Gen 8 本番進化学習 (10 世代 DRR) で実際に使用された訓練 Seed 空間 (300001 + gen*2000 + 0..65)",
+    allocatedSpan: 18066,
+    actualUsedCount: 660,
+    description: "Gen 8 本番進化学習 (10 世代 x 66 pairs) で実際に使用された訓練 Seed 空間 (300001 + gen*2000 + 0..65)。割当幅 18,066 に対し実使用 660 個",
   },
   {
     purpose: "Gen 8 Production Validation",
     status: "ALLOCATED_FOR_PRODUCTION",
     startSeed: 330001,
     endSeed: 339360,
-    count: 9360,
-    description: "Gen 8 本番進化学習の Validation (10 世代 x 360 pairs) で実際に使用された Seed 空間 (330001 + gen*1000 + 0..359)",
+    allocatedSpan: 9360,
+    actualUsedCount: 3600,
+    description: "Gen 8 本番進化学習の Validation (10 世代 x 360 pairs) で実際に使用された Seed 空間 (330001 + gen*1000 + 0..359)。割当幅 9,360 に対し実使用 3,600 個",
   },
   {
     purpose: "Gen 8 Final Holdout (Future Unused)",
     status: "RESERVED_FOR_FUTURE_HOLDOUT",
     startSeed: 350001,
     endSeed: 350300,
-    count: 300,
-    description: "本番学習完了後の正式評価・Holdout 用に将来割り当て予定の完全隔離 Seed (現在未実行・完全保護中)",
+    allocatedSpan: 300,
+    actualUsedCount: 0,
+    description: "本番学習完了後の正式評価・Holdout 用に将来割り当て予定の完全隔離 Seed (現在未実行・完全保護中・実使用 0 個)",
   },
 ];
 
+/**
+ * プログラムによる実使用 Seed 集合の厳密な再構成
+ */
+export function reconstructActualUsedSeedSets(): Record<string, Set<number>> {
+  // 1. Stage 3 Official Holdout (30 seeds)
+  const stage3Holdout = new Set<number>();
+  for (let s = 95001; s <= 95030; s++) stage3Holdout.add(s);
+
+  // 2. Gen 7 Phase 1 Diagnostic (30 seeds)
+  const diagnostic = new Set<number>();
+  for (let s = 200001; s <= 200030; s++) diagnostic.add(s);
+
+  // 3. Gen 8 Pilot (1000 seeds)
+  const pilot = new Set<number>();
+  for (let s = 210001; s <= 211000; s++) pilot.add(s);
+
+  // 4. Reserved Protected Range (120 seeds)
+  const reservedProtected = new Set<number>();
+  for (let s = 250001; s <= 250120; s++) reservedProtected.add(s);
+
+  // 5. Fitness Comparison (753 seeds)
+  const fitness = new Set<number>();
+  for (let s = 280001; s <= 280753; s++) fitness.add(s);
+
+  // 6. Gen 8 Production Training: 10 generations x 66 pairs = 660 seeds
+  const productionTraining = new Set<number>();
+  for (let gen = 0; gen < 10; gen++) {
+    for (let pair = 0; pair < 66; pair++) {
+      productionTraining.add(300001 + gen * 2000 + pair);
+    }
+  }
+
+  // 7. Gen 8 Production Validation: 10 generations x 360 pairs = 3600 seeds
+  const productionValidation = new Set<number>();
+  for (let gen = 0; gen < 10; gen++) {
+    for (let pair = 0; pair < 360; pair++) {
+      productionValidation.add(330001 + gen * 1000 + pair);
+    }
+  }
+
+  // 8. Gen 8 Future Holdout (300 seeds, currently unused & protected)
+  const futureHoldout = new Set<number>();
+  for (let s = 350001; s <= 350300; s++) futureHoldout.add(s);
+
+  return {
+    "Stage 3 Holdout": stage3Holdout,
+    "Gen 7 Diagnostic": diagnostic,
+    "Gen 8 Pilot": pilot,
+    "Reserved Protected": reservedProtected,
+    "Fitness Comparison": fitness,
+    "Gen 8 Training": productionTraining,
+    "Gen 8 Validation": productionValidation,
+    "Gen 8 Future Holdout": futureHoldout,
+  };
+}
+
 export function auditSeedRegistry(registry: SeedRangeAllocation[]) {
   console.log("================================================================================");
-  console.log("BlackPoker Work 4-3 — Comprehensive Seed Registry Audit");
+  console.log("BlackPoker Work 4-4 R2 — Comprehensive Seed Registry & Exact Set Audit");
   console.log("================================================================================");
 
   let collisionErrors = 0;
 
-  // 1. レンジ間の重複判定 (互いに独立なグループ間での重複検証)
-  // 過去の Stage A, B は Stage 3 Training のサブセットであったが、
-  // 今回の Gen 7 診断、Gen 8 パイロット、予約保護、本番学習、Validation、将来 Holdout は
-  // 相互に 1 Seed たりとも重複してはならない。
-  const criticalRanges = registry.filter(
-    (r) => r.startSeed >= 90000 // Stage 3 Holdout 以降の全重要レンジ
-  );
+  // 1. レンジ空間（割当スパン）間の重複判定
+  const criticalRanges = registry.filter((r) => r.startSeed >= 90000);
 
   for (let i = 0; i < criticalRanges.length; i++) {
     for (let j = i + 1; j < criticalRanges.length; j++) {
@@ -130,31 +194,55 @@ export function auditSeedRegistry(registry: SeedRangeAllocation[]) {
       const b = criticalRanges[j];
       const overlap = !(a.endSeed < b.startSeed || b.endSeed < a.startSeed);
       if (overlap) {
-        console.error(`COLLISION DETECTED: [${a.purpose}] (${a.startSeed}..${a.endSeed}) overlaps with [${b.purpose}] (${b.startSeed}..${b.endSeed})`);
+        console.error(`RANGE OVERLAP: [${a.purpose}] (${a.startSeed}..${a.endSeed}) overlaps with [${b.purpose}] (${b.startSeed}..${b.endSeed})`);
         collisionErrors++;
       }
     }
   }
 
-  // 2. 本番学習・Validation・将来Holdoutが過去の全使用済みSeedと重複しないことの検証
-  const productionRanges = registry.filter((r) => r.status.startsWith("ALLOCATED") || r.status.startsWith("RESERVED"));
-  const usedRanges = registry.filter((r) => r.status === "USED" || r.status === "PROTECTED_LOCKED");
+  // 2. 実使用 Seed 集合の個別要素（Point-by-Point）無衝突検証
+  const seedSets = reconstructActualUsedSeedSets();
+  const setKeys = Object.keys(seedSets);
 
-  for (const prod of productionRanges) {
-    for (const used of usedRanges) {
-      const overlap = !(prod.endSeed < used.startSeed || used.endSeed < prod.startSeed);
-      if (overlap) {
-        console.error(`CRITICAL COLLISION: Production Range [${prod.purpose}] overlaps with used/protected range [${used.purpose}]`);
+  console.log(">>> Reconstructed Actual Seed Sets:");
+  for (const [name, set] of Object.entries(seedSets)) {
+    console.log(`  * ${name.padEnd(22)}: ${set.size.toString().padStart(5)} seeds`);
+  }
+
+  for (let i = 0; i < setKeys.length; i++) {
+    for (let j = i + 1; j < setKeys.length; j++) {
+      const nameA = setKeys[i];
+      const nameB = setKeys[j];
+      const setA = seedSets[nameA];
+      const setB = seedSets[nameB];
+
+      for (const s of setA) {
+        if (setB.has(s)) {
+          console.error(`EXACT SEED COLLISION: Seed ${s} is present in both [${nameA}] and [${nameB}]!`);
+          collisionErrors++;
+        }
+      }
+    }
+  }
+
+  // 3. 正式 Holdout 領域 (350001〜350300) の完全保護確認
+  const holdoutSet = seedSets["Gen 8 Future Holdout"];
+  for (const [name, set] of Object.entries(seedSets)) {
+    if (name === "Gen 8 Future Holdout") continue;
+    for (const s of holdoutSet) {
+      if (set.has(s)) {
+        console.error(`HOLDOUT CONTAMINATION DETECTED: Holdout seed ${s} was used in [${name}]!`);
         collisionErrors++;
       }
     }
   }
 
-  console.log(`- Audited Critical Ranges: ${criticalRanges.length}`);
-  console.log(`- Detected Collisions:     ${collisionErrors}`);
+  console.log(`\n- Audited Range Spans:      ${criticalRanges.length}`);
+  console.log(`- Exact Seed Sets Audited:  ${setKeys.length}`);
+  console.log(`- Detected Collisions:      ${collisionErrors}`);
 
   if (collisionErrors === 0) {
-    console.log("- ALL SEED RANGES ARE DETERMINISTICALLY NON-OVERLAPPING & STRICTLY ISOLATED.");
+    console.log("- ALL SEED RANGES & EXACT SETS ARE DETERMINISTICALLY NON-OVERLAPPING & STRICTLY ISOLATED.");
   } else {
     throw new Error(`Seed Registry Audit FAILED with ${collisionErrors} collisions.`);
   }
@@ -167,6 +255,15 @@ export function auditSeedRegistry(registry: SeedRangeAllocation[]) {
     timestamp: new Date().toISOString(),
     auditStatus: "PASS",
     collisionErrors: 0,
+    registrySummary: {
+      totalCriticalSpans: criticalRanges.length,
+      trainingAllocatedSpan: 18066,
+      trainingActualUsedCount: 660,
+      validationAllocatedSpan: 9360,
+      validationActualUsedCount: 3600,
+      futureHoldoutReservedSpan: 300,
+      futureHoldoutActualUsedCount: 0,
+    },
     registry,
   }, null, 2);
   fs.writeFileSync(outPath, payload, "utf8");
