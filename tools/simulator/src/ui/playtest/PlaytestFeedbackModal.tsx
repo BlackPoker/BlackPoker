@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   HumanFeedbackCategory,
   HUMAN_FEEDBACK_CATEGORY_LABELS,
@@ -35,17 +35,27 @@ export const PlaytestFeedbackModal: React.FC<PlaytestFeedbackModalProps> = ({
   aiGenomeId,
   aiDnaDigest,
 }) => {
-  if (!isOpen) return null;
+  // 1. Hooks は最上部で常に同一順序・無条件で呼び出す (React Rules of Hooks 準拠)
+  const [selectedDecisionId, setSelectedDecisionId] = useState<string>("");
+  const [selectedCategory, setSelectedCategory] = useState<HumanFeedbackCategory>("WHY_NO_ATTACK");
+  const [note, setNote] = useState<string>("");
 
   // AI (policy) の行動のみをフィルタ
   const aiEntries = transcript.filter((t) => t.actor === "policy");
   const latestAiEntry = aiEntries.length > 0 ? aiEntries[aiEntries.length - 1] : null;
 
-  const [selectedDecisionId, setSelectedDecisionId] = useState<string>(
-    latestAiEntry?.decisionId || ""
-  );
-  const [selectedCategory, setSelectedCategory] = useState<HumanFeedbackCategory>("WHY_NO_ATTACK");
-  const [note, setNote] = useState<string>("");
+  // 2. モーダルが開いた際や対戦が進行・変更された際、対象 Decision ID を最新状態に自動同期
+  useEffect(() => {
+    if (isOpen) {
+      const exists = aiEntries.some((t) => t.decisionId === selectedDecisionId);
+      if (!exists || !selectedDecisionId) {
+        setSelectedDecisionId(latestAiEntry?.decisionId || "");
+      }
+    }
+  }, [isOpen, aiEntries, latestAiEntry?.decisionId, selectedDecisionId]);
+
+  // 3. 全ての Hooks 呼び出しの後にレンダリング判定を行う
+  if (!isOpen) return null;
 
   const targetEntry = aiEntries.find((t) => t.decisionId === selectedDecisionId) || latestAiEntry;
 
@@ -69,7 +79,7 @@ export const PlaytestFeedbackModal: React.FC<PlaytestFeedbackModalProps> = ({
     if (!diagnosticBundle) return;
     const sanitizedBundle = exportSanitizedPlaytestFeedbackBundle(diagnosticBundle, feedbacks);
     const ts = new Date().toISOString().replace(/[:.]/g, "-");
-    const filename = `blackpoker-feedback-share-${diagnosticBundle.match.environmentName ?? "match"}-${ts}.json`;
+    const filename = `blackpoker-feedback-share-v2-${diagnosticBundle.match.environmentName ?? "match"}-${ts}.json`;
     downloadJsonFile(filename, sanitizedBundle);
   };
 
@@ -92,7 +102,7 @@ export const PlaytestFeedbackModal: React.FC<PlaytestFeedbackModalProps> = ({
           </div>
           <button
             onClick={onClose}
-            className="text-zinc-400 hover:text-white font-mono text-sm px-2 py-1 rounded"
+            className="text-zinc-400 hover:text-white font-mono text-sm px-2 py-1 rounded cursor-pointer"
           >
             ✕ 閉じる
           </button>
@@ -115,7 +125,7 @@ export const PlaytestFeedbackModal: React.FC<PlaytestFeedbackModalProps> = ({
               <select
                 value={selectedDecisionId}
                 onChange={(e) => setSelectedDecisionId(e.target.value)}
-                className="w-full py-2 px-3 rounded-lg border border-zinc-300 bg-white text-zinc-900 font-mono"
+                className="w-full py-2 px-3 rounded-lg border border-zinc-300 bg-white text-zinc-900 font-mono cursor-pointer"
               >
                 {aiEntries.map((entry) => (
                   <option key={entry.decisionId} value={entry.decisionId}>
@@ -135,7 +145,7 @@ export const PlaytestFeedbackModal: React.FC<PlaytestFeedbackModalProps> = ({
                   key={cat}
                   type="button"
                   onClick={() => setSelectedCategory(cat)}
-                  className={`py-2 px-2.5 rounded-lg border text-left font-bold transition flex items-center gap-1.5 ${
+                  className={`py-2 px-2.5 rounded-lg border text-left font-bold transition flex items-center gap-1.5 cursor-pointer ${
                     selectedCategory === cat
                       ? "bg-zinc-900 text-white border-zinc-900 shadow-sm"
                       : "bg-zinc-50 hover:bg-zinc-100 text-zinc-800 border-zinc-300"
@@ -167,7 +177,7 @@ export const PlaytestFeedbackModal: React.FC<PlaytestFeedbackModalProps> = ({
               type="button"
               onClick={handleAdd}
               disabled={!targetEntry}
-              className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-300 text-white font-bold rounded-lg shadow-sm transition"
+              className="w-full py-2 bg-blue-600 hover:bg-blue-700 disabled:bg-zinc-300 text-white font-bold rounded-lg shadow-sm transition cursor-pointer"
             >
               ＋ 違和感フィードバックを記録
             </button>
@@ -199,7 +209,7 @@ export const PlaytestFeedbackModal: React.FC<PlaytestFeedbackModalProps> = ({
                     <button
                       type="button"
                       onClick={() => onDeleteFeedback(fb.feedbackId)}
-                      className="text-red-500 hover:text-red-700 text-xs px-1"
+                      className="text-red-500 hover:text-red-700 text-xs px-1 cursor-pointer"
                       title="削除"
                     >
                       ✕
@@ -210,23 +220,26 @@ export const PlaytestFeedbackModal: React.FC<PlaytestFeedbackModalProps> = ({
             </div>
           )}
 
-          {/* 共有用保存案内 */}
+          {/* 共有用保存案内 & 注意喚起 */}
           <div className="mt-3 p-3 bg-emerald-50 border border-emerald-200 rounded-lg text-emerald-950 flex flex-col gap-2">
             <div className="flex items-center gap-1.5 font-bold">
               <span>🛡️</span>
-              <span>非公開情報の保護について</span>
+              <span>公開共有用フィードバックの安全性について</span>
             </div>
-            <p className="text-[11px] leading-relaxed">
-              下記の「共有用フィードバック保存」からエクスポートされるJSONは、相手の手札・未公開山札などの非公開情報が完全に除去されています。GitHub Issueや外部チャットで安全に共有可能です。
+            <p className="text-[11px] leading-relaxed text-emerald-900">
+              公開共有用JSON (v2) は、対戦の決定論的シード値（seed）、詳細な意思決定履歴（transcript）、相手プレイヤーの非公開手札・山札配列を完全に除去しています。
             </p>
+            <div className="p-2 bg-amber-50 border border-amber-300 rounded text-amber-950 text-[11px]">
+              ⚠️ <strong>共有前の確認:</strong> ユーザー自由入力コメント内に個人情報や不要な機密情報が含まれていないか、ご自身で内容を確認した上で外部共有してください。
+            </div>
             <button
               type="button"
               onClick={handleExportSanitized}
               disabled={!diagnosticBundle}
-              className="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-300 text-white font-bold rounded shadow-sm transition text-xs flex items-center justify-center gap-1.5"
+              className="py-2 px-3 bg-emerald-600 hover:bg-emerald-700 disabled:bg-zinc-300 text-white font-bold rounded shadow-sm transition text-xs flex items-center justify-center gap-1.5 cursor-pointer"
             >
               <span>💾</span>
-              <span>フィードバック共有用 JSON 保存 (非公開情報除去済み)</span>
+              <span>フィードバック共有用 JSON 保存 (シード・非公開情報除去済み v2)</span>
             </button>
           </div>
         </div>
@@ -236,7 +249,7 @@ export const PlaytestFeedbackModal: React.FC<PlaytestFeedbackModalProps> = ({
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 bg-zinc-900 text-white font-bold rounded-lg text-xs font-mono"
+            className="px-4 py-2 bg-zinc-900 text-white font-bold rounded-lg text-xs font-mono cursor-pointer"
           >
             完了
           </button>
