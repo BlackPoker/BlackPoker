@@ -1,0 +1,18 @@
+{
+  "timestamp": "2026-11-07T03:34:46.888Z",
+  "totalMatches": 60,
+  "bestWins": 41,
+  "gen7Wins": 19,
+  "draws": 0,
+  "winRate": 68.33333333333333,
+  "tactics": {
+    "pilotBest": {
+      "attack": 157,
+      "throwing": 114
+    },
+    "gen7": {
+      "attack": 40,
+      "throwing": 127
+    }
+  }
+}
