@@ -22,6 +22,7 @@ import {
   MatchupPairingSpec,
   ChampionAuthenticityRecord,
   CompactMatchOutcomeRecord,
+  PlayerActionStatsRecord,
   ChunkManifestEntry,
   AnomalyCategory,
   AnomalyDiagnosticRecord,
@@ -529,11 +530,17 @@ export interface SingleMatchExecutionInput {
   readonly maxDecisionsPerMatch: number;
 }
 
+export type SingleMatchPlayerStats = PlayerActionStatsRecord;
+
 export interface SingleMatchExecutionResult {
   readonly outcomeRecord: CompactMatchOutcomeRecord;
   readonly durationMs: number;
   readonly offeredActions: Record<string, number>;
   readonly executedActions: Record<string, number>;
+  readonly playerStats?: {
+    readonly p1: SingleMatchPlayerStats;
+    readonly p2: SingleMatchPlayerStats;
+  };
   readonly observedComponents: Record<string, number>;
   readonly evaluatedStreamingPatterns: number;
   readonly streamingEvaluationElapsedMs: number;
@@ -568,6 +575,9 @@ export function executeSingleInstrumentedMatch(input: SingleMatchExecutionInput)
   const t0 = performance.now();
   const offeredActions: Record<string, number> = {};
   const executedActions: Record<string, number> = {};
+  const playerOffered: Record<"p1" | "p2", Record<string, number>> = { p1: {}, p2: {} };
+  const playerExecuted: Record<"p1" | "p2", Record<string, number>> = { p1: {}, p2: {} };
+  const playerPassDecisions: Record<"p1" | "p2", number> = { p1: 0, p2: 0 };
   const observedComponents: Record<string, number> = {};
 
   let passDecisions = 0;
@@ -636,6 +646,7 @@ export function executeSingleInstrumentedMatch(input: SingleMatchExecutionInput)
         // 提供された合法アクションの集計
         if (isStreaming) {
           offeredActions["action.block"] = (offeredActions["action.block"] ?? 0) + 1;
+          playerOffered[seat]["action.block"] = (playerOffered[seat]["action.block"] ?? 0) + 1;
         } else if (Array.isArray(request.patterns)) {
           const seenInStep = new Set<string>();
           for (const pat of request.patterns) {
@@ -650,6 +661,7 @@ export function executeSingleInstrumentedMatch(input: SingleMatchExecutionInput)
           }
           for (const actId of seenInStep) {
             offeredActions[actId] = (offeredActions[actId] ?? 0) + 1;
+            playerOffered[seat][actId] = (playerOffered[seat][actId] ?? 0) + 1;
           }
         }
 
@@ -662,6 +674,7 @@ export function executeSingleInstrumentedMatch(input: SingleMatchExecutionInput)
           evaluatedStreamingPatterns += legalCount;
           streamingEvaluationElapsedMs += evalElapsed;
           executedActions["action.block"] = (executedActions["action.block"] ?? 0) + 1;
+          playerExecuted[seat]["action.block"] = (playerExecuted[seat]["action.block"] ?? 0) + 1;
           currentConsecutivePasses = 0;
         } else {
           const chosenPat = request.patterns?.[response.selectedPatternRef];
@@ -669,11 +682,13 @@ export function executeSingleInstrumentedMatch(input: SingleMatchExecutionInput)
             illegalOrEmptyLegal = true;
           } else if (chosenPat.kind === "PASS") {
             passDecisions++;
+            playerPassDecisions[seat]++;
             currentConsecutivePasses++;
             if (currentConsecutivePasses > maxConsecutivePasses) {
               maxConsecutivePasses = currentConsecutivePasses;
             }
             executedActions["PASS"] = (executedActions["PASS"] ?? 0) + 1;
+            playerExecuted[seat]["PASS"] = (playerExecuted[seat]["PASS"] ?? 0) + 1;
           } else {
             currentConsecutivePasses = 0;
             const actId =
@@ -682,6 +697,7 @@ export function executeSingleInstrumentedMatch(input: SingleMatchExecutionInput)
                 : chosenPat.kind;
             if (actId) {
               executedActions[actId] = (executedActions[actId] ?? 0) + 1;
+              playerExecuted[seat][actId] = (playerExecuted[seat][actId] ?? 0) + 1;
             }
           }
         }
@@ -837,6 +853,18 @@ export function executeSingleInstrumentedMatch(input: SingleMatchExecutionInput)
       instantiationFailures: instFailures,
       reachedDecisionLimit: reachedLimit,
       finalStateHash,
+      playerStats: {
+        p1: {
+          offeredActions: playerOffered.p1,
+          executedActions: playerExecuted.p1,
+          passDecisions: playerPassDecisions.p1,
+        },
+        p2: {
+          offeredActions: playerOffered.p2,
+          executedActions: playerExecuted.p2,
+          passDecisions: playerPassDecisions.p2,
+        },
+      },
       ...(anomalyRecord ? { anomalyId: anomalyRecord.anomalyId } : {}),
     };
 
@@ -845,6 +873,7 @@ export function executeSingleInstrumentedMatch(input: SingleMatchExecutionInput)
       durationMs,
       offeredActions,
       executedActions,
+      playerStats: outcomeRecord.playerStats,
       observedComponents,
       evaluatedStreamingPatterns,
       streamingEvaluationElapsedMs,
@@ -942,6 +971,18 @@ export function executeSingleInstrumentedMatch(input: SingleMatchExecutionInput)
       instantiationFailures: instFailures,
       reachedDecisionLimit: false,
       finalStateHash: lastNormalStateHash || "FAILED_STATE",
+      playerStats: {
+        p1: {
+          offeredActions: playerOffered.p1,
+          executedActions: playerExecuted.p1,
+          passDecisions: playerPassDecisions.p1,
+        },
+        p2: {
+          offeredActions: playerOffered.p2,
+          executedActions: playerExecuted.p2,
+          passDecisions: playerPassDecisions.p2,
+        },
+      },
       anomalyId,
     };
 
@@ -950,6 +991,7 @@ export function executeSingleInstrumentedMatch(input: SingleMatchExecutionInput)
       durationMs,
       offeredActions,
       executedActions,
+      playerStats: outcomeRecord.playerStats,
       observedComponents,
       evaluatedStreamingPatterns,
       streamingEvaluationElapsedMs,

@@ -76,20 +76,28 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     description: "最終評価プロトコル確定まで完全未使用のまま保護される予約 Seed",
   },
   {
+    purpose: "Gen 8 Fitness Approach Comparison",
+    status: "USED",
+    startSeed: 280001,
+    endSeed: 280753,
+    count: 753,
+    description: "Work 4-3 本番学習前の Fitness 比較実験 (96 試合) で使用された実 Seed 範囲",
+  },
+  {
     purpose: "Gen 8 Production Training",
     status: "ALLOCATED_FOR_PRODUCTION",
     startSeed: 300001,
-    endSeed: 320000,
-    count: 20000,
-    description: "Gen 8 本番進化学習 (上限 10,000 試合) 用に新規割当された訓練 Seed 空間",
+    endSeed: 318066,
+    count: 18066,
+    description: "Gen 8 本番進化学習 (10 世代 DRR) で実際に使用された訓練 Seed 空間 (300001 + gen*2000 + 0..65)",
   },
   {
     purpose: "Gen 8 Production Validation",
     status: "ALLOCATED_FOR_PRODUCTION",
     startSeed: 330001,
-    endSeed: 331000,
-    count: 1000,
-    description: "Gen 8 本番進化学習の世代間 Validation 評価用に新規割当された Seed 空間",
+    endSeed: 339360,
+    count: 9360,
+    description: "Gen 8 本番進化学習の Validation (10 世代 x 360 pairs) で実際に使用された Seed 空間 (330001 + gen*1000 + 0..359)",
   },
   {
     purpose: "Gen 8 Final Holdout (Future Unused)",
@@ -97,7 +105,7 @@ export const SEED_REGISTRY_GEN8: SeedRangeAllocation[] = [
     startSeed: 350001,
     endSeed: 350300,
     count: 300,
-    description: "本番学習完了後の正式評価・Holdout 用に将来割り当て予定の完全隔離 Seed (現在未実行)",
+    description: "本番学習完了後の正式評価・Holdout 用に将来割り当て予定の完全隔離 Seed (現在未実行・完全保護中)",
   },
 ];
 
@@ -155,14 +163,19 @@ export function auditSeedRegistry(registry: SeedRangeAllocation[]) {
   const outDir = path.resolve(".artifacts/seed-registry");
   fs.mkdirSync(outDir, { recursive: true });
   const outPath = path.join(outDir, "seed-registry-gen8.json");
-  fs.writeFileSync(outPath, JSON.stringify({
+  const payload = JSON.stringify({
     timestamp: new Date().toISOString(),
     auditStatus: "PASS",
     collisionErrors: 0,
     registry,
-  }, null, 2), "utf8");
+  }, null, 2);
+  fs.writeFileSync(outPath, payload, "utf8");
 
-  console.log(`Seed registry written to: ${outPath}`);
+  const evidenceDir = path.resolve("evidence/seed-registry");
+  fs.mkdirSync(evidenceDir, { recursive: true });
+  fs.writeFileSync(path.join(evidenceDir, "seed-registry-gen8.json"), payload, "utf8");
+
+  console.log(`Seed registry written to: ${outPath} and evidence/seed-registry/seed-registry-gen8.json`);
 }
 
 if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith("verifySeedRegistryGen8.ts")) {

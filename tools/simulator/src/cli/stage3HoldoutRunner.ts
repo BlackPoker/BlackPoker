@@ -1937,11 +1937,13 @@ const isMainScript =
   process.argv.some((arg) => arg.includes("stage3HoldoutRunner"));
 
 if (isMainScript && !process.env.VITEST && !process.argv.includes("--no-auto-run")) {
-  try {
-    const parsed = parseHoldoutCliArgs(process.argv.slice(2));
-    await runStage3Holdout(parsed);
-  } catch (err: any) {
-    console.error(`[FATAL ERROR] Holdout Runner terminated with error:`, err?.message ?? String(err));
-    process.exit(1);
-  }
+  (async () => {
+    try {
+      const parsed = parseHoldoutCliArgs(process.argv.slice(2));
+      await runStage3Holdout(parsed);
+    } catch (err: any) {
+      console.error(`[FATAL ERROR] Holdout Runner terminated with error:`, err?.message ?? String(err));
+      process.exit(1);
+    }
+  })();
 }

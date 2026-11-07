@@ -98,6 +98,15 @@ export interface ChampionAuthenticityRecord {
 }
 
 /**
+ * プレイヤー別のアクション提示・実行・PASS統計
+ */
+export interface PlayerActionStatsRecord {
+  readonly offeredActions: Record<string, number>;
+  readonly executedActions: Record<string, number>;
+  readonly passDecisions: number;
+}
+
+/**
  * 通常試合用のコンパクト Outcome レコード (JSONL 1行 = 1試合)
  *
  * 【O(1) メモリ・省容量契約】
@@ -132,6 +141,10 @@ export interface CompactMatchOutcomeRecord {
   readonly instantiationFailures: number;
   readonly reachedDecisionLimit: boolean;
   readonly finalStateHash: string;
+  readonly playerStats?: {
+    readonly p1: PlayerActionStatsRecord;
+    readonly p2: PlayerActionStatsRecord;
+  };
   readonly durationMs?: number;
   readonly anomalyId?: string;
   readonly sampledLogFile?: string;
