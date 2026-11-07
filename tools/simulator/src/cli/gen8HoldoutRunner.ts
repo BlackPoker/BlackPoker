@@ -70,7 +70,7 @@ import { SEED_REGISTRY_GEN8 } from "./verifySeedRegistryGen8";
 // 定数定義
 // =============================================================================
 
-export const GEN8_HOLDOUT_WORK_ID = "BP-SIM-AI-V92-WORK4-4-GEN8-HOLDOUT-ENGINE-R3" as const;
+export const GEN8_HOLDOUT_WORK_ID = "BP-SIM-AI-V92-WORK4-4-GEN8-HOLDOUT-FINAL-FIX-R4" as const;
 export const GEN8_HOLDOUT_REGULATION_ID = "standard-pack" as const;
 export const GEN8_HOLDOUT_FRAME_ID = "pack" as const;
 export const GEN8_HOLDOUT_RULE_PACKAGE_VERSION = "1.0.0" as const;
@@ -270,6 +270,7 @@ export interface Gen8HoldoutPreflightManifest {
 
 export interface Gen8HoldoutAuditResult {
   readonly isValid: boolean;
+  readonly auditStatus: "AUDIT_PASSED" | "AUDIT_FAILED" | "IN_PROGRESS";
   readonly auditTimestamp: string;
   readonly artifactsDir: string;
   readonly checkedFiles: readonly string[];
@@ -912,27 +913,24 @@ export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOp
     sessionPairsLimit,
   } = options;
 
-  const targetPairsThisSession = sessionPairsLimit ? Math.min(pairsCount, sessionPairsLimit) : pairsCount;
-
-  // 1. 実 Holdout 予約 Seed (350001〜350300) の実試合実行保護 (Fail-Closed)
+  // 1. 実 Holdout 予約 Seed (350001〜350300) の実試合実行保護 (Fail-Closed: 完全区間重複判定)
   const endSeed = startSeed + pairsCount - 1;
   const overlapsReserved =
-    (startSeed >= GEN8_HOLDOUT_SEED_RANGE_START && startSeed <= GEN8_HOLDOUT_SEED_RANGE_END) ||
-    (endSeed >= GEN8_HOLDOUT_SEED_RANGE_START && endSeed <= GEN8_HOLDOUT_SEED_RANGE_END);
+    Math.max(startSeed, GEN8_HOLDOUT_SEED_RANGE_START) <= Math.min(endSeed, GEN8_HOLDOUT_SEED_RANGE_END);
   if (overlapsReserved) {
     throw new UnauthorizedHoldoutExecutionError(
-      `[Fail-Closed] Real Gen 8 Holdout Match Execution on reserved seeds (350001..350300) is strictly prohibited in Work 4-4 R3.\n` +
+      `[Fail-Closed] Real Gen 8 Holdout Match Execution on reserved seeds (${GEN8_HOLDOUT_SEED_RANGE_START}..${GEN8_HOLDOUT_SEED_RANGE_END}) is strictly prohibited in Work 4-4 R4.\n` +
       `Holdout matches on reserved seeds must remain 100% pristine and unexecuted until explicit user authorization.\n` +
-      `Current startSeed=${startSeed}, pairsCount=${pairsCount}.`
+      `Current startSeed=${startSeed}, pairsCount=${pairsCount}, endSeed=${endSeed}.`
     );
   }
 
   // 2. 実行モード判定 (未承認実行の遮断)
   if (!testExecutionAuthorized || (!isSyntheticTest && !isRealCoreTest)) {
     throw new UnauthorizedHoldoutExecutionError(
-      `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R3.\n` +
+      `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R4.\n` +
       `Actual match execution requires explicit stakeholder approval.\n` +
-      `Only synthetic and verified real-core small-scale test executions are permitted in R3.`
+      `Only synthetic and verified real-core small-scale test executions are permitted in R4.`
     );
   }
 
@@ -999,6 +997,17 @@ export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOp
       throw new Gen8HoldoutAuditError(`[Fail-Closed] Checkpoint configDigest mismatch: expected ${currentConfigDigest}, found ${raw.configDigest}`);
     }
 
+    if (raw.nextPairIndex !== raw.completedPairsCount) {
+      throw new Gen8HoldoutAuditError(
+        `[Fail-Closed] Checkpoint index mismatch: nextPairIndex (${raw.nextPairIndex}) !== completedPairsCount (${raw.completedPairsCount})`
+      );
+    }
+    if (raw.gitCommitSha && gitCommitSha !== "UNKNOWN" && raw.gitCommitSha !== "UNKNOWN" && raw.gitCommitSha !== gitCommitSha) {
+      throw new Gen8HoldoutAuditError(
+        `[Fail-Closed] Checkpoint gitCommitSha mismatch: expected ${gitCommitSha}, found ${raw.gitCommitSha}`
+      );
+    }
+
     // 確定済みチャンクファイルの存在と SHA-256 検証
     for (const chunkInfo of raw.completedChunks) {
       const chunkFilePath = path.join(outputDir, chunkInfo.fileName);
@@ -1014,6 +1023,11 @@ export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOp
     startPairIndex = raw.completedPairsCount;
     completedChunks = [...raw.completedChunks];
   }
+
+  // セッション分割の進行式: startPairIndex を基準に今回のターゲットを計算
+  const targetPairsThisSession = sessionPairsLimit
+    ? Math.min(pairsCount, startPairIndex + sessionPairsLimit)
+    : pairsCount;
 
   let currentChunkLines: string[] = [];
 
@@ -1309,7 +1323,7 @@ export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOp
   manifestMap["checkpoint.json"] = computeFileSha256(checkpointPath);
   fs.writeFileSync(path.join(outputDir, "MANIFEST_SHA256.json"), JSON.stringify(manifestMap, null, 2), "utf8");
 
-  // 全体完了時のみ監査を実行、部分セッション完了時は暫定サマリを返却
+  // 全体完了時のみ正式監査を実行、部分セッション完了時は IN_PROGRESS を返却
   let auditResult: Gen8HoldoutAuditResult;
   if (targetPairsThisSession === pairsCount) {
     auditResult = auditGen8HoldoutArtifacts(outputDir, {
@@ -1319,9 +1333,15 @@ export async function executeGen8HoldoutCampaign(options: Gen8HoldoutExecutionOp
       expectedTotalMatches: pairsCount * 2,
       expectedStartSeed: startSeed,
     });
+    if (!auditResult.isValid) {
+      throw new Gen8HoldoutAuditError(
+        `[Fail-Closed] Holdout campaign completed but audit failed with ${auditResult.errors.length} error(s): ${auditResult.errors.join("; ")}`
+      );
+    }
   } else {
     auditResult = {
-      isValid: true,
+      isValid: false,
+      auditStatus: "IN_PROGRESS",
       auditTimestamp: new Date().toISOString(),
       artifactsDir: outputDir,
       checkedFiles: ["checkpoint.json"],
@@ -1588,6 +1608,7 @@ export function auditGen8HoldoutArtifacts(
 
   return {
     isValid,
+    auditStatus: isValid ? "AUDIT_PASSED" : "AUDIT_FAILED",
     auditTimestamp: new Date().toISOString(),
     artifactsDir: dir,
     checkedFiles,
@@ -1612,13 +1633,19 @@ export function auditGen8HoldoutArtifacts(
 
 export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)): Promise<void> {
   console.log("================================================================================");
-  console.log("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Preflight & Evaluation Harness");
+  console.log("BlackPoker Work 4-4 R4 — Gen 8 Official Holdout Preflight & Evaluation Harness");
   console.log("================================================================================");
 
   let mode: "PLAN_ONLY" | "DRY_RUN" | "EXECUTE" | "AUDIT_ONLY" = "PLAN_ONLY";
   let approvalToken: string | undefined;
   let plannedPairs: number = DEFAULT_PRIMARY_PAIRS;
   let outputDir: string = DEFAULT_GEN8_HOLDOUT_OUTPUT_DIR;
+  let candidatePath: string | undefined;
+  let gen7CheckpointPath: string | undefined;
+  let expectedGen7Digest: string | undefined;
+  let expectedCandidateDigest: string | undefined;
+  let startSeedArg: number | undefined;
+  let sessionPairsLimit: number | undefined;
   let allowSyntheticTest = false;
   let allowRealCoreTest = false;
 
@@ -1642,24 +1669,44 @@ export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)):
       plannedPairs = Math.min(MAX_AVAILABLE_PAIRS, Math.max(1, parseInt(args[++i], 10)));
     } else if (arg === "--output-dir" && i + 1 < args.length) {
       outputDir = args[++i];
+    } else if (arg === "--candidate-path" && i + 1 < args.length) {
+      candidatePath = args[++i];
+    } else if (arg === "--gen7-checkpoint" && i + 1 < args.length) {
+      gen7CheckpointPath = args[++i];
+    } else if (arg === "--expected-gen7-digest" && i + 1 < args.length) {
+      expectedGen7Digest = args[++i];
+    } else if (arg === "--expected-candidate-digest" && i + 1 < args.length) {
+      expectedCandidateDigest = args[++i];
+    } else if (arg === "--start-seed" && i + 1 < args.length) {
+      startSeedArg = parseInt(args[++i], 10);
+    } else if (arg === "--session-pairs-limit" && i + 1 < args.length) {
+      sessionPairsLimit = parseInt(args[++i], 10);
     }
   }
 
   // 早期実行禁止・未承認判定 (Fail-Closed)
+  // 本 Work 4-4 R4 では、承認トークンがあっても本番実行 (Seeds 350001..350300) は未開放とし遮断
   if (mode === "EXECUTE") {
     if (!allowSyntheticTest && !allowRealCoreTest) {
       throw new UnauthorizedHoldoutExecutionError(
-        `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R3.\n` +
-        `Actual match execution on reserved seeds (350001..350300) requires explicit stakeholder approval.\n` +
-        `Only infrastructure implementation, verified small-scale tests, and synthetic tests are permitted in R3.`
+        `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R4.\n` +
+        `Actual match execution on reserved seeds (${GEN8_HOLDOUT_SEED_RANGE_START}..${GEN8_HOLDOUT_SEED_RANGE_END}) requires explicit stakeholder approval.\n` +
+        `Only infrastructure implementation, verified small-scale tests, and synthetic tests are permitted in R4.`
       );
     }
   }
 
   if (mode === "AUDIT_ONLY") {
     console.log(`>>> Running Audit on artifacts directory: ${outputDir}`);
-    const auditRes = auditGen8HoldoutArtifacts(outputDir);
-    console.log(`Audit Result: ${auditRes.isValid ? "PASS" : "FAIL"}`);
+    const effectiveStartSeed = startSeedArg ?? (allowSyntheticTest || allowRealCoreTest ? GEN8_HOLDOUT_TEST_SEED_START : undefined);
+    const auditRes = auditGen8HoldoutArtifacts(outputDir, {
+      expectedTotalPairs: plannedPairs,
+      expectedTotalMatches: plannedPairs * 2,
+      expectedCandidateDigest: expectedCandidateDigest ?? GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST,
+      expectedOpponentDigest: expectedGen7Digest ?? GEN7_EXPECTED_DIGEST,
+      expectedStartSeed: effectiveStartSeed,
+    });
+    console.log(`Audit Result: ${auditRes.isValid ? "PASS" : "FAIL"} (Status: ${auditRes.auditStatus})`);
     console.log(`- Total Matches:        ${auditRes.totalMatches}`);
     console.log(`- Completed:            ${auditRes.completedMatches}`);
     console.log(`- Candidate Verified:   ${auditRes.candidateDigestVerified}`);
@@ -1668,7 +1715,9 @@ export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)):
     if (auditRes.errors.length > 0) {
       console.error(`- Errors detected: ${auditRes.errors.length}`);
       for (const e of auditRes.errors) console.error(`  * ${e}`);
-      process.exit(1);
+      throw new Gen8HoldoutAuditError(
+        `[Audit Failed] Found ${auditRes.errors.length} violation(s): ${auditRes.errors.join("; ")}`
+      );
     }
     return;
   }
@@ -1678,6 +1727,12 @@ export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)):
     executionMode: mode,
     approvalToken,
     plannedPairs,
+    candidatePath,
+    gen7CheckpointPath,
+    expectedGen7Digest,
+    isSyntheticTest: allowSyntheticTest,
+    isRealCoreTest: allowRealCoreTest,
+    testExecutionAuthorized: allowSyntheticTest || allowRealCoreTest,
   });
 
   console.log(`Work ID:            ${manifest.workId}`);
@@ -1698,15 +1753,44 @@ export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)):
   console.log(`Note: ${manifest.hypothesisGate.sensitivityCaveat}`);
 
   if (mode === "EXECUTE") {
-    // 承認トークンがコード内に定義されていることだけを実行承認とは見なさない
-    if (!allowSyntheticTest) {
-      throw new UnauthorizedHoldoutExecutionError(
-        `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R2.\n` +
-        `Actual match execution on reserved seeds (350001..350300) requires explicit stakeholder approval.\n` +
-        `Only infrastructure implementation and synthetic tests are permitted in R2.`
-      );
-    }
-    console.log(">>> Synthetic test execution mode active (test only).");
+    console.log(">>> Connecting CLI to executeGen8HoldoutCampaign...");
+    const candDna = loadGen8PrimaryCandidate(candidatePath);
+    const candDigest = SemanticSHA256.hash(JSON.stringify(candDna));
+
+    const g7CheckPath = path.resolve(
+      gen7CheckpointPath ??
+        ".artifacts/stage3-full-action-retrain-r1/campaign-stage3-evolution-checkpoint.json"
+    );
+    const g7Dna = loadChampionDNA({
+      checkpointPath: g7CheckPath,
+      expectedGenomeId: GEN7_GENOME_ID,
+      expectedDigest: expectedGen7Digest ?? GEN7_EXPECTED_DIGEST,
+      verifyCheckpointChecksum: true,
+    });
+    const g7Digest = EvolutionIndependentEvaluator.computeDnaDigest(g7Dna);
+
+    const execResult = await executeGen8HoldoutCampaign({
+      workId: GEN8_HOLDOUT_WORK_ID,
+      candidateDNA: candDna,
+      candidateDigest: candDigest,
+      candidateGenomeId: GEN8_PRIMARY_CANDIDATE_GENOME_ID,
+      opponentDNA: g7Dna,
+      opponentDigest: g7Digest,
+      opponentGenomeId: GEN7_CHAMPION_GENOME_ID,
+      opponentId: "gen7-champion",
+      opponentName: "Stage3Gen7Champion",
+      pairsCount: plannedPairs,
+      startSeed: startSeedArg ?? (allowSyntheticTest || allowRealCoreTest ? GEN8_HOLDOUT_TEST_SEED_START : GEN8_HOLDOUT_SEED_RANGE_START),
+      outputDir,
+      isSyntheticTest: allowSyntheticTest,
+      isRealCoreTest: allowRealCoreTest,
+      testExecutionAuthorized: allowSyntheticTest || allowRealCoreTest,
+      sessionPairsLimit,
+      approvalToken,
+    });
+
+    console.log(`Execution completed: ${execResult.completedPairs} pairs, ${execResult.totalMatches} matches.`);
+    console.log(`Audit Valid: ${execResult.auditResult.isValid}, Status: ${execResult.auditResult.auditStatus}`);
   } else {
     console.log("\n[PROTECTION ACTIVE] Execution mode is PLAN_ONLY. Zero matches executed. Holdout seeds remain 100% pristine and protected.");
   }

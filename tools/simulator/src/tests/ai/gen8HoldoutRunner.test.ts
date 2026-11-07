@@ -11,6 +11,7 @@ import {
   GEN8_HOLDOUT_WORK_ID,
   GEN8_PRIMARY_CANDIDATE_GENOME_ID,
   GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST,
+  GEN8_PRIMARY_CANDIDATE_FILE_PATH,
   GEN8_HOLDOUT_APPROVAL_TOKEN,
   GEN8_HOLDOUT_SEED_RANGE_START,
   GEN8_HOLDOUT_SEED_RANGE_END,
@@ -28,6 +29,7 @@ import {
   auditGen8HoldoutArtifacts,
   executeGen8HoldoutCampaign,
   runGen8HoldoutCli,
+  computeHoldoutCheckpointChecksum,
   PairedScoreRecord,
 } from "../../cli/gen8HoldoutRunner";
 import { CompactMatchOutcomeRecord } from "../../domain/simulation/MillionMatchInfraTypes";
@@ -703,16 +705,63 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
       if (pool2Workers) await pool2Workers.terminate();
     });
 
-    it("should strictly refuse execution on reserved holdout seeds (350001..350300) even for real-core tests", async () => {
+    it("should strictly refuse execution on reserved holdout seeds (350001..350300) with comprehensive interval overlap checks", async () => {
       const testDir = path.join(tmpRoot, "refuse-reserved-seed");
+
+      // 1. 下限境界値接触 (startSeed: 350001)
       await expect(
         executeGen8HoldoutCampaign({
           candidateDNA: candDna,
           candidateDigest: candDigest,
           opponentDNA: testGen7Dna,
           opponentDigest: testGen7Digest,
-          pairsCount: 2,
-          startSeed: GEN8_HOLDOUT_SEED_RANGE_START, // 350001 (保護領域)
+          pairsCount: 1,
+          startSeed: GEN8_HOLDOUT_SEED_RANGE_START, // 350001
+          outputDir: testDir,
+          isRealCoreTest: true,
+          testExecutionAuthorized: true,
+        })
+      ).rejects.toThrow(UnauthorizedHoldoutExecutionError);
+
+      // 2. 上限境界値接触 (startSeed: 350300)
+      await expect(
+        executeGen8HoldoutCampaign({
+          candidateDNA: candDna,
+          candidateDigest: candDigest,
+          opponentDNA: testGen7Dna,
+          opponentDigest: testGen7Digest,
+          pairsCount: 1,
+          startSeed: GEN8_HOLDOUT_SEED_RANGE_END, // 350300
+          outputDir: testDir,
+          isRealCoreTest: true,
+          testExecutionAuthorized: true,
+        })
+      ).rejects.toThrow(UnauthorizedHoldoutExecutionError);
+
+      // 3. 予約範囲の完全包含 (startSeed: 349900, pairsCount: 500 => 349900..350399)
+      await expect(
+        executeGen8HoldoutCampaign({
+          candidateDNA: candDna,
+          candidateDigest: candDigest,
+          opponentDNA: testGen7Dna,
+          opponentDigest: testGen7Digest,
+          pairsCount: 500,
+          startSeed: 349900,
+          outputDir: testDir,
+          isRealCoreTest: true,
+          testExecutionAuthorized: true,
+        })
+      ).rejects.toThrow(UnauthorizedHoldoutExecutionError);
+
+      // 4. 上方部分重複 (startSeed: 350290, pairsCount: 20 => 350290..350309)
+      await expect(
+        executeGen8HoldoutCampaign({
+          candidateDNA: candDna,
+          candidateDigest: candDigest,
+          opponentDNA: testGen7Dna,
+          opponentDigest: testGen7Digest,
+          pairsCount: 20,
+          startSeed: 350290,
           outputDir: testDir,
           isRealCoreTest: true,
           testExecutionAuthorized: true,
@@ -882,6 +931,187 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
           testExecutionAuthorized: true,
         })
       ).rejects.toThrow(Gen8HoldoutAuditError);
+    }, 30000);
+
+    it("should allow repeating Resume with identical sessionPairsLimit to finish all pairs with IN_PROGRESS and then AUDIT_PASSED", async () => {
+      const stepDir = path.join(tmpRoot, "step-resume-test");
+
+      // 1回目: 2 pairs 予定中、sessionPairsLimit: 1 で 1 pair 実行
+      const res1 = await executeGen8HoldoutCampaign({
+        candidateDNA: candDna,
+        candidateDigest: candDigest,
+        opponentDNA: testGen7Dna,
+        opponentDigest: testGen7Digest,
+        pairsCount: 2,
+        sessionPairsLimit: 1,
+        startSeed: 360040,
+        outputDir: stepDir,
+        chunkSizeMatches: 2,
+        workerPool: pool1Worker,
+        isRealCoreTest: true,
+        testExecutionAuthorized: true,
+      });
+
+      expect(res1.completedPairs).toBe(1);
+      expect(res1.totalMatches).toBe(2);
+      expect(res1.auditResult.isValid).toBe(false);
+      expect(res1.auditResult.auditStatus).toBe("IN_PROGRESS");
+
+      // 2回目: 同一の sessionPairsLimit: 1 を指定して Resume 実行 -> 2 pairs 完走
+      const res2 = await executeGen8HoldoutCampaign({
+        candidateDNA: candDna,
+        candidateDigest: candDigest,
+        opponentDNA: testGen7Dna,
+        opponentDigest: testGen7Digest,
+        pairsCount: 2,
+        sessionPairsLimit: 1,
+        startSeed: 360040,
+        outputDir: stepDir,
+        chunkSizeMatches: 2,
+        workerPool: pool1Worker,
+        isRealCoreTest: true,
+        testExecutionAuthorized: true,
+      });
+
+      expect(res2.completedPairs).toBe(2);
+      expect(res2.totalMatches).toBe(4);
+      expect(res2.auditResult.isValid).toBe(true);
+      expect(res2.auditResult.auditStatus).toBe("AUDIT_PASSED");
+      expect(res2.auditResult.completedMatches).toBe(4);
+    }, 30000);
+
+    it("should fail closed when checkpoint index is inconsistent (nextPairIndex !== completedPairsCount)", async () => {
+      const corruptIndexDir = path.join(tmpRoot, "corrupt-index");
+      await executeGen8HoldoutCampaign({
+        candidateDNA: candDna,
+        candidateDigest: candDigest,
+        opponentDNA: testGen7Dna,
+        opponentDigest: testGen7Digest,
+        pairsCount: 2,
+        sessionPairsLimit: 1,
+        startSeed: 360042,
+        outputDir: corruptIndexDir,
+        chunkSizeMatches: 2,
+        workerPool: pool1Worker,
+        isRealCoreTest: true,
+        testExecutionAuthorized: true,
+      });
+
+      const ckptPath = path.join(corruptIndexDir, "checkpoint.json");
+      const rawCkpt = JSON.parse(fs.readFileSync(ckptPath, "utf8"));
+      rawCkpt.nextPairIndex = 999; // 不整合
+      const { checksum, ...rest } = rawCkpt;
+      rawCkpt.checksum = computeHoldoutCheckpointChecksum(rest);
+      fs.writeFileSync(ckptPath, JSON.stringify(rawCkpt, null, 2), "utf8");
+
+      await expect(
+        executeGen8HoldoutCampaign({
+          candidateDNA: candDna,
+          candidateDigest: candDigest,
+          opponentDNA: testGen7Dna,
+          opponentDigest: testGen7Digest,
+          pairsCount: 2,
+          startSeed: 360042,
+          outputDir: corruptIndexDir,
+          chunkSizeMatches: 2,
+          workerPool: pool1Worker,
+          isRealCoreTest: true,
+          testExecutionAuthorized: true,
+        })
+      ).rejects.toThrow(Gen8HoldoutAuditError);
+    }, 30000);
+
+    it("should fail closed when checkpoint gitCommitSha is altered", async () => {
+      const corruptGitDir = path.join(tmpRoot, "corrupt-git-sha");
+      await executeGen8HoldoutCampaign({
+        candidateDNA: candDna,
+        candidateDigest: candDigest,
+        opponentDNA: testGen7Dna,
+        opponentDigest: testGen7Digest,
+        pairsCount: 2,
+        sessionPairsLimit: 1,
+        startSeed: 360044,
+        outputDir: corruptGitDir,
+        chunkSizeMatches: 2,
+        workerPool: pool1Worker,
+        isRealCoreTest: true,
+        testExecutionAuthorized: true,
+      });
+
+      const ckptPath = path.join(corruptGitDir, "checkpoint.json");
+      const rawCkpt = JSON.parse(fs.readFileSync(ckptPath, "utf8"));
+      rawCkpt.gitCommitSha = "tampered_git_commit_sha_000000";
+      const { checksum, ...rest } = rawCkpt;
+      rawCkpt.checksum = computeHoldoutCheckpointChecksum(rest);
+      fs.writeFileSync(ckptPath, JSON.stringify(rawCkpt, null, 2), "utf8");
+
+      await expect(
+        executeGen8HoldoutCampaign({
+          candidateDNA: candDna,
+          candidateDigest: candDigest,
+          opponentDNA: testGen7Dna,
+          opponentDigest: testGen7Digest,
+          pairsCount: 2,
+          startSeed: 360044,
+          outputDir: corruptGitDir,
+          chunkSizeMatches: 2,
+          workerPool: pool1Worker,
+          isRealCoreTest: true,
+          testExecutionAuthorized: true,
+        })
+      ).rejects.toThrow(Gen8HoldoutAuditError);
+    }, 30000);
+
+    it("should connect runGen8HoldoutCli --execute cleanly for tests and fail-closed for unauthorized production seeds", async () => {
+      const cliTestDir = path.join(tmpRoot, "cli-exec-test");
+
+      // 1. 本番実行試行は未承認エラー (Fail-Closed)
+      await expect(
+        runGen8HoldoutCli(["--execute", "--pairs", "10", "--output-dir", cliTestDir])
+      ).rejects.toThrow(UnauthorizedHoldoutExecutionError);
+
+      await expect(
+        runGen8HoldoutCli([
+          "--execute",
+          "--approval-token",
+          GEN8_HOLDOUT_APPROVAL_TOKEN,
+          "--pairs",
+          "10",
+          "--output-dir",
+          cliTestDir,
+        ])
+      ).rejects.toThrow(UnauthorizedHoldoutExecutionError);
+
+      // 2. 合成テストフラグ付きで正常実行
+      await runGen8HoldoutCli([
+        "--execute",
+        "--allow-synthetic-execution-test",
+        "--pairs",
+        "1",
+        "--output-dir",
+        cliTestDir,
+        "--candidate-path",
+        GEN8_PRIMARY_CANDIDATE_FILE_PATH,
+        "--gen7-checkpoint",
+        fixtureGen7Path,
+        "--expected-gen7-digest",
+        fixtureGen7Digest,
+      ]);
+
+      expect(fs.existsSync(path.join(cliTestDir, "checkpoint.json"))).toBe(true);
+      expect(fs.existsSync(path.join(cliTestDir, "MANIFEST_SHA256.json"))).toBe(true);
+
+      // 3. --audit-only モードの実行
+      await runGen8HoldoutCli([
+        "--audit-only",
+        "--allow-synthetic-execution-test",
+        "--pairs",
+        "1",
+        "--output-dir",
+        cliTestDir,
+        "--expected-gen7-digest",
+        fixtureGen7Digest,
+      ]);
     }, 30000);
   });
 });
