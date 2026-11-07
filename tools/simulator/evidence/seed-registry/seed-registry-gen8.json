@@ -1,0 +1,95 @@
+{
+  "timestamp": "2026-11-07T03:51:35.024Z",
+  "auditStatus": "PASS",
+  "collisionErrors": 0,
+  "registry": [
+    {
+      "purpose": "Stage 3 Training",
+      "status": "USED",
+      "startSeed": 1,
+      "endSeed": 50000,
+      "count": 50000,
+      "description": "Stage 3 過去進化学習の訓練用 Seed 空間"
+    },
+    {
+      "purpose": "Stage A 1K Pilot",
+      "status": "USED",
+      "startSeed": 1001,
+      "endSeed": 1500,
+      "count": 500,
+      "description": "大規模基盤 Stage A 検証用 Seed"
+    },
+    {
+      "purpose": "Stage B 10K Scale Run",
+      "status": "USED",
+      "startSeed": 10001,
+      "endSeed": 15000,
+      "count": 5000,
+      "description": "大規模基盤 Stage B 10K 完走用 Seed"
+    },
+    {
+      "purpose": "Stage 3 Validation",
+      "status": "USED",
+      "startSeed": 70001,
+      "endSeed": 70100,
+      "count": 100,
+      "description": "Stage 3 過去進化学習の中間 Validation Seed"
+    },
+    {
+      "purpose": "Stage 3 Official Holdout (Protected)",
+      "status": "PROTECTED_LOCKED",
+      "startSeed": 95001,
+      "endSeed": 95030,
+      "count": 30,
+      "description": "Work 3-7 で使用された公式 Holdout 240 試合 Seed (厳格保護・再利用禁止)"
+    },
+    {
+      "purpose": "Gen 7 Phase 1 Diagnostic & H2H Verification",
+      "status": "USED",
+      "startSeed": 200001,
+      "endSeed": 200030,
+      "count": 30,
+      "description": "Work 4-3 Phase 1 診断 210 試合および H2H 60 試合で使用済み"
+    },
+    {
+      "purpose": "Gen 8 Phase 2 Pilot Exploration",
+      "status": "USED",
+      "startSeed": 210001,
+      "endSeed": 211000,
+      "count": 1000,
+      "description": "Work 4-3 Phase 2 パイロット探索 1,000 試合で使用済み"
+    },
+    {
+      "purpose": "Reserved Protected Seed Range",
+      "status": "PROTECTED_LOCKED",
+      "startSeed": 250001,
+      "endSeed": 250120,
+      "count": 120,
+      "description": "最終評価プロトコル確定まで完全未使用のまま保護される予約 Seed"
+    },
+    {
+      "purpose": "Gen 8 Production Training",
+      "status": "ALLOCATED_FOR_PRODUCTION",
+      "startSeed": 300001,
+      "endSeed": 320000,
+      "count": 20000,
+      "description": "Gen 8 本番進化学習 (上限 10,000 試合) 用に新規割当された訓練 Seed 空間"
+    },
+    {
+      "purpose": "Gen 8 Production Validation",
+      "status": "ALLOCATED_FOR_PRODUCTION",
+      "startSeed": 330001,
+      "endSeed": 331000,
+      "count": 1000,
+      "description": "Gen 8 本番進化学習の世代間 Validation 評価用に新規割当された Seed 空間"
+    },
+    {
+      "purpose": "Gen 8 Final Holdout (Future Unused)",
+      "status": "RESERVED_FOR_FUTURE_HOLDOUT",
+      "startSeed": 350001,
+      "endSeed": 350300,
+      "count": 300,
+      "description": "本番学習完了後の正式評価・Holdout 用に将来割り当て予定の完全隔離 Seed (現在未実行)"
+    }
+  ]
+}

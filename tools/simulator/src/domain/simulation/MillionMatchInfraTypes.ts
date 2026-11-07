@@ -6,6 +6,8 @@
  * 異常分類・再現 Evidence、およびルール網羅性 (Coverage) レポートのドメイン型定義。
  */
 
+import type { DecisionDNA } from "../ai/DecisionDNATypes";
+
 export const MILLION_MATCH_INFRA_VERSION = "1.0.0" as const;
 export const COMPACT_OUTCOME_SCHEMA_VERSION = "1.0.0" as const;
 export const CHECKPOINT_SCHEMA_VERSION = "1.0.0" as const;
@@ -54,6 +56,7 @@ export interface ParticipantPolicySpec {
   readonly dnaDigest?: string;
   readonly sourcePath?: string;
   readonly role: "CANDIDATE" | "REFERENCE_CHAMPION" | "BASELINE" | "SELF_PLAY" | "MUTANT";
+  readonly customDNA?: DecisionDNA;
 }
 
 /**

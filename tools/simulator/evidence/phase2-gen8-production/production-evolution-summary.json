@@ -1,0 +1,226 @@
+{
+  "workId": "BP-SIM-AI-V92-WORK4-3-STD-PACK-AI-R2",
+  "timestamp": "2026-11-07T04:24:59.528Z",
+  "cumulativeMatchesExecuted": 8520,
+  "maxMatchesLimit": 10000,
+  "bestEverCandidate": {
+    "genomeId": "gen8-prod-g0-ind7-cross7",
+    "dnaDigest": "11fff0f578c92af376eece46ff90f9eba3785e59d0cf64d5eeffc7967946445e",
+    "generation": 1,
+    "totalMatches": 82,
+    "wins": 70,
+    "losses": 12,
+    "draws": 0,
+    "winRate": 85.36585365853658,
+    "vsGen7Wins": 14,
+    "vsGen7Matches": 20,
+    "vsGen5Wins": 18,
+    "vsGen5Matches": 20,
+    "throwingCount": 108,
+    "attackCount": 245
+  },
+  "generationBestSummary": [
+    {
+      "generation": 0,
+      "bestCandidate": {
+        "genomeId": "gen8-prod-g0-ind4-mut",
+        "dnaDigest": "6d9484a52fa239be103f44650077c30647cc4298eab4999f0f2811ad92d5c7ea",
+        "generation": 0,
+        "totalMatches": 82,
+        "wins": 69,
+        "losses": 13,
+        "draws": 0,
+        "winRate": 84.14634146341463,
+        "vsGen7Wins": 16,
+        "vsGen7Matches": 20,
+        "vsGen5Wins": 17,
+        "vsGen5Matches": 20,
+        "throwingCount": 147,
+        "attackCount": 211
+      },
+      "anchorGen7WinRate": 68.29268292682927,
+      "anchorGen5WinRate": 54.87804878048781
+    },
+    {
+      "generation": 1,
+      "bestCandidate": {
+        "genomeId": "gen8-prod-g0-ind7-cross7",
+        "dnaDigest": "11fff0f578c92af376eece46ff90f9eba3785e59d0cf64d5eeffc7967946445e",
+        "generation": 1,
+        "totalMatches": 82,
+        "wins": 70,
+        "losses": 12,
+        "draws": 0,
+        "winRate": 85.36585365853658,
+        "vsGen7Wins": 14,
+        "vsGen7Matches": 20,
+        "vsGen5Wins": 18,
+        "vsGen5Matches": 20,
+        "throwingCount": 108,
+        "attackCount": 245
+      },
+      "anchorGen7WinRate": 62.19512195121951,
+      "anchorGen5WinRate": 48.78048780487805
+    },
+    {
+      "generation": 2,
+      "bestCandidate": {
+        "genomeId": "gen8-prod-g2-ind4",
+        "dnaDigest": "f39bfe393c4e22f8cba069b2c556a660d4975cc70f19fede232d3b36ea2481cd",
+        "generation": 2,
+        "totalMatches": 82,
+        "wins": 68,
+        "losses": 14,
+        "draws": 0,
+        "winRate": 82.92682926829268,
+        "vsGen7Wins": 15,
+        "vsGen7Matches": 20,
+        "vsGen5Wins": 18,
+        "vsGen5Matches": 20,
+        "throwingCount": 151,
+        "attackCount": 216
+      },
+      "anchorGen7WinRate": 65.85365853658537
+    },
+    {
+      "generation": 3,
+      "bestCandidate": {
+        "genomeId": "gen8-prod-g3-ind0-elite",
+        "dnaDigest": "f39bfe393c4e22f8cba069b2c556a660d4975cc70f19fede232d3b36ea2481cd",
+        "generation": 3,
+        "totalMatches": 82,
+        "wins": 69,
+        "losses": 13,
+        "draws": 0,
+        "winRate": 84.14634146341463,
+        "vsGen7Wins": 16,
+        "vsGen7Matches": 20,
+        "vsGen5Wins": 17,
+        "vsGen5Matches": 20,
+        "throwingCount": 135,
+        "attackCount": 202
+      },
+      "anchorGen7WinRate": 67.07317073170732
+    },
+    {
+      "generation": 4,
+      "bestCandidate": {
+        "genomeId": "gen8-prod-g4-ind11",
+        "dnaDigest": "42d1fe3d621903bdfde0478fb31e42f739c4aac067330207c5ca0ef673a332dd",
+        "generation": 4,
+        "totalMatches": 82,
+        "wins": 66,
+        "losses": 16,
+        "draws": 0,
+        "winRate": 80.48780487804879,
+        "vsGen7Wins": 16,
+        "vsGen7Matches": 20,
+        "vsGen5Wins": 18,
+        "vsGen5Matches": 20,
+        "throwingCount": 142,
+        "attackCount": 207
+      },
+      "anchorGen7WinRate": 53.65853658536586
+    },
+    {
+      "generation": 5,
+      "bestCandidate": {
+        "genomeId": "gen8-prod-g5-ind0-elite",
+        "dnaDigest": "42d1fe3d621903bdfde0478fb31e42f739c4aac067330207c5ca0ef673a332dd",
+        "generation": 5,
+        "totalMatches": 82,
+        "wins": 69,
+        "losses": 13,
+        "draws": 0,
+        "winRate": 84.14634146341463,
+        "vsGen7Wins": 17,
+        "vsGen7Matches": 20,
+        "vsGen5Wins": 19,
+        "vsGen5Matches": 20,
+        "throwingCount": 144,
+        "attackCount": 210
+      },
+      "anchorGen7WinRate": 58.536585365853654
+    },
+    {
+      "generation": 6,
+      "bestCandidate": {
+        "genomeId": "gen8-prod-g6-ind11",
+        "dnaDigest": "cbd8219985979a14d0f91ab209cc3536766466186e1421ee60411dc7c8bcfead",
+        "generation": 6,
+        "totalMatches": 82,
+        "wins": 68,
+        "losses": 14,
+        "draws": 0,
+        "winRate": 82.92682926829268,
+        "vsGen7Wins": 15,
+        "vsGen7Matches": 20,
+        "vsGen5Wins": 18,
+        "vsGen5Matches": 20,
+        "throwingCount": 132,
+        "attackCount": 207
+      },
+      "anchorGen7WinRate": 59.756097560975604
+    },
+    {
+      "generation": 7,
+      "bestCandidate": {
+        "genomeId": "gen8-prod-g7-ind3",
+        "dnaDigest": "cc5fd70eedebeebe4c88de4d329311b6462c1ebd63d34812bafb2e76db5a9b6f",
+        "generation": 7,
+        "totalMatches": 82,
+        "wins": 66,
+        "losses": 16,
+        "draws": 0,
+        "winRate": 80.48780487804879,
+        "vsGen7Wins": 15,
+        "vsGen7Matches": 20,
+        "vsGen5Wins": 18,
+        "vsGen5Matches": 20,
+        "throwingCount": 150,
+        "attackCount": 184
+      },
+      "anchorGen7WinRate": 54.87804878048781
+    },
+    {
+      "generation": 8,
+      "bestCandidate": {
+        "genomeId": "gen8-prod-g8-ind5",
+        "dnaDigest": "1002e29b3a0bd2a8a4092463cdec1c2f810592d50f957e24ed5cf9b4e85bd4d8",
+        "generation": 8,
+        "totalMatches": 82,
+        "wins": 69,
+        "losses": 13,
+        "draws": 0,
+        "winRate": 84.14634146341463,
+        "vsGen7Wins": 18,
+        "vsGen7Matches": 20,
+        "vsGen5Wins": 18,
+        "vsGen5Matches": 20,
+        "throwingCount": 130,
+        "attackCount": 176
+      },
+      "anchorGen7WinRate": 58.536585365853654
+    },
+    {
+      "generation": 9,
+      "bestCandidate": {
+        "genomeId": "gen8-prod-g9-ind3",
+        "dnaDigest": "04c0afa18863818c9846048aafbc007c123acffca278fb8b1d5b658e4a398a8f",
+        "generation": 9,
+        "totalMatches": 82,
+        "wins": 69,
+        "losses": 13,
+        "draws": 0,
+        "winRate": 84.14634146341463,
+        "vsGen7Wins": 16,
+        "vsGen7Matches": 20,
+        "vsGen5Wins": 19,
+        "vsGen5Matches": 20,
+        "throwingCount": 153,
+        "attackCount": 167
+      },
+      "anchorGen7WinRate": 60.97560975609756
+    }
+  ]
+}

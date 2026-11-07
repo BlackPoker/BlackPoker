@@ -98,6 +98,9 @@ parentPort.on("message", async (msg: MainToWorkerMessage) => {
         _matchSeed: number,
         playerSeed: number
       ): DecisionPolicy => {
+        if (spec.customDNA) {
+          return new GenomePolicy(spec.customDNA, `${spec.name || spec.policyId}-${seat}`);
+        }
         if (spec.policyId === "gen7-champion") {
           return new GenomePolicy(champions.gen7DNA, `Gen7Champion-${seat}`);
         }
