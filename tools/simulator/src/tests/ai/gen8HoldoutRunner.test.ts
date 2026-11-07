@@ -220,7 +220,7 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
       ).toThrow(Gen8CandidateIntegrityError);
     });
 
-    it("should refuse real Holdout execution even with approval token (Work 4-4 R4.1 Fail-Closed)", async () => {
+    it("should refuse real Holdout execution without official approval flag even with approval token (Work 4-5 Fail-Closed)", async () => {
       // 承認トークンがコード内に定義されていることだけを実行承認とは見なさない (公式 Checkpoint ロード前に即時遮断)
       await expect(runGen8HoldoutCli(["--execute"])).rejects.toThrow(
         UnauthorizedHoldoutExecutionError
