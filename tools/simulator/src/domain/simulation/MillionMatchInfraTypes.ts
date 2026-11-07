@@ -515,6 +515,7 @@ export interface ExecutionSessionHistoryEntry {
   readonly stopReason: "CAMPAIGN_COMPLETED" | "SESSION_MATCH_LIMIT_REACHED" | "TIME_BUDGET_REACHED" | "TEST_EARLY_STOP";
   readonly sessionMatchLimit?: number;
   readonly timeBudgetMinutes?: number;
+  readonly workersCount?: number;
   readonly timestamp: string;
 }
 
@@ -541,6 +542,7 @@ export interface MillionMatchCheckpointState {
   readonly completedMatchesCount: number;
   readonly nextPairIndex: number;
   readonly nextMatchIndex: number;
+  readonly workersCount?: number;
   readonly seedSpace: SeedSpaceSpec;
   readonly matchups: readonly MatchupPairingSpec[];
   readonly championAuthenticity?: ChampionAuthenticityRecord;
@@ -591,6 +593,7 @@ export interface MillionMatchCampaignEvidence {
   readonly featureSchemaVersion: number;
   readonly maxDecisionsPerMatch: number;
   readonly maxConcurrency: number;
+  readonly workersCount?: number;
   /** 実行タイミングに依存しない純粋な論理結果の SHA-256 Digest (中断Resumeと無中断実行の一致証明用) */
   readonly logicalResultDigest: string;
   readonly campaignStatus:

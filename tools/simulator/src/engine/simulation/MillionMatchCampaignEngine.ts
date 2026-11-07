@@ -54,6 +54,12 @@ import {
   CAMPAIGN_SEED,
   VALIDATION_SEEDS_COUNT,
 } from "../../cli/stage3EvolutionRunner";
+import {
+  MillionMatchWorkerPool,
+  WorkerPairTask,
+  WorkerPairTaskResult,
+} from "./MillionMatchWorkerPool";
+import type { SerializedChampionsBundle } from "../../domain/simulation/MillionMatchWorkerTypes";
 
 // =============================================================================
 // 専用エラー型 (Fail-Closed)
@@ -985,6 +991,12 @@ export interface MillionMatchCampaignOptions {
   readonly maxDecisionsPerMatch?: number;
   readonly chunkSizeMatches?: number; // デフォルト 1,000 (偶数)
   readonly maxConcurrency?: 1 | 2;
+  /** Work 4-2: CPU マルチコア並列実行 Worker Threads 数 (1, 2, 4, 8) */
+  readonly workersCount?: 1 | 2 | 4 | 8;
+  /** Worker スレッド初期化用シリアライズ済み Champion DNA バンドル */
+  readonly championsBundleForWorker?: SerializedChampionsBundle;
+  /** Worker スレッド初期化用ルールディレクトリ (省略時は src/data/rules-vnext) */
+  readonly rulesDirForWorker?: string;
   readonly gitCommitSha: string;
   readonly isGitClean: boolean;
   /** 1回の実行セッションで追加実行する最大試合数 (偶数・座席反転ペア境界で正常停止) */
@@ -1111,6 +1123,9 @@ export class MillionMatchCampaignEngine {
       maxDecisionsPerMatch = 500,
       chunkSizeMatches = 1000,
       maxConcurrency = 2,
+      workersCount,
+      championsBundleForWorker,
+      rulesDirForWorker,
       gitCommitSha,
       isGitClean,
       sessionMatchLimit,
@@ -1151,6 +1166,18 @@ export class MillionMatchCampaignEngine {
       throw new Error(
         `[Fail-Closed] maxConcurrency must be 1 or 2 in initial Million-Match infrastructure, got ${maxConcurrency}`
       );
+    }
+    if (workersCount !== undefined) {
+      if (![1, 2, 4, 8].includes(workersCount)) {
+        throw new Error(
+          `[Fail-Closed] workersCount must be 1, 2, 4, or 8, got ${workersCount}`
+        );
+      }
+      if (!championsBundleForWorker) {
+        throw new Error(
+          `[Fail-Closed] championsBundleForWorker must be provided when workersCount is specified`
+        );
+      }
     }
     if (matchups.length === 0) {
       throw new Error(`[Fail-Closed] At least one matchup pairing must be defined`);
@@ -1622,7 +1649,165 @@ export class MillionMatchCampaignEngine {
     let sessionStopReason: ExecutionSessionHistoryEntry["stopReason"] | undefined;
 
     try {
-      for (let pairIndex = startPairIndex; pairIndex < totalPlannedPairs; pairIndex++) {
+      if (workersCount !== undefined) {
+        // Work 4-2: Worker Pool によるマルチコア並列パイプライン実行
+        const workerPool = await MillionMatchWorkerPool.create({
+          workersCount,
+          regulationId,
+          frameId,
+          rulesDir: rulesDirForWorker ?? path.resolve("src/data/rules-vnext"),
+          maxDecisionsPerMatch,
+          champions: championsBundleForWorker!,
+        });
+
+        try {
+          const reorderBuffer = new Map<number, WorkerPairTaskResult>();
+          let nextDispatchPairIndex = startPairIndex;
+          let nextCommitPairIndex = startPairIndex;
+          const maxInFlightPairs = workersCount * 4;
+          let workerExecutionError: Error | null = null;
+
+          const dispatchPair = (pIndex: number) => {
+            const matchup = matchups[pIndex % matchups.length];
+            const matchSeed = seedAllocator.getPairSeed(pIndex);
+            const p1Seed = derivePlayerSeed(matchSeed, "p1");
+            const p2Seed = derivePlayerSeed(matchSeed, "p2");
+            const playerSeeds = { p1: p1Seed, p2: p2Seed };
+
+            const task: WorkerPairTask = {
+              taskId: `task-${campaignId}-p${pIndex}`,
+              campaignId,
+              workId,
+              pairIndex: pIndex,
+              matchSeed,
+              playerSeeds,
+              matchup,
+              maxDecisionsPerMatch,
+            };
+
+            workerPool.executePairTask(task).then(
+              (res) => {
+                reorderBuffer.set(res.pairIndex, res);
+              },
+              (err) => {
+                if (!workerExecutionError) {
+                  workerExecutionError = err;
+                }
+              }
+            );
+          };
+
+          while (nextCommitPairIndex < totalPlannedPairs && sessionStopReason === undefined) {
+            if (workerExecutionError) {
+              throw workerExecutionError;
+            }
+
+            // 1. バックプレッシャー制限以内で未ディスパッチタスクを投入
+            while (
+              nextDispatchPairIndex < totalPlannedPairs &&
+              nextDispatchPairIndex - nextCommitPairIndex < maxInFlightPairs &&
+              sessionStopReason === undefined
+            ) {
+              if (stopAfterPairsForTest !== undefined && nextDispatchPairIndex >= stopAfterPairsForTest) {
+                break;
+              }
+              dispatchPair(nextDispatchPairIndex);
+              nextDispatchPairIndex++;
+            }
+
+            // 2. コミット対象 (nextCommitPairIndex) の結果到着を待機
+            if (!reorderBuffer.has(nextCommitPairIndex)) {
+              if (workerExecutionError) {
+                throw workerExecutionError;
+              }
+              await new Promise((resolve) => setTimeout(resolve, 2));
+              continue;
+            }
+
+            // 3. 確定コミット (昇順)
+            const pairIndex = nextCommitPairIndex;
+            const taskResult = reorderBuffer.get(pairIndex)!;
+            reorderBuffer.delete(pairIndex);
+
+            const matchup = matchups[pairIndex % matchups.length];
+            const matchSeed = seedAllocator.getPairSeed(pairIndex);
+            const matchIndex0 = pairIndex * 2;
+            const matchId0 = `${campaignId}-p${pairIndex}-l0-s${matchSeed}-${matchup.agentA.policyId}-vs-${matchup.agentB.policyId}`;
+            const matchIndex1 = pairIndex * 2 + 1;
+            const matchId1 = `${campaignId}-p${pairIndex}-l1-s${matchSeed}-${matchup.agentB.policyId}-vs-${matchup.agentA.policyId}`;
+
+            if (recentMatchIds.has(matchId0) || recentMatchIds.has(matchId1) || matchId0 === matchId1) {
+              throw new DuplicateMatchIdDetectedError(
+                `[Fail-Closed] Duplicate matchId detected at pairIndex ${pairIndex}: "${matchId0}" / "${matchId1}"`
+              );
+            }
+            recentMatchIds.add(matchId0);
+            recentMatchIds.add(matchId1);
+
+            const batchResults = [taskResult.leg0Result, taskResult.leg1Result];
+            batchResults.sort((a, b) => a.outcomeRecord.matchIndex - b.outcomeRecord.matchIndex);
+            const [res0, res1] = batchResults;
+
+            for (const res of [res0, res1]) {
+              MillionMatchCampaignEngine.updateAggregatorWithSingleMatch(agg, res, anomaliesDir);
+              currentChunkLines.push(JSON.stringify(res.outcomeRecord));
+            }
+
+            MillionMatchCampaignEngine.updateAggregatorWithPair(
+              agg,
+              matchup.matchupId,
+              res0.outcomeRecord,
+              res1.outcomeRecord
+            );
+
+            const completedPairsNow = pairIndex + 1;
+            lastCompletedPairsInLoop = completedPairsNow;
+            pairsExecutedInSession++;
+            nextCommitPairIndex++;
+
+            const sessionElapsedNowMs = customWallClockElapsedMsForTest
+              ? customWallClockElapsedMsForTest(pairsExecutedInSession)
+              : performance.now() - runStartWall;
+
+            if (stopAfterPairsForTest !== undefined && completedPairsNow >= stopAfterPairsForTest) {
+              haltedEarlyForTest = true;
+              sessionStopReason = "TEST_EARLY_STOP";
+            } else if (completedPairsNow === totalPlannedPairs) {
+              sessionStopReason = "CAMPAIGN_COMPLETED";
+            } else if (sessionMatchLimit !== undefined && pairsExecutedInSession * 2 >= sessionMatchLimit) {
+              sessionStopReason = "SESSION_MATCH_LIMIT_REACHED";
+            } else if (timeBudgetMinutes !== undefined && sessionElapsedNowMs >= timeBudgetMinutes * 60 * 1000) {
+              sessionStopReason = "TIME_BUDGET_REACHED";
+            }
+
+            if (sessionStopReason !== undefined) {
+              sessionHistory.push({
+                sessionIndex: sessionHistory.length,
+                executionMode,
+                startMatchIndex: sessionStartMatchIndex,
+                endMatchIndex: completedPairsNow * 2 - 1,
+                addedMatchesCount: pairsExecutedInSession * 2,
+                cumulativeMatchesCount: completedPairsNow * 2,
+                sessionElapsedMs: sessionElapsedNowMs,
+                stopReason: sessionStopReason,
+                sessionMatchLimit,
+                timeBudgetMinutes,
+                workersCount,
+                timestamp: new Date().toISOString(),
+              });
+              flushChunkAndSaveCheckpoint(completedPairsNow);
+              break;
+            }
+
+            if (currentChunkLines.length >= chunkSizeMatches) {
+              flushChunkAndSaveCheckpoint(completedPairsNow);
+            }
+          }
+        } finally {
+          await workerPool.terminate();
+        }
+      } else {
+        for (let pairIndex = startPairIndex; pairIndex < totalPlannedPairs; pairIndex++) {
         if (stopAfterPairsForTest !== undefined && pairIndex >= stopAfterPairsForTest) {
           haltedEarlyForTest = true;
           sessionStopReason = "TEST_EARLY_STOP";
@@ -1758,6 +1943,7 @@ export class MillionMatchCampaignEngine {
             stopReason: sessionStopReason,
             sessionMatchLimit,
             timeBudgetMinutes,
+            workersCount,
             timestamp: new Date().toISOString(),
           });
           flushChunkAndSaveCheckpoint(completedPairsNow);
@@ -1767,6 +1953,7 @@ export class MillionMatchCampaignEngine {
         if (currentChunkLines.length >= chunkSizeMatches) {
           flushChunkAndSaveCheckpoint(completedPairsNow);
         }
+      }
       }
 
       // 端数チャンクが残っている場合 (テスト中断時以外) はフラッシュして Checkpoint 保存

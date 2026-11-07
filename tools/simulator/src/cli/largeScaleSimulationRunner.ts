@@ -40,6 +40,7 @@ import {
   executeSingleInstrumentedMatch,
   derivePlayerSeed,
 } from "../engine/simulation/MillionMatchCampaignEngine";
+import type { SerializedChampionsBundle } from "../domain/simulation/MillionMatchWorkerTypes";
 import {
   CANDIDATE_CHAMPION_GENOME_ID,
   CANDIDATE_CHAMPION_EXPECTED_DIGEST,
@@ -1124,6 +1125,7 @@ export interface ParsedLargeScaleCliArgs {
   readonly matches: number;
   readonly chunkSize: number;
   readonly concurrency: 1 | 2;
+  readonly workersCount?: 1 | 2 | 4 | 8;
   readonly campaignSeed: number;
   readonly campaignId: string;
   readonly outputDir: string;
@@ -1148,6 +1150,7 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
   let matches: number | undefined;
   let chunkSize: number | undefined;
   let concurrency: 1 | 2 = 2;
+  let workersCount: 1 | 2 | 4 | 8 | undefined;
   let campaignSeed: number = DEFAULT_CAMPAIGN_SEED;
   let campaignId: string | undefined;
   let outputDir: string | undefined;
@@ -1200,6 +1203,12 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
         throw new Error(`[Fail-Closed] --concurrency must be 1 or 2, got "${args[i]}"`);
       }
       concurrency = c;
+    } else if (arg === "--workers") {
+      const w = parseInt(args[++i], 10);
+      if (![1, 2, 4, 8].includes(w)) {
+        throw new Error(`[Fail-Closed] --workers must be 1, 2, 4, or 8, got "${args[i]}"`);
+      }
+      workersCount = w as 1 | 2 | 4 | 8;
     } else if (arg === "--campaign-seed") {
       campaignSeed = parseInt(args[++i], 10);
     } else if (arg === "--campaign-id") {
@@ -1285,6 +1294,7 @@ export function parseLargeScaleCliArgs(args: readonly string[]): ParsedLargeScal
     matches: resolvedMatches,
     chunkSize: resolvedChunkSize,
     concurrency,
+    workersCount,
     campaignSeed,
     campaignId: resolvedCampaignId,
     outputDir: resolvedOutputDir,
@@ -1303,6 +1313,9 @@ export async function runLargeScaleCli(parsed: ParsedLargeScaleCliArgs): Promise
   console.log(`Matches:       ${parsed.matches.toLocaleString()} (${(parsed.matches / 2).toLocaleString()} pairs)`);
   console.log(`Chunk Size:    ${parsed.chunkSize} matches`);
   console.log(`Concurrency:   ${parsed.concurrency}`);
+  if (parsed.workersCount !== undefined) {
+    console.log(`Workers:       ${parsed.workersCount} (Worker Threads Multi-core Parallel)`);
+  }
   if (parsed.sessionMatchLimit !== undefined) {
     console.log(`Session Limit: ${parsed.sessionMatchLimit.toLocaleString()} matches`);
   }
@@ -1356,6 +1369,18 @@ export async function runLargeScaleCli(parsed: ParsedLargeScaleCliArgs): Promise
 
   validateMillionMatchOutputDir(parsed.outputDir, parsed.mode);
 
+  const championsBundleForWorker: SerializedChampionsBundle = {
+    gen7DNA: champions.gen7DNA,
+    gen7Digest: champions.gen7Digest,
+    gen7Source: champions.gen7Source,
+    gen5DNA: champions.gen5DNA,
+    gen5Digest: champions.gen5Digest,
+    gen5Source: champions.gen5Source,
+    zeroDNA: champions.zeroDNA,
+    zeroDigest: champions.zeroDigest,
+    authenticityRecord: championAuthenticity,
+  };
+
   const stage: ScaleVerificationStage =
     parsed.matches === 1_000
       ? "STAGE_A_1K"
@@ -1388,6 +1413,9 @@ export async function runLargeScaleCli(parsed: ParsedLargeScaleCliArgs): Promise
     maxDecisionsPerMatch: DEFAULT_DECISION_LIMIT,
     chunkSizeMatches: parsed.chunkSize,
     maxConcurrency: parsed.concurrency,
+    workersCount: parsed.workersCount,
+    championsBundleForWorker,
+    rulesDirForWorker: rulesDir,
     gitCommitSha: gitInfo.headCommitSha,
     isGitClean: gitInfo.isClean,
     sessionMatchLimit: parsed.sessionMatchLimit,

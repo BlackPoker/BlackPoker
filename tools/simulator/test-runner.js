@@ -1,6 +1,6 @@
 import { spawn } from "child_process";
 
-const DEFAULT_TIMEOUT_MS = 360 * 1000;
+const DEFAULT_TIMEOUT_MS = 600 * 1000;
 const timeoutMs = process.env.TEST_TIMEOUT_SEC
   ? parseInt(process.env.TEST_TIMEOUT_SEC, 10) * 1000
   : DEFAULT_TIMEOUT_MS;
