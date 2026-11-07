@@ -18,6 +18,7 @@
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
+import { fileURLToPath } from "url";
 import { loadRulePackageFromDirectory } from "../engine/rules/RuleLoader.js";
 import { loadRegulationCatalog } from "../engine/regulation/RegulationLoader.js";
 import { createReplayPlanFromDiagnosticBundleV1 } from "../ui/playtest/DiagnosticReplayAdapter.js";
@@ -366,16 +367,32 @@ export async function runDiagnosticReplayCli(argv = process.argv.slice(2)): Prom
     }
 
     // C. 終了原因: 2回目の死の槍による AI ライフ 0
-    const matchState = recon.session.state;
-    if (matchState.winner !== "p1") {
-      console.error(`[ERROR] 勝者が p1 (Human) ではありません: ${matchState.winner}`);
+    const winner =
+      recon.currentStep.type === "FINISHED"
+        ? recon.currentStep.result.winner
+        : (recon.session.state as any).winner;
+    const finishReason =
+      recon.currentStep.type === "FINISHED"
+        ? recon.currentStep.result.reason
+        : (recon.session.state as any).finishReason;
+
+    if (winner !== "p1") {
+      console.error(`[ERROR] 勝者が p1 (Human) ではありません: ${winner}`);
       return 1;
     }
-    const p2Life = matchState.players?.p2?.life ?? -1;
+
+    const statePlayers = (recon.session.state as any).players;
+    const p2Life =
+      statePlayers?.p2?.life ??
+      statePlayers?.playerB?.life ??
+      (recon.session.state as any).playerB?.life ??
+      0;
     if (p2Life > 0) {
       console.error(`[ERROR] AI (p2) のライフが 0 以下になっていません: ${p2Life}`);
       return 1;
     }
+    console.log(`- Match Winner: ${winner} (Reason: ${finishReason})`);
+    console.log(`- Final P2 Life: ${p2Life}`);
 
     // D. 死の槍のダメージ検証 (Turn 2: 12点, Turn 4: 8点)
     const damageEvents = recordedEvents.filter((ev: any) =>
@@ -562,9 +579,9 @@ export function auditAiDecisionsAndVerifyArgmax(replayedDecisions: readonly any[
 const isVitest = !!process.env.VITEST;
 const isCliEntry =
   !isVitest &&
-  Boolean(
-    process.argv[1]?.endsWith("replayDiagnosticRunner.ts") ||
-    process.argv[1]?.endsWith("replayDiagnosticRunner.js")
+  (
+    (process.argv[1] && fileURLToPath(import.meta.url) === path.resolve(process.argv[1])) ||
+    process.argv.some((arg) => arg.includes("replayDiagnosticRunner"))
   );
 
 if (isCliEntry) {
