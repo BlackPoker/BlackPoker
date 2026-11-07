@@ -1,0 +1,80 @@
+{
+  "workId": "BP-SIM-AI-V92-WORK4-5-GEN8-OFFICIAL-HOLDOUT",
+  "headSha": "52cdb0b1f57d29f4a799fb009c4a113e3471672e",
+  "candidateDigest": "11fff0f578c92af376eece46ff90f9eba3785e59d0cf64d5eeffc7967946445e",
+  "gen7Digest": "04a1e2fa1b25c117558a9fb71fc60a57b10a26750540474d4c858e139e7aa3f4",
+  "totalMatches": 240,
+  "totalPairs": 120,
+  "candWins": 147,
+  "candLosses": 93,
+  "draws": 0,
+  "winRate": 0.6125,
+  "leg0": {
+    "wins": 74,
+    "losses": 46,
+    "draws": 0,
+    "winRate": 0.6166666666666667
+  },
+  "leg1": {
+    "wins": 73,
+    "losses": 47,
+    "draws": 0,
+    "winRate": 0.6083333333333333
+  },
+  "meanPairScore": 0.6125,
+  "standardDeviation": 0.3334471094340388,
+  "standardError": 0.030439417261986124,
+  "ci95Lower": 0.5522269098795414,
+  "ci95Upper": 0.6727730901204587,
+  "superiorityEstablished": true,
+  "nonInferiorityEstablished": true,
+  "tStatSup": 3.6958657595753066,
+  "pValueSup": 0.00010960004056392858,
+  "totalTurns": 1242,
+  "averageTurns": 5.175,
+  "averageDecisions": 98.69583333333334,
+  "reachedLimitCount": 0,
+  "instantiationFailureCount": 0,
+  "candStats": {
+    "executed": {
+      "action.attack": 590,
+      "PASS": 7063,
+      "EFFECT_SELECTION": 1720,
+      "action.summonSoldier": 678,
+      "action.end": 482,
+      "action.packOpen": 129,
+      "action.throwing": 300,
+      "action.summonAce": 43,
+      "action.addBulwark": 127,
+      "action.setBulwark": 182,
+      "action.destroyBulwark": 56,
+      "action.search": 66,
+      "action.reanimate": 16,
+      "action.unsummons": 14,
+      "action.block": 1
+    },
+    "totalExecuted": 11467
+  },
+  "gen7Stats": {
+    "executed": {
+      "action.packOpen": 240,
+      "EFFECT_SELECTION": 2104,
+      "PASS": 6940,
+      "action.search": 276,
+      "action.throwing": 447,
+      "action.setBulwark": 429,
+      "action.summonSoldier": 377,
+      "action.attack": 242,
+      "action.destroyBulwark": 118,
+      "action.up": 215,
+      "action.end": 520,
+      "action.summonAce": 78,
+      "action.block": 16,
+      "action.unsummons": 171,
+      "action.twist": 14,
+      "action.down": 32,
+      "action.handeth": 1
+    },
+    "totalExecuted": 12220
+  }
+}
