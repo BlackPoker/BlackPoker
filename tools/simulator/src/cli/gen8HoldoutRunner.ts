@@ -70,12 +70,18 @@ import { SEED_REGISTRY_GEN8 } from "./verifySeedRegistryGen8";
 // 定数定義
 // =============================================================================
 
-export const GEN8_HOLDOUT_WORK_ID = "BP-SIM-AI-V92-WORK4-4-GEN8-HOLDOUT-FINAL-FIX-R4" as const;
+export const GEN8_HOLDOUT_WORK_ID = "BP-SIM-AI-V92-WORK4-4-HOLDOUT-CI-HOTFIX-R4-1" as const;
 export const GEN8_HOLDOUT_REGULATION_ID = "standard-pack" as const;
 export const GEN8_HOLDOUT_FRAME_ID = "pack" as const;
 export const GEN8_HOLDOUT_RULE_PACKAGE_VERSION = "1.0.0" as const;
 export const GEN8_HOLDOUT_FEATURE_SCHEMA_VERSION = 6 as const;
 export const GEN8_HOLDOUT_APPROVAL_TOKEN = "BP-GEN8-HOLDOUT-APPROVED-2026" as const;
+
+/** 公式 Checkpoint パス (本番用固定値) */
+export const OFFICIAL_GEN7_CHECKPOINT_PATH =
+  ".artifacts/stage3-full-action-retrain-r1/campaign-stage3-evolution-checkpoint.json" as const;
+export const OFFICIAL_GEN5_CHECKPOINT_PATH =
+  ".artifacts/stage3-evolution/campaign-stage3-evolution-checkpoint.json" as const;
 
 /** Gen 8 Primary Candidate (事前登録個体) */
 export const GEN8_PRIMARY_CANDIDATE_GENOME_ID = "gen8-prod-g0-ind7-cross7" as const;
@@ -298,6 +304,7 @@ export interface Gen8HoldoutPreflightOptions {
   readonly expectedGen7Digest?: string;
   readonly expectedGen5Digest?: string;
   readonly requireOfficialCheckpoints?: boolean;
+  readonly requireGen5Checkpoint?: boolean;
   readonly testExecutionAuthorized?: boolean;
   readonly isSyntheticTest?: boolean;
   readonly isRealCoreTest?: boolean;
@@ -675,9 +682,9 @@ export function buildGen8HoldoutPreflightManifest(
     );
     if (!isTestExecution) {
       throw new UnauthorizedHoldoutExecutionError(
-        `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R3.\n` +
-        `Actual match execution on reserved seeds (350001..350300) requires explicit stakeholder approval.\n` +
-        `Only infrastructure implementation, verified small-scale tests, and synthetic tests are permitted in R3.`
+        `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R4.1.\n` +
+        `Actual match execution on reserved seeds (${GEN8_HOLDOUT_SEED_RANGE_START}..${GEN8_HOLDOUT_SEED_RANGE_END}) requires explicit stakeholder approval.\n` +
+        `Only infrastructure implementation, verified small-scale tests, and synthetic tests are permitted in R4.1.`
       );
     }
   }
@@ -699,11 +706,11 @@ export function buildGen8HoldoutPreflightManifest(
   // Anchor Champions 検証
   const gen7CheckPath = path.resolve(
     options?.gen7CheckpointPath ??
-      ".artifacts/stage3-full-action-retrain-r1/campaign-stage3-evolution-checkpoint.json"
+      OFFICIAL_GEN7_CHECKPOINT_PATH
   );
   const gen5CheckPath = path.resolve(
     options?.gen5CheckpointPath ??
-      ".artifacts/stage3-evolution/campaign-stage3-evolution-checkpoint.json"
+      OFFICIAL_GEN5_CHECKPOINT_PATH
   );
 
   const expectedGen7Digest = options?.expectedGen7Digest ?? GEN7_EXPECTED_DIGEST;
@@ -730,6 +737,7 @@ export function buildGen8HoldoutPreflightManifest(
     );
   }
 
+  // Gen 5 Checkpoint は退行評価用 Baseline であり、Primary Holdout (Gen 8 vs Gen 7) の実行をブロックしない
   if (fs.existsSync(gen5CheckPath)) {
     try {
       const g5Dna = loadChampionDNA({
@@ -742,9 +750,9 @@ export function buildGen8HoldoutPreflightManifest(
     } catch (e: any) {
       gen5Digest = `ERROR:${e?.message}`;
     }
-  } else if (mode === "EXECUTE" || options?.requireOfficialCheckpoints) {
+  } else if (options?.requireGen5Checkpoint) {
     throw new Gen8CandidateIntegrityError(
-      `[Fail-Closed] Official Gen 5 Checkpoint not found at "${gen5CheckPath}". Execution is strictly blocked without official verified checkpoints.`
+      `[Fail-Closed] Official Gen 5 Checkpoint not found at "${gen5CheckPath}". Regression baselines evaluation requires verified official Gen 5 checkpoint.`
     );
   }
 
@@ -1633,7 +1641,7 @@ export function auditGen8HoldoutArtifacts(
 
 export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)): Promise<void> {
   console.log("================================================================================");
-  console.log("BlackPoker Work 4-4 R4 — Gen 8 Official Holdout Preflight & Evaluation Harness");
+  console.log("BlackPoker Work 4-4 R4.1 — Gen 8 Official Holdout Preflight & Evaluation Harness");
   console.log("================================================================================");
 
   let mode: "PLAN_ONLY" | "DRY_RUN" | "EXECUTE" | "AUDIT_ONLY" = "PLAN_ONLY";
@@ -1684,14 +1692,51 @@ export async function runGen8HoldoutCli(args: string[] = process.argv.slice(2)):
     }
   }
 
-  // 早期実行禁止・未承認判定 (Fail-Closed)
-  // 本 Work 4-4 R4 では、承認トークンがあっても本番実行 (Seeds 350001..350300) は未開放とし遮断
+  const isTestExecution = allowSyntheticTest || allowRealCoreTest;
+
+  // 1. 早期実行禁止・未承認判定 (Fail-Closed)
+  // 本 Work 4-4 R4.1 では、承認トークンがあっても本番実行 (Seeds 350001..350300) は未開放とし遮断
   if (mode === "EXECUTE") {
-    if (!allowSyntheticTest && !allowRealCoreTest) {
+    if (!isTestExecution) {
       throw new UnauthorizedHoldoutExecutionError(
-        `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R4.\n` +
+        `[Fail-Closed] Real Gen 8 Holdout Execution is strictly prohibited in Work 4-4 R4.1.\n` +
         `Actual match execution on reserved seeds (${GEN8_HOLDOUT_SEED_RANGE_START}..${GEN8_HOLDOUT_SEED_RANGE_END}) requires explicit stakeholder approval.\n` +
-        `Only infrastructure implementation, verified small-scale tests, and synthetic tests are permitted in R4.`
+        `Only infrastructure implementation, verified small-scale tests, and synthetic tests are permitted in R4.1.`
+      );
+    }
+  }
+
+  // 2. 正式評価（本番モード）時の固定設定ガード (Fail-Closed)
+  // テスト用引数（--expected-gen7-digest 等）が本番モードで上書き改竄されることを厳格に防止
+  if (!isTestExecution) {
+    if (expectedGen7Digest && expectedGen7Digest !== GEN7_CHAMPION_EXPECTED_DIGEST) {
+      throw new Gen8CandidateIntegrityError(
+        `[Fail-Closed] Overriding expectedGen7Digest is strictly prohibited in official holdout evaluation mode.`
+      );
+    }
+    if (expectedCandidateDigest && expectedCandidateDigest !== GEN8_PRIMARY_CANDIDATE_EXPECTED_DIGEST) {
+      throw new Gen8CandidateIntegrityError(
+        `[Fail-Closed] Overriding expectedCandidateDigest is strictly prohibited in official holdout evaluation mode.`
+      );
+    }
+    if (candidatePath && path.resolve(candidatePath) !== path.resolve(GEN8_PRIMARY_CANDIDATE_FILE_PATH)) {
+      throw new Gen8CandidateIntegrityError(
+        `[Fail-Closed] Custom candidatePath is strictly prohibited in official holdout evaluation mode.`
+      );
+    }
+    if (gen7CheckpointPath && path.resolve(gen7CheckpointPath) !== path.resolve(OFFICIAL_GEN7_CHECKPOINT_PATH)) {
+      throw new Gen8CandidateIntegrityError(
+        `[Fail-Closed] Custom gen7CheckpointPath is strictly prohibited in official holdout evaluation mode.`
+      );
+    }
+    if (startSeedArg !== undefined && startSeedArg !== GEN8_HOLDOUT_SEED_RANGE_START) {
+      throw new Gen8CandidateIntegrityError(
+        `[Fail-Closed] Overriding startSeed is strictly prohibited in official holdout evaluation mode (must start at ${GEN8_HOLDOUT_SEED_RANGE_START}).`
+      );
+    }
+    if (plannedPairs !== DEFAULT_PRIMARY_PAIRS) {
+      throw new Gen8CandidateIntegrityError(
+        `[Fail-Closed] Overriding plannedPairs is strictly prohibited in official holdout evaluation mode (must be exactly ${DEFAULT_PRIMARY_PAIRS} pairs / ${DEFAULT_PRIMARY_PAIRS * 2} matches).`
       );
     }
   }

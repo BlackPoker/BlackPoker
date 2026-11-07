@@ -197,7 +197,30 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
       ).toThrow(Gen8CandidateIntegrityError);
     });
 
-    it("should refuse real Holdout execution even with approval token (Work 4-4 R3 Fail-Closed)", async () => {
+    it("should allow manifest creation when Gen 5 is absent, but fail closed if requireGen5Checkpoint is true", () => {
+      const nonExistentGen5 = path.join(tmpRoot, "non-existent-gen5.json");
+      const manifest = buildGen8HoldoutPreflightManifest({
+        executionMode: "PLAN_ONLY",
+        gen7CheckpointPath: fixtureGen7Path,
+        expectedGen7Digest: fixtureGen7Digest,
+        gen5CheckpointPath: nonExistentGen5,
+      });
+
+      expect(manifest.referenceAnchorGen5.verifiedDigest).toBe("FILE_NOT_FOUND");
+      expect(manifest.referenceAnchorGen5.digestMatches).toBe(false);
+
+      expect(() =>
+        buildGen8HoldoutPreflightManifest({
+          executionMode: "PLAN_ONLY",
+          gen7CheckpointPath: fixtureGen7Path,
+          expectedGen7Digest: fixtureGen7Digest,
+          gen5CheckpointPath: nonExistentGen5,
+          requireGen5Checkpoint: true,
+        })
+      ).toThrow(Gen8CandidateIntegrityError);
+    });
+
+    it("should refuse real Holdout execution even with approval token (Work 4-4 R4.1 Fail-Closed)", async () => {
       // 承認トークンがコード内に定義されていることだけを実行承認とは見なさない (公式 Checkpoint ロード前に即時遮断)
       await expect(runGen8HoldoutCli(["--execute"])).rejects.toThrow(
         UnauthorizedHoldoutExecutionError
@@ -1061,6 +1084,23 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
         })
       ).rejects.toThrow(Gen8HoldoutAuditError);
     }, 30000);
+
+    it("should strictly fail closed if official holdout configuration is tampered without test authorization flags", async () => {
+      // 1. 本番モードでの expected-gen7-digest 改竄の試行
+      await expect(
+        runGen8HoldoutCli(["--plan-only", "--expected-gen7-digest", "tampered_digest_12345"])
+      ).rejects.toThrow(Gen8CandidateIntegrityError);
+
+      // 2. 本番モードでの pairsCount 変更の試行
+      await expect(
+        runGen8HoldoutCli(["--plan-only", "--pairs", "60"])
+      ).rejects.toThrow(Gen8CandidateIntegrityError);
+
+      // 3. 本番モードでの startSeed 変更の試行
+      await expect(
+        runGen8HoldoutCli(["--plan-only", "--start-seed", "360001"])
+      ).rejects.toThrow(Gen8CandidateIntegrityError);
+    });
 
     it("should connect runGen8HoldoutCli --execute cleanly for tests and fail-closed for unauthorized production seeds", async () => {
       const cliTestDir = path.join(tmpRoot, "cli-exec-test");
