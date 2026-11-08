@@ -39,6 +39,14 @@ import {
   computeWeightsL1Distance,
   IndividualProvenanceRecord,
 } from "../../../scripts/run_gen9_pilot_evolution.js";
+import {
+  assertWork53SafeSeedRange,
+  analyzeSingleDecisionRequest,
+  createFeatureSensitivityAccumulators,
+  G0_IND2_WEIGHTS,
+  G0_IND7_WEIGHTS,
+  G3_IND3_WEIGHTS,
+} from "../../../scripts/run_gen9_sensitivity_analysis.js";
 
 describe("Work 5-2: R1/R4意思決定比較検証 & Gen9LearnableTacticalPolicy 独立評価・互換性テスト", () => {
   let evaluator: GenericTacticalEvaluator;
@@ -951,6 +959,177 @@ describe("Work 5-2: R1/R4意思決定比較検証 & Gen9LearnableTacticalPolicy 
       expect(() => assertSafeSeedRange("ForbiddenHoldout2", 250050, 10)).toThrow(/SEED_VIOLATION/);
       expect(() => assertSafeSeedRange("ForbiddenHoldout3", 350100, 10)).toThrow(/SEED_VIOLATION/);
       expect(() => assertSafeSeedRange("ForbiddenDiag", 4127992094, 1)).toThrow(/SEED_VIOLATION/);
+    });
+  });
+
+  // ===========================================================================
+  // 5. Work 5-3: 意思決定差分・特徴量感度分析・プラトー原因分類の検証
+  // ===========================================================================
+  describe("5. Work 5-3: 同一 DecisionRequest における5 Policy比較とプラトー原因分類の検証", () => {
+    it("assertWork53SafeSeedRange は 760001〜760030 を許可し、Work 5-2 R1/R2 の全 Seed および正式 Holdout を拒否する", () => {
+      expect(() => assertWork53SafeSeedRange("Work53Diagnostic", 760001, 30)).not.toThrow();
+
+      expect(() => assertWork53SafeSeedRange("ForbiddenR2Train", 730001, 10)).toThrow(/SEED_VIOLATION/);
+      expect(() => assertWork53SafeSeedRange("ForbiddenR2Selection", 740001, 10)).toThrow(/SEED_VIOLATION/);
+      expect(() => assertWork53SafeSeedRange("ForbiddenR2Final", 750001, 10)).toThrow(/SEED_VIOLATION/);
+      expect(() => assertWork53SafeSeedRange("ForbiddenR1Val", 720001, 10)).toThrow(/SEED_VIOLATION/);
+      expect(() => assertWork53SafeSeedRange("ForbiddenHoldout", 250001, 10)).toThrow(/SEED_VIOLATION/);
+    });
+
+    it("全戦術特徴量がゼロの通常局面では INACTIVE_ALL_ZERO と分類され、5 Policy すべてが Gen 8 と同一手を選択する", () => {
+      const req = createBaseRequest({
+        observation: {
+          viewerPlayerId: "p2",
+          turnPlayerId: "p2",
+          chancePlayerId: "p2",
+          players: [
+            {
+              playerId: "p1",
+              name: "Alice",
+              isViewer: false,
+              lifeCount: 15,
+              lifeDisplay: "15",
+              handCount: 5,
+              handCards: [],
+              field: [],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: false,
+            },
+            {
+              playerId: "p2",
+              name: "Bob",
+              isViewer: true,
+              lifeCount: 15,
+              lifeDisplay: "15",
+              handCount: 5,
+              handCards: [],
+              field: [],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: true,
+            },
+          ],
+          stageRequestRefs: [],
+          stageRequests: [],
+          recentEvents: [],
+        },
+        patterns: [
+          { patternId: "pat-pass", kind: "PASS" },
+          { patternId: "pat-summon-1", kind: "ACTION", actionSelectionRef: 2 },
+        ],
+      });
+
+      const snap = analyzeSingleDecisionRequest({
+        request: req,
+        gen8DNA,
+        tacticalEvaluator: evaluator,
+        matchSeed: 760001,
+        seat: "p2",
+        decisionIndex: 0,
+      });
+
+      expect(snap.anyTacticalFeatureActive).toBe(false);
+      expect(snap.causeG0Ind2VsG3Ind3).toBe("INACTIVE_ALL_ZERO");
+      expect(snap.causeG0Ind7VsG3Ind3).toBe("INACTIVE_ALL_ZERO");
+      expect(snap.causeGen8VsG3Ind3).toBe("INACTIVE_ALL_ZERO");
+      expect(snap.choices.GEN8.selectedPatternRef).toBe(snap.choices.G3_IND3.selectedPatternRef);
+    });
+
+    it("確定致死リクエストに対する Counter 局面では、Gen 8 に対して DECISION_CHANGED、G0 と G3 の間では SAME_CHOICE_THRESHOLD_SATURATED と分類される", () => {
+      const req = createBaseRequest({
+        observation: {
+          viewerPlayerId: "p2",
+          turnPlayerId: "p1",
+          chancePlayerId: "p2",
+          players: [
+            {
+              playerId: "p1",
+              name: "Alice",
+              isViewer: false,
+              lifeCount: 15,
+              lifeDisplay: "15",
+              handCount: 4,
+              handCards: [],
+              field: [],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: false,
+            },
+            {
+              playerId: "p2",
+              name: "Bob",
+              isViewer: true,
+              lifeCount: 10,
+              lifeDisplay: "10",
+              handCount: 5,
+              handCards: [],
+              field: [{ unitId: "u-p2-s", kind: "soldier", state: "charge", currentSize: 2, stackCount: 2 } as any],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: true,
+            },
+          ],
+          stageRequestRefs: ["req-opp-1"],
+          stageRequests: [
+            {
+              requestId: "req-opp-1",
+              actionId: "action.deathLance",
+              actionName: "死の槍",
+              controller: "p1",
+              keyCards: [
+                { visibility: "KNOWN", suit: "diamond", value: 1 },
+                { visibility: "KNOWN", suit: "spade", value: 13 },
+              ],
+              target: {
+                targetType: "unit",
+                targetUnitId: "u-p2-s",
+              },
+            } as any,
+          ],
+          recentEvents: [],
+        },
+        patterns: [
+          { patternId: "pat-pass", kind: "PASS" },
+          { patternId: "pat-counter", kind: "ACTION", actionSelectionRef: 0, targetSelectionRef: 0 },
+        ],
+      });
+
+      const accum = createFeatureSensitivityAccumulators();
+      const snap = analyzeSingleDecisionRequest({
+        request: req,
+        gen8DNA,
+        tacticalEvaluator: evaluator,
+        matchSeed: 760001,
+        seat: "p2",
+        decisionIndex: 1,
+        perFeatureStats: accum,
+      });
+
+      expect(snap.anyTacticalFeatureActive).toBe(true);
+      expect(snap.oppRequestCertainty).toBe("CERTAIN");
+      // Gen 8 は PASS (0)、R4 / G0_IND2 / G0_IND7 / G3_IND3 はすべて Counter (1) を選択
+      expect(snap.choices.GEN8.selectedPatternRef).toBe(0);
+      expect(snap.choices.R4.selectedPatternRef).toBe(1);
+      expect(snap.choices.G0_IND2.selectedPatternRef).toBe(1);
+      expect(snap.choices.G0_IND7.selectedPatternRef).toBe(1);
+      expect(snap.choices.G3_IND3.selectedPatternRef).toBe(1);
+
+      expect(snap.causeGen8VsG3Ind3).toBe("DECISION_CHANGED");
+      // G0 (+2.6) と G3 (+2.7222) は重みが異なるが、両方とも既に閾値を超えて Counter に飽和しているため選択手は変わらない
+      expect(snap.causeG0Ind2VsG3Ind3).toBe("SAME_CHOICE_THRESHOLD_SATURATED");
+      expect(snap.causeG0Ind7VsG3Ind3).toBe("SAME_CHOICE_THRESHOLD_SATURATED");
+      expect(G0_IND2_WEIGHTS.length).toBe(20);
+      expect(G0_IND7_WEIGHTS.length).toBe(20);
+      expect(G3_IND3_WEIGHTS.length).toBe(20);
     });
   });
 });
