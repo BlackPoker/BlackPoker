@@ -1,22 +1,26 @@
 /**
  * run_gen9_work54b_evaluation.ts
  *
- * BlackPoker Simulator - Gen 9 PASS戦術評価の適用条件改善後の限定評価 (Work 5-4B)
+ * BlackPoker Simulator - Gen 9 PASS戦術評価の適用条件改善後の限定評価 (Work 5-4B Evidence Correction)
  *
  * 【検証目的】
  * 1. 未使用の診断用 Seed (780001〜780030, 30ペア＝60試合) を用いて、
  *    Gen 8, Work 5-1 R4, G0人手設計個体 (G0_IND2, G0_IND7), G3進化個体 (G3_IND3) について
  *    修正前 (v7.1-unified-block-assignment) と修正後 (v7.2-unified-block-conditional-pass) を比較。
- * 2. 相手リクエスト存在下で、有効な対抗手段がない場合の PASS 減点免除が正しく作動した件数、
+ * 2. 【Work 5-4B Evidence Correction】:
+ *    過去の誤った重み設定 (G0 IND7 が R4 相当、G3 IND3 が確定値と不一致) を、
+ *    正本 (Gen9BenchmarkWeights.ts / Work 5-3 / Work 5-4A) の確定値へ修正して全対戦を再計測。
+ * 3. 相手リクエスト存在下で、有効な対抗手段がない場合の PASS 減点免除が正しく作動した件数、
  *    および不要なアクション (action.packOpen 等) から PASS への選択復帰件数を計測。
- * 3. 小規模な座席反転対戦 (30ペア＝60試合) で、修正前後の勝敗・異常終了・1判断あたりの時間を測定。
  * 4. 過去の結果ファイル (.artifacts/gen9-work5-2-*.json, .artifacts/gen9-work5-3-*.json,
- *    .artifacts/gen9-work5-4a-block-evaluation.json) は一切上書きせず、
- *    新規ファイル .artifacts/gen9-work5-4b-pass-evaluation.json に保存する。
+ *    .artifacts/gen9-work5-4a-block-evaluation.json, .artifacts/gen9-work5-4b-pass-evaluation.json) は
+ *    一切上書きせず SHA-256 により保護し、新規ファイル
+ *    .artifacts/gen9-work5-4b-pass-evaluation-corrected.json に保存する。
  */
 
 import * as fs from "fs";
 import * as path from "path";
+import * as crypto from "crypto";
 import { execSync } from "child_process";
 import { performance } from "perf_hooks";
 import { loadRegulationCatalog } from "../src/engine/regulation/RegulationLoader.js";
@@ -30,20 +34,23 @@ import { Gen9TacticalPrototypePolicy } from "../src/engine/ai/Gen9TacticalProtot
 import {
   Gen9LearnableTacticalPolicy,
   Gen9TacticalGenome,
-  R4_PRESET_TACTICAL_WEIGHTS,
   fromV6DNA,
   hasEffectiveCounterMeasure,
   TACTICAL_FEATURE_ENCODER_VERSION_V71,
   TACTICAL_FEATURE_ENCODER_VERSION_V72,
-  TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
 } from "../src/engine/ai/Gen9LearnableTacticalPolicy.js";
+import {
+  G0_IND2_WEIGHTS,
+  G0_IND7_WEIGHTS,
+  G3_IND3_WEIGHTS,
+  R4_PRESET_TACTICAL_WEIGHTS,
+} from "../src/engine/ai/Gen9BenchmarkWeights.js";
 import { GenericTacticalEvaluator } from "../src/engine/rules/GenericTacticalEvaluator.js";
 import { createGen8ChampionCandidatePolicy } from "../src/engine/ai/Gen8DNALoader.js";
 import { DecisionRequest } from "../src/domain/decision/DecisionRequest.js";
 import { DecisionResponse } from "../src/domain/decision/DecisionResponse.js";
 import { DecisionDNA } from "../src/domain/ai/DecisionDNATypes.js";
 import { DecisionDNACodec } from "../src/engine/ai/DecisionDNACodec.js";
-import { LegalPattern } from "../src/domain/decision/LegalPattern.js";
 
 // =============================================================================
 // 1. 禁止 Seed 範囲の厳格保護 (Holdout・Training・Validation・過去診断 Seed を完全ブロック)
@@ -91,23 +98,16 @@ export function assertWork54BSafeSeedRange(
 }
 
 // =============================================================================
-// 2. 比較対象 Policy 重み (Work 5-2 R2 / Work 5-3 確定値 — 一切変更しない)
+// 2. 過去の誤った重み定義 (証跡記録・無効化区別用)
 // =============================================================================
-export const G0_IND2_WEIGHTS: readonly number[] = Object.freeze([
-  0.0, 0.0, 0.0, 0.0, 0.0, 0.0,
-  +2.6, +2.0, +1.1, +0.15,
-  0.0, 0.0, 0.0, -0.30, 0.0, -2.5, 0.0,
-  0.0, +2.0, +2.5,
-]);
-
-export const G0_IND7_WEIGHTS: readonly number[] = Object.freeze([
+export const DEPRECATED_INVALID_G0_IND7_WEIGHTS: readonly number[] = Object.freeze([
   -2.5, -0.8, -0.35, -1.8, -0.5, -0.25,
   +2.2, +1.8, +1.0, +0.2,
   +0.2, +0.25, +0.05, -0.35, +0.2, -2.5, -0.5,
   +0.1, +2.0, +2.5,
 ]);
 
-export const G3_IND3_WEIGHTS: readonly number[] = Object.freeze([
+export const DEPRECATED_INVALID_G3_IND3_WEIGHTS: readonly number[] = Object.freeze([
   -2.2858, -0.8719, -0.3671, -1.6115, -0.4908, -0.2764,
   +2.1384, +1.6429, +0.9412, +0.1873,
   +0.2195, +0.2743, +0.0489, -0.3217, +0.2148, -2.3912, -0.5218,
@@ -115,7 +115,7 @@ export const G3_IND3_WEIGHTS: readonly number[] = Object.freeze([
 ]);
 
 // =============================================================================
-// 3. 計測用ラッパー
+// 3. 計測用ラッパーおよび統計関数
 // =============================================================================
 class TimedPolicyWrapper implements DecisionPolicy {
   public readonly descriptor: PolicyDescriptor;
@@ -172,6 +172,7 @@ export interface SeatSwappedMatchSummary {
   readonly avgDecisionTimeUsA: number;
   readonly avgDecisionTimeUsB: number;
   readonly exceptions: number;
+  readonly incompleteOrFailed: number;
 }
 
 function runSeatSwappedMatchup(params: {
@@ -203,6 +204,7 @@ function runSeatSwappedMatchup(params: {
   let winsB = 0;
   let draws = 0;
   let exceptions = 0;
+  let incompleteOrFailed = 0;
   const timedA = new TimedPolicyWrapper(policyA);
   const timedB = new TimedPolicyWrapper(policyB);
 
@@ -234,7 +236,10 @@ function runSeatSwappedMatchup(params: {
           );
 
           const targetSeat = aIsP1 ? "p1" : "p2";
-          if (simRes.winner === targetSeat) {
+          if (simRes.status === "FAILED" || simRes.status === "INCOMPLETE") {
+            // INCOMPLETE や FAILED は決して DRAW と混同しない
+            incompleteOrFailed++;
+          } else if (simRes.winner === targetSeat) {
             winsA++;
           } else if (
             simRes.winner !== undefined &&
@@ -242,8 +247,10 @@ function runSeatSwappedMatchup(params: {
             simRes.winner !== targetSeat
           ) {
             winsB++;
-          } else {
+          } else if (simRes.winner === "draw") {
             draws++;
+          } else {
+            incompleteOrFailed++;
           }
         } catch {
           exceptions++;
@@ -281,7 +288,44 @@ function runSeatSwappedMatchup(params: {
     avgDecisionTimeUsA: Number(avgDecisionTimeUsA.toFixed(2)),
     avgDecisionTimeUsB: Number(avgDecisionTimeUsB.toFixed(2)),
     exceptions,
+    incompleteOrFailed,
   };
+}
+
+/**
+ * 過去 Evidence ファイルの SHA-256 チェック
+ */
+function verifyPastEvidenceSha256(artifactsDir: string): Record<string, { expected: string; actual: string; valid: boolean }> {
+  const expectedHashes: Record<string, string | string[]> = {
+    "gen9-work5-2-pilot-results.json": "73de7dd1723f98772d9eb4202754b5bf882f987c517b83ba66851442c6c846b9",
+    "gen9-work5-2-r2-results.json": "f5099704b4b3e49f03f45e8612f96e25a71418e2f2004de6027df36de7715c01",
+    "gen9-work5-3-sensitivity-analysis.json": "c2275dd0ac2fbbc9a7a1b9d4dad7c79427f2e4d650d23cd015f63ae6579e6c83",
+    "gen9-work5-4a-block-evaluation.json": [
+      "85c78cae212bce0f056fa8bf06fb5a2ac7257cb76345a090abfbd2023b9881c3",
+      "26947bc8a97e407a59e40b7266decaf1635aac14094e342cbf10d4ad4b8128fa",
+    ],
+    "gen9-work5-4b-pass-evaluation.json": "ed3daf4c718e5fde64722323e09faeb673999b920f52b6feb3b404d78dcc0f0b",
+  };
+
+  const results: Record<string, { expected: string; actual: string; valid: boolean }> = {};
+  for (const [fileName, expected] of Object.entries(expectedHashes)) {
+    const fullPath = path.join(artifactsDir, fileName);
+    const expectedStr = Array.isArray(expected) ? expected.join(" OR ") : expected;
+    if (!fs.existsSync(fullPath)) {
+      results[fileName] = { expected: expectedStr, actual: "NOT_FOUND", valid: false };
+      continue;
+    }
+    const content = fs.readFileSync(fullPath);
+    const actual = crypto.createHash("sha256").update(content).digest("hex").toLowerCase();
+    const valid = Array.isArray(expected)
+      ? expected.map((e) => e.toLowerCase()).includes(actual)
+      : actual === expected.toLowerCase();
+    results[fileName] = { expected: expectedStr, actual, valid };
+    if (!valid) {
+      throw new Error(`[EVIDENCE_CORRUPTION] 過去ファイル ${fileName} の SHA-256 が一致しません: 期待=${expectedStr}, 実際=${actual}`);
+    }
+  }
+  return results;
 }
 
 // =============================================================================
@@ -297,14 +341,26 @@ export async function main() {
   };
 
   console.log("================================================================================");
-  console.log(" BlackPoker — Gen 9 PASS戦術評価適用条件改善 限定評価 (Work 5-4B)");
+  console.log(" BlackPoker — Gen 9 PASS戦術評価適用条件改善 限定評価修正 (Work 5-4B Evidence Correction)");
   console.log("================================================================================");
 
   // 1. 禁止 Seed 範囲チェック
   assertWork54BSafeSeedRange("Work 5-4B Diagnostic", 780001, 30);
   console.log("[SEED_AUDIT_PASS] 診断 Seed 780001..780030 は全禁止領域から完全に隔離されています");
 
-  // 2. ルールおよび Gen 8 Champion DNA のロード
+  // 2. Git SHA の厳格取得 (失敗時は例外で終了)
+  let gitSha: string;
+  try {
+    gitSha = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
+    if (!gitSha || !/^[0-9a-f]{40}$/i.test(gitSha)) {
+      throw new Error(`無効な Git SHA 形式: "${gitSha}"`);
+    }
+    console.log(`[GIT_SHA_VERIFIED] HEAD Commit: ${gitSha}`);
+  } catch (err) {
+    throw new Error(`[FATAL] Git SHA の取得に失敗しました。Evidence の完全性を保証できないため終了します: ${err}`);
+  }
+
+  // 3. ルールおよび Gen 8 Champion DNA のロード
   const rootDir = process.cwd();
   const rulesDir = path.resolve(rootDir, "src/data/rules-vnext");
   const regulationsDir = path.resolve(rootDir, "src/data/regulations");
@@ -320,7 +376,7 @@ export async function main() {
   const gen8Candidate = createGen8ChampionCandidatePolicy();
   const gen8DNA: DecisionDNA = DecisionDNACodec.clone((gen8Candidate as any).dna);
 
-  // 3. 各 Policy インスタンスの作成 (v7.1 vs v7.2)
+  // 4. 各 Policy インスタンスの作成 (v7.1 vs v7.2 - 正本重み使用)
   const r4V71 = new Gen9TacticalPrototypePolicy(
     gen8DNA,
     "Work51_R4_v7.1",
@@ -345,6 +401,7 @@ export async function main() {
   const g0Ind2V71 = new Gen9LearnableTacticalPolicy(g0Ind2GenomeV71, "G0_IND2_v7.1", tacticalEvaluator);
   const g0Ind2V72 = new Gen9LearnableTacticalPolicy(g0Ind2GenomeV72, "G0_IND2_v7.2", tacticalEvaluator);
 
+  // 【修正】G0_IND7_WEIGHTS は正本 (Gen9BenchmarkWeights.ts) から import された確定値
   const g0Ind7GenomeV71 = fromV6DNA(gen8DNA, G0_IND7_WEIGHTS, {
     id: "g0-ind7-v71",
     encoderVersion: TACTICAL_FEATURE_ENCODER_VERSION_V71,
@@ -356,6 +413,7 @@ export async function main() {
   const g0Ind7V71 = new Gen9LearnableTacticalPolicy(g0Ind7GenomeV71, "G0_IND7_v7.1", tacticalEvaluator);
   const g0Ind7V72 = new Gen9LearnableTacticalPolicy(g0Ind7GenomeV72, "G0_IND7_v7.2", tacticalEvaluator);
 
+  // 【修正】G3_IND3_WEIGHTS は正本 (Gen9BenchmarkWeights.ts) から import された確定値
   const g3Ind3GenomeV71 = fromV6DNA(gen8DNA, G3_IND3_WEIGHTS, {
     id: "g3-ind3-v71",
     encoderVersion: TACTICAL_FEATURE_ENCODER_VERSION_V71,
@@ -372,7 +430,7 @@ export async function main() {
   // ===========================================================================
   // Part 1: シャドウ評価（同一 DecisionRequest における PASS 戦術評価・分岐計測）
   // ===========================================================================
-  console.log("\n[Part 1] 同一 DecisionRequest シャドウ評価 (PASS戦術評価の作動・分岐調査)...");
+  console.log("\n[Part 1] 同一 DecisionRequest シャドウ評価 (正本重みによる作動・分岐調査)...");
 
   let totalDecisions = 0;
   let stageRequestDecisions = 0;
@@ -384,8 +442,8 @@ export async function main() {
   let decisionDivergedCountG3Ind3 = 0;
   let packOpenAvoidedToPassR4 = 0;
   let packOpenAvoidedToPassG0Ind7 = 0;
+  let packOpenAvoidedToPassG3Ind3 = 0;
 
-  // シャドウ評価用 Policy ラッパー
   class ShadowRecorderPolicy implements DecisionPolicy {
     public readonly descriptor: PolicyDescriptor;
     private readonly primary: DecisionPolicy;
@@ -398,7 +456,6 @@ export async function main() {
     public choose(request: Readonly<DecisionRequest>): DecisionResponse {
       totalDecisions++;
 
-      // 相手 StageRequest の有無を調査
       const obs = request.observation;
       const selfKey = request.playerId;
       const oppRequests = (obs.stageRequests ?? []).filter((r) => r.controller !== selfKey);
@@ -423,7 +480,7 @@ export async function main() {
         }
       }
 
-      // v7.1 と v7.2 の出力を比較
+      // R4 比較
       const choiceR4V71 = r4V71.choose(request);
       const choiceR4V72 = r4V72.choose(request);
       if (choiceR4V71.selectedPatternRef !== choiceR4V72.selectedPatternRef) {
@@ -439,6 +496,7 @@ export async function main() {
         }
       }
 
+      // G0_IND7 (正本重み) 比較
       const choiceG0V71 = g0Ind7V71.choose(request);
       const choiceG0V72 = g0Ind7V72.choose(request);
       if (choiceG0V71.selectedPatternRef !== choiceG0V72.selectedPatternRef) {
@@ -454,10 +512,20 @@ export async function main() {
         }
       }
 
+      // G3_IND3 (正本重み) 比較
       const choiceG3V71 = g3Ind3V71.choose(request);
       const choiceG3V72 = g3Ind3V72.choose(request);
       if (choiceG3V71.selectedPatternRef !== choiceG3V72.selectedPatternRef) {
         decisionDivergedCountG3Ind3++;
+        const pat71 = request.patterns[choiceG3V71.selectedPatternRef];
+        const pat72 = request.patterns[choiceG3V72.selectedPatternRef];
+        const act71 =
+          pat71.actionSelectionRef !== undefined
+            ? request.catalog.actions[pat71.actionSelectionRef]?.actionId
+            : pat71.kind;
+        if (act71 === "action.packOpen" && pat72.kind === "PASS") {
+          packOpenAvoidedToPassG3Ind3++;
+        }
       }
 
       return this.primary.choose(request);
@@ -467,7 +535,6 @@ export async function main() {
   const origLog = console.log;
   try {
     console.log = () => {};
-    // 30ペア＝60試合のシミュレーションを実行してシャドウ評価
     for (const seed of WORK54B_DIAGNOSTIC_SEEDS) {
       checkTimeout();
       for (const aIsP1 of [true, false]) {
@@ -499,9 +566,10 @@ export async function main() {
   console.log(`  - 有効対抗手段なし (PASS減点免除対象): ${oppRequestWithoutCounter}`);
   console.log(`- R4 分岐件数 (v7.1 vs v7.2): ${decisionDivergedCountR4}`);
   console.log(`  - 不要な action.packOpen から PASS への選択復帰: ${packOpenAvoidedToPassR4}`);
-  console.log(`- G0_IND7 分岐件数 (v7.1 vs v7.2): ${decisionDivergedCountG0Ind7}`);
+  console.log(`- G0_IND7 分岐件数 (v7.1 vs v7.2, 正本重み): ${decisionDivergedCountG0Ind7}`);
   console.log(`  - 不要な action.packOpen から PASS への選択復帰: ${packOpenAvoidedToPassG0Ind7}`);
-  console.log(`- G3_IND3 分岐件数 (v7.1 vs v7.2): ${decisionDivergedCountG3Ind3}`);
+  console.log(`- G3_IND3 分岐件数 (v7.1 vs v7.2, 正本重み): ${decisionDivergedCountG3Ind3}`);
+  console.log(`  - 不要な action.packOpen から PASS への選択復帰: ${packOpenAvoidedToPassG3Ind3}`);
 
   // ===========================================================================
   // Part 2: 座席反転実対戦シミュレーション（勝敗・パフォーマンス）
@@ -544,54 +612,60 @@ export async function main() {
     console.log(
       `    結果: ${summary.winsA}勝 - ${summary.winsB}敗 - ${summary.draws}分 ` +
       `(勝率: ${(summary.winRateA * 100).toFixed(1)}%, 95%CI: [${(summary.confidenceIntervalA.lower * 100).toFixed(1)}%, ${(summary.confidenceIntervalA.upper * 100).toFixed(1)}%], ` +
-      `avgTimeA: ${summary.avgDecisionTimeUsA}μs, exceptions: ${summary.exceptions})`
+      `avgTimeA: ${summary.avgDecisionTimeUsA}μs, exceptions: ${summary.exceptions}, incomplete: ${summary.incompleteOrFailed})`
     );
   }
 
   // ===========================================================================
-  // Part 3: 結果 JSON の保存 (過去 Evidence 保護)
+  // Part 3: 結果 JSON の保存 (過去 Evidence 保護 & 上書き防止)
   // ===========================================================================
-  console.log("\n[Part 3] 結果の永続化と過去 Evidence 保護確認...");
+  console.log("\n[Part 3] 結果の永続化と過去 Evidence 保護確認 (SHA-256)...");
 
   const artifactsDir = path.resolve(rootDir, ".artifacts");
   if (!fs.existsSync(artifactsDir)) {
     fs.mkdirSync(artifactsDir, { recursive: true });
   }
 
-  // 過去ファイルの不変性チェック
-  const pastFilesToCheck = [
-    "gen9-work5-2-pilot-results.json",
-    "gen9-work5-2-r2-results.json",
-    "gen9-work5-3-sensitivity-analysis.json",
-    "gen9-work5-4a-block-evaluation.json",
-  ];
-  for (const f of pastFilesToCheck) {
-    const fullP = path.join(artifactsDir, f);
-    if (!fs.existsSync(fullP)) {
-      console.warn(`[WARN] 過去ファイル ${f} が存在しません（新規環境の可能性）`);
-    } else {
-      console.log(`[PROTECTION_VERIFIED] 過去 Evidence ${f} は保護されています`);
-    }
+  // 過去 Evidence の SHA-256 不変性検証
+  const pastIntegrity = verifyPastEvidenceSha256(artifactsDir);
+  for (const [fName, status] of Object.entries(pastIntegrity)) {
+    console.log(`[SHA256_VERIFIED] ${fName}: ${status.actual}`);
   }
 
-  const outputFilename = "gen9-work5-4b-pass-evaluation.json";
+  // 出力先: 過去の誤った結果ファイルとは区別し、新規ファイル名を使用
+  const outputFilename = "gen9-work5-4b-pass-evaluation-corrected.json";
   const outputPath = path.join(artifactsDir, outputFilename);
 
-  let gitSha = "UNKNOWN";
-  try {
-    gitSha = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
-  } catch {}
+  // 既存ファイルが存在する場合の上書き防止チェック (強制フラグがない場合はエラー)
+  if (fs.existsSync(outputPath) && !process.env.FORCE_OVERWRITE) {
+    throw new Error(`[OVERWRITE_PREVENTED] 出力ファイル ${outputPath} は既に存在します。上書きを防止しました。`);
+  }
 
   const evaluationReport = {
-    workId: "BP-SIM-AI-GEN9-CONDITIONAL-PASS-TACTICAL-WORK5-4B",
+    workId: "BP-SIM-AI-GEN9-WORK54B-EVIDENCE-CORRECTION",
     timestamp: new Date().toISOString(),
     gitSha,
+    correctionContext: {
+      reason: "Work 5-4B初回評価スクリプトにおいて G0 IND7 および G3 IND3 の重み設定にコピーミスが存在したため、正本 (Gen9BenchmarkWeights.ts / Work 5-3 / Work 5-4A) の確定重みに修正して再計測を実施した。",
+      previousEvaluationFile: "gen9-work5-4b-pass-evaluation.json",
+      previousEvaluationStatus: "INVALIDATED_DUE_TO_WEIGHT_MISMATCH",
+      correctedEvaluationFile: outputFilename,
+    },
+    tacticalWeightsDefinition: {
+      R4_PRESET: [...R4_PRESET_TACTICAL_WEIGHTS],
+      G0_IND2_CORRECTED: [...G0_IND2_WEIGHTS],
+      G0_IND7_CORRECTED: [...G0_IND7_WEIGHTS],
+      G0_IND7_OLD_INVALID: [...DEPRECATED_INVALID_G0_IND7_WEIGHTS],
+      G3_IND3_CORRECTED: [...G3_IND3_WEIGHTS],
+      G3_IND3_OLD_INVALID: [...DEPRECATED_INVALID_G3_IND3_WEIGHTS],
+    },
     diagnosticSeedRange: {
       start: 780001,
       end: 780030,
       count: 30,
       totalMatchesPerCard: 60,
     },
+    pastEvidenceSha256: pastIntegrity,
     shadowDecisionStats: {
       totalDecisions,
       stageRequestDecisions,
@@ -603,13 +677,14 @@ export async function main() {
       decisionDivergedCountG0Ind7,
       packOpenAvoidedToPassG0Ind7,
       decisionDivergedCountG3Ind3,
+      packOpenAvoidedToPassG3Ind3,
     },
     matchups: matchupSummaries,
     executionDurationSeconds: Number(((Date.now() - startTime) / 1000).toFixed(2)),
   };
 
   fs.writeFileSync(outputPath, JSON.stringify(evaluationReport, null, 2), "utf8");
-  console.log(`\n[SUCCESS] 評価結果を保存しました: ${outputPath}`);
+  console.log(`\n[SUCCESS] 修正後評価結果を保存しました: ${outputPath}`);
   console.log(`所要時間: ${evaluationReport.executionDurationSeconds} 秒`);
 }
 
