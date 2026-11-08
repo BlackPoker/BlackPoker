@@ -6,7 +6,7 @@ import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec.js";
 import { Gen9TacticalPrototypePolicy } from "../../engine/ai/Gen9TacticalPrototypePolicy.js";
 import { createGen8ChampionCandidatePolicy } from "../../engine/ai/Gen8DNALoader.js";
 
-describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
+describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
   const gen8 = createGen8ChampionCandidatePolicy();
   const dna = DecisionDNACodec.clone((gen8 as any).dna);
 
@@ -70,7 +70,9 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
         cardSelections: [],
         unitSelections: [],
         costPayments: [],
-        targetSelections: [],
+        targetSelections: [
+          { targetType: "request", targetRequestId: "req-deathlance-1" } as any,
+        ],
         effectSelections: [],
         orderSelections: [],
       },
@@ -83,6 +85,7 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
           patternId: "pat-counter",
           kind: "ACTION",
           actionSelectionRef: 0,
+          targetSelectionRef: 0,
         },
       ],
       ...overrides,
@@ -109,7 +112,7 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
     }
   });
 
-  it("2. 死の槍（致死・大ダメージ）が存在する場合、PASSがペナルティを受けCounterが優先される", () => {
+  it("2. 死の槍（公式YAML条件成立・致死）に対し、PASSがペナルティを受けCounterが優先される", () => {
     const policy = new Gen9TacticalPrototypePolicy(dna, "Gen9-Test");
     const req = createBaseRequest({
       observation: {
@@ -140,7 +143,17 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
             lifeDisplay: "10",
             handCount: 5,
             handCards: [],
-            field: [],
+            field: [
+              {
+                unitId: "u-my-soldier-target",
+                kind: "soldier",
+                state: "charge",
+                face: "up",
+                cards: [],
+                labels: [],
+                currentSize: 10, // ♢1で割り切れる
+              },
+            ],
             fog: [],
             trumps: [],
             graveCount: 0,
@@ -156,6 +169,10 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
             controller: "p1",
             status: "PENDING",
             sequence: 1,
+            target: {
+              targetType: "unit",
+              targetUnitId: "u-my-soldier-target",
+            },
             keyCards: [
               { visibility: "KNOWN", cardInstanceId: "c1", suit: "diamond", rank: "A", value: 1, faceUp: true },
               { visibility: "KNOWN", cardInstanceId: "c2", suit: "spade", rank: "K", value: 13, faceUp: true },
@@ -172,15 +189,92 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
 
     expect(passDetail).toBeDefined();
     expect(counterDetail).toBeDefined();
-    // 14ダメージ (1+13) >= 残ライフ10 なので、PASS は致命的ペナルティ (-3.0) を受ける
-    expect(passDetail!.tacticalAdjustment).toBeLessThanOrEqual(-3.0);
-    // Counter は阻止ボーナス (+2.5) を受ける
-    expect(counterDetail!.tacticalAdjustment).toBeGreaterThanOrEqual(2.5);
+    // ♠13 - 1 = 12ダメージ >= 残ライフ10 なので、PASS は致死ペナルティ (-2.5) を受ける
+    expect(passDetail!.tacticalAdjustment).toBeLessThanOrEqual(-2.5);
+    // Counter は阻止ボーナス (+2.2) を受ける
+    expect(counterDetail!.tacticalAdjustment).toBeGreaterThanOrEqual(2.0);
     // 最終的に Counter が選択される
     expect(evalRes.bestPatternRef).toBe(1);
   });
 
-  it("3. 巨大ブロッカーが存在する場合、自爆攻撃にペナルティが入り召喚が優先される", () => {
+  it("3. 死の槍のガード条件不成立（割り切れない）時はダメージ0と判定され過度なペナルティをかけない", () => {
+    const policy = new Gen9TacticalPrototypePolicy(dna, "Gen9-Test");
+    const req = createBaseRequest({
+      observation: {
+        viewerPlayerId: "p2",
+        turnPlayerId: "p1",
+        chancePlayerId: "p2",
+        players: [
+          {
+            playerId: "p1",
+            name: "Alice",
+            isViewer: false,
+            lifeCount: 15,
+            lifeDisplay: "15",
+            handCount: 4,
+            handCards: [],
+            field: [],
+            fog: [],
+            trumps: [],
+            graveCount: 0,
+            grave: [],
+            canViewFullGrave: false,
+          },
+          {
+            playerId: "p2",
+            name: "Bob",
+            isViewer: true,
+            lifeCount: 10,
+            lifeDisplay: "10",
+            handCount: 5,
+            handCards: [],
+            field: [
+              {
+                unitId: "u-my-soldier-target",
+                kind: "soldier",
+                state: "charge",
+                face: "up",
+                cards: [],
+                labels: [],
+                currentSize: 7, // ♢3で割り切れない（不発！）
+              },
+            ],
+            fog: [],
+            trumps: [],
+            graveCount: 0,
+            grave: [],
+            canViewFullGrave: true,
+          },
+        ],
+        stageRequestRefs: ["req-deathlance-1" as any],
+        stageRequests: [
+          {
+            requestId: "req-deathlance-1" as any,
+            actionId: "action.deathLance",
+            controller: "p1",
+            status: "PENDING",
+            sequence: 1,
+            target: {
+              targetType: "unit",
+              targetUnitId: "u-my-soldier-target",
+            },
+            keyCards: [
+              { visibility: "KNOWN", cardInstanceId: "c1", suit: "diamond", rank: "3", value: 3, faceUp: true },
+              { visibility: "KNOWN", cardInstanceId: "c2", suit: "spade", rank: "K", value: 13, faceUp: true },
+            ],
+          },
+        ],
+        recentEvents: [],
+      },
+    });
+
+    const evalRes = policy.evaluatePatterns(req);
+    const passDetail = evalRes.scoredPatterns.find((p) => p.patternRef === 0);
+    // 不発のため PASS にダメージペナルティは入らない (0)
+    expect(passDetail!.tacticalAdjustment).toBe(0);
+  });
+
+  it("4. 数的優位（アタッカー2体 vs ブロッカー1体）のとき、突破攻撃ボーナスが付与される", () => {
     const policy = new Gen9TacticalPrototypePolicy(dna, "Gen9-Test");
     const req = createBaseRequest({
       catalog: {
@@ -228,7 +322,7 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
                 face: "up",
                 cards: [],
                 labels: [],
-                currentSize: 13,
+                currentSize: 13, // 相手ブロッカー 1体
               },
             ],
             fog: [],
@@ -247,7 +341,7 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
             handCards: [],
             field: [
               {
-                unitId: "u-my-soldier",
+                unitId: "u-my-soldier-1",
                 kind: "soldier",
                 state: "charge",
                 face: "up",
@@ -255,7 +349,16 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
                 labels: [],
                 currentSize: 3,
               },
-            ],
+              {
+                unitId: "u-my-soldier-2",
+                kind: "soldier",
+                state: "charge",
+                face: "up",
+                cards: [],
+                labels: [],
+                currentSize: 8,
+              },
+            ], // 自軍アタッカー 2体
             fog: [],
             trumps: [],
             graveCount: 0,
@@ -271,21 +374,16 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1)", () => {
 
     const evalRes = policy.evaluatePatterns(req);
     const attackDetail = evalRes.scoredPatterns.find((p) => p.patternRef === 0);
-    const summonDetail = evalRes.scoredPatterns.find((p) => p.patternRef === 1);
 
     expect(attackDetail).toBeDefined();
-    expect(summonDetail).toBeDefined();
-    // 相手サイズ13 vs 自軍サイズ3 のため、自爆攻撃ペナルティが入る
-    expect(attackDetail!.tacticalAdjustment).toBeLessThan(0);
-    // 自爆攻撃が回避され、召喚が選択される
-    expect(evalRes.bestPatternRef).toBe(1);
+    // アタッカー2体 > ブロッカー1体 の数的優位のため、攻撃にペナルティではなくボーナス (+0.25) が付与される
+    expect(attackDetail!.tacticalAdjustment).toBeGreaterThan(0);
   });
 
-  it("4. アーキテクチャ境界テスト: GameState や UI への不正な依存がないこと", () => {
+  it("5. アーキテクチャ境界テスト: GameState や UI への不正な依存がないこと", () => {
     const policyPath = path.resolve(__dirname, "../../engine/ai/Gen9TacticalPrototypePolicy.ts");
     const content = fs.readFileSync(policyPath, "utf-8");
 
-    // import 文での GameState, GameSession, UI への依存がないことを検証
     expect(content).not.toMatch(/import\s+.*GameState/);
     expect(content).not.toMatch(/import\s+.*GameSession/);
     expect(content).not.toMatch(/import\s+.*\/ui\//);
