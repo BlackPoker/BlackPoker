@@ -15,7 +15,8 @@ import {
   RequestView,
   UnitView,
 } from "./PlayerObservation.js";
-import { DecisionCatalog, LegalPattern } from "./DecisionCatalog.js";
+import { DecisionCatalog } from "./DecisionCatalog.js";
+import { LegalPattern } from "./LegalPattern.js";
 import { DecisionRequest } from "./DecisionRequest.js";
 
 /**

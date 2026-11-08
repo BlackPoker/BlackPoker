@@ -105,9 +105,10 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
       const obs = {
         viewerPlayerId: "p2" as const,
         players: [
-          { playerId: "p1" as const, isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p1" as const, name: "P1", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
           {
             playerId: "p2" as const,
+            name: "P2",
             isViewer: true,
             lifeCount: 10,
             lifeDisplay: "10",
@@ -119,7 +120,7 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
                 kind: "soldier" as const,
                 state: "charge" as const,
                 face: "up" as const,
-                cards: [{ id: "c-s10", suit: "S", rank: "10", value: 10 }],
+                cards: [{ visibility: "KNOWN" as const, cardInstanceId: "c-s10", suit: "S", rank: "10", value: 10, faceUp: true }],
                 labels: [],
                 currentSize: 10,
               },
@@ -165,9 +166,10 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
       const obs = {
         viewerPlayerId: "p2" as const,
         players: [
-          { playerId: "p1" as const, isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p1" as const, name: "P1", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
           {
             playerId: "p2" as const,
+            name: "P2",
             isViewer: true,
             lifeCount: 10,
             lifeDisplay: "10",
@@ -180,8 +182,8 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
                 state: "charge" as const,
                 face: "up" as const,
                 cards: [
-                  { id: "c-base", suit: "S", rank: "5", value: 5 },
-                  { id: "c-mounted", suit: "S", rank: "5", value: 5 },
+                  { visibility: "KNOWN" as const, cardInstanceId: "c-base", suit: "S", rank: "5", value: 5, faceUp: true },
+                  { visibility: "KNOWN" as const, cardInstanceId: "c-mounted", suit: "S", rank: "5", value: 5, faceUp: true },
                 ],
                 labels: [],
                 currentSize: 10, // 2枚で計10
@@ -226,9 +228,10 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
       const obs = {
         viewerPlayerId: "p2" as const,
         players: [
-          { playerId: "p1" as const, isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p1" as const, name: "P1", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
           {
             playerId: "p2" as const,
+            name: "P2",
             isViewer: true,
             lifeCount: 10,
             lifeDisplay: "10",
@@ -240,7 +243,7 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
                 kind: "soldier" as const,
                 state: "charge" as const,
                 face: "up" as const,
-                cards: [{ id: "c-s3", suit: "S", rank: "3", value: 3 }],
+                cards: [{ visibility: "KNOWN" as const, cardInstanceId: "c-s3", suit: "S", rank: "3", value: 3, faceUp: true }],
                 labels: [],
                 currentSize: 3,
               },
@@ -283,9 +286,10 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
       const obs = {
         viewerPlayerId: "p2" as const,
         players: [
-          { playerId: "p1" as const, isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p1" as const, name: "P1", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
           {
             playerId: "p2" as const,
+            name: "P2",
             isViewer: true,
             lifeCount: 10,
             lifeDisplay: "10",
@@ -297,7 +301,7 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
                 kind: "soldier" as const,
                 state: "charge" as const,
                 face: "up" as const,
-                cards: [{ id: "c-s3", suit: "S", rank: "3", value: 3 }],
+                cards: [{ visibility: "KNOWN" as const, cardInstanceId: "c-s3", suit: "S", rank: "3", value: 3, faceUp: true }],
                 labels: [],
                 currentSize: 3,
               },
@@ -322,8 +326,8 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
         sequence: 1,
         target: { targetType: "unit", targetUnitId: "u-soldier-3" },
         keyCards: [
-          { visibility: "HIDDEN", cardInstanceId: "c-d-hid", faceUp: false },
-          { visibility: "HIDDEN", cardInstanceId: "c-s-hid", faceUp: false },
+          { visibility: "HIDDEN", faceUp: false },
+          { visibility: "HIDDEN", faceUp: false },
         ],
       };
 
@@ -356,9 +360,10 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
       const reqOutcome = evaluator.evaluateRequestOutcome(oppReq, "p2", {
         viewerPlayerId: "p2",
         players: [
-          { playerId: "p1", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p1", name: "P1", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
           {
             playerId: "p2",
+            name: "P2",
             isViewer: true,
             lifeCount: 10,
             lifeDisplay: "10",
@@ -410,7 +415,7 @@ describe("GenericTacticalEvaluator Core Consistency Tests (Work 5-1 R3)", () => 
         },
         catalog: {
           actions: [{ actionId: "action.counter", actionName: "Counter", speed: "quick", timing: "quick" } as any],
-          cardSelections: [{ cardIds: ["c-c10"] }],
+          cardSelections: [{ cardIds: ["c-c10"], displayCodes: ["C10"] }],
           unitSelections: [],
           costPayments: [],
           targetSelections: [{ targetType: "request", targetRequestId: "req-target" } as any],

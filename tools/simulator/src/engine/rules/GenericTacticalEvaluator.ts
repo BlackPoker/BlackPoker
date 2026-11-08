@@ -30,7 +30,8 @@ import {
   KnownCardView,
   PlayerObservationView,
 } from "../../domain/decision/PlayerObservation.js";
-import { DecisionCatalog, LegalPattern } from "../../domain/decision/DecisionCatalog.js";
+import { DecisionCatalog } from "../../domain/decision/DecisionCatalog.js";
+import { LegalPattern } from "../../domain/decision/LegalPattern.js";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest.js";
 import {
   TacticalEvaluator,

@@ -407,9 +407,10 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
       const obsBase = {
         viewerPlayerId: "p2" as const,
         players: [
-          { playerId: "p1" as const, isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p1" as const, name: "Alice", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
           {
             playerId: "p2" as const,
+            name: "Bob",
             isViewer: true,
             lifeCount: 15,
             lifeDisplay: "15",
@@ -478,8 +479,8 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
       const obs = {
         viewerPlayerId: "p2" as const,
         players: [
-          { playerId: "p1" as const, isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
-          { playerId: "p2" as const, isViewer: true, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: true },
+          { playerId: "p1" as const, name: "Alice", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p2" as const, name: "Bob", isViewer: true, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: true },
         ],
         stageRequestRefs: [],
         stageRequests: [],
@@ -529,8 +530,8 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
       const obs = {
         viewerPlayerId: "p2" as const,
         players: [
-          { playerId: "p1" as const, isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
-          { playerId: "p2" as const, isViewer: true, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: true },
+          { playerId: "p1" as const, name: "Alice", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p2" as const, name: "Bob", isViewer: true, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: true },
         ],
         stageRequestRefs: [],
         stageRequests: [],
