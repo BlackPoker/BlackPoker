@@ -4,7 +4,10 @@ import * as path from "path";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest.js";
 import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec.js";
 import { Gen9TacticalPrototypePolicy } from "../../engine/ai/Gen9TacticalPrototypePolicy.js";
+import { GenericTacticalEvaluator } from "../../engine/ai/GenericTacticalEvaluator.js";
 import { createGen8ChampionCandidatePolicy } from "../../engine/ai/Gen8DNALoader.js";
+import { RulePackage } from "../../domain/rules/RulePackage.js";
+import { RequestView } from "../../domain/decision/PlayerObservation.js";
 
 describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
   const gen8 = createGen8ChampionCandidatePolicy();
@@ -389,5 +392,155 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
     expect(content).not.toMatch(/import\s+.*\/ui\//);
     expect(content).not.toContain("window.");
     expect(content).not.toContain("document.");
+  });
+
+  describe("GenericTacticalEvaluator - 汎用 DSL 効果評価基盤の単体検証", () => {
+    it("6-1. 死の槍: ガード条件成立で正味12ダメージ、不成立で不発(0ダメージ)がDSLから導出される", () => {
+      const evaluator = new GenericTacticalEvaluator();
+
+      const obsBase = {
+        viewerPlayerId: "p2" as const,
+        players: [
+          { playerId: "p1" as const, isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          {
+            playerId: "p2" as const,
+            isViewer: true,
+            lifeCount: 15,
+            lifeDisplay: "15",
+            handCount: 0,
+            handCards: [],
+            field: [
+              { unitId: "u-soldier-10", kind: "soldier", state: "charge", face: "up", cards: [], labels: [], currentSize: 10 },
+              { unitId: "u-soldier-3", kind: "soldier", state: "charge", face: "up", cards: [], labels: [], currentSize: 3 },
+            ],
+            fog: [],
+            trumps: [],
+            graveCount: 0,
+            grave: [],
+            canViewFullGrave: true,
+          },
+        ],
+        stageRequestRefs: [],
+        stageRequests: [],
+        recentEvents: [],
+      };
+
+      // ケース A: サイズ 10 の兵士を対象、♢1 + ♠13 (成立)
+      const reqHit: RequestView = {
+        requestId: "req-1" as any,
+        actionId: "action.deathLance",
+        controller: "p1",
+        status: "PENDING",
+        sequence: 1,
+        target: { targetType: "unit", targetUnitId: "u-soldier-10" },
+        keyCards: [
+          { visibility: "KNOWN", cardInstanceId: "c-dia", suit: "diamond", rank: "A", value: 1, faceUp: true },
+          { visibility: "KNOWN", cardInstanceId: "c-spd", suit: "spade", rank: "K", value: 13, faceUp: true },
+        ],
+      };
+
+      const outcomeHit = evaluator.evaluateRequestOutcome(reqHit, "p2", obsBase);
+      expect(outcomeHit.isGuardedOut).toBe(false);
+      expect(outcomeHit.directDamageToSelf).toBe(13);
+      expect(outcomeHit.lifeGainToSelf).toBe(1);
+      expect(outcomeHit.netDamageToSelf).toBe(12); // 正味 12 ダメージ
+
+      // ケース B: サイズ 3 の兵士を対象、♢2 + ♠13 (ガード不成立 3 % 2 !== 0 で不発)
+      const reqMiss: RequestView = {
+        requestId: "req-2" as any,
+        actionId: "action.deathLance",
+        controller: "p1",
+        status: "PENDING",
+        sequence: 2,
+        target: { targetType: "unit", targetUnitId: "u-soldier-3" },
+        keyCards: [
+          { visibility: "KNOWN", cardInstanceId: "c-dia2", suit: "diamond", rank: "2", value: 2, faceUp: true },
+          { visibility: "KNOWN", cardInstanceId: "c-spd2", suit: "spade", rank: "K", value: 13, faceUp: true },
+        ],
+      };
+
+      const outcomeMiss = evaluator.evaluateRequestOutcome(reqMiss, "p2", obsBase);
+      expect(outcomeMiss.isGuardedOut).toBe(true);
+      expect(outcomeMiss.netDamageToSelf).toBe(0); // 不発で 0 ダメージ
+    });
+
+    it("6-2. 投擲: ♠数値が正確に直接ダメージとなり、固定値依存がないこと", () => {
+      const evaluator = new GenericTacticalEvaluator();
+
+      const obs = {
+        viewerPlayerId: "p2" as const,
+        players: [
+          { playerId: "p1" as const, isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p2" as const, isViewer: true, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: true },
+        ],
+        stageRequestRefs: [],
+        stageRequests: [],
+        recentEvents: [],
+      };
+
+      // 相手が自分 (p2) に ♠9 で投擲
+      const reqThrow: RequestView = {
+        requestId: "req-throw" as any,
+        actionId: "action.throwing",
+        controller: "p1",
+        status: "PENDING",
+        sequence: 1,
+        target: { targetType: "player", targetPlayerKey: "p2" },
+        keyCards: [
+          { visibility: "KNOWN", cardInstanceId: "c-spd9", suit: "spade", rank: "9", value: 9, faceUp: true },
+          { visibility: "KNOWN", cardInstanceId: "c-clb", suit: "club", rank: "3", value: 3, faceUp: true },
+        ],
+      };
+
+      const outcome = evaluator.evaluateRequestOutcome(reqThrow, "p2", obs);
+      expect(outcome.netDamageToSelf).toBe(9); // ♠9 の 9 点ダメージ
+      expect(outcome.isCertain).toBe(true);
+    });
+
+    it("6-3. 新規切札 (action.meteor) を DSL 定義に追加するだけで、AI コード変更なしに戦術評価されること", () => {
+      // ユーザー指示の長期目標: AIコードを変更せず、YAML DSL 定義を追加するだけで戦術評価できることの実証
+      const customRulePackage: RulePackage = {
+        id: "custom-test-rules",
+        version: "1.0.0",
+        actions: [
+          {
+            id: "action.meteor",
+            name: "流星",
+            type: "trump",
+            request: { trigger: "direct", speed: "normal", timing: "main" },
+            effect: [
+              { dealDamage: { target: "targetPlayer", amount: 15 } },
+            ],
+          },
+        ],
+        components: [],
+      };
+
+      const evaluator = new GenericTacticalEvaluator(customRulePackage);
+
+      const obs = {
+        viewerPlayerId: "p2" as const,
+        players: [
+          { playerId: "p1" as const, isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p2" as const, isViewer: true, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: true },
+        ],
+        stageRequestRefs: [],
+        stageRequests: [],
+        recentEvents: [],
+      };
+
+      const reqMeteor: RequestView = {
+        requestId: "req-meteor" as any,
+        actionId: "action.meteor",
+        controller: "p1",
+        status: "PENDING",
+        sequence: 1,
+        target: { targetType: "player", targetPlayerKey: "p2" },
+      };
+
+      const outcome = evaluator.evaluateRequestOutcome(reqMeteor, "p2", obs);
+      expect(outcome.netDamageToSelf).toBe(15); // コード変更なしで 15 点ダメージを自動導出！
+      expect(outcome.isCertain).toBe(true);
+    });
   });
 });

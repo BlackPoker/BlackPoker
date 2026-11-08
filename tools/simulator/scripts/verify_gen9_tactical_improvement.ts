@@ -54,7 +54,7 @@ async function main() {
 
   const gen8Policy = createGen8ChampionCandidatePolicy();
   const dna = (gen8Policy as any).dna;
-  const gen9Policy = new Gen9TacticalPrototypePolicy(dna, "Gen9-Tactical-Prototype-R2");
+  const gen9Policy = new Gen9TacticalPrototypePolicy(dna, "Gen9-Tactical-Prototype-R2", fullRulePackage);
 
   console.log("================================================================================");
   console.log(" BlackPoker — Gen 8 vs Gen 9 戦術プロトタイプ 正本回帰検証 (Work 5-1 R2)");
@@ -70,6 +70,13 @@ async function main() {
       console.log("\n================================================================================");
       console.log(`[VERIFICATION 1] Turn 2 死の槍への対応 (Seq: 20, Step: ${i}, 合法手数: ${req.patterns.length})`);
       console.log("================================================================================");
+      console.log("StageRequests:", JSON.stringify(req.observation.stageRequests, null, 2));
+      console.log("PlayerId:", req.playerId);
+      const oppReqs = (req.observation.stageRequests ?? []).filter(r => r.controller !== req.playerId);
+      console.log("Opponent Requests count:", oppReqs.length);
+      if (oppReqs.length > 0) {
+        console.log("Opponent Request 0:", JSON.stringify(oppReqs[oppReqs.length - 1], null, 2));
+      }
 
       const gen8Choice = gen8Policy.choose(req);
       const gen9Eval = gen9Policy.evaluatePatterns(req);
@@ -162,6 +169,17 @@ async function main() {
 
       console.log(`Gen 8 選択: Pattern #${gen8Choice.selectedPatternRef} (Kind: ${req.patterns[gen8Choice.selectedPatternRef].kind})`);
       console.log(`Gen 9 選択: Pattern #${gen9Choice.selectedPatternRef} (Kind: ${req.patterns[gen9Choice.selectedPatternRef].kind})`);
+
+      const gen9Pat = req.patterns[gen9Choice.selectedPatternRef];
+      const gen9ActRef = gen9Pat.actionSelectionRef;
+      const gen9Act = gen9ActRef !== undefined ? req.catalog.actions[gen9ActRef] : undefined;
+      console.log(`Gen 9 選択 Pattern 詳細: ActionId=${gen9Act?.actionId}, Name=${gen9Act?.actionName}`);
+      const scoredP1 = gen9Eval.scoredPatterns.find(p => p.patternRef === gen9Choice.selectedPatternRef);
+      console.log(`  BaseScore=${scoredP1?.baseScore.toFixed(4)}, Adj=${scoredP1?.tacticalAdjustment.toFixed(4)} (${scoredP1?.reason}), Final=${scoredP1?.finalScore.toFixed(4)}`);
+
+      const passP = gen9Eval.scoredPatterns.find(p => req.patterns[p.patternRef].kind === "PASS");
+      console.log(`PASS (#${passP?.patternRef}) 詳細:`);
+      console.log(`  BaseScore=${passP?.baseScore.toFixed(4)}, Adj=${passP?.tacticalAdjustment.toFixed(4)} (${passP?.reason}), Final=${passP?.finalScore.toFixed(4)}`);
 
       const hasCounter = req.patterns.some(p => {
         const actRef = p.actionSelectionRef;

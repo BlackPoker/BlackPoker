@@ -131,7 +131,7 @@ async function runSuiteForOpponent(
     const matchSeed = seedStart + p;
 
     // Leg 0: P1=Gen9, P2=Opponent
-    const gen9Policy0 = new TimedGen9Policy(new Gen9TacticalPrototypePolicy(gen8DNA, "Gen9-P1"));
+    const gen9Policy0 = new TimedGen9Policy(new Gen9TacticalPrototypePolicy(gen8DNA, "Gen9-P1", rulePackage));
     const oppPolicy0 = opp.createPolicy("p2", matchSeed);
 
     const setup0 = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, matchSeed, {
@@ -175,7 +175,7 @@ async function runSuiteForOpponent(
 
     // Leg 1: P1=Opponent, P2=Gen9 (座席反転)
     const oppPolicy1 = opp.createPolicy("p1", matchSeed);
-    const gen9Policy1 = new TimedGen9Policy(new Gen9TacticalPrototypePolicy(gen8DNA, "Gen9-P2"));
+    const gen9Policy1 = new TimedGen9Policy(new Gen9TacticalPrototypePolicy(gen8DNA, "Gen9-P2", rulePackage));
 
     const setup1 = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, matchSeed, {
       playerNames: { p1: opp.name, p2: "Gen9" },

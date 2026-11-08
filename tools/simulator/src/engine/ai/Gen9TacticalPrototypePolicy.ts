@@ -27,6 +27,8 @@ import { DecisionFeatureEncoder } from "./DecisionFeatureEncoder.js";
 import { GenomeScorer } from "./GenomeScorer.js";
 import { LegalPattern } from "../../domain/decision/LegalPattern.js";
 import { UnitView, RequestView, PlayerObservationView, KnownCardView } from "../../domain/decision/PlayerObservation.js";
+import { RulePackage } from "../../domain/rules/RulePackage.js";
+import { GenericTacticalEvaluator } from "./GenericTacticalEvaluator.js";
 
 export interface TacticalEvaluationDetail {
   readonly patternRef: number;
@@ -44,10 +46,12 @@ export interface TacticalEvaluationResult {
 export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
   public readonly descriptor: PolicyDescriptor;
   private readonly dna: DecisionDNA;
+  private readonly tacticalEvaluator: GenericTacticalEvaluator;
 
-  constructor(dna: Readonly<DecisionDNA>, name?: string) {
+  constructor(dna: Readonly<DecisionDNA>, name?: string, rulePackage?: Readonly<RulePackage>) {
     DecisionDNACodec.validate(dna);
     this.dna = DecisionDNACodec.clone(dna);
+    this.tacticalEvaluator = new GenericTacticalEvaluator(rulePackage);
 
     this.descriptor = {
       kind: "genome",
@@ -263,7 +267,8 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
 
     if (oppRequests.length > 0) {
       const primaryOppReq = oppRequests[oppRequests.length - 1]; // 最上位の相手リクエスト
-      const estDamage = this.estimateRequestDamage(primaryOppReq, selfKey, selfView, oppView);
+      const reqOutcome = this.tacticalEvaluator.evaluateRequestOutcome(primaryOppReq, selfKey, obs);
+      const estDamage = reqOutcome.netDamageToSelf;
 
       // (A-1) PASS を選択した場合の損害ペナルティ (自分への正味ダメージがある場合のみ)
       if (pattern.kind === "PASS") {
@@ -285,21 +290,19 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
         }
       }
 
-      // (A-2) Counter (打ち消し) を選択した場合の阻止ボーナス
-      const act = pattern.actionSelectionRef !== undefined ? request.catalog.actions[pattern.actionSelectionRef] : undefined;
-      if (act && act.actionId === "action.counter") {
-        const canPrevent = this.canCounterPreventRequest(pattern, primaryOppReq, request);
-        if (canPrevent && estDamage > 0) {
-          if (estDamage >= selfLife) {
-            adjustment += 2.2;
-            reasons.push(`Lethal Counter bonus (+2.2): prevents estDamage=${estDamage}`);
-          } else if (selfLife - estDamage <= 4 || estDamage >= 8) {
-            adjustment += 1.0;
-            reasons.push(`High damage Counter bonus (+1.0): prevents estDamage=${estDamage}`);
-          } else if (estDamage >= 4) {
-            adjustment += 0.4;
-            reasons.push(`Moderate damage Counter bonus (+0.4): prevents estDamage=${estDamage}`);
-          }
+      // (A-2) 打ち消し・阻止選択肢 (Counter 等) を選択した場合の阻止ボーナス
+      const counterOutcome = this.tacticalEvaluator.evaluateCounterOutcome(pattern, primaryOppReq, request, reqOutcome);
+      if (counterOutcome.canCancel && counterOutcome.preventedDamageToSelf > 0) {
+        const prevented = counterOutcome.preventedDamageToSelf;
+        if (prevented >= selfLife) {
+          adjustment += 2.2;
+          reasons.push(`Lethal Counter bonus (+2.2): prevents estDamage=${prevented}`);
+        } else if (selfLife - prevented <= 4 || prevented >= 8) {
+          adjustment += 1.0;
+          reasons.push(`High damage Counter bonus (+1.0): prevents estDamage=${prevented}`);
+        } else if (prevented >= 4) {
+          adjustment += 0.4;
+          reasons.push(`Moderate damage Counter bonus (+0.4): prevents estDamage=${prevented}`);
         }
       }
     }
@@ -328,52 +331,6 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
       adjustment,
       reason: reasons.length > 0 ? reasons.join("; ") : undefined,
     };
-  }
-
-  /**
-   * カウンターが対象の相手リクエストを確実に阻止できるか検証
-   */
-  private canCounterPreventRequest(
-    pattern: Readonly<LegalPattern>,
-    oppReq: Readonly<RequestView>,
-    request: Readonly<DecisionRequest>
-  ): boolean {
-    // 1. ターゲットが相手リクエストを指しているか確認
-    if (pattern.targetSelectionRef !== undefined) {
-      const targetSel = request.catalog.targetSelections[pattern.targetSelectionRef];
-      if (targetSel && targetSel.targetRequestId && targetSel.targetRequestId !== oppReq.requestId) {
-        return false; // 別のリクエストを狙っている
-      }
-    }
-
-    // 2. カウンターのキーカード条件検証 (counter.yaml)
-    const oppKeyCount = oppReq.keyCards?.length ?? 0;
-    // 対象のキーカードが 2 枚の場合は無条件で無効化
-    if (oppKeyCount >= 2) {
-      return true;
-    }
-
-    // 対象のキーカードが 1 枚の場合: カウンターのキーカード数字 >= 対象キーカード数字
-    if (oppKeyCount === 1) {
-      const oppFirstKey = oppReq.keyCards?.[0];
-      const oppRankVal = (oppFirstKey?.visibility === "KNOWN" && typeof oppFirstKey.value === "number")
-        ? oppFirstKey.value
-        : 10;
-
-      // カウンターのキーカードを取得
-      if (pattern.keyCardSelectionRef !== undefined) {
-        const cardSel = request.catalog.cardSelections[pattern.keyCardSelectionRef];
-        const cardId = cardSel?.cardIds?.[0];
-        const selfHand = (request.observation.players.find(p => p.playerId === request.playerId)?.handCards) ?? [];
-        const myCard = selfHand.find(c => c.visibility === "KNOWN" && (c as any).cardInstanceId === cardId);
-        if (myCard && myCard.visibility === "KNOWN" && typeof myCard.value === "number") {
-          return myCard.value >= oppRankVal;
-        }
-      }
-      return true; // 不明時は成立可能性ありとして許容
-    }
-
-    return true;
   }
 
   /**
@@ -456,80 +413,5 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     }
 
     return { adjustment: 0 };
-  }
-
-  /**
-   * Stage リクエストから公開情報に基づいて自分への推定損害量を正確に計算 (公式 YAML 準拠)
-   */
-  private estimateRequestDamage(
-    req: Readonly<RequestView>,
-    selfKey: string,
-    selfView?: PlayerObservationView,
-    oppView?: PlayerObservationView
-  ): number {
-    // 0. 対象確認: 対象が自軍（自分または自分のユニット）でなければ自分への直接損害は 0
-    if (req.target) {
-      if (req.target.targetType === "player" && req.target.targetPlayerKey && req.target.targetPlayerKey !== selfKey) {
-        return 0; // 相手プレイヤーが対象
-      }
-      if (req.target.targetType === "unit" && req.target.targetUnitId) {
-        const isMyUnit = (selfView?.field ?? []).some(u => u.unitId === req.target?.targetUnitId);
-        if (!isMyUnit) {
-          return 0; // 相手ユニットが対象
-        }
-      }
-    }
-
-    // 1. action.deathLance (死の槍: death-lance.yaml 準拠)
-    if (req.actionId === "action.deathLance") {
-      // 対象が自軍の兵士か確認
-      const targetUnitId = req.target?.targetUnitId;
-      const targetUnit = (selfView?.field ?? []).find(u => u.unitId === targetUnitId);
-      if (!targetUnit) {
-        return 0; // 自軍の兵士が対象でない場合は損害なし
-      }
-
-      const targetSize = targetUnit.currentSize ?? 0;
-      const diaCard = req.keyCards?.find((k): k is KnownCardView => k.visibility === "KNOWN" && (k as any).suit === "diamond");
-      const spdCard = req.keyCards?.find((k): k is KnownCardView => k.visibility === "KNOWN" && (k as any).suit === "spade");
-
-      // ガード条件: target.size != 0 && target.size % diamond.rankValue == 0
-      if (diaCard && typeof diaCard.value === "number") {
-        if (targetSize === 0 || targetSize % diaCard.value !== 0) {
-          return 0; // 不発！ダメージ 0
-        }
-      }
-
-      // 成立時: ♠の数値ダメージ。兵士がライフに乗る (+1) ため、正味ライフ減少量は (♠値 - 1)
-      const rawDamage = (spdCard && typeof spdCard.value === "number") ? spdCard.value : 8;
-      return Math.max(1, rawDamage - 1);
-    }
-
-    // 2. action.damageJudge (戦闘ダメージ)
-    if (req.actionId === "action.damageJudge") {
-      // 相手アタッカーのうち、未ブロックのユニットのサイズ合計
-      const oppAttackers = (oppView?.field ?? []).filter(u => u.battle?.role === "attacker");
-      const unblocked = oppAttackers.filter(u => !u.battle?.blocksUnitId);
-      if (unblocked.length > 0) {
-        return unblocked.reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
-      }
-      return 0;
-    }
-
-    // 3. action.throwing (投擲)
-    if (req.actionId === "action.throwing") {
-      if (req.target?.targetType === "player" && req.target?.targetPlayerKey === selfKey) {
-        return 4;
-      }
-      return 2;
-    }
-
-    // 4. action.kill (破壊)
-    if (req.actionId === "action.kill") {
-      return 3; // ユニット破壊相当の脅威
-    }
-
-    // デフォルト: 不明な相手アクションは事実として扱わず、0 を返す (誤った致死判定を防止)
-    return 0;
   }
 }
