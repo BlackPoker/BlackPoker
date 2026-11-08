@@ -32,6 +32,14 @@ import {
   TacticalRequestOutcome,
   TacticalCounterOutcome,
 } from "../../domain/decision/TacticalEvaluationTypes.js";
+import {
+  TacticalFeatureEncoderVersion,
+  TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
+  BlockTacticalEvaluationContext,
+  createBlockTacticalContext,
+  extractBlockAssignmentsFromPattern,
+  evaluateBlockAssignmentTacticalFeatures,
+} from "./Gen9LearnableTacticalPolicy.js";
 
 export interface TacticalEvaluationDetail {
   readonly patternRef: number;
@@ -50,6 +58,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
   public readonly descriptor: PolicyDescriptor;
   private readonly dna: DecisionDNA;
   private readonly tacticalEvaluator?: TacticalEvaluator;
+  private readonly encoderVersion: TacticalFeatureEncoderVersion;
   private static defaultEvaluator?: TacticalEvaluator;
 
   /**
@@ -66,10 +75,16 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     return Gen9TacticalPrototypePolicy.defaultEvaluator;
   }
 
-  constructor(dna: Readonly<DecisionDNA>, name?: string, evaluator?: TacticalEvaluator) {
+  constructor(
+    dna: Readonly<DecisionDNA>,
+    name?: string,
+    evaluator?: TacticalEvaluator,
+    encoderVersion: TacticalFeatureEncoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT
+  ) {
     DecisionDNACodec.validate(dna);
     this.dna = DecisionDNACodec.clone(dna);
     this.tacticalEvaluator = evaluator ?? Gen9TacticalPrototypePolicy.defaultEvaluator;
+    this.encoderVersion = encoderVersion;
 
     this.descriptor = {
       kind: "genome",
@@ -78,11 +93,16 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
       metadata: {
         dnaFormatVersion: this.dna.dnaFormatVersion,
         featureSchemaVersion: this.dna.featureSchemaVersion,
+        tacticalFeatureEncoderVersion: this.encoderVersion,
         scoringModel: "linear_interaction_plus_tactical_v2",
         dnaId: this.dna.metadata?.id,
         dnaName: this.dna.metadata?.name,
       },
     };
+  }
+
+  public getEncoderVersion(): TacticalFeatureEncoderVersion {
+    return this.encoderVersion;
   }
 
   public choose(request: Readonly<DecisionRequest>): DecisionResponse {
@@ -117,25 +137,21 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
       throw new Error(`DecisionRequest に選択可能なパターンが存在しません: ${request.decisionId}`);
     }
 
-    const obs = request.observation;
-    const selfKey = request.playerId;
-    const selfView = obs.players.find((p) => p.playerId === selfKey) ?? obs.players.find((p) => p.isViewer);
-    const oppView = obs.players.find((p) => p.playerId !== selfKey) ?? obs.players.find((p) => !p.isViewer);
-    const selfLife = selfView?.lifeCount ?? 15;
-
-    // 自軍ユニットマップ (unitId -> UnitView)
-    const myUnitsMap = new Map<string, UnitView>();
-    for (const u of selfView?.field ?? []) myUnitsMap.set(u.unitId, u);
-    for (const u of selfView?.trumps ?? []) myUnitsMap.set(u.unitId, u);
-
-    // 相手アタッカーマップ (unitId -> UnitView)
-    const oppAttackersMap = new Map<string, UnitView>();
-    for (const u of oppView?.field ?? []) {
-      if (u.battle?.role === "attacker") oppAttackersMap.set(u.unitId, u);
-    }
+    const blockContext = createBlockTacticalContext(request);
 
     // 1. 文脈特徴量ベクトル (165次元) を 1 回だけ計算
-    const contextValues = DecisionFeatureEncoder.encodeContextOnly(request);
+    const contextValues = [...DecisionFeatureEncoder.encodeContextOnly(request)];
+    if (
+      this.encoderVersion === "v7.1-unified-block-assignment" &&
+      request.patterns.length === 0 &&
+      request.blockAssignmentStream
+    ) {
+      const n = request.blockAssignmentStream.patternCount;
+      const scaledCount = n <= 0 ? 0 : n / (n + 50);
+      contextValues[8] = scaledCount;  // legal_pattern_count
+      contextValues[11] = scaledCount; // legal_effect_selection_pattern_count
+      contextValues[12] = scaledCount; // legal_non_pass_pattern_count
+    }
 
     // 2. ブロック割り当て特徴量エンコーダのコンテキスト準備
     const encoderContext = DecisionFeatureEncoder.createBlockAssignmentEncoderContext(request);
@@ -153,53 +169,17 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
       );
       const baseScore = GenomeScorer.scoreSinglePattern(contextValues, pValues, this.dna);
 
-      // 戦術調整値の算出 (O(1) メモリ)
-      let tacticalAdj = 0;
-
-      // ブロックされたアタッカーIDセット
-      const blockedAttackerIds = new Set<string>();
-
-      for (const assign of assignments) {
-        const attackerUnitId = assign.sourceUnitId;
-        const blockerUnitIds = assign.selectedUnitIds ?? [];
-        if (blockerUnitIds.length === 0) continue;
-
-        blockedAttackerIds.add(attackerUnitId);
-        const atk = oppAttackersMap.get(attackerUnitId);
-        const atkSize = atk?.currentSize ?? 0;
-
-        for (const blockerUnitId of blockerUnitIds) {
-          const blk = myUnitsMap.get(blockerUnitId);
-          const blkSize = blk?.currentSize ?? 0;
-
-          // トレード評価
-          if (blkSize > atkSize) {
-            tacticalAdj += 0.2; // 有利トレード
-          } else if (blkSize === atkSize && blkSize > 0) {
-            tacticalAdj += 0.1; // 相討ち
-          } else if (blkSize < atkSize) {
-            // 不利トレード（一方的破壊）
-            if (selfLife > 8 && blkSize >= 5) {
-              tacticalAdj -= 0.15; // ライフ余裕時の大型犬死ペナルティ
-            }
-          }
-        }
-      }
-
-      // 未ブロックアタッカーの合計ダメージを算出
-      let unblockedDamage = 0;
-      for (const [atkId, atk] of oppAttackersMap.entries()) {
-        if (!blockedAttackerIds.has(atkId)) {
-          unblockedDamage += (atk.currentSize ?? 0);
-        }
-      }
-
-      // 即死・致死ダメージ回避
-      if (unblockedDamage >= selfLife && selfLife > 0) {
-        tacticalAdj -= 2.5; // 即死ペナルティ
-      } else if (selfLife - unblockedDamage <= 3) {
-        tacticalAdj -= 0.5 * (unblockedDamage / Math.max(1, selfLife));
-      }
+      // 戦術調整値の算出 (O(1) メモリ・通常ブロックと共通の評価関数)
+      const blockEval = evaluateBlockAssignmentTacticalFeatures(
+        assignments,
+        blockContext,
+        this.encoderVersion,
+        false
+      );
+      const tacticalAdj =
+        0.2 * blockEval.t14_block_trade_advantage +
+        -2.5 * blockEval.t15_block_unblocked_lethal +
+        -0.5 * blockEval.t16_block_unblocked_danger_ratio;
 
       const finalScore = baseScore + tacticalAdj;
 
@@ -228,6 +208,10 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
 
     const patterns = request.patterns;
     const details: TacticalEvaluationDetail[] = [];
+    const blockContext =
+      this.encoderVersion === "v7.1-unified-block-assignment"
+        ? createBlockTacticalContext(request)
+        : undefined;
 
     let bestScore = -Infinity;
     let bestPatternRef = baseScored[0]?.patternRef ?? 0;
@@ -237,7 +221,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
       const pat = patterns[sp.patternRef];
 
       // 2. 戦術的調整値の算出
-      const { adjustment, reason } = this.calculateTacticalAdjustment(request, pat);
+      const { adjustment, reason } = this.calculateTacticalAdjustment(request, pat, blockContext);
       const finalScore = sp.score + adjustment;
 
       details.push({
@@ -266,7 +250,8 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
    */
   private calculateTacticalAdjustment(
     request: Readonly<DecisionRequest>,
-    pattern: Readonly<LegalPattern>
+    pattern: Readonly<LegalPattern>,
+    precomputedBlockContext?: BlockTacticalEvaluationContext
   ): { adjustment: number; reason?: string } {
     const obs = request.observation;
     const selfKey = request.playerId;
@@ -354,6 +339,30 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
       const attackAdj = this.evaluateAttackTactics(request, pattern, selfView, oppView);
       adjustment += attackAdj.adjustment;
       if (attackAdj.reason) reasons.push(attackAdj.reason);
+    }
+
+    // =========================================================================
+    // 戦術評価 B-2: 通常ブロック割り当ての戦術評価 (Work 5-4A: ストリーミングと共通化)
+    // =========================================================================
+    if (this.encoderVersion === "v7.1-unified-block-assignment") {
+      const blockCtx = precomputedBlockContext ?? createBlockTacticalContext(request);
+      const blockAssignments = extractBlockAssignmentsFromPattern(request, pattern, blockCtx);
+      if (blockAssignments !== undefined) {
+        const blockEval = evaluateBlockAssignmentTacticalFeatures(
+          blockAssignments,
+          blockCtx,
+          this.encoderVersion,
+          true
+        );
+        const blockAdj =
+          0.2 * blockEval.t14_block_trade_advantage +
+          -2.5 * blockEval.t15_block_unblocked_lethal +
+          -0.5 * blockEval.t16_block_unblocked_danger_ratio;
+        adjustment += blockAdj;
+        for (const r of blockEval.reasons) {
+          reasons.push(r);
+        }
+      }
     }
 
     // =========================================================================

@@ -25,11 +25,32 @@ import { DecisionDNACodec } from "./DecisionDNACodec.js";
 import { DecisionFeatureEncoder } from "./DecisionFeatureEncoder.js";
 import { GenomeScorer } from "./GenomeScorer.js";
 import { LegalPattern } from "../../domain/decision/LegalPattern.js";
-import { UnitView, PlayerObservationView } from "../../domain/decision/PlayerObservation.js";
+import { UnitAssignment } from "../../domain/decision/DecisionCatalog.js";
+import { UnitView, PlayerObservationView, KnownCardView } from "../../domain/decision/PlayerObservation.js";
 import { TacticalEvaluator } from "../../domain/decision/TacticalEvaluationTypes.js";
 import { Gen9TacticalPrototypePolicy } from "./Gen9TacticalPrototypePolicy.js";
 
 export const TACTICAL_FEATURE_SCHEMA_VERSION = 7;
+
+/**
+ * 戦術特徴量エンコーダ仕様バージョン (Work 5-4A)
+ * - "v7.0-legacy-block-stream-only":
+ *   Work 5-2 / Work 5-3 時点の仕様。通常ブロック (patterns 列挙) では t14〜t16 が 0 のままとなり、
+ *   ストリーミングブロック時のみ単体サイズ比較で t14〜t16 を計算。過去の評価結果の完全再現用。
+ * - "v7.1-unified-block-assignment":
+ *   Work 5-4A 以降の標準仕様。通常ブロック (LegalPattern.effectSelectionRef -> DecisionCatalog.effectSelections ->
+ *   EffectSelection.assignments) とストリーミングブロックの双方で同一の評価関数を用い、
+ *   複数アタッカー・複数兵士合算サイズ・防壁ブロック・致死/危険域ダメージを完全一致で計算。
+ */
+export type TacticalFeatureEncoderVersion =
+  | "v7.0-legacy-block-stream-only"
+  | "v7.1-unified-block-assignment";
+
+export const TACTICAL_FEATURE_ENCODER_VERSION_LEGACY: TacticalFeatureEncoderVersion =
+  "v7.0-legacy-block-stream-only";
+
+export const TACTICAL_FEATURE_ENCODER_VERSION_CURRENT: TacticalFeatureEncoderVersion =
+  "v7.1-unified-block-assignment";
 
 /**
  * 独立評価可能な6つの戦術特徴量カテゴリ
@@ -173,6 +194,7 @@ export interface Gen9TacticalGenome {
     readonly originType?: TacticalGenomeOriginType;
     readonly parentIds?: readonly string[];
     readonly notes?: string;
+    readonly encoderVersion?: TacticalFeatureEncoderVersion;
   };
 }
 
@@ -263,6 +285,7 @@ export function fromV6DNA(
     generation: dna.metadata?.generation ?? 0,
     createdGeneration: 0,
     originType: defaultOrigin,
+    encoderVersion: TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
   };
   if (dna.metadata?.id) {
     defaultMeta.parentIds = [dna.metadata.id];
@@ -291,6 +314,7 @@ export function fromV6DNA(
     }
     if (metadata.parentIds !== undefined) m.parentIds = [...metadata.parentIds];
     if (metadata.notes !== undefined) m.notes = metadata.notes;
+    m.encoderVersion = metadata.encoderVersion ?? TACTICAL_FEATURE_ENCODER_VERSION_CURRENT;
     cleanMeta = m;
   } else {
     cleanMeta = defaultMeta;
@@ -317,6 +341,7 @@ export function toV6CompatibleDNA(genome: Readonly<Gen9TacticalGenome>): Decisio
       tacticalWeights: [...genome.tacticalWeights],
       originType: genome.metadata?.originType,
       createdGeneration: genome.metadata?.createdGeneration ?? genome.metadata?.generation,
+      encoderVersion: genome.metadata?.encoderVersion ?? TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
       userNotes: genome.metadata?.notes ?? cloned.metadata?.notes,
     }),
   };
@@ -374,6 +399,11 @@ export function fromV6CompatibleDNA(
               : undefined,
           parentIds,
           notes: typeof parsed.userNotes === "string" ? parsed.userNotes : undefined,
+          encoderVersion:
+            parsed.encoderVersion === "v7.0-legacy-block-stream-only" ||
+            parsed.encoderVersion === "v7.1-unified-block-assignment"
+              ? parsed.encoderVersion
+              : undefined,
         });
       }
     } catch {
@@ -398,6 +428,7 @@ export function cloneTacticalGenome(genome: Readonly<Gen9TacticalGenome>): Gen9T
     if (genome.metadata.originType !== undefined) m.originType = genome.metadata.originType;
     if (genome.metadata.parentIds !== undefined) m.parentIds = [...genome.metadata.parentIds];
     if (genome.metadata.notes !== undefined) m.notes = genome.metadata.notes;
+    if (genome.metadata.encoderVersion !== undefined) m.encoderVersion = genome.metadata.encoderVersion;
     cleanMeta = m;
   }
   return {
@@ -409,12 +440,359 @@ export function cloneTacticalGenome(genome: Readonly<Gen9TacticalGenome>): Gen9T
 }
 
 /**
+ * ブロック割り当て評価コンテキスト（通常パターン列挙・ストリーミング列挙の双方で共通利用）
+ */
+export interface BlockTacticalEvaluationContext {
+  readonly myUnitsMap: ReadonlyMap<string, UnitView>;
+  readonly oppAttackersMap: ReadonlyMap<string, UnitView>;
+  readonly selfLife: number;
+}
+
+/**
+ * ユニットが防壁 (bulwark) であるかを判定
+ */
+export function isBulwarkUnitView(u: UnitView | undefined): boolean {
+  if (!u) return false;
+  return (
+    u.componentId === "character.bulwark" ||
+    u.componentId === "comp-bulwark" ||
+    u.kind === "防壁" ||
+    u.kind === "bulwark"
+  );
+}
+
+/**
+ * 防壁とアタッカーの印刷ランク一致（または防壁が Joker）による破壊成立を判定
+ * - ObservationFactory.mapUnit により、自軍の防壁カード (u.cards[0]) は裏向きでも KNOWN として観測可能。
+ * - 公開されている相手アタッカーのカード (atk.cards) と印刷ランク/数値が一致するか、防壁が Joker であれば
+ *   resolveSoldierVsBulwarkCombat の公式ルール通りアタッカーを破壊できる。
+ */
+export function doesBulwarkDestroyAttacker(
+  bulwark: UnitView,
+  attacker: UnitView | undefined
+): boolean {
+  if (!attacker) return false;
+  const blkCard = bulwark.cards?.[0];
+  if (!blkCard || blkCard.visibility !== "KNOWN") return false;
+  if (blkCard.suit === "JOKER" || blkCard.rank === "JOKER") {
+    return true;
+  }
+  const atkCards = attacker.cards ?? [];
+  for (const c of atkCards) {
+    if (c.visibility === "KNOWN") {
+      if (
+        (blkCard.rank && c.rank && blkCard.rank === c.rank) ||
+        (blkCard.value > 0 && c.value > 0 && blkCard.value === c.value)
+      ) {
+        return true;
+      }
+    }
+  }
+  return false;
+}
+
+/**
+ * DecisionRequest からブロック戦術評価用の共通コンテキストを構築
+ */
+export function createBlockTacticalContext(
+  request: Readonly<DecisionRequest>
+): BlockTacticalEvaluationContext {
+  const obs = request.observation;
+  const selfKey = request.playerId;
+  const selfView =
+    obs.players.find((p) => p.playerId === selfKey) ??
+    obs.players.find((p) => p.isViewer);
+  const oppView =
+    obs.players.find((p) => p.playerId !== selfKey) ??
+    obs.players.find((p) => !p.isViewer);
+  const selfLife = selfView?.lifeCount ?? 15;
+
+  const myUnitsMap = new Map<string, UnitView>();
+  for (const u of selfView?.field ?? []) myUnitsMap.set(u.unitId, u);
+  for (const u of selfView?.trumps ?? []) myUnitsMap.set(u.unitId, u);
+
+  const oppFieldAndTrumps = new Map<string, UnitView>();
+  for (const u of oppView?.field ?? []) oppFieldAndTrumps.set(u.unitId, u);
+  for (const u of oppView?.trumps ?? []) oppFieldAndTrumps.set(u.unitId, u);
+
+  const oppAttackersMap = new Map<string, UnitView>();
+  for (const u of oppFieldAndTrumps.values()) {
+    if (u.battle?.role === "attacker") {
+      oppAttackersMap.set(u.unitId, u);
+    }
+  }
+  // blockAssignmentStreamMeta.attackerUnitIds が存在する場合は補完（テスト等で battle.role が省略された場合も一貫性を維持）
+  if (request.blockAssignmentStreamMeta?.attackerUnitIds) {
+    for (const atkId of request.blockAssignmentStreamMeta.attackerUnitIds) {
+      if (!oppAttackersMap.has(atkId)) {
+        const u = oppFieldAndTrumps.get(atkId);
+        if (u) oppAttackersMap.set(atkId, u);
+      }
+    }
+  }
+  // effectSelections[0].assignments の sourceUnitId からも補完（通常パターン列挙時との完全一致保証）
+  const firstEff = request.catalog?.effectSelections?.[0];
+  if (
+    firstEff &&
+    firstEff.selectionType === "unitAssignment" &&
+    Array.isArray(firstEff.assignments)
+  ) {
+    for (const a of firstEff.assignments) {
+      if (a.sourceUnitId && !oppAttackersMap.has(a.sourceUnitId)) {
+        const u = oppFieldAndTrumps.get(a.sourceUnitId);
+        if (u) oppAttackersMap.set(a.sourceUnitId, u);
+      }
+    }
+  }
+
+  return {
+    myUnitsMap,
+    oppAttackersMap,
+    selfLife,
+  };
+}
+
+/**
+ * 通常ブロックの LegalPattern から正本経路でブロック割り当てを取得
+ *
+ * 【正本経路 (Work 5-4A 要件 1)】
+ * - LegalPattern.effectSelectionRef
+ * - DecisionCatalog.effectSelections
+ * - EffectSelection.assignments
+ * - UnitAssignment.sourceUnitId
+ * - UnitAssignment.selectedUnitIds
+ *
+ * ※ pattern.keyUnitSelectionRef および catalog.unitSelections はブロック割り当ての正本として扱わない。
+ * ※ かつ request がブロック割り当て決定（相手アタッカーが存在する、または blockAssignmentStreamMeta が存在する）
+ *   である場合のみブロック割り当てとして抽出する。
+ */
+export function extractBlockAssignmentsFromPattern(
+  request: Readonly<DecisionRequest>,
+  pattern: Readonly<LegalPattern>,
+  blockContext?: BlockTacticalEvaluationContext
+): readonly UnitAssignment[] | undefined {
+  if (pattern.effectSelectionRef === undefined) {
+    return undefined;
+  }
+  const eff = request.catalog?.effectSelections?.[pattern.effectSelectionRef];
+  if (!eff || eff.selectionType !== "unitAssignment" || !Array.isArray(eff.assignments)) {
+    return undefined;
+  }
+
+  // ブロック割り当て決定であることの確認（対象 sourceUnitId が相手アタッカーであるか、または blockAssignmentStreamMeta が存在するか）
+  const hasStreamMeta = Boolean(request.blockAssignmentStreamMeta);
+  if (!hasStreamMeta) {
+    const ctx = blockContext ?? createBlockTacticalContext(request);
+    if (ctx.oppAttackersMap.size === 0) {
+      return undefined;
+    }
+    const touchesAttacker = eff.assignments.some(
+      (a) => a.sourceUnitId !== undefined && ctx.oppAttackersMap.has(a.sourceUnitId)
+    );
+    if (!touchesAttacker) {
+      return undefined;
+    }
+  }
+
+  return eff.assignments;
+}
+
+/**
+ * ブロック割り当て (UnitAssignment[]) から t14, t15, t16 を計算する共通関数
+ * - 通常ブロックパターン列挙とストリーミング列挙の双方から呼び出される単一の正本実装。
+ * - "v7.1-unified-block-assignment":
+ *   1. 複数アタッカー対応
+ *   2. 単体兵士・複数兵士ブロック（合計サイズ blockerTotalSize vs atkSize の比較: resolveSoldierVsSoldiersCombat 準拠）
+ *   3. 防壁ブロック（ランク一致/Joker によるアタッカー破壊 + ダメージ遮断: resolveSoldierVsBulwarkCombat 準拠）
+ *   4. 未ブロック時の致死ダメージ (t15) および危険域ダメージ比率 (t16)
+ * - "v7.0-legacy-block-stream-only":
+ *   旧ストリーミング実装の単体ループ計算を再現（過去結果の再現性検証用）。
+ */
+export interface BlockTacticalFeatureValues {
+  readonly t14_block_trade_advantage: number;
+  readonly t15_block_unblocked_lethal: number;
+  readonly t16_block_unblocked_danger_ratio: number;
+  readonly reasons: string[];
+}
+
+export function evaluateBlockAssignmentTacticalFeatures(
+  assignments: readonly StreamingBlockAssignmentEntry[],
+  blockContext: BlockTacticalEvaluationContext,
+  encoderVersion: TacticalFeatureEncoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
+  collectReasons: boolean = false
+): BlockTacticalFeatureValues {
+  const { myUnitsMap, oppAttackersMap, selfLife } = blockContext;
+  const reasons: string[] = [];
+
+  if (encoderVersion === "v7.0-legacy-block-stream-only") {
+    let tradeAdvantageUnits = 0;
+    const blockedAttackerIds = new Set<string>();
+
+    for (const assign of assignments) {
+      const attackerUnitId = assign.sourceUnitId;
+      const blockerUnitIds = assign.selectedUnitIds ?? [];
+      if (!attackerUnitId || blockerUnitIds.length === 0) continue;
+
+      blockedAttackerIds.add(attackerUnitId);
+      const atk = oppAttackersMap.get(attackerUnitId);
+      const atkSize = atk?.currentSize ?? 0;
+
+      for (const blockerUnitId of blockerUnitIds) {
+        const blk = myUnitsMap.get(blockerUnitId);
+        const blkSize = blk?.currentSize ?? 0;
+
+        if (blkSize > atkSize) {
+          tradeAdvantageUnits += 1.0;
+        } else if (blkSize === atkSize && blkSize > 0) {
+          tradeAdvantageUnits += 0.5;
+        } else if (blkSize < atkSize) {
+          if (selfLife > 8 && blkSize >= 5) {
+            tradeAdvantageUnits -= 0.75;
+          }
+        }
+      }
+    }
+
+    let unblockedDamage = 0;
+    for (const [atkId, atk] of oppAttackersMap.entries()) {
+      if (!blockedAttackerIds.has(atkId)) {
+        unblockedDamage += atk.currentSize ?? 0;
+      }
+    }
+
+    let f15Lethal = 0;
+    let f16DangerRatio = 0;
+    if (unblockedDamage >= selfLife && selfLife > 0) {
+      f15Lethal = 1.0;
+    } else if (selfLife - unblockedDamage <= 3) {
+      f16DangerRatio = unblockedDamage / Math.max(1, selfLife);
+    }
+
+    return {
+      t14_block_trade_advantage: tradeAdvantageUnits,
+      t15_block_unblocked_lethal: f15Lethal,
+      t16_block_unblocked_danger_ratio: f16DangerRatio,
+      reasons,
+    };
+  }
+
+  // "v7.1-unified-block-assignment"
+  let tradeAdvantageUnits = 0;
+  const blockedAttackerIds = new Set<string>();
+
+  for (const assign of assignments) {
+    const attackerUnitId = assign.sourceUnitId;
+    const blockerUnitIds = assign.selectedUnitIds ?? [];
+    if (!attackerUnitId || blockerUnitIds.length === 0) continue;
+
+    blockedAttackerIds.add(attackerUnitId);
+    const atk = oppAttackersMap.get(attackerUnitId);
+    const atkSize = atk?.currentSize ?? 0;
+
+    const firstBlocker = myUnitsMap.get(blockerUnitIds[0]);
+
+    // (A) 防壁によるブロック (resolveSoldierVsBulwarkCombat 準拠: 防壁は単独で1体のアタッカーをブロック)
+    if (blockerUnitIds.length === 1 && isBulwarkUnitView(firstBlocker)) {
+      if (doesBulwarkDestroyAttacker(firstBlocker!, atk)) {
+        tradeAdvantageUnits += 1.0;
+        if (collectReasons) {
+          reasons.push(
+            `t14_bulwark_destroy(+1.0: blk=${firstBlocker!.unitId} destroys atk=${attackerUnitId})`
+          );
+        }
+      } else if (atkSize > 0) {
+        // ランク不一致でも兵士を失わずにアタッカーのダメージを吸収
+        tradeAdvantageUnits += 0.25;
+        if (collectReasons) {
+          reasons.push(
+            `t14_bulwark_absorb(+0.25: blk=${firstBlocker!.unitId} absorbs atkSize=${atkSize})`
+          );
+        }
+      }
+      continue;
+    }
+
+    // (B) 単体または複数兵士・英雄によるブロック (resolveSoldierVsSoldiersCombat 準拠: ブロッカーの合計サイズ vs アタッカーサイズ)
+    let blockerTotalSize = 0;
+    for (const blockerUnitId of blockerUnitIds) {
+      const blk = myUnitsMap.get(blockerUnitId);
+      blockerTotalSize += blk?.currentSize ?? 0;
+    }
+
+    if (blockerTotalSize > atkSize) {
+      // アタッカーを一方的に撃破し、ブロッカー全員が生存
+      tradeAdvantageUnits += 1.0;
+      if (collectReasons) {
+        reasons.push(
+          `t14_favorable_block(+1.0: sumBlkSize=${blockerTotalSize}>atkSize=${atkSize}, count=${blockerUnitIds.length})`
+        );
+      }
+    } else if (blockerTotalSize === atkSize && blockerTotalSize > 0) {
+      // 相討ち（単体相討ちは +0.5、複数体消費の相討ちはカード枚数損を考慮し +0.25）
+      const eqBonus = blockerUnitIds.length === 1 ? 0.5 : 0.25;
+      tradeAdvantageUnits += eqBonus;
+      if (collectReasons) {
+        reasons.push(
+          `t14_equal_block(+${eqBonus.toFixed(2)}: sumBlkSize=${blockerTotalSize}==atkSize=${atkSize}, count=${blockerUnitIds.length})`
+        );
+      }
+    } else if (blockerTotalSize < atkSize) {
+      // 不利トレード（ブロッカー全員が一方的に破壊され、アタッカーは生存）
+      const unitLossPenalty =
+        selfLife > 8 && blockerTotalSize >= 5
+          ? 0.75 * blockerUnitIds.length
+          : 0.25 * blockerUnitIds.length;
+      tradeAdvantageUnits -= unitLossPenalty;
+      if (collectReasons) {
+        reasons.push(
+          `t14_unfavorable_block(-${unitLossPenalty.toFixed(2)}: sumBlkSize=${blockerTotalSize}<atkSize=${atkSize}, count=${blockerUnitIds.length})`
+        );
+      }
+    }
+  }
+
+  let unblockedDamage = 0;
+  for (const [atkId, atk] of oppAttackersMap.entries()) {
+    if (!blockedAttackerIds.has(atkId)) {
+      unblockedDamage += atk.currentSize ?? 0;
+    }
+  }
+
+  let f15Lethal = 0;
+  let f16DangerRatio = 0;
+  if (unblockedDamage >= selfLife && selfLife > 0) {
+    f15Lethal = 1.0;
+    if (collectReasons) {
+      reasons.push(
+        `t15_block_unblocked_lethal=1.0 (unblockedDmg=${unblockedDamage}>=life=${selfLife})`
+      );
+    }
+  } else if (unblockedDamage > 0 && selfLife - unblockedDamage <= 3) {
+    f16DangerRatio = unblockedDamage / Math.max(1, selfLife);
+    if (collectReasons) {
+      reasons.push(
+        `t16_block_unblocked_danger_ratio=${f16DangerRatio.toFixed(2)} (unblockedDmg=${unblockedDamage}, life=${selfLife})`
+      );
+    }
+  }
+
+  return {
+    t14_block_trade_advantage: tradeAdvantageUnits,
+    t15_block_unblocked_lethal: f15Lethal,
+    t16_block_unblocked_danger_ratio: f16DangerRatio,
+    reasons,
+  };
+}
+
+/**
  * 単一パターンの戦術特徴量ベクトル (20次元) をエンコード
  */
 export function encodeTacticalPatternFeatures(
   request: Readonly<DecisionRequest>,
   pattern: Readonly<LegalPattern>,
-  tacticalEvaluator?: TacticalEvaluator
+  tacticalEvaluator?: TacticalEvaluator,
+  encoderVersion: TacticalFeatureEncoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
+  precomputedBlockContext?: BlockTacticalEvaluationContext
 ): { features: Float64Array; reasons: string[] } {
   const features = new Float64Array(TACTICAL_FEATURE_DIMENSION);
   const reasons: string[] = [];
@@ -558,6 +936,28 @@ export function encodeTacticalPatternFeatures(
   }
 
   // ===========================================================================
+  // カテゴリ 4 (後半): 通常ブロック割り当ての戦術評価 (t14, t15, t16) (Work 5-4A)
+  // ===========================================================================
+  if (encoderVersion === "v7.1-unified-block-assignment") {
+    const blockCtx = precomputedBlockContext ?? createBlockTacticalContext(request);
+    const blockAssignments = extractBlockAssignmentsFromPattern(request, pattern, blockCtx);
+    if (blockAssignments !== undefined) {
+      const blockEval = evaluateBlockAssignmentTacticalFeatures(
+        blockAssignments,
+        blockCtx,
+        encoderVersion,
+        true
+      );
+      features[14] = blockEval.t14_block_trade_advantage;
+      features[15] = blockEval.t15_block_unblocked_lethal;
+      features[16] = blockEval.t16_block_unblocked_danger_ratio;
+      for (const r of blockEval.reasons) {
+        reasons.push(r);
+      }
+    }
+  }
+
+  // ===========================================================================
   // カテゴリ 5: 生存可能性と盤面リソース管理
   // ===========================================================================
   if (selfLife <= 6) {
@@ -583,55 +983,19 @@ export function computeStreamingBlockTacticalScore(
   myUnitsMap: ReadonlyMap<string, UnitView>,
   oppAttackersMap: ReadonlyMap<string, UnitView>,
   selfLife: number,
-  tacticalWeights: readonly number[]
+  tacticalWeights: readonly number[],
+  encoderVersion: TacticalFeatureEncoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT
 ): number {
-  let tradeAdvantageUnits = 0; // R4 weight +0.2 に対して +1.0 = +0.2, +0.5 = +0.1, -0.75 = -0.15
-  const blockedAttackerIds = new Set<string>();
-
-  for (const assign of assignments) {
-    const attackerUnitId = assign.sourceUnitId;
-    const blockerUnitIds = assign.selectedUnitIds ?? [];
-    if (!attackerUnitId || blockerUnitIds.length === 0) continue;
-
-    blockedAttackerIds.add(attackerUnitId);
-    const atk = oppAttackersMap.get(attackerUnitId);
-    const atkSize = atk?.currentSize ?? 0;
-
-    for (const blockerUnitId of blockerUnitIds) {
-      const blk = myUnitsMap.get(blockerUnitId);
-      const blkSize = blk?.currentSize ?? 0;
-
-      if (blkSize > atkSize) {
-        tradeAdvantageUnits += 1.0;
-      } else if (blkSize === atkSize && blkSize > 0) {
-        tradeAdvantageUnits += 0.5;
-      } else if (blkSize < atkSize) {
-        if (selfLife > 8 && blkSize >= 5) {
-          tradeAdvantageUnits -= 0.75;
-        }
-      }
-    }
-  }
-
-  let unblockedDamage = 0;
-  for (const [atkId, atk] of oppAttackersMap.entries()) {
-    if (!blockedAttackerIds.has(atkId)) {
-      unblockedDamage += atk.currentSize ?? 0;
-    }
-  }
-
-  let f15Lethal = 0;
-  let f16DangerRatio = 0;
-  if (unblockedDamage >= selfLife && selfLife > 0) {
-    f15Lethal = 1.0;
-  } else if (selfLife - unblockedDamage <= 3) {
-    f16DangerRatio = unblockedDamage / Math.max(1, selfLife);
-  }
-
+  const blockEval = evaluateBlockAssignmentTacticalFeatures(
+    assignments,
+    { myUnitsMap, oppAttackersMap, selfLife },
+    encoderVersion,
+    false
+  );
   return (
-    tacticalWeights[14] * tradeAdvantageUnits +
-    tacticalWeights[15] * f15Lethal +
-    tacticalWeights[16] * f16DangerRatio
+    tacticalWeights[14] * blockEval.t14_block_trade_advantage +
+    tacticalWeights[15] * blockEval.t15_block_unblocked_lethal +
+    tacticalWeights[16] * blockEval.t16_block_unblocked_danger_ratio
   );
 }
 
@@ -705,11 +1069,13 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
   public readonly descriptor: PolicyDescriptor;
   private readonly genome: Gen9TacticalGenome;
   private readonly tacticalEvaluator?: TacticalEvaluator;
+  private readonly encoderVersion: TacticalFeatureEncoderVersion;
 
   constructor(
     genomeOrDNA: Readonly<Gen9TacticalGenome> | Readonly<DecisionDNA>,
     name?: string,
-    evaluator?: TacticalEvaluator
+    evaluator?: TacticalEvaluator,
+    encoderVersionOverride?: TacticalFeatureEncoderVersion
   ) {
     if ("tacticalSchemaVersion" in genomeOrDNA) {
       DecisionDNACodec.validate(genomeOrDNA.baseDNA);
@@ -723,6 +1089,11 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
       this.genome = fromV6CompatibleDNA(genomeOrDNA, "r4");
     }
 
+    this.encoderVersion =
+      encoderVersionOverride ??
+      this.genome.metadata?.encoderVersion ??
+      TACTICAL_FEATURE_ENCODER_VERSION_CURRENT;
+
     this.tacticalEvaluator = evaluator ?? Gen9TacticalPrototypePolicy.getDefaultEvaluator();
 
     this.descriptor = {
@@ -733,6 +1104,7 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
         dnaFormatVersion: this.genome.baseDNA.dnaFormatVersion,
         featureSchemaVersion: this.genome.baseDNA.featureSchemaVersion,
         tacticalSchemaVersion: this.genome.tacticalSchemaVersion,
+        tacticalFeatureEncoderVersion: this.encoderVersion,
         scoringModel: "linear_interaction_v6_plus_learnable_tactical_v7",
         dnaId: this.genome.metadata?.id ?? this.genome.baseDNA.metadata?.id,
         dnaName: this.genome.metadata?.name ?? this.genome.baseDNA.metadata?.name,
@@ -742,6 +1114,10 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
 
   public getGenome(): Gen9TacticalGenome {
     return cloneTacticalGenome(this.genome);
+  }
+
+  public getEncoderVersion(): TacticalFeatureEncoderVersion {
+    return this.encoderVersion;
   }
 
   public getTacticalWeights(): readonly number[] {
@@ -770,28 +1146,97 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
     };
   }
 
+  /**
+   * ストリーミングまたは単一のブロック割り当て (UnitAssignment[]) に対する詳細な評価内訳を O(1) メモリで取得
+   */
+  public evaluateSingleBlockAssignment(
+    request: Readonly<DecisionRequest>,
+    assignments: readonly StreamingBlockAssignmentEntry[],
+    patternRef: number = 0,
+    precomputedContextValues?: readonly number[],
+    precomputedEncoderContext?: ReturnType<typeof DecisionFeatureEncoder.createBlockAssignmentEncoderContext>,
+    precomputedBlockContext?: BlockTacticalEvaluationContext
+  ): LearnableTacticalEvaluationDetail {
+    const contextValues =
+      precomputedContextValues ?? this.encodeAlignedStreamingContext(request);
+    const encoderContext =
+      precomputedEncoderContext ??
+      DecisionFeatureEncoder.createBlockAssignmentEncoderContext(request);
+    const blockContext =
+      precomputedBlockContext ?? createBlockTacticalContext(request);
+
+    const candidateCount =
+      request.blockAssignmentStream?.candidateCount ??
+      request.blockAssignmentStreamMeta?.candidateBlockerUnitIds.length ??
+      request.catalog?.effectSelections?.[0]?.candidateCount ??
+      0;
+
+    const pValues = DecisionFeatureEncoder.encodeBlockAssignmentValues(
+      assignments as readonly UnitAssignment[],
+      candidateCount,
+      encoderContext
+    );
+    const baseScore = GenomeScorer.scoreSinglePattern(
+      contextValues,
+      pValues,
+      this.genome.baseDNA
+    );
+
+    const features = new Float64Array(TACTICAL_FEATURE_DIMENSION);
+    const blockEval = evaluateBlockAssignmentTacticalFeatures(
+      assignments,
+      blockContext,
+      this.encoderVersion,
+      true
+    );
+    features[14] = blockEval.t14_block_trade_advantage;
+    features[15] = blockEval.t15_block_unblocked_lethal;
+    features[16] = blockEval.t16_block_unblocked_danger_ratio;
+
+    const breakdown = computeCategoryBreakdown(
+      baseScore,
+      features,
+      this.genome.tacticalWeights
+    );
+
+    return {
+      patternRef,
+      baseScore,
+      tacticalAdjustment: breakdown.totalTacticalScore,
+      finalScore: breakdown.finalScore,
+      tacticalFeatures: Array.from(features),
+      categoryBreakdown: breakdown,
+      reason: blockEval.reasons.length > 0 ? blockEval.reasons.join("; ") : undefined,
+    };
+  }
+
+  /**
+   * ストリーミング時 (request.patterns.length === 0) に通常列挙時と同一のパターン数文脈特徴量 (index 8, 11, 12) を設定
+   */
+  private encodeAlignedStreamingContext(request: Readonly<DecisionRequest>): number[] {
+    const contextValues = [...DecisionFeatureEncoder.encodeContextOnly(request)];
+    if (
+      this.encoderVersion === "v7.1-unified-block-assignment" &&
+      request.patterns.length === 0 &&
+      request.blockAssignmentStream
+    ) {
+      const n = request.blockAssignmentStream.patternCount;
+      const scaledCount = n <= 0 ? 0 : n / (n + 50);
+      contextValues[8] = scaledCount;  // legal_pattern_count
+      contextValues[11] = scaledCount; // legal_effect_selection_pattern_count
+      contextValues[12] = scaledCount; // legal_non_pass_pattern_count
+    }
+    return contextValues;
+  }
+
   private chooseStreamingWithLearnableTactics(request: Readonly<DecisionRequest>): DecisionResponse {
     const stream = request.blockAssignmentStream!;
     if (stream.patternCount === 0) {
       throw new Error(`DecisionRequest に選択可能なパターンが存在しません: ${request.decisionId}`);
     }
 
-    const obs = request.observation;
-    const selfKey = request.playerId;
-    const selfView = obs.players.find((p) => p.playerId === selfKey) ?? obs.players.find((p) => p.isViewer);
-    const oppView = obs.players.find((p) => p.playerId !== selfKey) ?? obs.players.find((p) => !p.isViewer);
-    const selfLife = selfView?.lifeCount ?? 15;
-
-    const myUnitsMap = new Map<string, UnitView>();
-    for (const u of selfView?.field ?? []) myUnitsMap.set(u.unitId, u);
-    for (const u of selfView?.trumps ?? []) myUnitsMap.set(u.unitId, u);
-
-    const oppAttackersMap = new Map<string, UnitView>();
-    for (const u of oppView?.field ?? []) {
-      if (u.battle?.role === "attacker") oppAttackersMap.set(u.unitId, u);
-    }
-
-    const contextValues = DecisionFeatureEncoder.encodeContextOnly(request);
+    const blockContext = createBlockTacticalContext(request);
+    const contextValues = this.encodeAlignedStreamingContext(request);
     const encoderContext = DecisionFeatureEncoder.createBlockAssignmentEncoderContext(request);
     const weights = this.genome.tacticalWeights;
     const hasBlockTacticalWeights =
@@ -809,15 +1254,19 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
       );
       const baseScore = GenomeScorer.scoreSinglePattern(contextValues, pValues, this.genome.baseDNA);
 
-      const tacticalAdj = hasBlockTacticalWeights
-        ? computeStreamingBlockTacticalScore(
-            assignments,
-            myUnitsMap,
-            oppAttackersMap,
-            selfLife,
-            weights
-          )
-        : 0;
+      let tacticalAdj = 0;
+      if (hasBlockTacticalWeights) {
+        const blockEval = evaluateBlockAssignmentTacticalFeatures(
+          assignments,
+          blockContext,
+          this.encoderVersion,
+          false
+        );
+        tacticalAdj =
+          weights[14] * blockEval.t14_block_trade_advantage +
+          weights[15] * blockEval.t15_block_unblocked_lethal +
+          weights[16] * blockEval.t16_block_unblocked_danger_ratio;
+      }
 
       const finalScore = baseScore + tacticalAdj;
       if (finalScore > bestScore) {
@@ -844,6 +1293,10 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
     const patterns = request.patterns;
     const details: LearnableTacticalEvaluationDetail[] = [];
     const weights = this.genome.tacticalWeights;
+    const blockContext =
+      this.encoderVersion === "v7.1-unified-block-assignment"
+        ? createBlockTacticalContext(request)
+        : undefined;
 
     let bestScore = -Infinity;
     let bestPatternRef = baseScored[0]?.patternRef ?? 0;
@@ -855,7 +1308,9 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
       const { features, reasons } = encodeTacticalPatternFeatures(
         request,
         pat,
-        this.tacticalEvaluator
+        this.tacticalEvaluator,
+        this.encoderVersion,
+        blockContext
       );
       const breakdown = computeCategoryBreakdown(sp.score, features, weights);
 
