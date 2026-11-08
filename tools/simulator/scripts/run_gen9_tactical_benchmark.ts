@@ -79,17 +79,39 @@ export class Gen9TacticalPrototypePolicyR1 implements DecisionPolicy {
       throw new Error(`DecisionRequest に選択可能なパターンが存在しません: ${request.decisionId}`);
     }
 
+    const evaluation = this.evaluatePatterns(request);
+
+    return {
+      decisionId: request.decisionId,
+      stateVersion: request.stateVersion,
+      selectedPatternRef: evaluation.bestPatternRef,
+    };
+  }
+
+  public evaluatePatterns(request: Readonly<DecisionRequest>): {
+    scoredPatterns: { patternRef: number; baseScore: number; tacticalAdjustment: number; finalScore: number }[];
+    bestPatternRef: number;
+  } {
+    const patterns = request.patterns;
     const encodedFeatures = DecisionFeatureEncoder.encode(request);
     const baseScored = GenomeScorer.score(encodedFeatures, this.dna);
 
     let bestScore = -Infinity;
     let bestPatternRef = baseScored[0]?.patternRef ?? 0;
+    const scoredPatterns: { patternRef: number; baseScore: number; tacticalAdjustment: number; finalScore: number }[] = [];
 
     for (let i = 0; i < baseScored.length; i++) {
       const sp = baseScored[i];
       const pat = patterns[sp.patternRef];
       const { adjustment } = this.calculateTacticalAdjustmentR1(request, pat);
       const finalScore = sp.score + adjustment;
+
+      scoredPatterns.push({
+        patternRef: sp.patternRef,
+        baseScore: sp.score,
+        tacticalAdjustment: adjustment,
+        finalScore,
+      });
 
       if (finalScore > bestScore) {
         bestScore = finalScore;
@@ -98,9 +120,8 @@ export class Gen9TacticalPrototypePolicyR1 implements DecisionPolicy {
     }
 
     return {
-      decisionId: request.decisionId,
-      stateVersion: request.stateVersion,
-      selectedPatternRef: bestPatternRef,
+      scoredPatterns,
+      bestPatternRef,
     };
   }
 
@@ -445,7 +466,7 @@ async function runVariantForOpponent(params: {
     const setup0 = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, matchSeed, {
       playerNames: { p1: variantId, p2: opp.name },
     });
-    const session0 = new GameSession(setup0.state, rulePackage, { matchSeed });
+    const session0 = new GameSession((setup0 as any).state, rulePackage, { matchSeed });
     const simRes0 = SimulationRunner.run(session0, { p1: candPolicy0, p2: oppPolicy0 }, { maxDecisions: 1000 });
 
     const leg0Won = simRes0.winner === "p1";
@@ -491,7 +512,7 @@ async function runVariantForOpponent(params: {
     const setup1 = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, matchSeed, {
       playerNames: { p1: opp.name, p2: variantId },
     });
-    const session1 = new GameSession(setup1.state, rulePackage, { matchSeed });
+    const session1 = new GameSession((setup1 as any).state, rulePackage, { matchSeed });
     const simRes1 = SimulationRunner.run(session1, { p1: oppPolicy1, p2: candPolicy1 }, { maxDecisions: 1000 });
 
     const leg1Won = simRes1.winner === "p2";
@@ -791,7 +812,14 @@ async function main() {
   console.log(`\n=> A/B比較ベンチマーク結果JSON保存完了: ${outPath}`);
 }
 
-main().catch((err) => {
-  console.error("Benchmark failed:", err);
-  process.exit(1);
-});
+const isMainModule =
+  typeof process !== "undefined" &&
+  process.argv[1] &&
+  process.argv[1].replace(/\\/g, "/").includes("run_gen9_tactical_benchmark");
+
+if (isMainModule) {
+  main().catch((err) => {
+    console.error("Benchmark failed:", err);
+    process.exit(1);
+  });
+}
