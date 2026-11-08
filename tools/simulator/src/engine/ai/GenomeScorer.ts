@@ -1,5 +1,9 @@
 import { DecisionDNA, DecisionDNAExecutionError } from "../../domain/ai/DecisionDNATypes";
-import { EncodedDecisionFeatures } from "../../domain/ai/DecisionFeatureTypes";
+import {
+  EncodedDecisionFeatures,
+  CONTEXT_FEATURE_NAMES,
+  PATTERN_FEATURE_NAMES,
+} from "../../domain/ai/DecisionFeatureTypes";
 
 /**
  * スコアリングされた単一合法手の結果
@@ -9,6 +13,45 @@ export interface ScoredPattern {
   readonly kind: string;
   readonly logicalPatternKey?: string;
   readonly score: number;
+}
+
+/**
+ * 単一特徴量の線形重み寄与
+ */
+export interface FeatureContribution {
+  readonly index: number;
+  readonly name: string;
+  readonly value: number;
+  readonly weight: number;
+  readonly contribution: number;
+}
+
+/**
+ * Context-Pattern 相互作用の寄与
+ */
+export interface InteractionContribution {
+  readonly contextIndex: number;
+  readonly contextName: string;
+  readonly contextValue: number;
+  readonly patternIndex: number;
+  readonly patternName: string;
+  readonly patternValue: number;
+  readonly weight: number;
+  readonly contribution: number;
+}
+
+/**
+ * 合法手のスコア詳細内訳（デバッグ・分析用）
+ */
+export interface ScoreExplanation {
+  readonly patternRef: number;
+  readonly kind: string;
+  readonly logicalPatternKey?: string;
+  readonly totalScore: number;
+  readonly linearScore: number;
+  readonly interactionScore: number;
+  readonly linearContributions: readonly FeatureContribution[];
+  readonly interactionContributions: readonly InteractionContribution[];
 }
 
 /**
@@ -140,5 +183,109 @@ export class GenomeScorer {
     }
 
     return score;
+  }
+
+  /**
+   * 合法手のスコアを特徴量別に詳細分解して説明を生成する（デバッグ・分析用）
+   */
+  public static explainScore(
+    features: Readonly<EncodedDecisionFeatures>,
+    dna: Readonly<DecisionDNA>,
+    targetPatternRef?: number
+  ): ScoreExplanation[] {
+    if (dna.featureSchemaVersion !== features.featureSchemaVersion) {
+      throw new DecisionDNAExecutionError(
+        `FeatureSchemaVersion 不一致: DNA=${dna.featureSchemaVersion}, Features=${features.featureSchemaVersion}`
+      );
+    }
+
+    const contextValues = features.context.values;
+    const patterns = features.patterns;
+    const pWeights = dna.patternWeights;
+    const cpWeights = dna.contextPatternWeights;
+    const pDim = dna.patternDimension;
+    const cDim = dna.contextDimension;
+
+    const explanations: ScoreExplanation[] = [];
+
+    for (let pIdx = 0; pIdx < patterns.length; pIdx++) {
+      const pat = patterns[pIdx];
+      if (targetPatternRef !== undefined && pat.patternRef !== targetPatternRef) {
+        continue;
+      }
+
+      const pValues = pat.values;
+      const linearContributions: FeatureContribution[] = [];
+      const interactionContributions: InteractionContribution[] = [];
+
+      let linearScore = 0;
+      let interactionScore = 0;
+
+      // 1. Pattern Linear Weights
+      for (let j = 0; j < pDim; j++) {
+        const p_j = pValues[j] ?? 0;
+        const w_j = pWeights[j] ?? 0;
+        const contrib = w_j * p_j;
+        linearScore += contrib;
+
+        if (contrib !== 0 || (p_j !== 0 && w_j !== 0)) {
+          linearContributions.push({
+            index: j,
+            name: PATTERN_FEATURE_NAMES[j] ?? `p_${j}`,
+            value: p_j,
+            weight: w_j,
+            contribution: contrib,
+          });
+        }
+      }
+
+      // 2. Context-Pattern Interaction
+      for (let i = 0; i < cDim; i++) {
+        const c_i = contextValues[i] ?? 0;
+        if (c_i === 0) continue;
+
+        const rowOffset = i * pDim;
+        for (let j = 0; j < pDim; j++) {
+          const p_j = pValues[j] ?? 0;
+          if (p_j === 0) continue;
+
+          const m_ij = cpWeights[rowOffset + j] ?? 0;
+          const contrib = m_ij * c_i * p_j;
+          interactionScore += contrib;
+
+          if (contrib !== 0) {
+            interactionContributions.push({
+              contextIndex: i,
+              contextName: CONTEXT_FEATURE_NAMES[i] ?? `c_${i}`,
+              contextValue: c_i,
+              patternIndex: j,
+              patternName: PATTERN_FEATURE_NAMES[j] ?? `p_${j}`,
+              patternValue: p_j,
+              weight: m_ij,
+              contribution: contrib,
+            });
+          }
+        }
+      }
+
+      const totalScore = linearScore + interactionScore;
+
+      // 寄与の絶対値降順でソート
+      linearContributions.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
+      interactionContributions.sort((a, b) => Math.abs(b.contribution) - Math.abs(a.contribution));
+
+      explanations.push({
+        patternRef: pat.patternRef,
+        kind: pat.kind,
+        logicalPatternKey: pat.logicalPatternKey,
+        totalScore,
+        linearScore,
+        interactionScore,
+        linearContributions,
+        interactionContributions,
+      });
+    }
+
+    return explanations;
   }
 }
