@@ -23,11 +23,22 @@ import {
   fromV6DNA,
   toV6CompatibleDNA,
   fromV6CompatibleDNA,
+  isEvolvedOffspring,
+  isHandDesignedG0,
 } from "../../engine/ai/Gen9LearnableTacticalPolicy.js";
 import { GenericTacticalEvaluator } from "../../engine/rules/GenericTacticalEvaluator.js";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader.js";
 import { createGen8ChampionCandidatePolicy } from "../../engine/ai/Gen8DNALoader.js";
+import { SeededRandom } from "../../engine/random/RandomSource.js";
 import { Gen9TacticalPrototypePolicyR1 } from "../../../scripts/run_gen9_tactical_benchmark.js";
+import {
+  createInitialPopulationG0,
+  breedEvolvedOffspring,
+  selectBestCandidatesByOrigin,
+  assertSafeSeedRange,
+  computeWeightsL1Distance,
+  IndividualProvenanceRecord,
+} from "../../../scripts/run_gen9_pilot_evolution.js";
 
 describe("Work 5-2: R1/R4意思決定比較検証 & Gen9LearnableTacticalPolicy 独立評価・互換性テスト", () => {
   let evaluator: GenericTacticalEvaluator;
@@ -815,6 +826,131 @@ describe("Work 5-2: R1/R4意思決定比較検証 & Gen9LearnableTacticalPolicy 
       // Summon (selfLife=5 <= 6): SURVIVAL のみ非ゼロ (+0.1)
       expect(summonDetail.categoryBreakdown.SURVIVAL).toBeCloseTo(+0.1, 10);
       expect(summonDetail.categoryBreakdown.LETHAL_OPPORTUNITY).toBe(0);
+    });
+  });
+
+  // ===========================================================================
+  // 4. Work 5-2 R2: 初期個体と進化個体の由来区別・世代間公平選抜・禁止Seed保護検証
+  // ===========================================================================
+  describe("4. Work 5-2 R2: 個体由来(Provenance)の厳格な区別と世代間公平選抜の検証", () => {
+    it("Work 5-2 R1の採用個体(gen9-g0-ind7-survival-trade)がG0人手設計個体(HAND_DESIGNED_G0)であり、G1以降の進化個体(EVOLVED_OFFSPRING)と厳格に区別される", () => {
+      const g0Pop = createInitialPopulationG0(gen8DNA);
+      const r1Best = g0Pop.find((g) => g.metadata?.id === "gen9-g0-ind7-survival-trade")!;
+      expect(r1Best).toBeDefined();
+      expect(r1Best.metadata?.originType).toBe("HAND_DESIGNED_G0");
+      expect(r1Best.metadata?.createdGeneration).toBe(0);
+      expect(isHandDesignedG0(r1Best)).toBe(true);
+      expect(isEvolvedOffspring(r1Best)).toBe(false);
+
+      // G1〜G3 で生成された子個体は必ず EVOLVED_OFFSPRING であり、G0 のどの初期重みとも異なる
+      const rng = new SeededRandom(123456);
+      for (const gen of [1, 2, 3]) {
+        const child = breedEvolvedOffspring(g0Pop[4], g0Pop[5], g0Pop, rng, gen, 3, 1.0);
+        expect(child.metadata?.originType).toBe("EVOLVED_OFFSPRING");
+        expect(child.metadata?.createdGeneration).toBe(gen);
+        expect(isEvolvedOffspring(child)).toBe(true);
+        expect(isHandDesignedG0(child)).toBe(false);
+        expect(child.metadata?.parentIds).toEqual([
+          "gen9-g0-ind5-lethal-guard-focused",
+          "gen9-g0-ind7-survival-trade",
+        ]);
+        for (const g0 of g0Pop) {
+          expect(computeWeightsL1Distance(child.tacticalWeights, g0.tacticalWeights)).toBeGreaterThan(0.05);
+        }
+
+        // Schema v6 往復変換後も originType と createdGeneration が無損失で保持される
+        const v6 = toV6CompatibleDNA(child);
+        const restored = fromV6CompatibleDNA(v6);
+        expect(restored.metadata?.originType).toBe("EVOLVED_OFFSPRING");
+        expect(restored.metadata?.createdGeneration).toBe(gen);
+        expect(isEvolvedOffspring(restored)).toBe(true);
+      }
+    });
+
+    it("selectBestCandidatesByOrigin は同一Selection Seedで評価された候補のみを受け付け、G0人手設計最良とG1+進化最良を混同せず分離選抜する", () => {
+      const mockRec = (overrides: Partial<IndividualProvenanceRecord>): IndividualProvenanceRecord => ({
+        individualId: "id",
+        individualName: "name",
+        originType: "HAND_DESIGNED_G0",
+        isHandDesignedInitial: true,
+        isEvolvedOffspring: false,
+        createdGeneration: 0,
+        evaluatedGeneration: 4,
+        parentIds: ["gen8-prod-g0-ind7-cross7"],
+        minL1DistanceFromG0Presets: 0,
+        modifiedFeaturesFromPrimaryParent: 0,
+        tacticalWeights: [...R4_PRESET_TACTICAL_WEIGHTS],
+        evaluationPhase: "FAIR_SELECTION_ARENA",
+        evaluationSeedRange: "740001-740064",
+        fitnessScore: 55.0,
+        overallWinRatePct: 55.0,
+        vsGen8WinRatePct: 55.0,
+        vsR4WinRatePct: 55.0,
+        vsGen7WinRatePct: 55.0,
+        totalMatches: 100,
+        totalExceptions: 0,
+        avgTimeUsPerDecision: 2500,
+        evalWallTimeMs: 1000,
+        ...overrides,
+      });
+
+      const records: IndividualProvenanceRecord[] = [
+        mockRec({
+          individualId: "gen9-g0-ind7-survival-trade",
+          originType: "HAND_DESIGNED_G0",
+          isHandDesignedInitial: true,
+          isEvolvedOffspring: false,
+          createdGeneration: 0,
+          fitnessScore: 62.0,
+        }),
+        mockRec({
+          individualId: "gen9-g0-ind5-lethal-guard-focused",
+          originType: "HAND_DESIGNED_G0",
+          isHandDesignedInitial: true,
+          isEvolvedOffspring: false,
+          createdGeneration: 0,
+          fitnessScore: 59.0,
+        }),
+        mockRec({
+          individualId: "gen9-evolved-g2-ind4",
+          originType: "EVOLVED_OFFSPRING",
+          isHandDesignedInitial: false,
+          isEvolvedOffspring: true,
+          createdGeneration: 2,
+          parentIds: ["gen9-g0-ind5-lethal-guard-focused", "gen9-g0-ind7-survival-trade"],
+          minL1DistanceFromG0Presets: 0.45,
+          modifiedFeaturesFromPrimaryParent: 7,
+          fitnessScore: 61.5,
+        }),
+      ];
+
+      const selected = selectBestCandidatesByOrigin(records);
+      // G0 のスコア (62.0) が高くても、bestEvolvedOffspring には絶対に G0 個体が混入しない
+      expect(selected.bestHandDesignedG0.individualId).toBe("gen9-g0-ind7-survival-trade");
+      expect(selected.bestHandDesignedG0.originType).toBe("HAND_DESIGNED_G0");
+      expect(selected.bestEvolvedOffspring.individualId).toBe("gen9-evolved-g2-ind4");
+      expect(selected.bestEvolvedOffspring.originType).toBe("EVOLVED_OFFSPRING");
+      expect(selected.bestEvolvedOffspring.createdGeneration).toBe(2);
+
+      // 異なる Seed 範囲のスコアが混在している場合は例外を投げて不正な世代間比較を拒否する
+      expect(() =>
+        selectBestCandidatesByOrigin([
+          records[0],
+          mockRec({ ...records[2], evaluationSeedRange: "730001-730064" }),
+        ])
+      ).toThrow(/世代間選抜の公平性違反/);
+    });
+
+    it("assertSafeSeedRange は Validation Seeds (720001〜720050)、正式Holdout、正本診断Seedの使用を確実にブロックする", () => {
+      expect(() => assertSafeSeedRange("Train", 730001, 350)).not.toThrow();
+      expect(() => assertSafeSeedRange("Selection", 740001, 100)).not.toThrow();
+      expect(() => assertSafeSeedRange("Final", 750001, 100)).not.toThrow();
+
+      expect(() => assertSafeSeedRange("ForbiddenR1Val", 720010, 10)).toThrow(/SEED_VIOLATION/);
+      expect(() => assertSafeSeedRange("ForbiddenHoldout1", 95001, 5)).toThrow(/SEED_VIOLATION/);
+      expect(() => assertSafeSeedRange("ForbiddenHoldout2", 250050, 10)).toThrow(/SEED_VIOLATION/);
+      expect(() => assertSafeSeedRange("ForbiddenHoldout3", 350100, 10)).toThrow(/SEED_VIOLATION/);
+      expect(() => assertSafeSeedRange("ForbiddenDiag", 4127992094, 1)).toThrow(/SEED_VIOLATION/);
     });
   });
 });

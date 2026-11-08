@@ -148,6 +148,17 @@ export const R4_PRESET_TACTICAL_WEIGHTS: readonly number[] = Object.freeze([
 ]);
 
 /**
+ * 個体の由来区分 (Work 5-2 R2)
+ * - HAND_DESIGNED_G0: G0 で人手設計された初期重み個体
+ * - EVOLVED_OFFSPRING: G1 以降に親個体の交叉・突然変異によって生成された進化個体
+ * - V6_BASELINE: 戦術重みゼロの既存 Schema v6 ベースライン個体
+ */
+export type TacticalGenomeOriginType =
+  | "HAND_DESIGNED_G0"
+  | "EVOLVED_OFFSPRING"
+  | "V6_BASELINE";
+
+/**
  * Gen 9 戦術統合 Genome 構造 (Schema v7 Tactical Extension)
  */
 export interface Gen9TacticalGenome {
@@ -158,9 +169,36 @@ export interface Gen9TacticalGenome {
     readonly id?: string;
     readonly name?: string;
     readonly generation?: number;
+    readonly createdGeneration?: number;
+    readonly originType?: TacticalGenomeOriginType;
     readonly parentIds?: readonly string[];
     readonly notes?: string;
   };
+}
+
+/**
+ * G1以降に交叉・突然変異で生成された進化個体であるかを厳格判定
+ */
+export function isEvolvedOffspring(genome: Readonly<Gen9TacticalGenome>): boolean {
+  const meta = genome.metadata;
+  if (!meta) return false;
+  const createdGen = meta.createdGeneration ?? meta.generation ?? 0;
+  return (
+    meta.originType === "EVOLVED_OFFSPRING" &&
+    createdGen >= 1 &&
+    Array.isArray(meta.parentIds) &&
+    meta.parentIds.length >= 1
+  );
+}
+
+/**
+ * G0で人手設計された初期重み個体であるかを厳格判定
+ */
+export function isHandDesignedG0(genome: Readonly<Gen9TacticalGenome>): boolean {
+  const meta = genome.metadata;
+  if (!meta) return false;
+  const createdGen = meta.createdGeneration ?? meta.generation ?? 0;
+  return meta.originType === "HAND_DESIGNED_G0" && createdGen === 0;
 }
 
 /**
@@ -216,10 +254,15 @@ export function fromV6DNA(
     weights = [...preset];
   }
 
+  const defaultOrigin: TacticalGenomeOriginType =
+    preset === "zero" ? "V6_BASELINE" : "HAND_DESIGNED_G0";
+
   const defaultMeta: Record<string, any> = {
     id: dna.metadata?.id ? `${dna.metadata.id}-tactical-v7` : "gen9-tactical-v7",
     name: dna.metadata?.name ? `${dna.metadata.name} (Tactical v7)` : "Gen9TacticalGenome",
-    generation: dna.metadata?.generation ?? 9,
+    generation: dna.metadata?.generation ?? 0,
+    createdGeneration: 0,
+    originType: defaultOrigin,
   };
   if (dna.metadata?.id) {
     defaultMeta.parentIds = [dna.metadata.id];
@@ -231,6 +274,21 @@ export function fromV6DNA(
     if (metadata.id !== undefined) m.id = metadata.id;
     if (metadata.name !== undefined) m.name = metadata.name;
     if (metadata.generation !== undefined) m.generation = metadata.generation;
+    if (metadata.createdGeneration !== undefined) {
+      m.createdGeneration = metadata.createdGeneration;
+    } else if (metadata.generation !== undefined) {
+      m.createdGeneration = metadata.generation;
+    }
+    if (metadata.originType !== undefined) {
+      m.originType = metadata.originType;
+    } else {
+      m.originType =
+        (m.createdGeneration ?? 0) >= 1
+          ? "EVOLVED_OFFSPRING"
+          : preset === "zero"
+            ? "V6_BASELINE"
+            : "HAND_DESIGNED_G0";
+    }
     if (metadata.parentIds !== undefined) m.parentIds = [...metadata.parentIds];
     if (metadata.notes !== undefined) m.notes = metadata.notes;
     cleanMeta = m;
@@ -257,6 +315,8 @@ export function toV6CompatibleDNA(genome: Readonly<Gen9TacticalGenome>): Decisio
     notes: JSON.stringify({
       tacticalSchemaVersion: genome.tacticalSchemaVersion,
       tacticalWeights: [...genome.tacticalWeights],
+      originType: genome.metadata?.originType,
+      createdGeneration: genome.metadata?.createdGeneration ?? genome.metadata?.generation,
       userNotes: genome.metadata?.notes ?? cloned.metadata?.notes,
     }),
   };
@@ -304,6 +364,14 @@ export function fromV6CompatibleDNA(
           id: typeof dna.metadata.id === "string" ? dna.metadata.id : undefined,
           name: typeof dna.metadata.name === "string" ? dna.metadata.name : undefined,
           generation: typeof dna.metadata.generation === "number" ? dna.metadata.generation : undefined,
+          createdGeneration:
+            typeof parsed.createdGeneration === "number" ? parsed.createdGeneration : undefined,
+          originType:
+            parsed.originType === "HAND_DESIGNED_G0" ||
+            parsed.originType === "EVOLVED_OFFSPRING" ||
+            parsed.originType === "V6_BASELINE"
+              ? parsed.originType
+              : undefined,
           parentIds,
           notes: typeof parsed.userNotes === "string" ? parsed.userNotes : undefined,
         });
@@ -325,6 +393,9 @@ export function cloneTacticalGenome(genome: Readonly<Gen9TacticalGenome>): Gen9T
     if (genome.metadata.id !== undefined) m.id = genome.metadata.id;
     if (genome.metadata.name !== undefined) m.name = genome.metadata.name;
     if (genome.metadata.generation !== undefined) m.generation = genome.metadata.generation;
+    if (genome.metadata.createdGeneration !== undefined)
+      m.createdGeneration = genome.metadata.createdGeneration;
+    if (genome.metadata.originType !== undefined) m.originType = genome.metadata.originType;
     if (genome.metadata.parentIds !== undefined) m.parentIds = [...genome.metadata.parentIds];
     if (genome.metadata.notes !== undefined) m.notes = genome.metadata.notes;
     cleanMeta = m;

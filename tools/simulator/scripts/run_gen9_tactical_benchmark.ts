@@ -814,8 +814,8 @@ async function main() {
 
 const isMainModule =
   typeof process !== "undefined" &&
-  process.argv[1] &&
-  process.argv[1].replace(/\\/g, "/").includes("run_gen9_tactical_benchmark");
+  Array.isArray(process.argv) &&
+  process.argv.some((arg) => arg.replace(/\\/g, "/").includes("run_gen9_tactical_benchmark"));
 
 if (isMainModule) {
   main().catch((err) => {
