@@ -31,6 +31,8 @@ export interface TacticalValueRange {
   readonly expected: number;
   /** 公開情報のみで確定的に単一値として決まっているか (min === max === expected) */
   readonly isCertain: boolean;
+  /** 未対応の変数・式・対象情報により評価不能 (UNKNOWN) かどうか */
+  readonly isUnknown?: boolean;
 }
 
 /**
@@ -42,7 +44,9 @@ export type TacticalConditionStatus =
   /** 確定不発 (公開情報から条件が偽であることが確定。後続効果は発動しない) */
   | "CERTAIN_UNSATISFIED"
   /** 不確実 (非公開カードや未解決選択肢に依存し、成立・不発の双方が起こりうる) */
-  | "UNCERTAIN";
+  | "UNCERTAIN"
+  /** 評価不能 (未知の変数・式・対象情報が含まれるため判定不能) */
+  | "UNKNOWN";
 
 /**
  * リクエストに対する戦術損害・影響の評価結果
@@ -84,7 +88,7 @@ export interface TacticalRequestOutcome {
  */
 export interface TacticalCounterOutcome {
   /** カウンター条件の成立状態 */
-  readonly cancelStatus: "CERTAIN_CANCEL" | "UNCERTAIN_CANCEL" | "CANNOT_CANCEL";
+  readonly cancelStatus: "CERTAIN_CANCEL" | "UNCERTAIN_CANCEL" | "CANNOT_CANCEL" | "UNKNOWN_CANCEL";
 
   /** 阻止できる損害の範囲 */
   readonly preventedDamageToSelf: TacticalValueRange;

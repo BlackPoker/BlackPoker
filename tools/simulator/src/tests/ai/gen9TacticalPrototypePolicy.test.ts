@@ -551,5 +551,208 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
       expect(outcome.netDamageToSelf.expected).toBe(15); // コード変更なしで 15 点ダメージを自動導出！
       expect(outcome.netDamageToSelf.isCertain).toBe(true);
     });
+
+    it("6-4. 未知のアクション (RulePackage未定義) は確定0ダメージと混同せず UNKNOWN として返す", () => {
+      const evaluator = new GenericTacticalEvaluator();
+      const obs = {
+        viewerPlayerId: "p2" as const,
+        players: [
+          { playerId: "p1" as const, name: "Alice", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p2" as const, name: "Bob", isViewer: true, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: true },
+        ],
+        stageRequestRefs: [],
+        stageRequests: [],
+        recentEvents: [],
+      };
+
+      const reqUnknown: RequestView = {
+        requestId: "req-unknown-action" as any,
+        actionId: "action.nonExistentFutureTrump",
+        controller: "p1",
+        status: "PENDING",
+        sequence: 1,
+        target: { targetType: "player", targetPlayerKey: "p2" },
+      };
+
+      const outcome = evaluator.evaluateRequestOutcome(reqUnknown, "p2", obs);
+      expect(outcome.certainty).toBe("UNKNOWN");
+      expect(outcome.guardStatus).toBe("UNKNOWN");
+      expect(outcome.netDamageToSelf.isCertain).toBe(false);
+      expect(outcome.netDamageToSelf.isUnknown).toBe(true);
+    });
+
+    it("6-5. 新規切札で未対応変数・未知の式・未対応対象を含む場合は 0 の確定値とせず UNKNOWN を返す", () => {
+      const customRulePackage: RulePackage = {
+        id: "custom-unknown-vars-rules",
+        version: "1.0.0",
+        actions: [
+          {
+            id: "action.graveBlast",
+            name: "墓地爆破",
+            type: "trump",
+            request: { trigger: "direct", speed: "normal", timing: "main" },
+            effect: [
+              // graveyard.count は未対応変数 -> 0の確定値にしてはいけない
+              { dealDamage: { target: "targetPlayer", amount: "graveyard.count + 5" } },
+            ],
+          },
+          {
+            id: "action.unknownGuard",
+            name: "謎の結界",
+            type: "trump",
+            request: { trigger: "direct", speed: "normal", timing: "main" },
+            effect: [
+              { guardCondition: { condition: "turn.count >= 5" } },
+              { dealDamage: { target: "targetPlayer", amount: 10 } },
+            ],
+          },
+          {
+            id: "action.dynamicTargetDamage",
+            name: "動的対象反射",
+            type: "trump",
+            request: { trigger: "direct", speed: "normal", timing: "main" },
+            effect: [
+              { dealDamage: { target: "sourceEvent.payload.combat.attackerPlayerKey", amount: 8 } },
+            ],
+          },
+        ],
+        components: [],
+      };
+
+      const evaluator = new GenericTacticalEvaluator(customRulePackage);
+      const obs = {
+        viewerPlayerId: "p2" as const,
+        players: [
+          { playerId: "p1" as const, name: "Alice", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 10, grave: [], canViewFullGrave: false },
+          { playerId: "p2" as const, name: "Bob", isViewer: true, lifeCount: 6, lifeDisplay: "6", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: true },
+        ],
+        stageRequestRefs: [],
+        stageRequests: [],
+        recentEvents: [],
+      };
+
+      // (1) 未対応変数 graveyard.count を含むダメージ式
+      const outGraveBlast = evaluator.evaluateRequestOutcome(
+        {
+          requestId: "req-gb" as any,
+          actionId: "action.graveBlast",
+          controller: "p1",
+          status: "PENDING",
+          sequence: 1,
+          target: { targetType: "player", targetPlayerKey: "p2" },
+        },
+        "p2",
+        obs
+      );
+      expect(outGraveBlast.certainty).toBe("UNKNOWN");
+      expect(outGraveBlast.netDamageToSelf.isCertain).toBe(false);
+      expect(outGraveBlast.netDamageToSelf.isUnknown).toBe(true);
+
+      // (2) 未対応変数 turn.count を含むガード条件
+      const outUnknownGuard = evaluator.evaluateRequestOutcome(
+        {
+          requestId: "req-ug" as any,
+          actionId: "action.unknownGuard",
+          controller: "p1",
+          status: "PENDING",
+          sequence: 2,
+          target: { targetType: "player", targetPlayerKey: "p2" },
+        },
+        "p2",
+        obs
+      );
+      expect(outUnknownGuard.certainty).toBe("UNKNOWN");
+      expect(outUnknownGuard.guardStatus).toBe("UNKNOWN");
+      expect(outUnknownGuard.isGuardedOut).toBe(false);
+      expect(outUnknownGuard.netDamageToSelf.isCertain).toBe(false);
+      expect(outUnknownGuard.netDamageToSelf.isUnknown).toBe(true);
+
+      // (3) 未対応の動的対象指定
+      const outDynamicTarget = evaluator.evaluateRequestOutcome(
+        {
+          requestId: "req-dt" as any,
+          actionId: "action.dynamicTargetDamage",
+          controller: "p1",
+          status: "PENDING",
+          sequence: 3,
+        },
+        "p2",
+        obs
+      );
+      expect(outDynamicTarget.certainty).toBe("UNKNOWN");
+      expect(outDynamicTarget.netDamageToSelf.isCertain).toBe(false);
+      expect(outDynamicTarget.netDamageToSelf.isUnknown).toBe(true);
+    });
+
+    it("6-6. 公開情報(CERTAIN)・非公開情報(ESTIMATED)・未知情報(UNKNOWN)の3状態が厳格に区別されること", () => {
+      const evaluator = new GenericTacticalEvaluator();
+      const obs = {
+        viewerPlayerId: "p2" as const,
+        players: [
+          { playerId: "p1" as const, name: "Alice", isViewer: false, lifeCount: 15, lifeDisplay: "15", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: false },
+          { playerId: "p2" as const, name: "Bob", isViewer: true, lifeCount: 10, lifeDisplay: "10", handCount: 0, handCards: [], field: [], fog: [], trumps: [], graveCount: 0, grave: [], canViewFullGrave: true },
+        ],
+        stageRequestRefs: [],
+        stageRequests: [],
+        recentEvents: [],
+      };
+
+      // 1. 公開キーカードによる投擲 -> CERTAIN
+      const outCertain = evaluator.evaluateRequestOutcome(
+        {
+          requestId: "req-c" as any,
+          actionId: "action.throwing",
+          controller: "p1",
+          status: "PENDING",
+          sequence: 1,
+          target: { targetType: "player", targetPlayerKey: "p2" },
+          keyCards: [{ visibility: "KNOWN", cardInstanceId: "c1", suit: "spade", rank: "10", value: 10, faceUp: true }],
+        },
+        "p2",
+        obs
+      );
+      expect(outCertain.certainty).toBe("CERTAIN");
+      expect(outCertain.netDamageToSelf.isCertain).toBe(true);
+      expect(outCertain.netDamageToSelf.isUnknown).toBe(false);
+      expect(outCertain.netDamageToSelf.expected).toBe(10);
+
+      // 2. 非公開 (HIDDEN) キーカードによる投擲 -> ESTIMATED
+      const outEstimated = evaluator.evaluateRequestOutcome(
+        {
+          requestId: "req-e" as any,
+          actionId: "action.throwing",
+          controller: "p1",
+          status: "PENDING",
+          sequence: 2,
+          target: { targetType: "player", targetPlayerKey: "p2" },
+          keyCards: [{ visibility: "HIDDEN", faceUp: false }],
+        },
+        "p2",
+        obs
+      );
+      expect(outEstimated.certainty).toBe("ESTIMATED");
+      expect(outEstimated.netDamageToSelf.isCertain).toBe(false);
+      expect(outEstimated.netDamageToSelf.isUnknown).toBe(false);
+      expect(outEstimated.netDamageToSelf.min).toBe(1);
+      expect(outEstimated.netDamageToSelf.max).toBe(13);
+
+      // 3. 対象情報が欠落した投擲 -> UNKNOWN
+      const outUnknown = evaluator.evaluateRequestOutcome(
+        {
+          requestId: "req-u" as any,
+          actionId: "action.throwing",
+          controller: "p1",
+          status: "PENDING",
+          sequence: 3,
+          // target 欠落 -> targetPlayer が解決不能
+          keyCards: [{ visibility: "KNOWN", cardInstanceId: "c1", suit: "spade", rank: "10", value: 10, faceUp: true }],
+        },
+        "p2",
+        obs
+      );
+      expect(outUnknown.certainty).toBe("UNKNOWN");
+      expect(outUnknown.netDamageToSelf.isCertain).toBe(false);
+      expect(outUnknown.netDamageToSelf.isUnknown).toBe(true);
+    });
   });
 });

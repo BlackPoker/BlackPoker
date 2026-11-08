@@ -326,7 +326,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
 
         // (A-2) 打ち消し・阻止選択肢 (Counter 等) を選択した場合の阻止ボーナス
         const counterOutcome = this.tacticalEvaluator.evaluateCounterOutcome(pattern, primaryOppReq, request, reqOutcome);
-        if (counterOutcome.cancelStatus === "CERTAIN_CANCEL") {
+        if (counterOutcome.cancelStatus === "CERTAIN_CANCEL" && !counterOutcome.preventedDamageToSelf.isUnknown) {
           const prevented = counterOutcome.preventedDamageToSelf;
           if (prevented.isCertain && prevented.min >= selfLife && selfLife > 0) {
             adjustment += 2.2; // 確定致死阻止
@@ -339,7 +339,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
             adjustment += b;
             reasons.push(`Counter bonus (+${b.toFixed(2)}): prevents expectedDamage=${prevented.expected}`);
           }
-        } else if (counterOutcome.cancelStatus === "UNCERTAIN_CANCEL") {
+        } else if (counterOutcome.cancelStatus === "UNCERTAIN_CANCEL" && !counterOutcome.preventedDamageToSelf.isUnknown) {
           adjustment += 0.2;
           reasons.push(`Uncertain Counter potential bonus (+0.2)`);
         }

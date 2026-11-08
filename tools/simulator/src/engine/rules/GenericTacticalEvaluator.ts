@@ -22,6 +22,7 @@
 
 import { ActionDefinition, EffectCommand, RulePackage } from "../../domain/rules/RulePackage.js";
 import { loadRulePackageForBrowser } from "./BrowserRuleLoader.js";
+import { normalizeSuit, rankToValue } from "./cardUtils.js";
 import {
   PlayerObservation,
   RequestView,
@@ -50,6 +51,7 @@ export function createCertainRange(val: number): TacticalValueRange {
     max: val,
     expected: val,
     isCertain: true,
+    isUnknown: false,
   };
 }
 
@@ -62,6 +64,20 @@ export function createEstimatedRange(min: number, max: number, expected: number)
     max,
     expected,
     isCertain: min === max,
+    isUnknown: false,
+  };
+}
+
+/**
+ * 未知・評価不能の TacticalValueRange を生成 (確定値 0 と混同しない)
+ */
+export function createUnknownRange(): TacticalValueRange {
+  return {
+    min: 0,
+    max: 0,
+    expected: 0,
+    isCertain: false,
+    isUnknown: true,
   };
 }
 
@@ -84,25 +100,29 @@ export interface TacticalExprContext {
 }
 
 /**
- * 観測情報ベースの式評価器（不確実性を考慮）
+ * 観測情報ベースの式評価器（不確実性および未知変数の安全性を考慮）
  */
 export class CoreAlignedExpressionEvaluator {
   /**
    * 条件式 (target.size != 0 && target.size % keyCards.diamond.rankValue == 0 等) を評価
    */
   public static evaluateCondition(expr: string, context: TacticalExprContext): TacticalConditionStatus {
-    if (!expr || typeof expr !== "string") return "CERTAIN_UNSATISFIED";
+    if (!expr || typeof expr !== "string") return "UNKNOWN";
     expr = expr.trim();
+    if (expr.length === 0) return "UNKNOWN";
 
     // 1. 論理 OR (||)
     const orParts = expr.split("||").map((s) => s.trim());
     if (orParts.length > 1) {
       let hasUncertain = false;
+      let hasUnknown = false;
       for (const part of orParts) {
         const res = this.evaluateCondition(part, context);
         if (res === "CERTAIN_SATISFIED") return "CERTAIN_SATISFIED";
+        if (res === "UNKNOWN") hasUnknown = true;
         if (res === "UNCERTAIN") hasUncertain = true;
       }
+      if (hasUnknown) return "UNKNOWN";
       return hasUncertain ? "UNCERTAIN" : "CERTAIN_UNSATISFIED";
     }
 
@@ -110,18 +130,22 @@ export class CoreAlignedExpressionEvaluator {
     const andParts = expr.split("&&").map((s) => s.trim());
     if (andParts.length > 1) {
       let hasUncertain = false;
+      let hasUnknown = false;
       for (const part of andParts) {
         const res = this.evaluateCondition(part, context);
         if (res === "CERTAIN_UNSATISFIED") return "CERTAIN_UNSATISFIED";
+        if (res === "UNKNOWN") hasUnknown = true;
         if (res === "UNCERTAIN") hasUncertain = true;
       }
+      if (hasUnknown) return "UNKNOWN";
       return hasUncertain ? "UNCERTAIN" : "CERTAIN_SATISFIED";
     }
 
     // 3. 比較演算子 (>=, <=, ==, !=, >, <)
     const opMatch = expr.match(/(>=|<=|==|!=|>|<)/);
     if (!opMatch) {
-      const val = this.resolveNumeric(expr, context);
+      const val = this.evaluateArithmetic(expr, context);
+      if (val.isUnknown) return "UNKNOWN";
       if (!val.isCertain) return "UNCERTAIN";
       return val.expected !== 0 ? "CERTAIN_SATISFIED" : "CERTAIN_UNSATISFIED";
     }
@@ -130,14 +154,13 @@ export class CoreAlignedExpressionEvaluator {
     const leftStr = expr.substring(0, opMatch.index!).trim();
     const rightStr = expr.substring(opMatch.index! + op.length).trim();
 
-    // 特殊ケース: target.size != 0 で target.size === 0 の場合は確実に偽
-    if (leftStr === "target.size" && op === "!=" && rightStr === "0") {
-      const size = context.targetUnit?.currentSize ?? 0;
-      return size !== 0 ? "CERTAIN_SATISFIED" : "CERTAIN_UNSATISFIED";
-    }
-
     const leftVal = this.evaluateArithmetic(leftStr, context);
     const rightVal = this.evaluateArithmetic(rightStr, context);
+
+    // 未知変数・未対応式が含まれる場合は UNKNOWN とし、確定値や非公開推定と混同しない
+    if (leftVal.isUnknown || rightVal.isUnknown) {
+      return "UNKNOWN";
+    }
 
     // 両方確定値の場合
     if (leftVal.isCertain && rightVal.isCertain) {
@@ -156,7 +179,6 @@ export class CoreAlignedExpressionEvaluator {
     }
 
     // 非公開カードに依存する場合 (例: target.size % keyCards.diamond.rankValue == 0)
-    // 相手が対象を指定して発動した合法的背景から、成立可能性が存在するが未確定
     return "UNCERTAIN";
   }
 
@@ -164,16 +186,24 @@ export class CoreAlignedExpressionEvaluator {
    * 算術式 (+, -, %) を評価し、数値範囲を算出
    */
   public static evaluateArithmetic(expr: string, context: TacticalExprContext): TacticalValueRange {
+    if (!expr || typeof expr !== "string") return createUnknownRange();
     expr = expr.trim();
+    if (expr.length === 0) return createUnknownRange();
+
     const tokens = expr.split(/\s*([+\-%])\s*/).filter(Boolean);
     if (tokens.length <= 1) {
       return this.resolveNumeric(tokens[0] || expr, context);
     }
 
     let result = this.resolveNumeric(tokens[0], context);
+    if (result.isUnknown) return createUnknownRange();
+
     for (let i = 1; i < tokens.length; i += 2) {
       const op = tokens[i];
-      const nextVal = this.resolveNumeric(tokens[i + 1], context);
+      const nextToken = tokens[i + 1];
+      if (!nextToken) return createUnknownRange();
+      const nextVal = this.resolveNumeric(nextToken, context);
+      if (nextVal.isUnknown) return createUnknownRange();
 
       if (op === "+") {
         result = {
@@ -181,6 +211,7 @@ export class CoreAlignedExpressionEvaluator {
           max: result.max + nextVal.max,
           expected: result.expected + nextVal.expected,
           isCertain: result.isCertain && nextVal.isCertain,
+          isUnknown: false,
         };
       } else if (op === "-") {
         result = {
@@ -188,102 +219,122 @@ export class CoreAlignedExpressionEvaluator {
           max: result.max - nextVal.min,
           expected: result.expected - nextVal.expected,
           isCertain: result.isCertain && nextVal.isCertain,
+          isUnknown: false,
         };
       } else if (op === "%") {
         if (result.isCertain && nextVal.isCertain) {
-          if (nextVal.expected <= 0) return createCertainRange(0);
+          if (nextVal.expected <= 0) return createUnknownRange();
           return createCertainRange(result.expected % nextVal.expected);
         }
-        // 未確定剰余
+        // 未確定剰余 (非公開カードに依存)
         return createEstimatedRange(0, Math.max(0, nextVal.max - 1), 0);
+      } else {
+        return createUnknownRange();
       }
     }
     return result;
   }
 
   /**
-   * 単一トークンの数値範囲を解決（非公開カードを固定数値で捏造しない）
+   * 単一トークンの数値範囲を解決（非公開カードは ESTIMATED、未知変数は UNKNOWN とし、0 の確定値で捏造しない）
    */
   public static resolveNumeric(token: string, context: TacticalExprContext): TacticalValueRange {
+    if (!token || typeof token !== "string") return createUnknownRange();
     token = token.trim();
-    const num = Number(token);
-    if (!isNaN(num)) return createCertainRange(num);
+    if (token.length === 0) return createUnknownRange();
 
-    // target.size: 公開盤面の現在サイズ
-    if (token === "target.size") {
-      return createCertainRange(context.targetUnit?.currentSize ?? 0);
+    // 1. 数値リテラルのみを確定値として解釈 (空文字等を Number("") === 0 と誤認しない)
+    if (/^-?\d+(\.\d+)?$/.test(token)) {
+      return createCertainRange(Number(token));
     }
 
-    // key.rankValue (単一キーカードのランク数値)
-    if (token === "key.rankValue") {
+    // 2. target.size: 公開盤面の対象ユニットの現在サイズ
+    if (token === "target.size") {
+      if (!context.targetUnit || typeof context.targetUnit.currentSize !== "number") {
+        return createUnknownRange();
+      }
+      return createCertainRange(context.targetUnit.currentSize);
+    }
+
+    // 3. key.rankValue / -key.rankValue (単一キーカードのランク数値)
+    if (token === "key.rankValue" || token === "-key.rankValue") {
+      const sign = token.startsWith("-") ? -1 : 1;
       if (context.myKeyCardValue !== undefined) {
-        return createCertainRange(context.myKeyCardValue);
+        return createCertainRange(sign * context.myKeyCardValue);
       }
       const firstKey = context.keyCards?.[0];
-      if (firstKey && firstKey.visibility === "KNOWN" && typeof (firstKey as any).value === "number") {
-        return createCertainRange((firstKey as any).value);
+      if (firstKey && firstKey.visibility === "KNOWN") {
+        const val = typeof (firstKey as any).value === "number"
+          ? (firstKey as any).value
+          : rankToValue((firstKey as any).rank);
+        if (val > 0) {
+          return createCertainRange(sign * val);
+        }
       }
       if (firstKey && firstKey.visibility === "HIDDEN") {
-        // 非公開キーカード: 1〜13の範囲（期待値 7 または 8）
-        return createEstimatedRange(1, 13, 7);
+        // 非公開キーカード: 1〜13の範囲（期待値 7）
+        return sign === 1
+          ? createEstimatedRange(1, 13, 7)
+          : createEstimatedRange(-13, -1, -7);
       }
-      return createCertainRange(0);
+      return createUnknownRange();
     }
 
-    // keyCards.spade.rankValue
-    if (token === "keyCards.spade.rankValue") {
-      const spd = context.keyCards?.find(
-        (k): k is KnownCardView => k.visibility === "KNOWN" && (k as any).suit === "spade"
+    // 4. keyCards.<suit>.rankValue (spade, diamond, heart, club)
+    const suitMatch = token.match(/^keyCards\.(spade|diamond|heart|club)\.rankValue$/);
+    if (suitMatch) {
+      const targetSuit = suitMatch[1];
+      const matchedCard = context.keyCards?.find(
+        (k): k is KnownCardView =>
+          k.visibility === "KNOWN" && normalizeSuit((k as any).suit) === targetSuit
       );
-      if (spd && typeof spd.value === "number") {
-        return createCertainRange(spd.value);
+      if (matchedCard) {
+        const val = typeof matchedCard.value === "number"
+          ? matchedCard.value
+          : rankToValue((matchedCard as any).rank);
+        if (val > 0) {
+          return createCertainRange(val);
+        }
       }
-      // ♠が非公開の場合: A..K (1〜13), 期待値 8 (最大想定 13)
+      // 非公開キーカードが含まれる場合: ESTIMATED 範囲 1〜13
       const hasHiddenKey = context.keyCards?.some((k) => k.visibility === "HIDDEN");
       if (hasHiddenKey) {
-        return createEstimatedRange(1, 13, 8);
+        return createEstimatedRange(1, 13, targetSuit === "spade" ? 8 : 7);
       }
-      return createCertainRange(0);
+      return createUnknownRange();
     }
 
-    // keyCards.diamond.rankValue
-    if (token === "keyCards.diamond.rankValue") {
-      const dia = context.keyCards?.find(
-        (k): k is KnownCardView => k.visibility === "KNOWN" && (k as any).suit === "diamond"
-      );
-      if (dia && typeof dia.value === "number") {
-        return createCertainRange(dia.value);
-      }
-      // ♢が非公開の場合: A..K (1〜13), 期待値 7
-      const hasHiddenKey = context.keyCards?.some((k) => k.visibility === "HIDDEN");
-      if (hasHiddenKey) {
-        return createEstimatedRange(1, 13, 7);
-      }
-      return createCertainRange(0);
-    }
-
-    // targetRequest.keyCards.count: キーカード枚数は公開情報 (公開配列長)
+    // 5. targetRequest.keyCards.count: 対象リクエストが存在する場合のみ公開配列長を確定値として返す
     if (token === "targetRequest.keyCards.count") {
-      return createCertainRange(context.targetRequest?.keyCards?.length ?? 0);
+      if (!context.targetRequest || !Array.isArray(context.targetRequest.keyCards)) {
+        return createUnknownRange();
+      }
+      return createCertainRange(context.targetRequest.keyCards.length);
     }
 
-    // targetRequest.keyCards.first.rankValue
+    // 6. targetRequest.keyCards.first.rankValue
     if (
       token === "targetRequest.keyCards.first.rankValue" ||
       token === "targetRequest.keyCard.rankValue"
     ) {
       const firstKey = context.targetRequest?.keyCards?.[0];
-      if (firstKey && firstKey.visibility === "KNOWN" && typeof (firstKey as any).value === "number") {
-        return createCertainRange((firstKey as any).value);
+      if (firstKey && firstKey.visibility === "KNOWN") {
+        const val = typeof (firstKey as any).value === "number"
+          ? (firstKey as any).value
+          : rankToValue((firstKey as any).rank);
+        if (val > 0) {
+          return createCertainRange(val);
+        }
       }
       if (firstKey && firstKey.visibility === "HIDDEN") {
         // 非公開の場合は推定範囲 1〜13
         return createEstimatedRange(1, 13, 7);
       }
-      return createCertainRange(0);
+      return createUnknownRange();
     }
 
-    return createCertainRange(0);
+    // 7. 未対応の変数・トークンは 0 の確定値とせず UNKNOWN を返す
+    return createUnknownRange();
   }
 }
 
@@ -384,15 +435,15 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
     // 2. YAML DSL ActionDefinition の取得
     const actionDef = this.actionsMap.get(req.actionId);
     if (!actionDef || !actionDef.effect || actionDef.effect.length === 0) {
-      // 公式ルール定義が存在しない場合: 偽の効果を捏造せず UNKNOWN として安全に扱う
-      const zeroRange = createCertainRange(0);
+      // 公式ルール定義が存在しない場合: 偽の効果や確定0ダメージと混同せず UNKNOWN として安全に扱う
+      const unknownRange = createUnknownRange();
       return {
         certainty: "UNKNOWN",
-        guardStatus: "UNCERTAIN",
-        netDamageToSelf: zeroRange,
-        netDamageToOpponent: zeroRange,
-        directDamageToSelf: zeroRange,
-        lifeGainToSelf: zeroRange,
+        guardStatus: "UNKNOWN",
+        netDamageToSelf: unknownRange,
+        netDamageToOpponent: unknownRange,
+        directDamageToSelf: unknownRange,
+        lifeGainToSelf: unknownRange,
         destroyedSelfUnits: [],
         destroyedOppUnits: [],
         isGuardedOut: false,
@@ -420,6 +471,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
     let guardStatus: TacticalConditionStatus = "CERTAIN_SATISFIED";
     let isGuardedOut = false;
     let isCertain = true;
+    let hasUnknown = false;
 
     // 4. DSL 効果ノードの順次評価 (Core の処理順序に準拠)
     for (const cmd of actionDef.effect) {
@@ -433,8 +485,17 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         break;
       }
 
-      if (outcome.guardStatus === "UNCERTAIN") {
+      if (outcome.guardStatus === "UNKNOWN") {
+        guardStatus = "UNKNOWN";
+        isCertain = false;
+        hasUnknown = true;
+      } else if (outcome.guardStatus === "UNCERTAIN" && guardStatus !== "UNKNOWN") {
         guardStatus = "UNCERTAIN";
+        isCertain = false;
+      }
+
+      if (outcome.hasUnknown) {
+        hasUnknown = true;
         isCertain = false;
       }
 
@@ -477,11 +538,27 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
       };
     }
 
+    // 未知の変数・式・対象情報が含まれる場合: 確定損害や推定損害と混同せず UNKNOWN として返す
+    if (hasUnknown) {
+      const unknownRange = createUnknownRange();
+      return {
+        certainty: "UNKNOWN",
+        guardStatus: guardStatus === "CERTAIN_SATISFIED" ? "UNKNOWN" : guardStatus,
+        netDamageToSelf: unknownRange,
+        netDamageToOpponent: unknownRange,
+        directDamageToSelf: directDamageToSelf.isUnknown ? unknownRange : directDamageToSelf,
+        lifeGainToSelf: lifeGainToSelf.isUnknown ? unknownRange : lifeGainToSelf,
+        destroyedSelfUnits,
+        destroyedOppUnits,
+        isGuardedOut: false,
+        reasons,
+      };
+    }
+
     // 正味ライフ損害 = Math.max(0, directDamage - lifeGain)
     // ガードが未確定 (UNCERTAIN) の場合、不発時 (0) と成立時 (direct - lifeGain) の両方を考慮
     let netDamageToSelf: TacticalValueRange;
     if (guardStatus === "UNCERTAIN") {
-      const hitMin = Math.max(0, directDamageToSelf.min - lifeGainToSelf.max);
       const hitMax = Math.max(0, directDamageToSelf.max - lifeGainToSelf.min);
       const hitExpected = Math.max(0, directDamageToSelf.expected - lifeGainToSelf.expected);
       netDamageToSelf = {
@@ -489,6 +566,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         max: hitMax,
         expected: hitExpected,
         isCertain: false,
+        isUnknown: false,
       };
     } else {
       netDamageToSelf = {
@@ -496,6 +574,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         max: Math.max(0, directDamageToSelf.max - lifeGainToSelf.min),
         expected: Math.max(0, directDamageToSelf.expected - lifeGainToSelf.expected),
         isCertain: directDamageToSelf.isCertain && lifeGainToSelf.isCertain,
+        isUnknown: false,
       };
     }
 
@@ -531,7 +610,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
 
     const actionDef = this.actionsMap.get(act.actionId);
     if (!actionDef || !actionDef.effect) {
-      return { cancelStatus: "CANNOT_CANCEL", preventedDamageToSelf: createCertainRange(0), isCertain: false, reasons: [] };
+      return { cancelStatus: "UNKNOWN_CANCEL", preventedDamageToSelf: createUnknownRange(), isCertain: false, reasons: [] };
     }
 
     // 1. 対象リクエストの照合
@@ -547,15 +626,18 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
       }
     }
 
-    // 2. 自軍キーカードのランク数値を取得
-    let myKeyCardValue = 0;
+    // 2. 自軍キーカードのランク数値を取得 (未解決時に 0 で捏造しないよう undefined を保持)
+    let myKeyCardValue: number | undefined = undefined;
     if (pattern.keyCardSelectionRef !== undefined) {
       const cardSel = request.catalog.cardSelections[pattern.keyCardSelectionRef];
       const cardId = cardSel?.cardIds?.[0];
       const selfHand = request.observation.players.find((p) => p.playerId === request.playerId)?.handCards ?? [];
       const myCard = selfHand.find((c) => c.visibility === "KNOWN" && (c as any).cardInstanceId === cardId);
-      if (myCard && myCard.visibility === "KNOWN" && typeof myCard.value === "number") {
-        myKeyCardValue = myCard.value;
+      if (myCard && myCard.visibility === "KNOWN") {
+        const val = typeof myCard.value === "number" ? myCard.value : rankToValue((myCard as any).rank);
+        if (val > 0) {
+          myKeyCardValue = val;
+        }
       }
     }
 
@@ -589,6 +671,15 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
       };
     }
 
+    if (status === "UNKNOWN_CANCEL") {
+      return {
+        cancelStatus: "UNKNOWN_CANCEL",
+        preventedDamageToSelf: createUnknownRange(),
+        isCertain: false,
+        reasons: [`Counter condition contains unknown expression for ${targetOppReq.actionId}`],
+      };
+    }
+
     return {
       cancelStatus: "CANNOT_CANCEL",
       preventedDamageToSelf: createCertainRange(0),
@@ -603,7 +694,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
   private checkCancelReachable(
     commands: readonly EffectCommand[],
     context: TacticalExprContext
-  ): "CERTAIN_CANCEL" | "UNCERTAIN_CANCEL" | "CANNOT_CANCEL" {
+  ): "CERTAIN_CANCEL" | "UNCERTAIN_CANCEL" | "CANNOT_CANCEL" | "UNKNOWN_CANCEL" {
     for (const cmd of commands) {
       const cmdKey = Object.keys(cmd)[0];
       const args = (cmd as any)[cmdKey];
@@ -625,6 +716,9 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         if (condStatus === "UNCERTAIN") {
           return "UNCERTAIN_CANCEL";
         }
+        if (condStatus === "UNKNOWN") {
+          return "UNKNOWN_CANCEL";
+        }
       }
     }
     return "CANNOT_CANCEL";
@@ -643,22 +737,26 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
     destroyedUnit?: UnitView;
     guardStatus: TacticalConditionStatus;
     isCertain: boolean;
+    hasUnknown: boolean;
     reason?: string;
   } {
     const cmdKey = Object.keys(cmd)[0];
     const args = (cmd as any)[cmdKey];
     const zeroRange = createCertainRange(0);
+    const unknownRange = createUnknownRange();
 
     // (1) guardCondition
     if (cmdKey === "guardCondition") {
       const cond = args.condition;
       const status = CoreAlignedExpressionEvaluator.evaluateCondition(cond, context);
+      const isUnknown = status === "UNKNOWN";
       return {
         damageToSelf: zeroRange,
         damageToOpponent: zeroRange,
         lifeGainToSelf: zeroRange,
         guardStatus: status,
-        isCertain: status !== "UNCERTAIN",
+        isCertain: status === "CERTAIN_SATISFIED" || status === "CERTAIN_UNSATISFIED",
+        hasUnknown: isUnknown,
         reason: `guardCondition: status=${status} (${cond})`,
       };
     }
@@ -667,18 +765,24 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
     if (cmdKey === "dealDamage") {
       const amountRange = typeof args.amount === "number"
         ? createCertainRange(args.amount)
-        : CoreAlignedExpressionEvaluator.evaluateArithmetic(String(args.amount), context);
+        : CoreAlignedExpressionEvaluator.evaluateArithmetic(String(args.amount ?? ""), context);
 
-      const target = args.target;
-      const isTargetSelf =
-        target === "self" ||
-        (target === "targetPlayer" && context.targetPlayerKey === context.viewerPlayerId) ||
-        (target === "targetOwner" && this.isTargetOwnerViewer(context));
+      const targetRole = this.resolveTargetRole(args.target, context);
 
-      const isTargetOpponent =
-        target === "opponent" ||
-        (target === "targetPlayer" && context.targetPlayerKey && context.targetPlayerKey !== context.viewerPlayerId) ||
-        (target === "targetOwner" && !this.isTargetOwnerViewer(context));
+      if (amountRange.isUnknown || targetRole === "UNKNOWN") {
+        return {
+          damageToSelf: unknownRange,
+          damageToOpponent: unknownRange,
+          lifeGainToSelf: zeroRange,
+          guardStatus: "CERTAIN_SATISFIED",
+          isCertain: false,
+          hasUnknown: true,
+          reason: `dealDamage: unknown amount or target (amount=${args.amount}, target=${args.target})`,
+        };
+      }
+
+      const isTargetSelf = targetRole === "SELF";
+      const isTargetOpponent = targetRole === "OPPONENT";
 
       return {
         damageToSelf: isTargetSelf ? amountRange : zeroRange,
@@ -686,20 +790,45 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         lifeGainToSelf: zeroRange,
         guardStatus: "CERTAIN_SATISFIED",
         isCertain: amountRange.isCertain,
+        hasUnknown: false,
         reason: `dealDamage: amount=[${amountRange.min}..${amountRange.max}] (toSelf=${isTargetSelf})`,
       };
     }
 
     // (3) moveUnitCardsToZoneTop (Core の commandHandlers.ts と一致: 複数カード兵士は全カードが移動)
     if (cmdKey === "moveUnitCardsToZoneTop") {
-      const zone = args.zone;
-      const isPlayerSelf =
-        args.player === "self" ||
-        (args.player === "targetOwner" && this.isTargetOwnerViewer(context));
+      const zone = args.zone ?? "life";
+      if (zone !== "life") {
+        return {
+          damageToSelf: zeroRange,
+          damageToOpponent: zeroRange,
+          lifeGainToSelf: unknownRange,
+          guardStatus: "CERTAIN_SATISFIED",
+          isCertain: false,
+          hasUnknown: true,
+          reason: `moveUnitCardsToZoneTop: unsupported zone=${zone}`,
+        };
+      }
 
-      if (zone === "life" && isPlayerSelf) {
+      const playerRole = args.player
+        ? this.resolveTargetRole(args.player, context)
+        : this.resolveTargetRole("targetOwner", context);
+
+      if (!context.targetUnit || playerRole === "UNKNOWN") {
+        return {
+          damageToSelf: zeroRange,
+          damageToOpponent: zeroRange,
+          lifeGainToSelf: unknownRange,
+          guardStatus: "CERTAIN_SATISFIED",
+          isCertain: false,
+          hasUnknown: true,
+          reason: `moveUnitCardsToZoneTop: unknown targetUnit or player`,
+        };
+      }
+
+      if (playerRole === "SELF") {
         // 兵士がライフに乗る場合: 兵士を構成するカード枚数分がライフに追加される (Core 意味論完全一致)
-        const cardsCount = context.targetUnit?.cards && context.targetUnit.cards.length > 0
+        const cardsCount = context.targetUnit.cards && context.targetUnit.cards.length > 0
           ? context.targetUnit.cards.length
           : 1;
 
@@ -709,6 +838,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
           lifeGainToSelf: createCertainRange(cardsCount),
           guardStatus: "CERTAIN_SATISFIED",
           isCertain: true,
+          hasUnknown: false,
           reason: `moveUnitCardsToZoneTop: life +${cardsCount} to self`,
         };
       }
@@ -719,11 +849,23 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         lifeGainToSelf: zeroRange,
         guardStatus: "CERTAIN_SATISFIED",
         isCertain: true,
+        hasUnknown: false,
       };
     }
 
     // (4) moveToGraveyard (キル等のユニット破壊)
     if (cmdKey === "moveToGraveyard") {
+      if (args.target === "target" && !context.targetUnit) {
+        return {
+          damageToSelf: zeroRange,
+          damageToOpponent: zeroRange,
+          lifeGainToSelf: zeroRange,
+          guardStatus: "CERTAIN_SATISFIED",
+          isCertain: false,
+          hasUnknown: true,
+          reason: `moveToGraveyard: target unit is unknown`,
+        };
+      }
       return {
         damageToSelf: zeroRange,
         damageToOpponent: zeroRange,
@@ -731,6 +873,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         destroyedUnit: context.targetUnit,
         guardStatus: "CERTAIN_SATISFIED",
         isCertain: true,
+        hasUnknown: false,
         reason: context.targetUnit ? `moveToGraveyard: unit ${context.targetUnit.unitId}` : undefined,
       };
     }
@@ -739,6 +882,18 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
     if (cmdKey === "if") {
       const cond = args.condition;
       const status = CoreAlignedExpressionEvaluator.evaluateCondition(cond, context);
+
+      if (status === "UNKNOWN") {
+        return {
+          damageToSelf: unknownRange,
+          damageToOpponent: unknownRange,
+          lifeGainToSelf: zeroRange,
+          guardStatus: "UNKNOWN",
+          isCertain: false,
+          hasUnknown: true,
+          reason: `if: condition is UNKNOWN (${cond})`,
+        };
+      }
 
       let subCommands: EffectCommand[] | undefined;
       if (status === "CERTAIN_SATISFIED") {
@@ -757,6 +912,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         let destroyed: UnitView | undefined;
         let subGuard: TacticalConditionStatus = "CERTAIN_SATISFIED";
         let certain = status !== "UNCERTAIN";
+        let subUnknown = false;
 
         for (const sub of subCommands) {
           const res = this.evaluateEffectCommand(sub, context);
@@ -764,7 +920,15 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
             subGuard = "CERTAIN_UNSATISFIED";
             break;
           }
-          if (res.guardStatus === "UNCERTAIN") subGuard = "UNCERTAIN";
+          if (res.guardStatus === "UNKNOWN") {
+            subGuard = "UNKNOWN";
+            subUnknown = true;
+          } else if (res.guardStatus === "UNCERTAIN" && subGuard !== "UNKNOWN") {
+            subGuard = "UNCERTAIN";
+          }
+          if (res.hasUnknown) {
+            subUnknown = true;
+          }
           dmgSelf = this.addRanges(dmgSelf, res.damageToSelf);
           dmgOpp = this.addRanges(dmgOpp, res.damageToOpponent);
           lifeGain = this.addRanges(lifeGain, res.lifeGainToSelf);
@@ -778,7 +942,8 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
           lifeGainToSelf: lifeGain,
           destroyedUnit: destroyed,
           guardStatus: subGuard,
-          isCertain: certain,
+          isCertain: certain && !subUnknown,
+          hasUnknown: subUnknown,
         };
       }
 
@@ -788,6 +953,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         lifeGainToSelf: zeroRange,
         guardStatus: "CERTAIN_SATISFIED",
         isCertain: true,
+        hasUnknown: false,
       };
     }
 
@@ -812,43 +978,91 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         lifeGainToSelf: zeroRange,
         guardStatus: "CERTAIN_SATISFIED",
         isCertain: true,
+        hasUnknown: false,
       };
     }
 
-    // (7) その他未対応コマンド
+    // (7) その他未対応コマンド: 確定損害と混同しないよう UNKNOWN とする
     return {
-      damageToSelf: zeroRange,
-      damageToOpponent: zeroRange,
+      damageToSelf: unknownRange,
+      damageToOpponent: unknownRange,
       lifeGainToSelf: zeroRange,
-      guardStatus: "UNCERTAIN",
+      guardStatus: "UNKNOWN",
       isCertain: false,
+      hasUnknown: true,
       reason: `Unhandled effect command: ${cmdKey}`,
     };
   }
 
   /**
-   * 2つの TacticalValueRange を加算
+   * 2つの TacticalValueRange を加算 (UNKNOWN の伝播を含む)
    */
   private addRanges(a: TacticalValueRange, b: TacticalValueRange): TacticalValueRange {
+    if (a.isUnknown || b.isUnknown) {
+      return createUnknownRange();
+    }
     return {
       min: a.min + b.min,
       max: a.max + b.max,
       expected: a.expected + b.expected,
       isCertain: a.isCertain && b.isCertain,
+      isUnknown: false,
     };
   }
 
   /**
-   * targetOwner が viewer（自軍）か判定
+   * 対象指定文字列 ("self", "opponent", "targetPlayer", "targetOwner" 等) を
+   * viewer 視点での "SELF" | "OPPONENT" | "UNKNOWN" に解決する。
+   * 未知・未対応の対象指定や解決不能な対象を勝手に相手側・自分側へ確定させない。
    */
-  private isTargetOwnerViewer(context: TacticalExprContext): boolean {
-    if (context.targetPlayerKey) {
-      return context.targetPlayerKey === context.viewerPlayerId;
+  private resolveTargetRole(
+    targetSpec: string | undefined,
+    context: TacticalExprContext
+  ): "SELF" | "OPPONENT" | "UNKNOWN" {
+    if (!targetSpec || typeof targetSpec !== "string") {
+      return "UNKNOWN";
     }
-    if (context.targetUnit) {
-      return (context.selfView?.field ?? []).some((u) => u.unitId === context.targetUnit?.unitId) ||
-        (context.selfView?.trumps ?? []).some((u) => u.unitId === context.targetUnit?.unitId);
+
+    // "self" / "controller": リクエストの controller 自身
+    if (targetSpec === "self" || targetSpec === "controller") {
+      if (!context.request?.controller) return "UNKNOWN";
+      return context.request.controller === context.viewerPlayerId ? "SELF" : "OPPONENT";
     }
-    return false;
+
+    // "opponent": リクエストの controller の対戦相手
+    if (targetSpec === "opponent") {
+      if (!context.request?.controller) return "UNKNOWN";
+      return context.request.controller === context.viewerPlayerId ? "OPPONENT" : "SELF";
+    }
+
+    // "targetPlayer": 明示的にプレイヤー対象が解決できている場合のみ
+    if (targetSpec === "targetPlayer") {
+      if (!context.targetPlayerKey) return "UNKNOWN";
+      return context.targetPlayerKey === context.viewerPlayerId ? "SELF" : "OPPONENT";
+    }
+
+    // "targetOwner": 対象ユニットの所有者、または対象プレイヤー
+    if (targetSpec === "targetOwner") {
+      if (context.targetUnit) {
+        const inSelf =
+          (context.selfView?.field ?? []).some((u) => u.unitId === context.targetUnit?.unitId) ||
+          (context.selfView?.trumps ?? []).some((u) => u.unitId === context.targetUnit?.unitId);
+        if (inSelf) return "SELF";
+
+        const inOpp =
+          (context.oppView?.field ?? []).some((u) => u.unitId === context.targetUnit?.unitId) ||
+          (context.oppView?.trumps ?? []).some((u) => u.unitId === context.targetUnit?.unitId);
+        if (inOpp) return "OPPONENT";
+
+        return "UNKNOWN";
+      }
+      if (context.targetPlayerKey) {
+        return context.targetPlayerKey === context.viewerPlayerId ? "SELF" : "OPPONENT";
+      }
+      return "UNKNOWN";
+    }
+
+    // その他の動的バインディング (例: sourceEvent.payload.combat.attackerPlayerKey 等) は UNKNOWN
+    return "UNKNOWN";
   }
 }
