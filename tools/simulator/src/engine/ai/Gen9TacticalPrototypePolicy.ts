@@ -39,6 +39,7 @@ import {
   createBlockTacticalContext,
   extractBlockAssignmentsFromPattern,
   evaluateBlockAssignmentTacticalFeatures,
+  hasEffectiveCounterMeasure,
 } from "./Gen9LearnableTacticalPolicy.js";
 
 export interface TacticalEvaluationDetail {
@@ -142,7 +143,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     // 1. 文脈特徴量ベクトル (165次元) を 1 回だけ計算
     const contextValues = [...DecisionFeatureEncoder.encodeContextOnly(request)];
     if (
-      this.encoderVersion === "v7.1-unified-block-assignment" &&
+      this.encoderVersion !== "v7.0-legacy-block-stream-only" &&
       request.patterns.length === 0 &&
       request.blockAssignmentStream
     ) {
@@ -209,9 +210,35 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     const patterns = request.patterns;
     const details: TacticalEvaluationDetail[] = [];
     const blockContext =
-      this.encoderVersion === "v7.1-unified-block-assignment"
+      this.encoderVersion !== "v7.0-legacy-block-stream-only"
         ? createBlockTacticalContext(request)
         : undefined;
+
+    // Work 5-4B: 有効な対抗手段の有無を事前判定
+    let precomputedHasCounter: boolean | undefined = undefined;
+    if (
+      this.encoderVersion === "v7.2-unified-block-conditional-pass" &&
+      this.tacticalEvaluator
+    ) {
+      const stageRequests = request.observation.stageRequests ?? [];
+      const oppRequests = stageRequests.filter(
+        (r) => r.controller !== request.playerId
+      );
+      if (oppRequests.length > 0) {
+        const primaryOppReq = oppRequests[oppRequests.length - 1];
+        const reqOutcome = this.tacticalEvaluator.evaluateRequestOutcome(
+          primaryOppReq,
+          request.playerId,
+          request.observation
+        );
+        precomputedHasCounter = hasEffectiveCounterMeasure(
+          request,
+          primaryOppReq,
+          reqOutcome,
+          this.tacticalEvaluator
+        );
+      }
+    }
 
     let bestScore = -Infinity;
     let bestPatternRef = baseScored[0]?.patternRef ?? 0;
@@ -221,7 +248,12 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
       const pat = patterns[sp.patternRef];
 
       // 2. 戦術的調整値の算出
-      const { adjustment, reason } = this.calculateTacticalAdjustment(request, pat, blockContext);
+      const { adjustment, reason } = this.calculateTacticalAdjustment(
+        request,
+        pat,
+        blockContext,
+        precomputedHasCounter
+      );
       const finalScore = sp.score + adjustment;
 
       details.push({
@@ -251,7 +283,8 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
   private calculateTacticalAdjustment(
     request: Readonly<DecisionRequest>,
     pattern: Readonly<LegalPattern>,
-    precomputedBlockContext?: BlockTacticalEvaluationContext
+    precomputedBlockContext?: BlockTacticalEvaluationContext,
+    precomputedHasCounter?: boolean
   ): { adjustment: number; reason?: string } {
     const obs = request.observation;
     const selfKey = request.playerId;
@@ -277,7 +310,25 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
 
         // (A-1) PASS を選択した場合の損害ペナルティ
         if (pattern.kind === "PASS") {
-          if (reqOutcome.certainty === "CERTAIN") {
+          // Work 5-4B: v7.2 以降では、同一 DecisionRequest 内に有効な対抗手段がない場合、PASS の損害減点を免除する
+          const isConditionalPassVersion =
+            this.encoderVersion === "v7.2-unified-block-conditional-pass";
+          const hasCounter = isConditionalPassVersion
+            ? precomputedHasCounter !== undefined
+              ? precomputedHasCounter
+              : hasEffectiveCounterMeasure(
+                  request,
+                  primaryOppReq,
+                  reqOutcome,
+                  this.tacticalEvaluator
+                )
+            : true;
+
+          if (!hasCounter) {
+            reasons.push(
+              `PASS penalty exempted: no effective counter available against ${primaryOppReq.actionId}`
+            );
+          } else if (reqOutcome.certainty === "CERTAIN") {
             // 確定損害
             if (netDmg.min >= selfLife && selfLife > 0) {
               adjustment -= 2.5; // 確定致死回避ペナルティ
@@ -344,7 +395,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     // =========================================================================
     // 戦術評価 B-2: 通常ブロック割り当ての戦術評価 (Work 5-4A: ストリーミングと共通化)
     // =========================================================================
-    if (this.encoderVersion === "v7.1-unified-block-assignment") {
+    if (this.encoderVersion !== "v7.0-legacy-block-stream-only") {
       const blockCtx = precomputedBlockContext ?? createBlockTacticalContext(request);
       const blockAssignments = extractBlockAssignmentsFromPattern(request, pattern, blockCtx);
       if (blockAssignments !== undefined) {

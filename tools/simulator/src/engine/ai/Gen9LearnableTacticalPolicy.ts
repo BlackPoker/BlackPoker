@@ -26,31 +26,41 @@ import { DecisionFeatureEncoder } from "./DecisionFeatureEncoder.js";
 import { GenomeScorer } from "./GenomeScorer.js";
 import { LegalPattern } from "../../domain/decision/LegalPattern.js";
 import { UnitAssignment } from "../../domain/decision/DecisionCatalog.js";
-import { UnitView, PlayerObservationView, KnownCardView } from "../../domain/decision/PlayerObservation.js";
-import { TacticalEvaluator } from "../../domain/decision/TacticalEvaluationTypes.js";
+import { UnitView, PlayerObservationView, KnownCardView, RequestView } from "../../domain/decision/PlayerObservation.js";
+import { TacticalEvaluator, TacticalRequestOutcome } from "../../domain/decision/TacticalEvaluationTypes.js";
 import { Gen9TacticalPrototypePolicy } from "./Gen9TacticalPrototypePolicy.js";
 
 export const TACTICAL_FEATURE_SCHEMA_VERSION = 7;
 
 /**
- * 戦術特徴量エンコーダ仕様バージョン (Work 5-4A)
+ * 戦術特徴量エンコーダ仕様バージョン (Work 5-4B)
  * - "v7.0-legacy-block-stream-only":
  *   Work 5-2 / Work 5-3 時点の仕様。通常ブロック (patterns 列挙) では t14〜t16 が 0 のままとなり、
- *   ストリーミングブロック時のみ単体サイズ比較で t14〜t16 を計算。過去の評価結果の完全再現用。
+ *   ストリーミングブロック時のみ単体サイズ比較で t14〜t16 を計算。PASS 減点は対抗手段の有無にかかわらず無条件適用。
  * - "v7.1-unified-block-assignment":
- *   Work 5-4A 以降の標準仕様。通常ブロック (LegalPattern.effectSelectionRef -> DecisionCatalog.effectSelections ->
- *   EffectSelection.assignments) とストリーミングブロックの双方で同一の評価関数を用い、
- *   複数アタッカー・複数兵士合算サイズ・防壁ブロック・致死/危険域ダメージを完全一致で計算。
+ *   Work 5-4A の仕様。通常ブロックとストリーミングブロックの双方で同一の評価関数を用い、
+ *   複数アタッカー・複数兵士合算サイズ・防壁ブロック・致死/危険域ダメージを完全一致で計算。PASS 減点は無条件適用。
+ * - "v7.2-unified-block-conditional-pass":
+ *   Work 5-4B 以降の標準仕様。ブロック特徴量の統一評価 (v7.1) を完全に維持した上で、
+ *   同一 DecisionRequest 内に相手リクエストに対する有効な対抗手段（Counter 等）が存在しない場合、
+ *   PASS に対する追加減点 (t00〜t05) を免除し、無関係なアクション (action.packOpen 等) への逃避を防ぐ。
  */
 export type TacticalFeatureEncoderVersion =
   | "v7.0-legacy-block-stream-only"
-  | "v7.1-unified-block-assignment";
+  | "v7.1-unified-block-assignment"
+  | "v7.2-unified-block-conditional-pass";
 
 export const TACTICAL_FEATURE_ENCODER_VERSION_LEGACY: TacticalFeatureEncoderVersion =
   "v7.0-legacy-block-stream-only";
 
-export const TACTICAL_FEATURE_ENCODER_VERSION_CURRENT: TacticalFeatureEncoderVersion =
+export const TACTICAL_FEATURE_ENCODER_VERSION_V71: TacticalFeatureEncoderVersion =
   "v7.1-unified-block-assignment";
+
+export const TACTICAL_FEATURE_ENCODER_VERSION_V72: TacticalFeatureEncoderVersion =
+  "v7.2-unified-block-conditional-pass";
+
+export const TACTICAL_FEATURE_ENCODER_VERSION_CURRENT: TacticalFeatureEncoderVersion =
+  "v7.2-unified-block-conditional-pass";
 
 /**
  * 独立評価可能な6つの戦術特徴量カテゴリ
@@ -401,7 +411,8 @@ export function fromV6CompatibleDNA(
           notes: typeof parsed.userNotes === "string" ? parsed.userNotes : undefined,
           encoderVersion:
             parsed.encoderVersion === "v7.0-legacy-block-stream-only" ||
-            parsed.encoderVersion === "v7.1-unified-block-assignment"
+            parsed.encoderVersion === "v7.1-unified-block-assignment" ||
+            parsed.encoderVersion === "v7.2-unified-block-conditional-pass"
               ? parsed.encoderVersion
               : undefined,
         });
@@ -785,6 +796,62 @@ export function evaluateBlockAssignmentTacticalFeatures(
 }
 
 /**
+ * 同一 DecisionRequest 内に相手リクエストに対する有効な対抗手段（Counter 等）が存在するか判定 (Work 5-4B)
+ *
+ * 【判定原則】
+ * 1. CERTAIN_CANCEL: 確定的に損害を阻止できる有効な対抗手段（preventedDamage.min > 0 または expected > 0）
+ * 2. UNCERTAIN_CANCEL: 非公開情報に依存するが損害を阻止できる可能性がある有効な対抗手段（preventedDamage.expected > 0 または max > 0）
+ * 3. UNKNOWN_CANCEL: 式・変数が未定義・評価不能な効果であり、有効なCounterと無条件にみなさない (Work 5-4B 要件3)
+ * 4. CANNOT_CANCEL: 条件不成立または打ち消し不可
+ *
+ * 有効な対抗手段が1つも存在しない場合、PASS に対する追加減点 (t00〜t05) を免除する。
+ */
+export function hasEffectiveCounterMeasure(
+  request: Readonly<DecisionRequest>,
+  primaryOppReq: Readonly<RequestView>,
+  reqOutcome: TacticalRequestOutcome,
+  tacticalEvaluator?: TacticalEvaluator
+): boolean {
+  if (!tacticalEvaluator) return false;
+  const patterns = request.patterns;
+  if (!patterns || patterns.length === 0) return false;
+
+  for (const p of patterns) {
+    if (p.kind === "PASS") continue;
+    const counterOutcome = tacticalEvaluator.evaluateCounterOutcome(
+      p,
+      primaryOppReq,
+      request,
+      reqOutcome
+    );
+    if (
+      counterOutcome.cancelStatus === "CERTAIN_CANCEL" &&
+      !counterOutcome.preventedDamageToSelf.isUnknown
+    ) {
+      if (
+        counterOutcome.preventedDamageToSelf.min > 0 ||
+        counterOutcome.preventedDamageToSelf.expected > 0
+      ) {
+        return true;
+      }
+    } else if (
+      counterOutcome.cancelStatus === "UNCERTAIN_CANCEL" &&
+      !counterOutcome.preventedDamageToSelf.isUnknown
+    ) {
+      if (
+        counterOutcome.preventedDamageToSelf.expected > 0 ||
+        counterOutcome.preventedDamageToSelf.max > 0
+      ) {
+        return true;
+      }
+    }
+    // UNKNOWN_CANCEL, CANNOT_CANCEL は有効な対抗手段とみなさない
+  }
+
+  return false;
+}
+
+/**
  * 単一パターンの戦術特徴量ベクトル (20次元) をエンコード
  */
 export function encodeTacticalPatternFeatures(
@@ -792,7 +859,8 @@ export function encodeTacticalPatternFeatures(
   pattern: Readonly<LegalPattern>,
   tacticalEvaluator?: TacticalEvaluator,
   encoderVersion: TacticalFeatureEncoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
-  precomputedBlockContext?: BlockTacticalEvaluationContext
+  precomputedBlockContext?: BlockTacticalEvaluationContext,
+  precomputedHasCounter?: boolean
 ): { features: Float64Array; reasons: string[] } {
   const features = new Float64Array(TACTICAL_FEATURE_DIMENSION);
   const reasons: string[] = [];
@@ -817,7 +885,20 @@ export function encodeTacticalPatternFeatures(
       const netDmg = reqOutcome.netDamageToSelf;
 
       if (pattern.kind === "PASS") {
-        if (reqOutcome.certainty === "CERTAIN") {
+        // Work 5-4B: v7.2 以降では、同一 DecisionRequest 内に有効な対抗手段がない場合、PASS の損害減点を免除する
+        const isConditionalPassVersion =
+          encoderVersion === "v7.2-unified-block-conditional-pass";
+        const hasCounter = isConditionalPassVersion
+          ? precomputedHasCounter !== undefined
+            ? precomputedHasCounter
+            : hasEffectiveCounterMeasure(request, primaryOppReq, reqOutcome, tacticalEvaluator)
+          : true;
+
+        if (!hasCounter) {
+          reasons.push(
+            `t00_t05_pass_penalty_exempted: no effective counter available against ${primaryOppReq.actionId}`
+          );
+        } else if (reqOutcome.certainty === "CERTAIN") {
           // Category 1: DSLから計算した確定損害
           if (netDmg.min >= selfLife && selfLife > 0) {
             features[0] = 1.0; // t00_pass_certain_lethal
@@ -938,7 +1019,7 @@ export function encodeTacticalPatternFeatures(
   // ===========================================================================
   // カテゴリ 4 (後半): 通常ブロック割り当ての戦術評価 (t14, t15, t16) (Work 5-4A)
   // ===========================================================================
-  if (encoderVersion === "v7.1-unified-block-assignment") {
+  if (encoderVersion !== "v7.0-legacy-block-stream-only") {
     const blockCtx = precomputedBlockContext ?? createBlockTacticalContext(request);
     const blockAssignments = extractBlockAssignmentsFromPattern(request, pattern, blockCtx);
     if (blockAssignments !== undefined) {
@@ -1216,7 +1297,7 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
   private encodeAlignedStreamingContext(request: Readonly<DecisionRequest>): number[] {
     const contextValues = [...DecisionFeatureEncoder.encodeContextOnly(request)];
     if (
-      this.encoderVersion === "v7.1-unified-block-assignment" &&
+      this.encoderVersion !== "v7.0-legacy-block-stream-only" &&
       request.patterns.length === 0 &&
       request.blockAssignmentStream
     ) {
@@ -1294,8 +1375,28 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
     const details: LearnableTacticalEvaluationDetail[] = [];
     const weights = this.genome.tacticalWeights;
     const blockContext =
-      this.encoderVersion === "v7.1-unified-block-assignment"
+      this.encoderVersion !== "v7.0-legacy-block-stream-only"
         ? createBlockTacticalContext(request)
+        : undefined;
+
+    // Work 5-4B: 相手リクエストが存在する場合、決定内で有効な対抗手段（Counter等）が存在するかを1回だけ事前判定
+    const oppRequests = (request.observation.stageRequests ?? []).filter(
+      (r) => r.controller !== request.playerId
+    );
+    const precomputedHasCounter =
+      this.encoderVersion === "v7.2-unified-block-conditional-pass" &&
+      oppRequests.length > 0 &&
+      this.tacticalEvaluator
+        ? hasEffectiveCounterMeasure(
+            request,
+            oppRequests[oppRequests.length - 1],
+            this.tacticalEvaluator.evaluateRequestOutcome(
+              oppRequests[oppRequests.length - 1],
+              request.playerId,
+              request.observation
+            ),
+            this.tacticalEvaluator
+          )
         : undefined;
 
     let bestScore = -Infinity;
@@ -1310,7 +1411,8 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
         pat,
         this.tacticalEvaluator,
         this.encoderVersion,
-        blockContext
+        blockContext,
+        precomputedHasCounter
       );
       const breakdown = computeCategoryBreakdown(sp.score, features, weights);
 
