@@ -14,6 +14,7 @@ import { createReplayPlanFromDiagnosticBundleV1 } from "../src/ui/playtest/Diagn
 import { reconstructMatch } from "../src/engine/replay/ReplayReconstructionService.js";
 import { createGen8ChampionCandidatePolicy } from "../src/engine/ai/Gen8DNALoader.js";
 import { Gen9TacticalPrototypePolicy } from "../src/engine/ai/Gen9TacticalPrototypePolicy.js";
+import { GenericTacticalEvaluator } from "../src/engine/rules/GenericTacticalEvaluator.js";
 
 async function main() {
   const targetFile = path.resolve(
@@ -54,7 +55,8 @@ async function main() {
 
   const gen8Policy = createGen8ChampionCandidatePolicy();
   const dna = (gen8Policy as any).dna;
-  const gen9Policy = new Gen9TacticalPrototypePolicy(dna, "Gen9-Tactical-Prototype-R2", fullRulePackage);
+  const tacticalEvaluator = new GenericTacticalEvaluator(fullRulePackage);
+  const gen9Policy = new Gen9TacticalPrototypePolicy(dna, "Gen9-Tactical-Prototype-R3", tacticalEvaluator);
 
   console.log("================================================================================");
   console.log(" BlackPoker — Gen 8 vs Gen 9 戦術プロトタイプ 正本回帰検証 (Work 5-1 R2)");

@@ -27,8 +27,11 @@ import { DecisionFeatureEncoder } from "./DecisionFeatureEncoder.js";
 import { GenomeScorer } from "./GenomeScorer.js";
 import { LegalPattern } from "../../domain/decision/LegalPattern.js";
 import { UnitView, RequestView, PlayerObservationView, KnownCardView } from "../../domain/decision/PlayerObservation.js";
-import { RulePackage } from "../../domain/rules/RulePackage.js";
-import { GenericTacticalEvaluator } from "./GenericTacticalEvaluator.js";
+import {
+  TacticalEvaluator,
+  TacticalRequestOutcome,
+  TacticalCounterOutcome,
+} from "../../domain/decision/TacticalEvaluationTypes.js";
 
 export interface TacticalEvaluationDetail {
   readonly patternRef: number;
@@ -46,12 +49,27 @@ export interface TacticalEvaluationResult {
 export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
   public readonly descriptor: PolicyDescriptor;
   private readonly dna: DecisionDNA;
-  private readonly tacticalEvaluator: GenericTacticalEvaluator;
+  private readonly tacticalEvaluator?: TacticalEvaluator;
+  private static defaultEvaluator?: TacticalEvaluator;
 
-  constructor(dna: Readonly<DecisionDNA>, name?: string, rulePackage?: Readonly<RulePackage>) {
+  /**
+   * グローバルデフォルトの TacticalEvaluator を設定
+   */
+  public static setDefaultEvaluator(evaluator: TacticalEvaluator): void {
+    Gen9TacticalPrototypePolicy.defaultEvaluator = evaluator;
+  }
+
+  /**
+   * グローバルデフォルトの TacticalEvaluator を取得
+   */
+  public static getDefaultEvaluator(): TacticalEvaluator | undefined {
+    return Gen9TacticalPrototypePolicy.defaultEvaluator;
+  }
+
+  constructor(dna: Readonly<DecisionDNA>, name?: string, evaluator?: TacticalEvaluator) {
     DecisionDNACodec.validate(dna);
     this.dna = DecisionDNACodec.clone(dna);
-    this.tacticalEvaluator = new GenericTacticalEvaluator(rulePackage);
+    this.tacticalEvaluator = evaluator ?? Gen9TacticalPrototypePolicy.defaultEvaluator;
 
     this.descriptor = {
       kind: "genome",
@@ -265,44 +283,65 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     const stageRequests = obs.stageRequests ?? [];
     const oppRequests = stageRequests.filter((r) => r.controller !== selfKey);
 
-    if (oppRequests.length > 0) {
+    if (oppRequests.length > 0 && this.tacticalEvaluator) {
       const primaryOppReq = oppRequests[oppRequests.length - 1]; // 最上位の相手リクエスト
       const reqOutcome = this.tacticalEvaluator.evaluateRequestOutcome(primaryOppReq, selfKey, obs);
-      const estDamage = reqOutcome.netDamageToSelf;
 
-      // (A-1) PASS を選択した場合の損害ペナルティ (自分への正味ダメージがある場合のみ)
-      if (pattern.kind === "PASS") {
-        if (estDamage > 0) {
-          if (estDamage >= selfLife) {
-            // 即死回避
-            adjustment -= 2.5;
-            reasons.push(`Lethal PASS penalty (-2.5): estDamage=${estDamage} >= life=${selfLife}`);
-          } else if (selfLife - estDamage <= 4) {
-            // 瀕死・危険域
-            const severePenalty = 0.8 * (estDamage / Math.max(1, selfLife));
-            adjustment -= severePenalty;
-            reasons.push(`Severe damage PASS penalty (-${severePenalty.toFixed(2)}): estDamage=${estDamage}`);
-          } else if (estDamage >= 5) {
-            // 中〜大ダメージ
-            adjustment -= 0.35;
-            reasons.push(`Damage PASS penalty (-0.35): estDamage=${estDamage}`);
+      if (!reqOutcome.isGuardedOut) {
+        const netDmg = reqOutcome.netDamageToSelf;
+
+        // (A-1) PASS を選択した場合の損害ペナルティ
+        if (pattern.kind === "PASS") {
+          if (reqOutcome.certainty === "CERTAIN") {
+            // 確定損害
+            if (netDmg.min >= selfLife && selfLife > 0) {
+              adjustment -= 2.5; // 確定致死回避ペナルティ
+              reasons.push(`Certain lethal PASS penalty (-2.5): damage=${netDmg.min} >= life=${selfLife}`);
+            } else if (selfLife - netDmg.expected <= 4) {
+              const severePenalty = 0.8 * (netDmg.expected / Math.max(1, selfLife));
+              adjustment -= severePenalty;
+              reasons.push(`Certain severe damage PASS penalty (-${severePenalty.toFixed(2)}): damage=${netDmg.expected}`);
+            } else if (netDmg.expected >= 5) {
+              adjustment -= 0.35;
+              reasons.push(`Certain damage PASS penalty (-0.35): damage=${netDmg.expected}`);
+            }
+          } else if (reqOutcome.certainty === "ESTIMATED") {
+            // 非公開情報を含む推定損害 (最悪想定〜期待値)
+            if (netDmg.max >= selfLife && selfLife > 0) {
+              // 最悪ケースで致死の危険性あり (最悪致死リスクヘッジ)
+              // 確定致死(-2.5)とは混同せず、リスクに応じた慎重なペナルティ
+              const riskPenalty = Math.min(1.8, 0.8 + 0.8 * (netDmg.expected / Math.max(1, selfLife)));
+              adjustment -= riskPenalty;
+              reasons.push(`Estimated lethal risk PASS penalty (-${riskPenalty.toFixed(2)}): maxDmg=${netDmg.max} >= life=${selfLife}, expected=${netDmg.expected}`);
+            } else if (selfLife - netDmg.expected <= 4) {
+              const p = 0.5 * (netDmg.expected / Math.max(1, selfLife));
+              adjustment -= p;
+              reasons.push(`Estimated damage PASS penalty (-${p.toFixed(2)}): expected=${netDmg.expected}`);
+            } else if (netDmg.expected >= 5) {
+              adjustment -= 0.25;
+              reasons.push(`Estimated moderate damage PASS penalty (-0.25): expected=${netDmg.expected}`);
+            }
           }
         }
-      }
 
-      // (A-2) 打ち消し・阻止選択肢 (Counter 等) を選択した場合の阻止ボーナス
-      const counterOutcome = this.tacticalEvaluator.evaluateCounterOutcome(pattern, primaryOppReq, request, reqOutcome);
-      if (counterOutcome.canCancel && counterOutcome.preventedDamageToSelf > 0) {
-        const prevented = counterOutcome.preventedDamageToSelf;
-        if (prevented >= selfLife) {
-          adjustment += 2.2;
-          reasons.push(`Lethal Counter bonus (+2.2): prevents estDamage=${prevented}`);
-        } else if (selfLife - prevented <= 4 || prevented >= 8) {
-          adjustment += 1.0;
-          reasons.push(`High damage Counter bonus (+1.0): prevents estDamage=${prevented}`);
-        } else if (prevented >= 4) {
-          adjustment += 0.4;
-          reasons.push(`Moderate damage Counter bonus (+0.4): prevents estDamage=${prevented}`);
+        // (A-2) 打ち消し・阻止選択肢 (Counter 等) を選択した場合の阻止ボーナス
+        const counterOutcome = this.tacticalEvaluator.evaluateCounterOutcome(pattern, primaryOppReq, request, reqOutcome);
+        if (counterOutcome.cancelStatus === "CERTAIN_CANCEL") {
+          const prevented = counterOutcome.preventedDamageToSelf;
+          if (prevented.isCertain && prevented.min >= selfLife && selfLife > 0) {
+            adjustment += 2.2; // 確定致死阻止
+            reasons.push(`Certain lethal Counter bonus (+2.2): prevents damage=${prevented.min}`);
+          } else if (!prevented.isCertain && prevented.max >= selfLife && selfLife > 0) {
+            adjustment += 1.8; // 推定最悪致死阻止
+            reasons.push(`Estimated lethal risk Counter bonus (+1.8): prevents maxDamage=${prevented.max}`);
+          } else if (prevented.expected >= 4) {
+            const b = Math.min(1.0, 0.3 + 0.08 * prevented.expected);
+            adjustment += b;
+            reasons.push(`Counter bonus (+${b.toFixed(2)}): prevents expectedDamage=${prevented.expected}`);
+          }
+        } else if (counterOutcome.cancelStatus === "UNCERTAIN_CANCEL") {
+          adjustment += 0.2;
+          reasons.push(`Uncertain Counter potential bonus (+0.2)`);
         }
       }
     }

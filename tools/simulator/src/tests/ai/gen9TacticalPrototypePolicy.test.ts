@@ -1,15 +1,21 @@
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, beforeAll } from "vitest";
 import * as fs from "fs";
 import * as path from "path";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest.js";
 import { DecisionDNACodec } from "../../engine/ai/DecisionDNACodec.js";
 import { Gen9TacticalPrototypePolicy } from "../../engine/ai/Gen9TacticalPrototypePolicy.js";
-import { GenericTacticalEvaluator } from "../../engine/ai/GenericTacticalEvaluator.js";
+import { GenericTacticalEvaluator } from "../../engine/rules/GenericTacticalEvaluator.js";
+import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader.js";
 import { createGen8ChampionCandidatePolicy } from "../../engine/ai/Gen8DNALoader.js";
 import { RulePackage } from "../../domain/rules/RulePackage.js";
 import { RequestView } from "../../domain/decision/PlayerObservation.js";
 
 describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
+  beforeAll(() => {
+    const fullPkg = loadRulePackageForBrowser();
+    const evaluator = new GenericTacticalEvaluator(fullPkg);
+    Gen9TacticalPrototypePolicy.setDefaultEvaluator(evaluator);
+  });
   const gen8 = createGen8ChampionCandidatePolicy();
   const dna = DecisionDNACodec.clone((gen8 as any).dna);
 
@@ -441,9 +447,10 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
 
       const outcomeHit = evaluator.evaluateRequestOutcome(reqHit, "p2", obsBase);
       expect(outcomeHit.isGuardedOut).toBe(false);
-      expect(outcomeHit.directDamageToSelf).toBe(13);
-      expect(outcomeHit.lifeGainToSelf).toBe(1);
-      expect(outcomeHit.netDamageToSelf).toBe(12); // 正味 12 ダメージ
+      expect(outcomeHit.directDamageToSelf.expected).toBe(13);
+      expect(outcomeHit.lifeGainToSelf.expected).toBe(1);
+      expect(outcomeHit.netDamageToSelf.expected).toBe(12); // 正味 12 ダメージ
+      expect(outcomeHit.netDamageToSelf.isCertain).toBe(true);
 
       // ケース B: サイズ 3 の兵士を対象、♢2 + ♠13 (ガード不成立 3 % 2 !== 0 で不発)
       const reqMiss: RequestView = {
@@ -461,11 +468,12 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
 
       const outcomeMiss = evaluator.evaluateRequestOutcome(reqMiss, "p2", obsBase);
       expect(outcomeMiss.isGuardedOut).toBe(true);
-      expect(outcomeMiss.netDamageToSelf).toBe(0); // 不発で 0 ダメージ
+      expect(outcomeMiss.netDamageToSelf.expected).toBe(0); // 不発で 0 ダメージ
     });
 
     it("6-2. 投擲: ♠数値が正確に直接ダメージとなり、固定値依存がないこと", () => {
-      const evaluator = new GenericTacticalEvaluator();
+      const fullPkg = loadRulePackageForBrowser();
+      const evaluator = new GenericTacticalEvaluator(fullPkg);
 
       const obs = {
         viewerPlayerId: "p2" as const,
@@ -493,8 +501,8 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
       };
 
       const outcome = evaluator.evaluateRequestOutcome(reqThrow, "p2", obs);
-      expect(outcome.netDamageToSelf).toBe(9); // ♠9 の 9 点ダメージ
-      expect(outcome.isCertain).toBe(true);
+      expect(outcome.netDamageToSelf.expected).toBe(9); // ♠9 の 9 点ダメージ
+      expect(outcome.netDamageToSelf.isCertain).toBe(true);
     });
 
     it("6-3. 新規切札 (action.meteor) を DSL 定義に追加するだけで、AI コード変更なしに戦術評価されること", () => {
@@ -539,8 +547,8 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
       };
 
       const outcome = evaluator.evaluateRequestOutcome(reqMeteor, "p2", obs);
-      expect(outcome.netDamageToSelf).toBe(15); // コード変更なしで 15 点ダメージを自動導出！
-      expect(outcome.isCertain).toBe(true);
+      expect(outcome.netDamageToSelf.expected).toBe(15); // コード変更なしで 15 点ダメージを自動導出！
+      expect(outcome.netDamageToSelf.isCertain).toBe(true);
     });
   });
 });
