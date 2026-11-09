@@ -148,7 +148,7 @@ export function assertCleanCommitState(
 export async function main() {
   const tStart = performance.now();
   console.log("================================================================================");
-  console.log("  BlackPoker Gen 9 Work 5-4C R2: カード選択診断の精度修正・Evidence再検証");
+  console.log("  BlackPoker Gen 9 Work 5-4C R3: スコア寄与度の正確性修正・実選択の照合");
   console.log("================================================================================");
 
   const rootDir = process.cwd();
@@ -162,7 +162,7 @@ export async function main() {
   console.log(`[GIT_COMMIT_VERIFIED] HEAD Commit: ${gitSha} (CommitTime: ${commitTimeIso})`);
   console.log(`[WORKTREE_VERIFIED] 作業ツリーは完全にクリーンです`);
 
-  // 0. 既存 Work 5-4C Evidence の完全保護検証 (SHA-256 不変性アサーション)
+  // 0-1. 既存 Work 5-4C 初版 Evidence の完全保護検証 (SHA-256 不変性アサーション)
   let originalEvidencePath = path.resolve(
     rootDir,
     "evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-46735ba3d704.json"
@@ -174,17 +174,41 @@ export async function main() {
     );
   }
   if (!fs.existsSync(originalEvidencePath)) {
-    throw new Error(`[PROTECTION_ERROR] 既存 Evidence JSON が見つかりません: ${originalEvidencePath}`);
+    throw new Error(`[PROTECTION_ERROR] 既存 初版 Evidence JSON が見つかりません: ${originalEvidencePath}`);
   }
   const originalBuf = fs.readFileSync(originalEvidencePath);
   const originalSha256 = crypto.createHash("sha256").update(originalBuf).digest("hex").toLowerCase();
   const EXPECTED_ORIGINAL_SHA256 = "53f9c9b82c136a8026df79e9fbba8196435db7ac3520b186529308565939dcd6";
   if (originalSha256 !== EXPECTED_ORIGINAL_SHA256) {
     throw new Error(
-      `[PROTECTION_VIOLATION] 既存 Evidence JSON の改変を検知しました: 期待値=${EXPECTED_ORIGINAL_SHA256}, 実際=${originalSha256}`
+      `[PROTECTION_VIOLATION] 既存 初版 Evidence JSON の改変を検知しました: 期待値=${EXPECTED_ORIGINAL_SHA256}, 実際=${originalSha256}`
     );
   }
-  console.log(`[EVIDENCE_PROTECTED] 既存 Evidence SHA-256 検証成功: ${originalSha256}`);
+  console.log(`[EVIDENCE_PROTECTED] 既存 初版 Evidence SHA-256 検証成功: ${originalSha256}`);
+
+  // 0-2. 既存 Work 5-4C R2 Evidence の完全保護検証 (SHA-256 不変性アサーション)
+  let r2EvidencePath = path.resolve(
+    rootDir,
+    "evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r2-d78652a6ab98.json"
+  );
+  if (!fs.existsSync(r2EvidencePath)) {
+    r2EvidencePath = path.resolve(
+      repoRoot,
+      "tools/simulator/evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r2-d78652a6ab98.json"
+    );
+  }
+  if (!fs.existsSync(r2EvidencePath)) {
+    throw new Error(`[PROTECTION_ERROR] 既存 R2 Evidence JSON が見つかりません: ${r2EvidencePath}`);
+  }
+  const r2Buf = fs.readFileSync(r2EvidencePath);
+  const r2Sha256 = crypto.createHash("sha256").update(r2Buf).digest("hex").toLowerCase();
+  const EXPECTED_R2_SHA256 = "6e94b81fcb18c780257ccc7104bf2f1ca4419b82d5a382e51664ee4497f4c49f";
+  if (r2Sha256 !== EXPECTED_R2_SHA256) {
+    throw new Error(
+      `[PROTECTION_VIOLATION] 既存 R2 Evidence JSON の改変を検知しました: 期待値=${EXPECTED_R2_SHA256}, 実際=${r2Sha256}`
+    );
+  }
+  console.log(`[EVIDENCE_PROTECTED] 既存 R2 Evidence SHA-256 検証成功: ${r2Sha256}`);
 
   // 3. ルールおよびレギュレーションのロード
   const rulesDir = path.resolve(rootDir, "src/data/rules-vnext");
@@ -241,11 +265,23 @@ export async function main() {
   let currentSeat = "p1";
   const seenUniqueDecisionKeys = new Set<string>();
   const varianceDecisions: DecisionRequest[] = [];
+  const actualMatchResponsesByDecisionId = new Map<string, Record<string, DecisionResponse>>();
 
-  const onDecisionObserved = (req: Readonly<DecisionRequest>) => {
+  const onDecisionObserved = (
+    req: Readonly<DecisionRequest>,
+    res: Readonly<DecisionResponse>,
+    policyName: string
+  ) => {
     // 修正F: 複合一意キー (matchSeed_seat_turn_decisionId)
     const turnCount = req.observation.turnCount ?? 0;
     const uniqueKey = `${currentMatchSeed}_${currentSeat}_${turnCount}_${req.decisionId}`;
+
+    // 修正C: 実対戦 Policy の選択レスポンスを直接記録
+    if (!actualMatchResponsesByDecisionId.has(req.decisionId)) {
+      actualMatchResponsesByDecisionId.set(req.decisionId, {});
+    }
+    actualMatchResponsesByDecisionId.get(req.decisionId)![policyName] = res;
+
     if (seenUniqueDecisionKeys.has(uniqueKey)) return;
     seenUniqueDecisionKeys.add(uniqueKey);
 
@@ -257,10 +293,10 @@ export async function main() {
   };
 
   const wrapperR4 = new DiagnosticTransparentWrapperPolicy(policyR4, {
-    onDecision: onDecisionObserved,
+    onDecision: (req, res) => onDecisionObserved(req, res, "R4_v72"),
   });
   const wrapperGen8 = new DiagnosticTransparentWrapperPolicy(policyGen8, {
-    onDecision: onDecisionObserved,
+    onDecision: (req, res) => onDecisionObserved(req, res, "Gen8"),
   });
 
   let matchCounter = 0;
@@ -335,7 +371,8 @@ export async function main() {
   let totalCounterVariance = 0;
 
   for (const req of varianceDecisions) {
-    const rec = diagnoseDecisionRequest(req, policiesForShadow);
+    const actualResponses = actualMatchResponsesByDecisionId.get(req.decisionId);
+    const rec = diagnoseDecisionRequest(req, policiesForShadow, actualResponses);
     if (!rec) continue;
 
     diagnosticRecords.push(rec);
@@ -357,7 +394,7 @@ export async function main() {
     aggregateMetrics[pName] = computePolicyAggregateMetrics(pName, diagnosticRecords);
   }
 
-  // 9. 代表事例の抽出とスコア寄与度分解 (修正E)
+  // 9. 代表事例の抽出とスコア寄与度分解 (修正A・修正B)
   console.log("\n[EXPLANATION] 代表事例 (兵士召喚、Counter、コスト支払い) のスコア寄与度分解中...");
 
   const explainRepresentativeGroup = (
@@ -371,10 +408,19 @@ export async function main() {
     const origReq = varianceDecisions.find((r) => r.decisionId === reqRecord.decisionId);
     if (!origReq) return undefined;
 
+    const explanation = explainScoreDifferenceBetweenPatterns(origReq, gen8DNA, refA, refB);
+
+    // 修正A: 数理的一致性のアサーション
+    if (!explanation.isMathematicallyConsistent) {
+      throw new Error(
+        `[MATH_ASSERTION_FAILED] 代表事例の数理的不整合: scoreDiff=${explanation.scoreDiff}, sumContribDiff=${explanation.sumContributionDiff}`
+      );
+    }
+
     return {
       candidateRefA: refA,
       candidateRefB: refB,
-      explanation: explainScoreDifferenceBetweenPatterns(origReq, gen8DNA, refA, refB),
+      explanation,
     };
   };
 
@@ -411,10 +457,10 @@ export async function main() {
 
   const elapsedSec = Number(((performance.now() - tStart) / 1000).toFixed(2));
 
-  // 10. Evidence JSON オブジェクトの構築 (Work 5-4C R2)
+  // 10. Evidence JSON オブジェクトの構築 (Work 5-4C R3)
   const evidenceReport = {
-    workId: "BP-SIM-AI-GEN9-WORK54C-DIAGNOSTIC-ACCURACY-R2",
-    schemaVersion: "2.0.0",
+    workId: "BP-SIM-AI-GEN9-WORK54C-EXPLANATION-ACCURACY-R3",
+    schemaVersion: "3.0.0",
     generatedAt: new Date().toISOString(),
     executionEnvironment: {
       gitCommitSha: gitSha,
@@ -444,16 +490,17 @@ export async function main() {
       decisionsWithCounterVariance: totalCounterVariance,
     },
     aggregateMetrics,
+    // 修正F: 軽量化 (巨大な生特徴量配列の重複展開を避け、集計統計値と検証可能な代表事例中心の構成にする)
     representativeExamples: {
-      summonSoldier: diagnosticRecords.filter((r) => r.hasSummonSoldierVariance).slice(0, 5),
-      counter: diagnosticRecords.filter((r) => r.hasCounterVariance).slice(0, 5),
-      costPayment: diagnosticRecords.filter((r) => r.hasCostVariance).slice(0, 5),
+      summonSoldier: sampleSummon ? [sampleSummon] : [],
+      counter: sampleCounter ? [sampleCounter] : [],
+      costPayment: sampleCost ? [sampleCost] : [],
     },
     representativeExamplesWithExplanation,
     executionDurationSeconds: elapsedSec,
   };
 
-  // 11. Evidence JSON の排他的永続化保存 (R2ファイル名)
+  // 11. Evidence JSON の排他的永続化保存 (R3ファイル名)
   const shortSha = gitSha.substring(0, 12);
   let evidenceDir = path.resolve(rootDir, "evidence/gen9-work5-4c");
   if (!fs.existsSync(evidenceDir)) {
@@ -463,7 +510,7 @@ export async function main() {
     fs.mkdirSync(evidenceDir, { recursive: true });
   }
 
-  const evidenceFileName = `gen9-work5-4c-card-selection-diagnostic-r2-${shortSha}.json`;
+  const evidenceFileName = `gen9-work5-4c-card-selection-diagnostic-r3-${shortSha}.json`;
   const evidenceFilePath = path.join(evidenceDir, evidenceFileName);
 
   const jsonStr = JSON.stringify(evidenceReport, null, 2);

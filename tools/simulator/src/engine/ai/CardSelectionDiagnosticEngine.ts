@@ -27,6 +27,10 @@ import { Gen9TacticalPrototypePolicy } from "./Gen9TacticalPrototypePolicy.js";
 import { GenomePolicy } from "./GenomePolicy.js";
 import { DecisionFeatureEncoder } from "./DecisionFeatureEncoder.js";
 import { GenomeScorer } from "./GenomeScorer.js";
+import {
+  CONTEXT_FEATURE_NAMES,
+  PATTERN_FEATURE_NAMES,
+} from "../../domain/ai/DecisionFeatureTypes.js";
 
 // =============================================================================
 // 1. データ構造・インターフェース
@@ -117,6 +121,7 @@ export interface GroupScoreTieAnalysis {
 }
 
 export interface ActualPolicyChoice {
+  readonly choiceType?: "ACTUAL_MATCH_CHOICE" | "SHADOW_POLICY_CHOICE";
   readonly selectedPatternRef: number;
   readonly selectedActionId?: string;
   readonly selectedKeyCardIds: readonly string[];
@@ -446,8 +451,9 @@ export function analyzeScoresTie(scores: readonly number[]): GroupScoreTieAnalys
   const bestScore = sorted[0];
   const secondBestScore = sorted.length > 1 ? sorted[1] : bestScore;
   const minScore = sorted[sorted.length - 1];
-  const scoreMargin = Number((bestScore - secondBestScore).toFixed(6));
-  const scoreRange = Number((bestScore - minScore).toFixed(6));
+  // 修正D: 未丸めの生の浮動小数点値で保持 (表示・レポート出力時のみ丸め適用)
+  const scoreMargin = bestScore - secondBestScore;
+  const scoreRange = bestScore - minScore;
 
   const EPSILON = 1e-9;
 
@@ -577,7 +583,11 @@ export function evaluatePolicyOnDecisionRequest(
   policy: DecisionPolicy,
   policyName: string,
   request: Readonly<DecisionRequest>,
-  resolvedPatterns: readonly ResolvedPatternInfo[]
+  resolvedPatterns: readonly ResolvedPatternInfo[],
+  options?: {
+    actualResponse?: Readonly<DecisionResponse>;
+    choiceType?: "ACTUAL_MATCH_CHOICE" | "SHADOW_POLICY_CHOICE";
+  }
 ): {
   candidateScores: readonly EvaluatedCandidateScore[];
   bestPatternRef: number;
@@ -641,26 +651,31 @@ export function evaluatePolicyOnDecisionRequest(
     bestPatternRef = choice.selectedPatternRef;
   }
 
-  // 全合法手の中での最高スコアとタイブレーク判定
+  // 全合法手の中での最高スコアとタイブレーク判定 (修正D: 厳密同点 exact === に基づくタイブレーク)
   let globalBestScore = -Infinity;
   for (const s of candidateScores) {
     if (s.finalScore > globalBestScore) {
       globalBestScore = s.finalScore;
     }
   }
-  const EPSILON = 1e-9;
-  const globalTopTies = candidateScores.filter((s) => Math.abs(s.finalScore - globalBestScore) < EPSILON);
-  const minGlobalTieRef = globalTopTies.length > 0 ? Math.min(...globalTopTies.map((s) => s.patternRef)) : bestPatternRef;
 
-  const chosenPattern = resolvedPatterns[bestPatternRef];
+  const chosenRef = options?.actualResponse ? options.actualResponse.selectedPatternRef : bestPatternRef;
+  const exactGlobalTopTies = candidateScores.filter((s) => s.finalScore === globalBestScore);
+  const minGlobalTieRef =
+    exactGlobalTopTies.length > 0
+      ? Math.min(...exactGlobalTopTies.map((s) => s.patternRef))
+      : chosenRef;
+
+  const chosenPattern = resolvedPatterns.find((p) => p.patternRef === chosenRef);
   const actualChoice: ActualPolicyChoice = {
-    selectedPatternRef: bestPatternRef,
+    choiceType: options?.choiceType ?? (options?.actualResponse ? "ACTUAL_MATCH_CHOICE" : "SHADOW_POLICY_CHOICE"),
+    selectedPatternRef: chosenRef,
     selectedActionId: chosenPattern?.actionId,
     selectedKeyCardIds: chosenPattern?.keyCardIds ?? [],
     selectedCostSignature: chosenPattern?.costSignature ?? "",
-    finalScore: candidateScores[bestPatternRef]?.finalScore ?? 0,
-    isGlobalTopScoreTie: globalTopTies.length > 1,
-    isGlobalTieBreakChosen: globalTopTies.length > 1 && bestPatternRef === minGlobalTieRef,
+    finalScore: candidateScores.find((s) => s.patternRef === chosenRef)?.finalScore ?? 0,
+    isGlobalTopScoreTie: exactGlobalTopTies.length > 1,
+    isGlobalTieBreakChosen: exactGlobalTopTies.length > 1 && chosenRef === minGlobalTieRef,
   };
 
   return {
@@ -676,10 +691,17 @@ export function evaluateGroupDistinguishability(
   candidateScores: readonly EvaluatedCandidateScore[],
   actualChoice?: ActualPolicyChoice
 ): PolicyGroupEvaluation {
-  const groupScores = group.patternRefs.map((ref) => candidateScores[ref]);
+  // 修正D: patternRef による明示的対応付け (インデックス暗黙仮定の排除)
+  const groupScores = group.patternRefs.map((ref) => {
+    const found = candidateScores.find((s) => s.patternRef === ref);
+    if (!found) {
+      throw new Error(`[PATTERN_REF_NOT_FOUND] candidateScores 内に patternRef=${ref} が見つかりません`);
+    }
+    return found;
+  });
   const scoresOnly = groupScores.map((s) => s.finalScore);
 
-  // 修正A: 同点判定
+  // 修正A & 修正D: 同点判定 (未丸めスコア保持)
   const tieAnalysis = analyzeScoresTie(scoresOnly);
   const bestScore = tieAnalysis.bestScore;
   const secondBestScore = tieAnalysis.secondBestScore;
@@ -696,30 +718,37 @@ export function evaluateGroupDistinguishability(
   });
   const bestPatternRef = sortedScores[0]?.patternRef ?? group.patternRefs[0];
 
-  // グループ最高スコア同点候補リスト (approx 1e-9)
+  // グループ最高スコア同点候補リスト (修正D: 厳密一致 exact ===)
+  const topExactTieCandidates = groupScores.filter((s) => s.finalScore === bestScore);
+  const minIndexAmongGroupExactTies =
+    topExactTieCandidates.length > 0
+      ? Math.min(...topExactTieCandidates.map((c) => c.patternRef))
+      : bestPatternRef;
+
+  // 近似同点候補リスト (approx 1e-9)
   const EPSILON = 1e-9;
-  const topTieCandidates = groupScores.filter((s) => Math.abs(s.finalScore - bestScore) < EPSILON);
-  const minIndexAmongGroupTies = topTieCandidates.length > 0 ? Math.min(...topTieCandidates.map((c) => c.patternRef)) : bestPatternRef;
+  const topApproxTieCandidates = groupScores.filter((s) => Math.abs(s.finalScore - bestScore) < EPSILON);
 
   // 修正B: Policy実選択との分離 (未指定時は内部最良選択を使用)
   const actual = actualChoice ?? {
+    choiceType: "SHADOW_POLICY_CHOICE" as const,
     selectedPatternRef: bestPatternRef,
     selectedActionId: undefined,
     selectedKeyCardIds: [],
     selectedCostSignature: "",
     finalScore: bestScore,
-    isGlobalTopScoreTie: topTieCandidates.length > 1,
-    isGlobalTieBreakChosen: topTieCandidates.length > 1 && bestPatternRef === minIndexAmongGroupTies,
+    isGlobalTopScoreTie: topExactTieCandidates.length > 1,
+    isGlobalTieBreakChosen: topExactTieCandidates.length > 1 && bestPatternRef === minIndexAmongGroupExactTies,
   };
 
   // 1. Policyが実際にこのグループ内の候補を選んだか
   const isGroupChosen = group.patternRefs.includes(actual.selectedPatternRef);
-  // 2. Policyがこのグループ内の候補を実際に選択し、かつその選択が同点タイブレークによるものか
+  // 2. Policyがこのグループ内の候補を実際に選択し、かつその選択が厳密同点タイブレークによるものか (修正D)
   const isGroupTieBreakChosen =
     isGroupChosen &&
-    topTieCandidates.some((c) => c.patternRef === actual.selectedPatternRef) &&
-    actual.selectedPatternRef === minIndexAmongGroupTies &&
-    topTieCandidates.length > 1;
+    topExactTieCandidates.some((c) => c.patternRef === actual.selectedPatternRef) &&
+    actual.selectedPatternRef === minIndexAmongGroupExactTies &&
+    topExactTieCandidates.length > 1;
 
   // 修正C: 候補ペア単位の特徴量比較
   const pairCompResult = compareCandidatePairs(groupScores);
@@ -743,9 +772,9 @@ export function evaluateGroupDistinguishability(
     hasPairCompleteCollision: pairCompResult.hasPairCompleteCollision,
     allPairsCompleteColliding: pairCompResult.allPairsCompleteColliding,
     // 互換用プロパティ（旧集計との比較用）
-    hasScoreTie: tieAnalysis.approx.hasTopScoreTie,
-    tieCandidatesCount: tieAnalysis.approx.topTieCandidateCount,
-    isTieBreakChosen: tieAnalysis.approx.hasTopScoreTie && bestPatternRef === minIndexAmongGroupTies,
+    hasScoreTie: tieAnalysis.exact.hasTopScoreTie,
+    tieCandidatesCount: tieAnalysis.exact.topTieCandidateCount,
+    isTieBreakChosen: tieAnalysis.exact.hasTopScoreTie && bestPatternRef === minIndexAmongGroupExactTies,
     isBaseFeatureColliding: pairCompResult.hasPairBaseCollision ?? false,
     isTacticalFeatureColliding: pairCompResult.hasPairTacticalCollision ?? false,
     isCompleteFeatureColliding: pairCompResult.hasPairCompleteCollision ?? false,
@@ -761,13 +790,19 @@ export class DiagnosticTransparentWrapperPolicy implements DecisionPolicy {
   private readonly targetPolicy: DecisionPolicy;
   public readonly recordedDecisions: DecisionRequest[] = [];
   public totalDecisionsObserved = 0;
-  private readonly onDecisionCallback?: (request: Readonly<DecisionRequest>) => void;
+  private readonly onDecisionCallback?: (
+    request: Readonly<DecisionRequest>,
+    response: Readonly<DecisionResponse>
+  ) => void;
   private readonly recordAll: boolean;
 
   constructor(
     targetPolicy: DecisionPolicy,
     options?: {
-      onDecision?: (request: Readonly<DecisionRequest>) => void;
+      onDecision?: (
+        request: Readonly<DecisionRequest>,
+        response: Readonly<DecisionResponse>
+      ) => void;
       recordAllDecisions?: boolean;
     }
   ) {
@@ -782,16 +817,18 @@ export class DiagnosticTransparentWrapperPolicy implements DecisionPolicy {
     if (this.recordAll) {
       this.recordedDecisions.push(request as DecisionRequest);
     }
+    // 修正C: 元 Policy に委譲してレスポンスを取得 (二重実行防止 & 実選択の直接記録)
+    const response = this.targetPolicy.choose(request);
     if (this.onDecisionCallback) {
       try {
-        this.onDecisionCallback(request);
+        this.onDecisionCallback(request, response);
       } catch (err) {
         // 非干渉性: 診断コールバックの例外でシミュレーションを中断させない
         console.error("Diagnostic callback error:", err);
       }
     }
-    // 元 Policy にそのまま委譲
-    return this.targetPolicy.choose(request);
+    // 元 Policy の選択を一切変更せずそのまま返却
+    return response;
   }
 }
 
@@ -892,7 +929,8 @@ export function extractKnownCardDetails(
 
 export function diagnoseDecisionRequest(
   request: Readonly<DecisionRequest>,
-  policies: Record<string, DecisionPolicy>
+  policies: Record<string, DecisionPolicy>,
+  actualMatchResponses?: Record<string, Readonly<DecisionResponse>>
 ): DecisionDiagnosticRecord | null {
   // ストリーミング判断または合法手が存在しない場合は安全にスキップ
   if ((request as any).isStreaming || !request.patterns || request.patterns.length === 0) {
@@ -920,11 +958,16 @@ export function diagnoseDecisionRequest(
   const policyEvaluations: DecisionDiagnosticRecord["policyEvaluations"] = {};
 
   for (const [pName, policy] of Object.entries(policies)) {
+    const actualResp = actualMatchResponses ? actualMatchResponses[pName] : undefined;
     const { candidateScores, bestPatternRef, actualChoice } = evaluatePolicyOnDecisionRequest(
       policy,
       pName,
       request,
-      resolvedPatterns
+      resolvedPatterns,
+      {
+        actualResponse: actualResp,
+        choiceType: actualResp ? "ACTUAL_MATCH_CHOICE" : "SHADOW_POLICY_CHOICE",
+      }
     );
 
     const keyCardGroupEvaluations = pureKeyCardGroups.map((g) =>
@@ -1433,10 +1476,11 @@ export function computePolicyAggregateMetrics(
 }
 
 // =============================================================================
-// 8. スコア寄与度分解ヘルパー (修正E)
+// 8. スコア寄与度分解ヘルパー (修正A・修正B)
 // =============================================================================
 
 export interface FeatureDiffExplanation {
+  readonly featureKey: string;
   readonly featureName: string;
   readonly featureType: "linear" | "interaction";
   readonly weight: number;
@@ -1448,82 +1492,187 @@ export interface FeatureDiffExplanation {
   readonly contributionDiff: number;
 }
 
+export interface ScoreDifferenceExplanationResult {
+  readonly patternRefA: number;
+  readonly patternRefB: number;
+  readonly scoreA: number;
+  readonly scoreB: number;
+  readonly scoreDiff: number;
+  readonly sumContributionDiff: number;
+  readonly isMathematicallyConsistent: boolean;
+  readonly topContributingFeatureDiffs: readonly FeatureDiffExplanation[];
+  readonly allFeatureDiffs: readonly FeatureDiffExplanation[];
+}
+
 export function explainScoreDifferenceBetweenPatterns(
   request: Readonly<DecisionRequest>,
   dna: any,
   patternRefA: number,
   patternRefB: number
-): {
-  scoreA: number;
-  scoreB: number;
-  scoreDiff: number;
-  topContributingFeatureDiffs: readonly FeatureDiffExplanation[];
-} {
+): ScoreDifferenceExplanationResult {
   const encoded = DecisionFeatureEncoder.encode(request);
-  const explanations = GenomeScorer.explainScore(encoded, dna);
-  const expA = explanations.find((e) => e.patternRef === patternRefA);
-  const expB = explanations.find((e) => e.patternRef === patternRefB);
+
+  // 1. パターンの存在検証 (修正A: パターンが存在しない場合は例外送出)
+  const patA = encoded.patterns.find((p) => p.patternRef === patternRefA);
+  const patB = encoded.patterns.find((p) => p.patternRef === patternRefB);
+
+  if (!patA || !patB) {
+    throw new Error(
+      `[PATTERN_NOT_FOUND] 指定された patternRef が存在しません: patternRefA=${patternRefA} (${
+        patA ? "存在" : "不在"
+      }), patternRefB=${patternRefB} (${patB ? "存在" : "不在"})`
+    );
+  }
+
+  // 2. GenomeScorer による詳細説明の生成 (各 patternRef を指定)
+  const explanationsA = GenomeScorer.explainScore(encoded, dna, patternRefA);
+  const explanationsB = GenomeScorer.explainScore(encoded, dna, patternRefB);
+  const expA = explanationsA.find((e) => e.patternRef === patternRefA);
+  const expB = explanationsB.find((e) => e.patternRef === patternRefB);
 
   if (!expA || !expB) {
-    return {
-      scoreA: 0,
-      scoreB: 0,
-      scoreDiff: 0,
-      topContributingFeatureDiffs: [],
-    };
+    throw new Error(
+      `[EXPLANATION_FAILED] patternRefA (${patternRefA}) または patternRefB (${patternRefB}) のスコア説明生成に失敗しました`
+    );
   }
 
+  // 3. 非有限スコア検証 (修正A: NaN / Infinity 等の異常値を拒絶)
+  if (!Number.isFinite(expA.totalScore) || !Number.isFinite(expB.totalScore)) {
+    throw new Error(
+      `[NON_FINITE_SCORE] 非有限スコアが検出されました: scoreA=${expA.totalScore}, scoreB=${expB.totalScore}`
+    );
+  }
+
+  // 4. 正規IDによる特徴量マップ構築 (修正A: 配列インデックスではなく正規IDで突合)
+  const linearKey = (idx: number) => `lin:${idx}`;
+  const interactionKey = (cIdx: number, pIdx: number) => `int:${cIdx}:${pIdx}`;
+
+  const mapA = new Map<string, { type: "linear" | "interaction"; name: string; weight: number; val: number; contrib: number }>();
+  const mapB = new Map<string, { type: "linear" | "interaction"; name: string; weight: number; val: number; contrib: number }>();
+
+  // patternRefA の登録と重複キー検証
+  for (const l of expA.linearContributions) {
+    const k = linearKey(l.index);
+    if (mapA.has(k)) {
+      throw new Error(`[DUPLICATE_FEATURE_KEY] patternRefA (${patternRefA}) 内で重複キーを検出しました: ${k}`);
+    }
+    mapA.set(k, { type: "linear", name: l.name, weight: l.weight, val: l.value, contrib: l.contribution });
+  }
+  for (const i of expA.interactionContributions) {
+    const k = interactionKey(i.contextIndex, i.patternIndex);
+    if (mapA.has(k)) {
+      throw new Error(`[DUPLICATE_FEATURE_KEY] patternRefA (${patternRefA}) 内で重複キーを検出しました: ${k}`);
+    }
+    mapA.set(k, { type: "interaction", name: `${i.contextName} x ${i.patternName}`, weight: i.weight, val: i.patternValue, contrib: i.contribution });
+  }
+
+  // patternRefB の登録と重複キー検証
+  for (const l of expB.linearContributions) {
+    const k = linearKey(l.index);
+    if (mapB.has(k)) {
+      throw new Error(`[DUPLICATE_FEATURE_KEY] patternRefB (${patternRefB}) 内で重複キーを検出しました: ${k}`);
+    }
+    mapB.set(k, { type: "linear", name: l.name, weight: l.weight, val: l.value, contrib: l.contribution });
+  }
+  for (const i of expB.interactionContributions) {
+    const k = interactionKey(i.contextIndex, i.patternIndex);
+    if (mapB.has(k)) {
+      throw new Error(`[DUPLICATE_FEATURE_KEY] patternRefB (${patternRefB}) 内で重複キーを検出しました: ${k}`);
+    }
+    mapB.set(k, { type: "interaction", name: `${i.contextName} x ${i.patternName}`, weight: i.weight, val: i.patternValue, contrib: i.contribution });
+  }
+
+  // 5. 元の入力特徴量ベクトルから生値を参照 (修正A: 片側未登録でも正しい特徴量値を反映)
+  const contextValues = encoded.context.values;
+  const pDim = dna.patternDimension;
+  const pWeights = dna.patternWeights;
+  const cpWeights = dna.contextPatternWeights;
+
+  const allKeys = new Set<string>([...mapA.keys(), ...mapB.keys()]);
   const diffs: FeatureDiffExplanation[] = [];
+  let sumContribDiff = 0;
 
-  // 線形特徴量
-  for (let j = 0; j < expA.linearContributions.length; j++) {
-    const lA = expA.linearContributions[j];
-    const lB = expB.linearContributions[j];
-    const contribDiff = lA.contribution - lB.contribution;
-    const valueDiff = lA.value - lB.value;
-    if (Math.abs(contribDiff) > 1e-6 || Math.abs(valueDiff) > 1e-6) {
+  for (const k of allKeys) {
+    let featureName: string;
+    let featureType: "linear" | "interaction";
+    let weight: number;
+    let valA: number;
+    let valB: number;
+    let contribA: number;
+    let contribB: number;
+
+    if (k.startsWith("lin:")) {
+      const j = Number(k.split(":")[1]);
+      featureType = "linear";
+      featureName = PATTERN_FEATURE_NAMES[j] ?? `pat_${j}`;
+      weight = pWeights[j] ?? 0;
+      valA = patA.values[j] ?? 0;
+      valB = patB.values[j] ?? 0;
+      contribA = mapA.get(k)?.contrib ?? (weight * valA);
+      contribB = mapB.get(k)?.contrib ?? (weight * valB);
+    } else {
+      const [, cStr, pStr] = k.split(":");
+      const cIdx = Number(cStr);
+      const pIdx = Number(pStr);
+      featureType = "interaction";
+      const cName = CONTEXT_FEATURE_NAMES[cIdx] ?? `ctx_${cIdx}`;
+      const pName = PATTERN_FEATURE_NAMES[pIdx] ?? `pat_${pIdx}`;
+      featureName = `${cName} x ${pName}`;
+      weight = cpWeights[cIdx * pDim + pIdx] ?? 0;
+      const cVal = contextValues[cIdx] ?? 0;
+      valA = patA.values[pIdx] ?? 0;
+      valB = patB.values[pIdx] ?? 0;
+      contribA = mapA.get(k)?.contrib ?? (weight * cVal * valA);
+      contribB = mapB.get(k)?.contrib ?? (weight * cVal * valB);
+    }
+
+    // 修正B: スコア差の符号整合性 (scoreDiff = scoreA - scoreB, contribDiff = contribA - contribB)
+    const contribDiff = contribA - contribB;
+    const valDiff = valA - valB;
+
+    sumContribDiff += contribDiff;
+
+    if (Math.abs(contribDiff) > 1e-9 || Math.abs(valDiff) > 1e-9) {
       diffs.push({
-        featureName: lA.name,
-        featureType: "linear",
-        weight: lA.weight,
-        valueA: lA.value,
-        valueB: lB.value,
-        valueDiff,
-        contributionA: lA.contribution,
-        contributionB: lB.contribution,
+        featureKey: k,
+        featureName,
+        featureType,
+        weight,
+        valueA: valA,
+        valueB: valB,
+        valueDiff: valDiff,
+        contributionA: contribA,
+        contributionB: contribB,
         contributionDiff: contribDiff,
       });
     }
   }
 
-  // 相互作用
-  for (let k = 0; k < expA.interactionContributions.length; k++) {
-    const iA = expA.interactionContributions[k];
-    const iB = expB.interactionContributions[k];
-    const contribDiff = iA.contribution - iB.contribution;
-    const valueDiff = iA.patternValue - iB.patternValue;
-    if (Math.abs(contribDiff) > 1e-6 || Math.abs(valueDiff) > 1e-6) {
-      diffs.push({
-        featureName: `${iA.contextName} x ${iA.patternName}`,
-        featureType: "interaction",
-        weight: iA.weight,
-        valueA: iA.patternValue,
-        valueB: iB.patternValue,
-        valueDiff,
-        contributionA: iA.contribution,
-        contributionB: iB.contribution,
-        contributionDiff: contribDiff,
-      });
-    }
+  // 6. 数理的一致性の検証 (修正A: |scoreDiff - sumContribDiff| < 1e-9)
+  const scoreDiff = expA.totalScore - expB.totalScore;
+  const EPSILON = 1e-9;
+  const isMathematicallyConsistent = Math.abs(scoreDiff - sumContribDiff) < EPSILON;
+
+  if (!isMathematicallyConsistent) {
+    throw new Error(
+      `[MATH_INCONSISTENCY] scoreDiff (${scoreDiff}) と sumContribDiff (${sumContribDiff}) の差が許容誤差 1e-9 を超えています: 差=${Math.abs(
+        scoreDiff - sumContribDiff
+      )}`
+    );
   }
 
-  // 寄与度絶対値の大きい順にソート
+  // 寄与度差分の絶対値降順ソート
   diffs.sort((a, b) => Math.abs(b.contributionDiff) - Math.abs(a.contributionDiff));
 
   return {
+    patternRefA,
+    patternRefB,
     scoreA: expA.totalScore,
     scoreB: expB.totalScore,
-    scoreDiff: expA.totalScore - expB.totalScore,
-    topContributingFeatureDiffs: Object.freeze(diffs),
+    scoreDiff,
+    sumContributionDiff: sumContribDiff,
+    isMathematicallyConsistent,
+    topContributingFeatureDiffs: Object.freeze(diffs.slice(0, 10)),
+    allFeatureDiffs: Object.freeze(diffs),
   };
 }

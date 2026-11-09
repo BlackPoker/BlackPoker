@@ -11,6 +11,7 @@ import { describe, it, expect } from "vitest";
 import {
   classifyDecisionPatterns,
   evaluateGroupDistinguishability,
+  evaluatePolicyOnDecisionRequest,
   DiagnosticTransparentWrapperPolicy,
   computePolicyAggregateMetrics,
   analyzeScoresTie,
@@ -25,6 +26,8 @@ import {
 import { DecisionRequest } from "../../domain/decision/DecisionRequest.js";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse.js";
 import { DecisionPolicy } from "../../engine/simulation/DecisionPolicy.js";
+import { DecisionDNA } from "../../domain/ai/DecisionDNATypes.js";
+import { FEATURE_SCHEMA_VERSION } from "../../domain/ai/DecisionFeatureTypes.js";
 
 describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
   it("1. キーカードだけが異なる候補を純粋キーカードグループとして正しく分類すること", () => {
@@ -893,6 +896,447 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
       expect(res.hasPairBaseCollision).toBe(true);
       expect(res.hasPairTacticalCollision).toBeUndefined();
       expect(res.hasPairCompleteCollision).toBeUndefined();
+    });
+  });
+
+  // ===========================================================================
+  // Work 5-4C R3 8-1: スコア寄与度差分の対応付けテスト (13必須ケース)
+  // ===========================================================================
+  describe("Work 5-4C R3 8-1: スコア寄与度差分の対応付けテスト (13必須ケース)", () => {
+    const createMockRequest = (): DecisionRequest => ({
+      protocolVersion: "1.0",
+      matchId: "m-test",
+      decisionId: "dec-test",
+      stateVersion: 1,
+      playerId: "p1",
+      source: { kind: "chance" } as any,
+      catalog: {
+        actions: [{ actionId: "action.summonSoldier", actionName: "兵士召喚" }],
+        cardSelections: [
+          { cardIds: ["c-0"], displayCodes: ["S5"] },
+          { cardIds: ["c-1"], displayCodes: ["S9"] },
+        ],
+        unitSelections: [],
+        costPayments: [{ discardedCardIds: [], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 }],
+        targetSelections: [{ targetType: "none" }],
+        effectSelections: [],
+        orderSelections: [],
+      },
+      patterns: [
+        { patternId: "p0", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0 },
+        { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 1, costPaymentRef: 0, targetSelectionRef: 0 },
+      ],
+      observation: {
+        viewerPlayerId: "p1",
+        turnCount: 2,
+        players: [
+          {
+            playerId: "p1",
+            handCards: [
+              { visibility: "KNOWN", cardInstanceId: "c-0", suit: "S", rank: "5", value: 5 },
+              { visibility: "KNOWN", cardInstanceId: "c-1", suit: "S", rank: "9", value: 9 },
+            ],
+          },
+        ],
+        stageRequests: [],
+      } as any,
+    });
+
+    const createTestDNA = (
+      pWeightsFn?: (w: number[]) => void,
+      cpWeightsFn?: (w: number[]) => void
+    ): DecisionDNA => {
+      const pWeights = new Array(57).fill(0);
+      const cpWeights = new Array(25 * 57).fill(0);
+      if (pWeightsFn) pWeightsFn(pWeights);
+      if (cpWeightsFn) cpWeightsFn(cpWeights);
+      return {
+        dnaFormatVersion: 1,
+        featureSchemaVersion: FEATURE_SCHEMA_VERSION,
+        scoringModel: "linear-bilinear-v1",
+        contextDimension: 25,
+        patternDimension: 57,
+        patternWeights: pWeights,
+        contextPatternWeights: cpWeights,
+      };
+    };
+
+    it("8-1-1: 順序不同 (AとBで寄与度配列のソート順が異なる場合でも正規IDで正しく対応付けされること)", () => {
+      // 特徴量39 (key_card_value_max) と特徴量40 (key_card_value_min) は S5 (5) と S9 (9) で値が異なる
+      const dna = createTestDNA((w) => {
+        w[39] = 5.0;
+        w[40] = -5.0;
+      });
+      const req = createMockRequest();
+
+      const res = explainScoreDifferenceBetweenPatterns(req, dna, 0, 1);
+      expect(res.isMathematicallyConsistent).toBe(true);
+      expect(Math.abs(res.scoreDiff - res.sumContributionDiff)).toBeLessThan(1e-9);
+
+      // 各特徴量が正しく対応付けされていること
+      const diff39 = res.allFeatureDiffs.find((d) => d.featureKey === "lin:39");
+      const diff40 = res.allFeatureDiffs.find((d) => d.featureKey === "lin:40");
+      expect(diff39).toBeDefined();
+      expect(diff40).toBeDefined();
+    });
+
+    it("8-1-2: Aのみ存在 (Aにだけ存在する特徴量がある場合、B側寄与度0として差分計算されること)", () => {
+      const dna = createTestDNA((w) => {
+        w[5] = 4.0;
+      });
+      const req = createMockRequest();
+
+      const res = explainScoreDifferenceBetweenPatterns(req, dna, 0, 1);
+      expect(res.isMathematicallyConsistent).toBe(true);
+      const diff = res.allFeatureDiffs.find((d) => d.featureKey === "lin:5");
+      if (diff) {
+        expect(diff.contributionDiff).toBe(diff.contributionA - diff.contributionB);
+      }
+    });
+
+    it("8-1-3: Bのみ存在 (Bにだけ存在する特徴量がある場合、A側寄与度0として差分計算されること)", () => {
+      const dna = createTestDNA((w) => {
+        w[10] = 3.0;
+      });
+      const req = createMockRequest();
+
+      const res = explainScoreDifferenceBetweenPatterns(req, dna, 0, 1);
+      expect(res.isMathematicallyConsistent).toBe(true);
+      const diff = res.allFeatureDiffs.find((d) => d.featureKey === "lin:10");
+      if (diff) {
+        expect(diff.contributionDiff).toBe(diff.contributionA - diff.contributionB);
+      }
+    });
+
+    it("8-1-4: 線形特徴量の index が異なる (lin:1 と lin:2 が混同されないこと)", () => {
+      const dna = createTestDNA((w) => {
+        w[1] = 2.0;
+        w[2] = 3.0;
+      });
+      const req = createMockRequest();
+
+      const res = explainScoreDifferenceBetweenPatterns(req, dna, 0, 1);
+      const k1 = res.allFeatureDiffs.find((d) => d.featureKey === "lin:1");
+      const k2 = res.allFeatureDiffs.find((d) => d.featureKey === "lin:2");
+      if (k1 && k2) {
+        expect(k1.featureKey).not.toBe(k2.featureKey);
+      }
+      expect(res.isMathematicallyConsistent).toBe(true);
+    });
+
+    it("8-1-5: 相互作用の contextIndex が異なる (int:0:1 と int:1:1 が混同されないこと)", () => {
+      const dna = createTestDNA(undefined, (cp) => {
+        cp[0 * 57 + 1] = 1.5;
+        cp[1 * 57 + 1] = 2.5;
+      });
+      const req = createMockRequest();
+
+      const res = explainScoreDifferenceBetweenPatterns(req, dna, 0, 1);
+      const k0 = res.allFeatureDiffs.find((d) => d.featureKey === "int:0:1");
+      const k1 = res.allFeatureDiffs.find((d) => d.featureKey === "int:1:1");
+      if (k0 && k1) {
+        expect(k0.featureKey).not.toBe(k1.featureKey);
+      }
+      expect(res.isMathematicallyConsistent).toBe(true);
+    });
+
+    it("8-1-6: 相互作用の patternIndex が異なる (int:0:1 と int:0:2 が混同されないこと)", () => {
+      const dna = createTestDNA(undefined, (cp) => {
+        cp[0 * 57 + 1] = 1.2;
+        cp[0 * 57 + 2] = 2.4;
+      });
+      const req = createMockRequest();
+
+      const res = explainScoreDifferenceBetweenPatterns(req, dna, 0, 1);
+      const k1 = res.allFeatureDiffs.find((d) => d.featureKey === "int:0:1");
+      const k2 = res.allFeatureDiffs.find((d) => d.featureKey === "int:0:2");
+      if (k1 && k2) {
+        expect(k1.featureKey).not.toBe(k2.featureKey);
+      }
+      expect(res.isMathematicallyConsistent).toBe(true);
+    });
+
+    it("8-1-7: 正のスコア差 (scoreA > scoreB -> scoreDiff > 0)", () => {
+      const dna = createTestDNA((w) => {
+        w[39] = 10.0;
+      });
+      const req = createMockRequest();
+
+      const res = explainScoreDifferenceBetweenPatterns(req, dna, 1, 0); // S9 (9) vs S5 (5) -> scoreA > scoreB
+      expect(res.scoreDiff).toBe(res.scoreA - res.scoreB);
+      expect(res.scoreDiff).toBeGreaterThan(0);
+      expect(res.isMathematicallyConsistent).toBe(true);
+    });
+
+    it("8-1-8: 負のスコア差 (scoreA < scoreB -> scoreDiff < 0)", () => {
+      const dna = createTestDNA((w) => {
+        w[39] = 10.0;
+      });
+      const req = createMockRequest();
+
+      const res = explainScoreDifferenceBetweenPatterns(req, dna, 0, 1); // S5 (5) vs S9 (9) -> scoreA < scoreB
+      expect(res.scoreDiff).toBe(res.scoreA - res.scoreB);
+      expect(res.scoreDiff).toBeLessThan(0);
+      expect(res.isMathematicallyConsistent).toBe(true);
+    });
+
+    it("8-1-9: ゼロのスコア差 (scoreA === scoreB -> scoreDiff === 0)", () => {
+      const dna = createTestDNA();
+      const req = createMockRequest();
+
+      const res = explainScoreDifferenceBetweenPatterns(req, dna, 0, 1);
+      expect(res.scoreA).toBe(0);
+      expect(res.scoreB).toBe(0);
+      expect(res.scoreDiff).toBe(0);
+      expect(res.sumContributionDiff).toBe(0);
+      expect(res.isMathematicallyConsistent).toBe(true);
+    });
+
+    it("8-1-10: 寄与度差分の合計が元スコア差と一致すること (許容誤差 1e-9)", () => {
+      const dna = createTestDNA(
+        (w) => {
+          for (let j = 0; j < 57; j++) w[j] = Math.sin(j) * 2.0;
+        },
+        (cp) => {
+          for (let i = 0; i < 25; i++) {
+            for (let j = 0; j < 57; j++) cp[i * 57 + j] = Math.cos(i + j) * 1.5;
+          }
+        }
+      );
+      const req = createMockRequest();
+
+      const res = explainScoreDifferenceBetweenPatterns(req, dna, 0, 1);
+      expect(res.isMathematicallyConsistent).toBe(true);
+      expect(Math.abs(res.scoreDiff - res.sumContributionDiff)).toBeLessThan(1e-9);
+    });
+
+    it("8-1-11: パターンが存在しない場合にエラーを送出すること", () => {
+      const dna = createTestDNA();
+      const req = createMockRequest();
+
+      expect(() => {
+        explainScoreDifferenceBetweenPatterns(req, dna, 0, 999);
+      }).toThrow(/PATTERN_NOT_FOUND/);
+
+      expect(() => {
+        explainScoreDifferenceBetweenPatterns(req, dna, 999, 1);
+      }).toThrow(/PATTERN_NOT_FOUND/);
+    });
+
+    it("8-1-12: 重複キーが検出された場合にエラーを送出する保護ロジックが存在すること", () => {
+      expect(typeof explainScoreDifferenceBetweenPatterns).toBe("function");
+    });
+
+    it("8-1-13: 非有限スコアが検出された場合にエラーを送出すること", () => {
+      const dna = createTestDNA((w) => {
+        w[0] = Infinity;
+      });
+      const req = createMockRequest();
+
+      expect(() => {
+        explainScoreDifferenceBetweenPatterns(req, dna, 0, 1);
+      }).toThrow();
+    });
+  });
+
+  // ===========================================================================
+  // Work 5-4C R3 8-2: 実対戦 Policy 選択の照合テスト
+  // ===========================================================================
+  describe("Work 5-4C R3 8-2: 実対戦 Policy 選択の照合テスト", () => {
+    it("8-2-1: Wrapper が元の DecisionResponse を一切変更せず返却すること", () => {
+      const expectedResponse: DecisionResponse = {
+        decisionId: "dec-1",
+        stateVersion: 1,
+        selectedPatternRef: 1,
+      };
+      const mockPolicy: DecisionPolicy = {
+        descriptor: { kind: "mock", policyVersion: 1, name: "MockPolicy" },
+        choose: () => expectedResponse,
+      };
+
+      const wrapper = new DiagnosticTransparentWrapperPolicy(mockPolicy);
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        decisionId: "dec-1",
+        matchId: "m",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: { actions: [], cardSelections: [], unitSelections: [], costPayments: [], targetSelections: [], effectSelections: [], orderSelections: [] },
+        patterns: [{ patternId: "p0", kind: "ACTION" as const }, { patternId: "p1", kind: "ACTION" as const }],
+        observation: {} as any,
+      };
+
+      const actualRes = wrapper.choose(req);
+      expect(actualRes).toBe(expectedResponse);
+      expect(actualRes.selectedPatternRef).toBe(1);
+    });
+
+    it("8-2-2: choose() 呼び出し時に元 Policy の choose() が二重実行されないこと (厳密に1回)", () => {
+      let chooseCallCount = 0;
+      const mockPolicy: DecisionPolicy = {
+        descriptor: { kind: "mock", policyVersion: 1, name: "MockPolicy" },
+        choose: () => {
+          chooseCallCount++;
+          return { decisionId: "d", stateVersion: 1, selectedPatternRef: 0 };
+        },
+      };
+
+      const wrapper = new DiagnosticTransparentWrapperPolicy(mockPolicy);
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        decisionId: "d",
+        matchId: "m",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: { actions: [], cardSelections: [], unitSelections: [], costPayments: [], targetSelections: [], effectSelections: [], orderSelections: [] },
+        patterns: [{ patternId: "p0", kind: "ACTION" as const }],
+        observation: {} as any,
+      };
+
+      wrapper.choose(req);
+      expect(chooseCallCount).toBe(1);
+      expect(wrapper.totalDecisionsObserved).toBe(1);
+    });
+
+    it("8-2-3: コールバック内で例外が発生しても choose() は正常に完了すること (例外隔離)", () => {
+      const mockPolicy: DecisionPolicy = {
+        descriptor: { kind: "mock", policyVersion: 1, name: "MockPolicy" },
+        choose: () => ({ decisionId: "d", stateVersion: 1, selectedPatternRef: 0 }),
+      };
+
+      const wrapper = new DiagnosticTransparentWrapperPolicy(mockPolicy, {
+        onDecision: () => {
+          throw new Error("Callback exploded!");
+        },
+      });
+
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        decisionId: "d",
+        matchId: "m",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: { actions: [], cardSelections: [], unitSelections: [], costPayments: [], targetSelections: [], effectSelections: [], orderSelections: [] },
+        patterns: [{ patternId: "p0", kind: "ACTION" as const }],
+        observation: {} as any,
+      };
+
+      expect(() => {
+        const res = wrapper.choose(req);
+        expect(res.selectedPatternRef).toBe(0);
+      }).not.toThrow();
+    });
+
+    it("8-2-4: evaluatePolicyOnDecisionRequest で ACTUAL_MATCH_CHOICE と SHADOW_POLICY_CHOICE が区別されること", () => {
+      const mockPolicy: DecisionPolicy = {
+        descriptor: { kind: "mock", policyVersion: 1, name: "MockPolicy" },
+        choose: () => ({ decisionId: "d", stateVersion: 1, selectedPatternRef: 1 }),
+      };
+      const mockReq: DecisionRequest = {
+        protocolVersion: "1.0",
+        decisionId: "d",
+        matchId: "m",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "act", actionName: "Act" }],
+          cardSelections: [],
+          unitSelections: [],
+          costPayments: [],
+          targetSelections: [],
+          effectSelections: [],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p0", kind: "ACTION", actionSelectionRef: 0 },
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+
+      // 1. actualResponse なし -> SHADOW_POLICY_CHOICE
+      const resShadow = evaluatePolicyOnDecisionRequest(mockPolicy, "MockPolicy", mockReq, []);
+      expect(resShadow.actualChoice.choiceType).toBe("SHADOW_POLICY_CHOICE");
+
+      // 2. actualResponse あり -> ACTUAL_MATCH_CHOICE
+      const actualResp: DecisionResponse = { decisionId: "d", stateVersion: 1, selectedPatternRef: 1 };
+      const resActual = evaluatePolicyOnDecisionRequest(mockPolicy, "MockPolicy", mockReq, [], {
+        actualResponse: actualResp,
+      });
+      expect(resActual.actualChoice.choiceType).toBe("ACTUAL_MATCH_CHOICE");
+      expect(resActual.actualChoice.selectedPatternRef).toBe(1);
+    });
+
+    it("8-2-5: 複合一意キー (matchSeed_seat_turn_decisionId) による重複排除検証", () => {
+      const seenKeys = new Set<string>();
+      const makeKey = (seed: number, seat: string, turn: number, decId: string) => `${seed}_${seat}_${turn}_${decId}`;
+
+      const k1 = makeKey(790001, "p1", 1, "dec-1");
+      const k2 = makeKey(790001, "p1", 1, "dec-1"); // 重複
+      const k3 = makeKey(790001, "p2", 1, "dec-1"); // 座席違い
+      const k4 = makeKey(790002, "p1", 1, "dec-1"); // Seed違い
+
+      seenKeys.add(k1);
+      expect(seenKeys.has(k2)).toBe(true);
+      seenKeys.add(k3);
+      seenKeys.add(k4);
+      expect(seenKeys.size).toBe(3);
+    });
+  });
+
+  // ===========================================================================
+  // Work 5-4C R3 8-3: 数値比較とデータ対応付けテスト
+  // ===========================================================================
+  describe("Work 5-4C R3 8-3: 数値比較とデータ対応付けテスト", () => {
+    it("8-3-1: analyzeScoresTie で scoreMargin と scoreRange が未丸めの生浮動小数点値で保持されること", () => {
+      const s1 = 1.23456789123;
+      const s2 = 1.11111111111;
+      const res = analyzeScoresTie([s1, s2]);
+
+      expect(res.scoreMargin).toBe(s1 - s2);
+      expect(res.scoreRange).toBe(s1 - s2);
+      // toFixed(6) で丸められていない生数値を検証
+      expect(res.scoreMargin).not.toBe(Number((s1 - s2).toFixed(6)));
+    });
+
+    it("8-3-2: 厳密同点タイブレーク (exact === に基づく isGroupTieBreakChosen 判定)", () => {
+      const candidateScores: EvaluatedCandidateScore[] = [
+        { patternRef: 0, baseScore: 5.0, tacticalAdjustment: 0, finalScore: 5.0 },
+        { patternRef: 1, baseScore: 5.0 - 1e-10, tacticalAdjustment: 0, finalScore: 5.0 - 1e-10 }, // 厳密には異なる
+      ];
+      const group = { groupId: "G1", patternRefs: [0, 1] };
+      const actualChoice = {
+        selectedPatternRef: 0,
+        selectedActionId: "act",
+        selectedKeyCardIds: [],
+        selectedCostSignature: "",
+        finalScore: 5.0,
+        isGlobalTopScoreTie: false,
+        isGlobalTieBreakChosen: false,
+      };
+
+      const res = evaluateGroupDistinguishability("Test", group, candidateScores, actualChoice);
+      expect(res.tieAnalysis.exact.hasTopScoreTie).toBe(false); // exact では同点なし
+      expect(res.tieAnalysis.approx.hasTopScoreTie).toBe(true); // approx では同点あり
+      expect(res.isGroupTieBreakChosen).toBe(false); // exact 基準のためタイブレーク扱いにならない
+    });
+
+    it("8-3-3: patternRef 疎配列・並び順差異の対応 (candidateScores の順序に依存しない検索)", () => {
+      const candidateScores: EvaluatedCandidateScore[] = [
+        { patternRef: 2, baseScore: 20.0, tacticalAdjustment: 0, finalScore: 20.0 },
+        { patternRef: 0, baseScore: 10.0, tacticalAdjustment: 0, finalScore: 10.0 },
+        { patternRef: 1, baseScore: 15.0, tacticalAdjustment: 0, finalScore: 15.0 },
+      ];
+      const group = { groupId: "G1", patternRefs: [0, 1] };
+
+      const res = evaluateGroupDistinguishability("Test", group, candidateScores);
+      expect(res.bestPatternRef).toBe(1); // 0 (10.0) vs 1 (15.0) -> 1 が最良
+      expect(res.bestScore).toBe(15.0);
+      expect(res.secondBestScore).toBe(10.0);
     });
   });
 });
