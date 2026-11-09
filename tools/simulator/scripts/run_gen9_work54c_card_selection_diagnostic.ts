@@ -220,44 +220,50 @@ export async function main() {
 
   for (const seed of WORK54C_DIAGNOSTIC_SEEDS) {
     // 正順: P1=R4, P2=Gen8
-    const setup1 = new OfficialRegulationMatchSetup({
-      rulePackage,
-      regulation: reg,
+    const setup1 = OfficialRegulationMatchSetup.setupMatch(
+      reg,
       frame,
-      playerAId: "p1",
-      playerBId: "p2",
+      rulePackage,
       seed,
+      {
+        playerNames: { p1: policyR4.descriptor.name, p2: policyGen8.descriptor.name },
+      }
+    );
+    const session1 = new GameSession((setup1 as any).state, rulePackage, {
+      matchSeed: seed,
     });
-    const state1 = setup1.createInitialGameState();
-    const runner1 = new SimulationRunner({
-      policies: { p1: wrapperR4, p2: wrapperGen8 },
-      maxTurns: 300,
-    });
-    const res1 = runner1.run(state1);
+    const res1 = SimulationRunner.run(
+      session1,
+      { p1: wrapperR4, p2: wrapperGen8 },
+      { maxDecisions: 1000 }
+    );
     matchCounter++;
-    if (res1.winnerId === "p1") winsR4++;
-    else if (res1.winnerId === "p2") winsGen8++;
-    else draws++;
+    if (res1.winner === "p1") winsR4++;
+    else if (res1.winner === "p2") winsGen8++;
+    else if (res1.winner === "draw") draws++;
 
     // 逆順: P1=Gen8, P2=R4
-    const setup2 = new OfficialRegulationMatchSetup({
-      rulePackage,
-      regulation: reg,
+    const setup2 = OfficialRegulationMatchSetup.setupMatch(
+      reg,
       frame,
-      playerAId: "p1",
-      playerBId: "p2",
+      rulePackage,
       seed,
+      {
+        playerNames: { p1: policyGen8.descriptor.name, p2: policyR4.descriptor.name },
+      }
+    );
+    const session2 = new GameSession((setup2 as any).state, rulePackage, {
+      matchSeed: seed,
     });
-    const state2 = setup2.createInitialGameState();
-    const runner2 = new SimulationRunner({
-      policies: { p1: wrapperGen8, p2: wrapperR4 },
-      maxTurns: 300,
-    });
-    const res2 = runner2.run(state2);
+    const res2 = SimulationRunner.run(
+      session2,
+      { p1: wrapperGen8, p2: wrapperR4 },
+      { maxDecisions: 1000 }
+    );
     matchCounter++;
-    if (res2.winnerId === "p2") winsR4++;
-    else if (res2.winnerId === "p1") winsGen8++;
-    else draws++;
+    if (res2.winner === "p2") winsR4++;
+    else if (res2.winner === "p1") winsGen8++;
+    else if (res2.winner === "draw") draws++;
   }
 
   console.log(`[SIMULATION_COMPLETE] 全 60 試合完了: R4=${winsR4}勝, Gen8=${winsGen8}勝, 引分=${draws}`);
