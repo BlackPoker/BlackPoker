@@ -301,10 +301,18 @@ export function assertCleanCommitState(
   rootDir: string,
   options?: { allowDirtyForTesting?: boolean }
 ): { gitSha: string; commitTimeIso: string } {
-  // A. 40桁のコミットSHAを取得
+  // A. Git リポジトリのトップレベルディレクトリを取得
+  let repoRoot = rootDir;
+  try {
+    repoRoot = execSync("git rev-parse --show-toplevel", { cwd: rootDir, encoding: "utf8" }).trim();
+  } catch {
+    repoRoot = rootDir;
+  }
+
+  // B. 40桁のコミットSHAを取得
   let gitSha: string;
   try {
-    gitSha = execSync("git rev-parse HEAD", { cwd: rootDir, encoding: "utf8" }).trim();
+    gitSha = execSync("git rev-parse HEAD", { cwd: repoRoot, encoding: "utf8" }).trim();
     if (!gitSha || !/^[0-9a-f]{40}$/i.test(gitSha)) {
       throw new Error(`無効な Git SHA 形式: "${gitSha}"`);
     }
@@ -312,9 +320,9 @@ export function assertCleanCommitState(
     throw new Error(`[FATAL] Git SHA の取得に失敗しました: ${err.message || err}`);
   }
 
-  // B. 作業ツリーのクリーン性を検証 (git status --porcelain)
+  // C. 作業ツリーのクリーン性を検証 (git status --porcelain)
   if (!options?.allowDirtyForTesting) {
-    const statusOutput = execSync("git status --porcelain", { cwd: rootDir, encoding: "utf8" }).trim();
+    const statusOutput = execSync("git status --porcelain", { cwd: repoRoot, encoding: "utf8" }).trim();
     if (statusOutput.length > 0) {
       const dirtyLines = statusOutput
         .split("\n")
@@ -330,7 +338,7 @@ export function assertCleanCommitState(
     }
   }
 
-  // C. 評価スクリプトおよび重み定義が当該コミットに含まれていることを確認
+  // D. 評価スクリプトおよび重み定義が当該コミットに含まれていることを確認 (repoRoot基準)
   const requiredTrackedFiles = [
     "tools/simulator/scripts/run_gen9_work54b_evaluation.ts",
     "tools/simulator/src/engine/ai/Gen9BenchmarkWeights.ts",
@@ -338,14 +346,17 @@ export function assertCleanCommitState(
   ];
   for (const relPath of requiredTrackedFiles) {
     try {
-      execSync(`git ls-tree HEAD ${relPath}`, { cwd: rootDir, stdio: "pipe" });
+      const lsOutput = execSync(`git ls-tree HEAD ${relPath}`, { cwd: repoRoot, encoding: "utf8" }).trim();
+      if (!lsOutput) {
+        throw new Error(`ファイルが見つかりません`);
+      }
     } catch {
       throw new Error(`[UNTRACKED_FILE_ERROR] 必要なファイル ${relPath} が HEAD コミットに含まれていません`);
     }
   }
 
-  // D. コミット時刻を取得
-  const commitTimeIso = execSync("git log -1 --format=%cI HEAD", { cwd: rootDir, encoding: "utf8" }).trim();
+  // E. コミット時刻を取得
+  const commitTimeIso = execSync("git log -1 --format=%cI HEAD", { cwd: repoRoot, encoding: "utf8" }).trim();
 
   return { gitSha, commitTimeIso };
 }
