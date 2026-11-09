@@ -12,6 +12,7 @@ import {
   classifyDecisionPatterns,
   evaluateGroupDistinguishability,
   evaluatePolicyOnDecisionRequest,
+  diagnoseDecisionRequest,
   DiagnosticTransparentWrapperPolicy,
   computePolicyAggregateMetrics,
   analyzeScoresTie,
@@ -22,6 +23,8 @@ import {
   PureKeyCardVarianceGroup,
   PureCostPaymentVarianceGroup,
   PolicyGroupEvaluation,
+  ObservedMatchDecision,
+  ChoiceOrigin,
 } from "../../engine/ai/CardSelectionDiagnosticEngine.js";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest.js";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse.js";
@@ -1388,6 +1391,369 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
       expect(res.bestPatternRef).toBe(1); // 0 (10.0) vs 1 (15.0) -> 1 が最良
       expect(res.bestScore).toBe(15.0);
       expect(res.secondBestScore).toBe(10.0);
+    });
+  });
+
+  // ===========================================================================
+  // Work 5-4C R3.1 8-4: 実選択の対応付け・集計分離・最終整合性テスト (T1〜T12)
+  // ===========================================================================
+  describe("Work 5-4C R3.1 8-4: 実選択の対応付け・集計分離・最終整合性テスト (T1〜T12)", () => {
+    const createBasicMockRequest = (decisionId = "dec-base", pId = "p1"): DecisionRequest => ({
+      protocolVersion: "1.0",
+      matchId: "m-base",
+      decisionId,
+      stateVersion: 1,
+      playerId: pId,
+      source: { kind: "chance" } as any,
+      catalog: {
+        actions: [{ actionId: "action.summonSoldier", actionName: "兵士召喚" }],
+        cardSelections: [
+          { cardIds: ["card-1"], displayCodes: ["C1"] },
+          { cardIds: ["card-2"], displayCodes: ["C2"] },
+        ],
+        unitSelections: [],
+        costPayments: [{ discardedCardIds: [], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 }],
+        targetSelections: [{ targetType: "none" }],
+        effectSelections: [],
+        orderSelections: [],
+      },
+      patterns: [
+        { patternId: "p0", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0 },
+        { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 1, costPaymentRef: 0, targetSelectionRef: 0 },
+      ],
+      observation: { viewerPlayerId: pId, players: [], stageRequests: [] } as any,
+    });
+
+    const createMockPolicy = (name: string, chosenRef: number): DecisionPolicy => ({
+      descriptor: { kind: "mock", policyVersion: 1, name },
+      choose: (req) => ({ decisionId: req.decisionId, stateVersion: req.stateVersion, selectedPatternRef: chosenRef }),
+    });
+
+    it("T1: 異なる試合で同一 Decision ID の非混在検証", () => {
+      const reqA = createBasicMockRequest("dec-shared", "p1");
+      const reqB = createBasicMockRequest("dec-shared", "p1");
+      const resA: DecisionResponse = { decisionId: "dec-shared", stateVersion: 1, selectedPatternRef: 0 };
+      const resB: DecisionResponse = { decisionId: "dec-shared", stateVersion: 1, selectedPatternRef: 1 };
+
+      const obsA: ObservedMatchDecision = {
+        observationId: `790001_FORWARD_1_p1_dec-shared`,
+        matchSeed: 790001,
+        matchLeg: "FORWARD",
+        decisionOrdinal: 1,
+        actingPlayerId: "p1",
+        policyName: "R4_v72",
+        request: reqA,
+        response: resA,
+      };
+
+      const obsB: ObservedMatchDecision = {
+        observationId: `790002_FORWARD_1_p1_dec-shared`,
+        matchSeed: 790002,
+        matchLeg: "FORWARD",
+        decisionOrdinal: 1,
+        actingPlayerId: "p1",
+        policyName: "R4_v72",
+        request: reqB,
+        response: resB,
+      };
+
+      const policies = { R4_v72: createMockPolicy("R4_v72", 0) };
+      const recA = diagnoseDecisionRequest(reqA, policies, obsA);
+      const recB = diagnoseDecisionRequest(reqB, policies, obsB);
+
+      expect(recA?.observationId).toBe("790001_FORWARD_1_p1_dec-shared");
+      expect(recB?.observationId).toBe("790002_FORWARD_1_p1_dec-shared");
+      expect(recA?.actualMatchResponse?.selectedPatternRef).toBe(0);
+      expect(recB?.actualMatchResponse?.selectedPatternRef).toBe(1);
+    });
+
+    it("T2: 同一 Seed の座席反転 (FORWARD vs REVERSE) の非混同検証", () => {
+      const seenIds = new Set<string>();
+      const makeObsId = (seed: number, leg: "FORWARD" | "REVERSE", ord: number, pId: string, dId: string) =>
+        `${seed}_${leg}_${ord}_${pId}_${dId}`;
+
+      const idFwd = makeObsId(790001, "FORWARD", 1, "p1", "dec-100");
+      const idRev = makeObsId(790001, "REVERSE", 1, "p2", "dec-100");
+
+      seenIds.add(idFwd);
+      expect(seenIds.has(idRev)).toBe(false);
+      seenIds.add(idRev);
+      expect(seenIds.size).toBe(2);
+    });
+
+    it("T3: プレイヤー別選択 (R4 と Gen 8 の正確な対応付け)", () => {
+      const reqR4 = createBasicMockRequest("dec-r4", "p1");
+      const obsR4: ObservedMatchDecision = {
+        observationId: `790001_FORWARD_1_p1_dec-r4`,
+        matchSeed: 790001,
+        matchLeg: "FORWARD",
+        decisionOrdinal: 1,
+        actingPlayerId: "p1",
+        policyName: "R4_v72",
+        request: reqR4,
+        response: { decisionId: "dec-r4", stateVersion: 1, selectedPatternRef: 1 },
+      };
+
+      const policies = {
+        R4_v72: createMockPolicy("R4_v72", 1),
+        Gen8: createMockPolicy("Gen8", 0),
+      };
+
+      const rec = diagnoseDecisionRequest(reqR4, policies, obsR4);
+      expect(rec?.policyEvaluations["R4_v72"].actualChoice.choiceOrigin).toBe("ACTUAL_MATCH_CHOICE");
+      expect(rec?.policyEvaluations["R4_v72"].actualChoice.selectedPatternRef).toBe(1);
+      expect(rec?.policyEvaluations["Gen8"].actualChoice.choiceOrigin).toBe("SHADOW_POLICY_CHOICE");
+    });
+
+    it("T4: 実対戦とシャドウ評価の区別 (G0/G3 実選択 0 件、相手番シャドウ扱い)", () => {
+      const req = createBasicMockRequest("dec-p1", "p1");
+      const obs: ObservedMatchDecision = {
+        observationId: `790001_FORWARD_1_p1_dec-p1`,
+        matchSeed: 790001,
+        matchLeg: "FORWARD",
+        decisionOrdinal: 1,
+        actingPlayerId: "p1",
+        policyName: "R4_v72",
+        request: req,
+        response: { decisionId: "dec-p1", stateVersion: 1, selectedPatternRef: 0 },
+      };
+
+      const policies = {
+        R4_v72: createMockPolicy("R4_v72", 0),
+        Gen8: createMockPolicy("Gen8", 0),
+        G0_IND7_v72: createMockPolicy("G0_IND7_v72", 0),
+        G3_IND3_v72: createMockPolicy("G3_IND3_v72", 0),
+      };
+
+      const rec = diagnoseDecisionRequest(req, policies, obs);
+      expect(rec?.policyEvaluations["G0_IND7_v72"].actualChoice.choiceOrigin).toBe("SHADOW_POLICY_CHOICE");
+      expect(rec?.policyEvaluations["G3_IND3_v72"].actualChoice.choiceOrigin).toBe("SHADOW_POLICY_CHOICE");
+
+      const metricsG0 = computePolicyAggregateMetrics("G0_IND7_v72", [rec!]);
+      expect(metricsG0.actualMatch?.decisionsCount).toBe(0);
+      expect(metricsG0.actualMatch?.keyCard.chosenGroupCount).toBe(0);
+      expect(metricsG0.actualMatch?.keyCard.chosenTieBreakCount).toBe(0);
+    });
+
+    it("T5: 実応答欠落時のシャドウ代入禁止", () => {
+      const req = createBasicMockRequest("dec-none", "p1");
+      const policies = { R4_v72: createMockPolicy("R4_v72", 0) };
+
+      // actualMatchResponsesOrObserved なし
+      const rec = diagnoseDecisionRequest(req, policies);
+      expect(rec?.actualActingPolicyName).toBeUndefined();
+      expect(rec?.actualMatchResponse).toBeUndefined();
+      expect(rec?.policyEvaluations["R4_v72"].actualChoice.choiceOrigin).toBe("SHADOW_POLICY_CHOICE");
+    });
+
+    it("T6: グループ内 Argmax の厳密性 (1e-10 差の厳密判定)", () => {
+      const candidateScores: EvaluatedCandidateScore[] = [
+        { patternRef: 0, baseScore: 5.00000000001, tacticalAdjustment: 0, finalScore: 5.00000000001 },
+        { patternRef: 1, baseScore: 5.0, tacticalAdjustment: 0, finalScore: 5.0 },
+      ];
+      const group = { groupId: "G-strict", patternRefs: [0, 1] };
+
+      const res = evaluateGroupDistinguishability("Test", group, candidateScores);
+      expect(res.bestPatternRef).toBe(0);
+      expect(res.tieAnalysis.exact.hasTopScoreTie).toBe(false);
+      expect(res.bestScore).toBe(5.00000000001);
+    });
+
+    it("T7: グローバル Argmax と実 Policy 応答の照合 (isArgmaxMismatch)", () => {
+      const mockReq = createBasicMockRequest("dec-mismatch", "p1");
+      const mockPolicy: DecisionPolicy = {
+        descriptor: { kind: "mock", policyVersion: 1, name: "Mock" },
+        choose: () => ({ decisionId: "dec-mismatch", stateVersion: 1, selectedPatternRef: 0 }),
+      };
+
+      // actualResponse で ref 1 が選ばれたが、Policy のスコアでは ref 0 が選ばれたとする
+      const res = evaluatePolicyOnDecisionRequest(mockPolicy, "Mock", mockReq, [], {
+        actualResponse: { decisionId: "dec-mismatch", stateVersion: 1, selectedPatternRef: 1 },
+      });
+
+      expect(res.bestPatternRef).toBe(0);
+      expect(res.actualChoice.selectedPatternRef).toBe(1);
+      expect(res.actualChoice.isArgmaxMismatch).toBe(true);
+    });
+
+    it("T8: 代表事例の整合性 (数理的一致性のアサーション)", () => {
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m-8",
+        decisionId: "dec-8",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "action.summonSoldier", actionName: "兵士召喚" }],
+          cardSelections: [
+            { cardIds: ["c-0"], displayCodes: ["C3"] },
+            { cardIds: ["c-1"], displayCodes: ["C4"] },
+          ],
+          unitSelections: [],
+          costPayments: [{ discardedCardIds: [], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 }],
+          targetSelections: [{ targetType: "none" }],
+          effectSelections: [],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p0", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0 },
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 1, costPaymentRef: 0, targetSelectionRef: 0 },
+        ],
+        observation: {
+          viewerPlayerId: "p1",
+          players: [
+            {
+              playerId: "p1",
+              handCards: [
+                { cardInstanceId: "c-0", visibility: "KNOWN", suit: "SPADE", rank: "3", value: 3 },
+                { cardInstanceId: "c-1", visibility: "KNOWN", suit: "SPADE", rank: "4", value: 4 },
+              ],
+            },
+          ],
+          stageRequests: [],
+        } as any,
+      };
+
+      const dna: DecisionDNA = {
+        dnaFormatVersion: 1,
+        featureSchemaVersion: FEATURE_SCHEMA_VERSION,
+        scoringModel: "linear-bilinear-v1",
+        contextDimension: 25,
+        patternDimension: 57,
+        patternWeights: new Array(57).fill(0.05),
+        contextPatternWeights: new Array(25 * 57).fill(0.01),
+      };
+
+      const explanation = explainScoreDifferenceBetweenPatterns(req, dna, 0, 1);
+      expect(explanation.isMathematicallyConsistent).toBe(true);
+      expect(Math.abs(explanation.scoreDiff - explanation.sumContributionDiff)).toBeLessThan(1e-15);
+    });
+
+    it("T9: コスト支払いの実選択/シャドウ分離集計", () => {
+      const costReq: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m-cost",
+        decisionId: "dec-cost",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "action.attack", actionName: "攻撃" }],
+          cardSelections: [{ cardIds: ["c-1"], displayCodes: ["C1"] }],
+          unitSelections: [],
+          costPayments: [
+            { discardedCardIds: ["c-d1"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+            { discardedCardIds: ["c-d2"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+          ],
+          targetSelections: [{ targetType: "none" }],
+          effectSelections: [],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p0", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0 },
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 1, targetSelectionRef: 0 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+
+      const obs: ObservedMatchDecision = {
+        observationId: `790001_FORWARD_1_p1_dec-cost`,
+        matchSeed: 790001,
+        matchLeg: "FORWARD",
+        decisionOrdinal: 1,
+        actingPlayerId: "p1",
+        policyName: "R4_v72",
+        request: costReq,
+        response: { decisionId: "dec-cost", stateVersion: 1, selectedPatternRef: 0 },
+      };
+
+      const policies = { R4_v72: createMockPolicy("R4_v72", 0) };
+      const rec = diagnoseDecisionRequest(costReq, policies, obs);
+      expect(rec).not.toBeNull();
+
+      const metrics = computePolicyAggregateMetrics("R4_v72", [rec!]);
+      expect(metrics.actualMatch?.cost.chosenGroupCount).toBe(1);
+      expect(metrics.actualMatch?.cost.chosenGroupRate).toBe(1.0);
+      expect(metrics.shadowEvaluation?.cost.evaluatedGroupsCount).toBe(1);
+    });
+
+    it("T10: 観測の非干渉性 (ラッパーが元Policyの選択を一切変更しないこと)", () => {
+      const mockReq = createBasicMockRequest("dec-transparent", "p1");
+      const basePolicy = createMockPolicy("Original", 1);
+      let callbackObserved = false;
+
+      const wrapper = new DiagnosticTransparentWrapperPolicy(basePolicy, {
+        onDecision: () => {
+          callbackObserved = true;
+        },
+      });
+
+      const resOriginal = basePolicy.choose(mockReq);
+      const resWrapper = wrapper.choose(mockReq);
+
+      expect(resWrapper.selectedPatternRef).toBe(resOriginal.selectedPatternRef);
+      expect(resWrapper.decisionId).toBe(resOriginal.decisionId);
+      expect(callbackObserved).toBe(true);
+    });
+
+    it("T11: 過去 Evidence 3件の SHA-256 不変性確認", () => {
+      const checkHash = (filePath: string, expectedHash: string) => {
+        if (!fs.existsSync(filePath)) {
+          throw new Error(`File not found: ${filePath}`);
+        }
+        const buf = fs.readFileSync(filePath);
+        const hash = crypto.createHash("sha256").update(buf).digest("hex").toLowerCase();
+        expect(hash).toBe(expectedHash);
+      };
+
+      // 相対パス解決
+      const rootDir = process.cwd();
+      let p1 = path.resolve(rootDir, "evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-46735ba3d704.json");
+      if (!fs.existsSync(p1)) {
+        p1 = path.resolve(rootDir, "tools/simulator/evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-46735ba3d704.json");
+      }
+      let p2 = path.resolve(rootDir, "evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r2-d78652a6ab98.json");
+      if (!fs.existsSync(p2)) {
+        p2 = path.resolve(rootDir, "tools/simulator/evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r2-d78652a6ab98.json");
+      }
+      let p3 = path.resolve(rootDir, "evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r3-f986ed049a20.json");
+      if (!fs.existsSync(p3)) {
+        p3 = path.resolve(rootDir, "tools/simulator/evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r3-f986ed049a20.json");
+      }
+
+      checkHash(p1, "53f9c9b82c136a8026df79e9fbba8196435db7ac3520b186529308565939dcd6");
+      checkHash(p2, "6e94b81fcb18c780257ccc7104bf2f1ca4419b82d5a382e51664ee4497f4c49f");
+      checkHash(p3, "24a5158c9cdd7041fd47dc5c31c823c53882dcc29804bc86603fe807896b24a0");
+    });
+
+    it("T12: 集計の分母・分子整合性 (数理的アサーション)", () => {
+      const records: DecisionDiagnosticRecord[] = [];
+      const req = createBasicMockRequest("dec-t12", "p1");
+      const obs: ObservedMatchDecision = {
+        observationId: `790001_FORWARD_1_p1_dec-t12`,
+        matchSeed: 790001,
+        matchLeg: "FORWARD",
+        decisionOrdinal: 1,
+        actingPlayerId: "p1",
+        policyName: "R4_v72",
+        request: req,
+        response: { decisionId: "dec-t12", stateVersion: 1, selectedPatternRef: 0 },
+      };
+
+      const policies = { R4_v72: createMockPolicy("R4_v72", 0) };
+      const rec = diagnoseDecisionRequest(req, policies, obs);
+      if (rec) records.push(rec);
+
+      const m = computePolicyAggregateMetrics("R4_v72", records);
+      if (m.actualMatch) {
+        expect(m.actualMatch.keyCard.chosenGroupCount).toBeLessThanOrEqual(m.actualMatch.keyCard.evaluatedGroupsCount);
+        expect(m.actualMatch.keyCard.chosenTieBreakCount).toBeLessThanOrEqual(m.actualMatch.keyCard.chosenGroupCount);
+        if (m.actualMatch.keyCard.chosenGroupCount > 0) {
+          const expectedRate = Number((m.actualMatch.keyCard.chosenTieBreakCount / m.actualMatch.keyCard.chosenGroupCount).toFixed(4));
+          expect(m.actualMatch.keyCard.chosenTieBreakRate).toBe(expectedRate);
+        }
+      }
     });
   });
 });

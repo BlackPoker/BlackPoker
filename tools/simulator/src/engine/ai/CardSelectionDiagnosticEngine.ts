@@ -36,6 +36,19 @@ import {
 // 1. データ構造・インターフェース
 // =============================================================================
 
+export interface ObservedMatchDecision {
+  readonly observationId: string;
+  readonly matchSeed: number;
+  readonly matchLeg: "FORWARD" | "REVERSE";
+  readonly decisionOrdinal: number;
+  readonly actingPlayerId: string;
+  readonly policyName: string;
+  readonly request: Readonly<DecisionRequest>;
+  readonly response: Readonly<DecisionResponse>;
+}
+
+export type ChoiceOrigin = "ACTUAL_MATCH_CHOICE" | "SHADOW_POLICY_CHOICE";
+
 export interface ResolvedPatternInfo {
   readonly patternRef: number;
   readonly patternId: string;
@@ -121,7 +134,8 @@ export interface GroupScoreTieAnalysis {
 }
 
 export interface ActualPolicyChoice {
-  readonly choiceType?: "ACTUAL_MATCH_CHOICE" | "SHADOW_POLICY_CHOICE";
+  readonly choiceOrigin?: ChoiceOrigin;
+  readonly choiceType?: "ACTUAL_MATCH_CHOICE" | "SHADOW_POLICY_CHOICE"; // 後方互換用
   readonly selectedPatternRef: number;
   readonly selectedActionId?: string;
   readonly selectedKeyCardIds: readonly string[];
@@ -129,6 +143,7 @@ export interface ActualPolicyChoice {
   readonly finalScore: number;
   readonly isGlobalTopScoreTie: boolean;
   readonly isGlobalTieBreakChosen: boolean;
+  readonly isArgmaxMismatch?: boolean;
 }
 
 export interface PolicyGroupEvaluation {
@@ -169,6 +184,12 @@ export interface CardDetailsView {
 }
 
 export interface DecisionDiagnosticRecord {
+  readonly observationId?: string;
+  readonly matchSeed?: number;
+  readonly matchLeg?: "FORWARD" | "REVERSE";
+  readonly decisionOrdinal?: number;
+  readonly actualActingPolicyName?: string;
+  readonly actualMatchResponse?: Readonly<DecisionResponse>;
   readonly decisionId: string;
   readonly stateVersion: number;
   readonly turnNumber?: number;
@@ -586,6 +607,7 @@ export function evaluatePolicyOnDecisionRequest(
   resolvedPatterns: readonly ResolvedPatternInfo[],
   options?: {
     actualResponse?: Readonly<DecisionResponse>;
+    choiceOrigin?: ChoiceOrigin;
     choiceType?: "ACTUAL_MATCH_CHOICE" | "SHADOW_POLICY_CHOICE";
   }
 ): {
@@ -666,9 +688,14 @@ export function evaluatePolicyOnDecisionRequest(
       ? Math.min(...exactGlobalTopTies.map((s) => s.patternRef))
       : chosenRef;
 
+  const isArgmaxMismatch = options?.actualResponse ? chosenRef !== bestPatternRef : false;
+  const choiceOrigin: ChoiceOrigin =
+    options?.choiceOrigin ?? (options?.actualResponse ? "ACTUAL_MATCH_CHOICE" : "SHADOW_POLICY_CHOICE");
+
   const chosenPattern = resolvedPatterns.find((p) => p.patternRef === chosenRef);
   const actualChoice: ActualPolicyChoice = {
-    choiceType: options?.choiceType ?? (options?.actualResponse ? "ACTUAL_MATCH_CHOICE" : "SHADOW_POLICY_CHOICE"),
+    choiceOrigin,
+    choiceType: choiceOrigin,
     selectedPatternRef: chosenRef,
     selectedActionId: chosenPattern?.actionId,
     selectedKeyCardIds: chosenPattern?.keyCardIds ?? [],
@@ -676,6 +703,7 @@ export function evaluatePolicyOnDecisionRequest(
     finalScore: candidateScores.find((s) => s.patternRef === chosenRef)?.finalScore ?? 0,
     isGlobalTopScoreTie: exactGlobalTopTies.length > 1,
     isGlobalTieBreakChosen: exactGlobalTopTies.length > 1 && chosenRef === minGlobalTieRef,
+    isArgmaxMismatch,
   };
 
   return {
@@ -709,9 +737,9 @@ export function evaluateGroupDistinguishability(
   const scoreMargin = tieAnalysis.scoreMargin;
   const scoreRange = tieAnalysis.scoreRange;
 
-  // グループ内での最良候補 (スコア降順、同点は最小 patternRef)
+  // グループ内での最良候補 (スコア降順、同点は最小 patternRef) - R3.1: 厳密比較
   const sortedScores = [...groupScores].sort((a, b) => {
-    if (Math.abs(b.finalScore - a.finalScore) > 1e-9) {
+    if (b.finalScore !== a.finalScore) {
       return b.finalScore - a.finalScore;
     }
     return a.patternRef - b.patternRef;
@@ -730,8 +758,9 @@ export function evaluateGroupDistinguishability(
   const topApproxTieCandidates = groupScores.filter((s) => Math.abs(s.finalScore - bestScore) < EPSILON);
 
   // 修正B: Policy実選択との分離 (未指定時は内部最良選択を使用)
-  const actual = actualChoice ?? {
-    choiceType: "SHADOW_POLICY_CHOICE" as const,
+  const actual: ActualPolicyChoice = actualChoice ?? {
+    choiceOrigin: "SHADOW_POLICY_CHOICE",
+    choiceType: "SHADOW_POLICY_CHOICE",
     selectedPatternRef: bestPatternRef,
     selectedActionId: undefined,
     selectedKeyCardIds: [],
@@ -930,12 +959,24 @@ export function extractKnownCardDetails(
 export function diagnoseDecisionRequest(
   request: Readonly<DecisionRequest>,
   policies: Record<string, DecisionPolicy>,
-  actualMatchResponses?: Record<string, Readonly<DecisionResponse>>
+  actualMatchResponsesOrObserved?:
+    | Record<string, Readonly<DecisionResponse>>
+    | Readonly<ObservedMatchDecision>
 ): DecisionDiagnosticRecord | null {
   // ストリーミング判断または合法手が存在しない場合は安全にスキップ
   if ((request as any).isStreaming || !request.patterns || request.patterns.length === 0) {
     return null;
   }
+
+  const observedDecision: Readonly<ObservedMatchDecision> | undefined =
+    actualMatchResponsesOrObserved && "observationId" in actualMatchResponsesOrObserved
+      ? (actualMatchResponsesOrObserved as Readonly<ObservedMatchDecision>)
+      : undefined;
+
+  const legacyActualResponses: Record<string, Readonly<DecisionResponse>> | undefined =
+    actualMatchResponsesOrObserved && !("observationId" in actualMatchResponsesOrObserved)
+      ? (actualMatchResponsesOrObserved as Record<string, Readonly<DecisionResponse>>)
+      : undefined;
 
   const { resolvedPatterns, pureKeyCardGroups, pureCostGroups } = classifyDecisionPatterns(request);
 
@@ -958,7 +999,26 @@ export function diagnoseDecisionRequest(
   const policyEvaluations: DecisionDiagnosticRecord["policyEvaluations"] = {};
 
   for (const [pName, policy] of Object.entries(policies)) {
-    const actualResp = actualMatchResponses ? actualMatchResponses[pName] : undefined;
+    let actualResp: Readonly<DecisionResponse> | undefined;
+    let choiceOrigin: ChoiceOrigin;
+
+    if (observedDecision) {
+      // 一体型観測レコードの場合: 手番を担当した当事者Policyのみが実選択
+      if (pName === observedDecision.policyName) {
+        actualResp = observedDecision.response;
+        choiceOrigin = "ACTUAL_MATCH_CHOICE";
+      } else {
+        actualResp = undefined;
+        choiceOrigin = "SHADOW_POLICY_CHOICE";
+      }
+    } else if (legacyActualResponses) {
+      actualResp = legacyActualResponses[pName];
+      choiceOrigin = actualResp ? "ACTUAL_MATCH_CHOICE" : "SHADOW_POLICY_CHOICE";
+    } else {
+      actualResp = undefined;
+      choiceOrigin = "SHADOW_POLICY_CHOICE";
+    }
+
     const { candidateScores, bestPatternRef, actualChoice } = evaluatePolicyOnDecisionRequest(
       policy,
       pName,
@@ -966,7 +1026,8 @@ export function diagnoseDecisionRequest(
       resolvedPatterns,
       {
         actualResponse: actualResp,
-        choiceType: actualResp ? "ACTUAL_MATCH_CHOICE" : "SHADOW_POLICY_CHOICE",
+        choiceOrigin,
+        choiceType: choiceOrigin,
       }
     );
 
@@ -1092,6 +1153,12 @@ export function diagnoseDecisionRequest(
   }
 
   return {
+    observationId: observedDecision?.observationId,
+    matchSeed: observedDecision?.matchSeed,
+    matchLeg: observedDecision?.matchLeg,
+    decisionOrdinal: observedDecision?.decisionOrdinal,
+    actualActingPolicyName: observedDecision?.policyName,
+    actualMatchResponse: observedDecision?.response,
     decisionId: request.decisionId,
     stateVersion: request.stateVersion,
     turnNumber: request.observation.turnCount ?? 0,
@@ -1112,13 +1179,66 @@ export function diagnoseDecisionRequest(
 }
 
 // =============================================================================
-// 7. 全体統計集計ロジック (診断C・修正A・修正B・修正C)
+// 7. 全体統計集計ロジック (診断C・修正A・修正B・修正C・R3.1分離集計)
 // =============================================================================
+
+export interface PolicyCategoryMetrics {
+  readonly evaluatedGroupsCount: number;
+  readonly topTieExactCount: number;
+  readonly topTieExactRate: number;
+  readonly allTiedExactCount: number;
+  readonly allTiedExactRate: number;
+  readonly partialTieExactCount: number;
+  readonly partialTieExactRate: number;
+  readonly topTieApproxCount: number;
+  readonly topTieApproxRate: number;
+  readonly allTiedApproxCount: number;
+  readonly allTiedApproxRate: number;
+  readonly partialTieApproxCount: number;
+  readonly partialTieApproxRate: number;
+  readonly tieBreakChosenCount: number;
+  readonly tieBreakChosenRate: number;
+  readonly totalPairsEvaluated: number;
+  readonly pairCompleteCollisionCount: number;
+  readonly pairCompleteCollisionRate?: number;
+  readonly allPairsCompleteCollidingGroupCount: number;
+  readonly allPairsCompleteCollidingGroupRate?: number;
+  readonly avgScoreMargin: number;
+  readonly avgScoreRange: number;
+}
+
+export interface ActualMatchPolicyMetrics {
+  readonly decisionsCount: number;
+  readonly keyCard: {
+    readonly evaluatedGroupsCount: number;
+    readonly chosenGroupCount: number;
+    readonly chosenGroupRate: number;
+    readonly chosenTieBreakCount: number;
+    readonly chosenTieBreakRate: number;
+  };
+  readonly cost: {
+    readonly evaluatedGroupsCount: number;
+    readonly chosenGroupCount: number;
+    readonly chosenGroupRate: number;
+    readonly chosenTieBreakCount: number;
+    readonly chosenTieBreakRate: number;
+  };
+}
+
+export interface ShadowEvaluationPolicyMetrics {
+  readonly decisionsCount: number;
+  readonly keyCard: PolicyCategoryMetrics;
+  readonly cost: PolicyCategoryMetrics;
+}
 
 export interface PolicyAggregateMetrics {
   readonly policyName: string;
 
-  // --- キーカード群 ---
+  // --- Work 5-4C R3.1 完全分離集計 ---
+  readonly actualMatch?: ActualMatchPolicyMetrics;
+  readonly shadowEvaluation?: ShadowEvaluationPolicyMetrics;
+
+  // --- キーカード群 (後方互換用フラットプロパティ) ---
   readonly totalKeyCardGroupsEvaluated: number;
   // 同点判定 (Exact)
   readonly keyCardTopTieExactCount: number;
@@ -1377,8 +1497,126 @@ export function computePolicyAggregateMetrics(
   const calcOptionalRate = (cnt: number, availTotal: number) =>
     availTotal > 0 ? Number((cnt / availTotal).toFixed(4)) : undefined;
 
+  // --- Work 5-4C R3.1 実対戦選択のみの集計 ---
+  // 当事者Policyとして実対戦の意思決定を行ったレコードのみを対象
+  const actualMatchRecords = records.filter(
+    (r) =>
+      r.actualActingPolicyName === policyName ||
+      r.policyEvaluations[policyName]?.actualChoice?.choiceOrigin === "ACTUAL_MATCH_CHOICE"
+  );
+  const actualDecisionsCount = actualMatchRecords.length;
+
+  let actualKeyCardEvaluatedGroups = 0;
+  let actualKeyCardChosenGroupCount = 0;
+  let actualKeyCardChosenTieBreakCount = 0;
+
+  let actualCostEvaluatedGroups = 0;
+  let actualCostChosenGroupCount = 0;
+  let actualCostChosenTieBreakCount = 0;
+
+  for (const rec of actualMatchRecords) {
+    const ev = rec.policyEvaluations[policyName];
+    if (!ev) continue;
+
+    for (const g of ev.keyCardGroupEvaluations) {
+      actualKeyCardEvaluatedGroups++;
+      if (g.isGroupChosen) {
+        actualKeyCardChosenGroupCount++;
+        if (g.isGroupTieBreakChosen) actualKeyCardChosenTieBreakCount++;
+      }
+    }
+
+    for (const g of ev.costGroupEvaluations) {
+      actualCostEvaluatedGroups++;
+      if (g.isGroupChosen) {
+        actualCostChosenGroupCount++;
+        if (g.isGroupTieBreakChosen) actualCostChosenTieBreakCount++;
+      }
+    }
+  }
+
+  const actualMatch: ActualMatchPolicyMetrics = {
+    decisionsCount: actualDecisionsCount,
+    keyCard: {
+      evaluatedGroupsCount: actualKeyCardEvaluatedGroups,
+      chosenGroupCount: actualKeyCardChosenGroupCount,
+      chosenGroupRate: calcRate(actualKeyCardChosenGroupCount, actualKeyCardEvaluatedGroups),
+      chosenTieBreakCount: actualKeyCardChosenTieBreakCount,
+      chosenTieBreakRate: calcRate(actualKeyCardChosenTieBreakCount, actualKeyCardChosenGroupCount),
+    },
+    cost: {
+      evaluatedGroupsCount: actualCostEvaluatedGroups,
+      chosenGroupCount: actualCostChosenGroupCount,
+      chosenGroupRate: calcRate(actualCostChosenGroupCount, actualCostEvaluatedGroups),
+      chosenTieBreakCount: actualCostChosenTieBreakCount,
+      chosenTieBreakRate: calcRate(actualCostChosenTieBreakCount, actualCostChosenGroupCount),
+    },
+  };
+
+  const shadowEvaluation: ShadowEvaluationPolicyMetrics = {
+    decisionsCount: records.length,
+    keyCard: {
+      evaluatedGroupsCount: totalKeyCardGroups,
+      topTieExactCount: keyCardTopTieExactCount,
+      topTieExactRate: calcRate(keyCardTopTieExactCount, totalKeyCardGroups),
+      allTiedExactCount: keyCardAllTiedExactCount,
+      allTiedExactRate: calcRate(keyCardAllTiedExactCount, totalKeyCardGroups),
+      partialTieExactCount: keyCardPartialTieExactCount,
+      partialTieExactRate: calcRate(keyCardPartialTieExactCount, totalKeyCardGroups),
+      topTieApproxCount: keyCardTopTieApproxCount,
+      topTieApproxRate: calcRate(keyCardTopTieApproxCount, totalKeyCardGroups),
+      allTiedApproxCount: keyCardAllTiedApproxCount,
+      allTiedApproxRate: calcRate(keyCardAllTiedApproxCount, totalKeyCardGroups),
+      partialTieApproxCount: keyCardPartialTieApproxCount,
+      partialTieApproxRate: calcRate(keyCardPartialTieApproxCount, totalKeyCardGroups),
+      tieBreakChosenCount: keyCardActualChosenTieBreakCount,
+      tieBreakChosenRate: calcRate(keyCardActualChosenTieBreakCount, keyCardActualChosenGroupCount),
+      totalPairsEvaluated: keyCardTotalPairs,
+      pairCompleteCollisionCount: keyCardPairCompleteEqualCount,
+      pairCompleteCollisionRate: calcOptionalRate(keyCardPairCompleteEqualCount, keyCardPairBothAvailCount),
+      allPairsCompleteCollidingGroupCount: keyCardAllPairsCompleteCollidingGroups,
+      allPairsCompleteCollidingGroupRate: calcOptionalRate(
+        keyCardAllPairsCompleteCollidingGroups,
+        keyCardCompleteGroupsEvaluated
+      ),
+      avgScoreMargin: totalKeyCardGroups > 0 ? Number((keyCardScoreMarginSum / totalKeyCardGroups).toFixed(4)) : 0,
+      avgScoreRange: totalKeyCardGroups > 0 ? Number((keyCardScoreRangeSum / totalKeyCardGroups).toFixed(4)) : 0,
+    },
+    cost: {
+      evaluatedGroupsCount: totalCostGroups,
+      topTieExactCount: costTopTieExactCount,
+      topTieExactRate: calcRate(costTopTieExactCount, totalCostGroups),
+      allTiedExactCount: costAllTiedExactCount,
+      allTiedExactRate: calcRate(costAllTiedExactCount, totalCostGroups),
+      partialTieExactCount: costPartialTieExactCount,
+      partialTieExactRate: calcRate(costPartialTieExactCount, totalCostGroups),
+      topTieApproxCount: costTopTieApproxCount,
+      topTieApproxRate: calcRate(costTopTieApproxCount, totalCostGroups),
+      allTiedApproxCount: costAllTiedApproxCount,
+      allTiedApproxRate: calcRate(costAllTiedApproxCount, totalCostGroups),
+      partialTieApproxCount: costPartialTieApproxCount,
+      partialTieApproxRate: calcRate(costPartialTieApproxCount, totalCostGroups),
+      tieBreakChosenCount: costActualChosenTieBreakCount,
+      tieBreakChosenRate: calcRate(costActualChosenTieBreakCount, costActualChosenGroupCount),
+      totalPairsEvaluated: costTotalPairs,
+      pairCompleteCollisionCount: costPairCompleteEqualCount,
+      pairCompleteCollisionRate: calcOptionalRate(costPairCompleteEqualCount, costPairBothAvailCount),
+      allPairsCompleteCollidingGroupCount: costAllPairsCompleteCollidingGroups,
+      allPairsCompleteCollidingGroupRate: calcOptionalRate(
+        costAllPairsCompleteCollidingGroups,
+        costCompleteGroupsEvaluated
+      ),
+      avgScoreMargin: totalCostGroups > 0 ? Number((costScoreMarginSum / totalCostGroups).toFixed(4)) : 0,
+      avgScoreRange: totalCostGroups > 0 ? Number((costScoreRangeSum / totalCostGroups).toFixed(4)) : 0,
+    },
+  };
+
   return {
     policyName,
+
+    // R3.1 完全分離集計
+    actualMatch,
+    shadowEvaluation,
 
     // キーカード群
     totalKeyCardGroupsEvaluated: totalKeyCardGroups,
