@@ -13,8 +13,14 @@ import {
   evaluateGroupDistinguishability,
   DiagnosticTransparentWrapperPolicy,
   computePolicyAggregateMetrics,
+  analyzeScoresTie,
+  compareCandidatePairs,
+  explainScoreDifferenceBetweenPatterns,
   DecisionDiagnosticRecord,
   EvaluatedCandidateScore,
+  PureKeyCardVarianceGroup,
+  PureCostPaymentVarianceGroup,
+  PolicyGroupEvaluation,
 } from "../../engine/ai/CardSelectionDiagnosticEngine.js";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest.js";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse.js";
@@ -261,12 +267,25 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
   });
 
   it("6. computePolicyAggregateMetrics が全体の統計指標を正確に計算すること", () => {
+    const tieAnalysis = analyzeScoresTie([5.0, 5.0]);
     const mockRecord: DecisionDiagnosticRecord = {
       decisionId: "d1",
       stateVersion: 1,
       activePlayerId: "p1",
       totalPatternsCount: 2,
-      pureKeyCardGroups: [{ groupId: "G1", actionId: "a", costSignature: "", targetSignature: "", effectSignature: "", patternRefs: [0, 1], candidateCount: 2 }],
+      pureKeyCardGroups: [
+        {
+          groupId: "G1",
+          actionId: "a",
+          costSignature: "",
+          targetSignature: "",
+          effectSignature: "",
+          orderSignature: "",
+          keyUnitSignature: "",
+          patternRefs: [0, 1],
+          candidateCount: 2,
+        },
+      ],
       pureCostGroups: [],
       hasKeyCardVariance: true,
       hasCostVariance: false,
@@ -275,6 +294,15 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
       policyEvaluations: {
         PolicyA: {
           selectedPatternRef: 0,
+          actualChoice: {
+            selectedPatternRef: 0,
+            selectedActionId: "a",
+            selectedKeyCardIds: ["c1"],
+            selectedCostSignature: "",
+            finalScore: 5.0,
+            isGlobalTopScoreTie: true,
+            isGlobalTieBreakChosen: true,
+          },
           keyCardGroupEvaluations: [
             {
               policyName: "PolicyA",
@@ -283,7 +311,25 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
               bestPatternRef: 0,
               bestScore: 5.0,
               secondBestScore: 5.0,
+              minScore: 5.0,
               scoreMargin: 0.0,
+              scoreRange: 0.0,
+              tieAnalysis,
+              isGroupChosen: true,
+              isGroupTieBreakChosen: true,
+              pairComparisons: [
+                {
+                  candidateRefA: 0,
+                  candidateRefB: 1,
+                  baseEqual: true,
+                  tacticalEqual: true,
+                  completeEqual: true,
+                },
+              ],
+              hasPairBaseCollision: true,
+              hasPairTacticalCollision: true,
+              hasPairCompleteCollision: true,
+              allPairsCompleteColliding: true,
               hasScoreTie: true,
               tieCandidatesCount: 2,
               isTieBreakChosen: true,
@@ -303,11 +349,20 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
     expect(metrics.keyCardScoreTieRate).toBe(1.0);
     expect(metrics.keyCardTieBreakCount).toBe(1);
     expect(metrics.keyCardTieBreakRate).toBe(1.0);
-    expect(metrics.keyCardBaseFeatureCollisionCount).toBe(1);
-    expect(metrics.keyCardBaseFeatureCollisionRate).toBe(1.0);
-    expect(metrics.keyCardCompleteCollisionCount).toBe(1);
-    expect(metrics.keyCardCompleteCollisionRate).toBe(1.0);
+    expect(metrics.keyCardTopTieExactCount).toBe(1);
+    expect(metrics.keyCardTopTieExactRate).toBe(1.0);
+    expect(metrics.keyCardAllTiedExactCount).toBe(1);
+    expect(metrics.keyCardAllTiedExactRate).toBe(1.0);
+    expect(metrics.keyCardPartialTieExactCount).toBe(0);
+    expect(metrics.keyCardActualChosenGroupCount).toBe(1);
+    expect(metrics.keyCardActualChosenTieBreakCount).toBe(1);
+    expect(metrics.keyCardActualChosenTieBreakRate).toBe(1.0);
+    expect(metrics.keyCardTotalPairsEvaluated).toBe(1);
+    expect(metrics.keyCardPairBaseCollisionCount).toBe(1);
+    expect(metrics.keyCardPairCompleteCollisionCount).toBe(1);
+    expect(metrics.keyCardPairCompleteCollisionRate).toBe(1.0);
     expect(metrics.keyCardAvgScoreMargin).toBe(0.0);
+    expect(metrics.keyCardAvgScoreRange).toBe(0.0);
   });
 
   it("7. Work 5-4C Evidence JSON および Markdown レポートの真正性・完全性が保証されていること", () => {
@@ -367,5 +422,424 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
     expect(reportText).toContain("Q3.");
     expect(reportText).toContain("Q4.");
     expect(reportText).toContain("Q5.");
+  });
+
+  // ===========================================================================
+  // 修正A: 同点判定精緻化テスト (A-3 必須ケース)
+  // ===========================================================================
+  describe("修正A: analyzeScoresTie (A-3 必須ケース検証)", () => {
+    it("Case 1: [5.0, 5.0, 5.0] -> 全候補同点", () => {
+      const res = analyzeScoresTie([5.0, 5.0, 5.0]);
+      expect(res.exact.hasTopScoreTie).toBe(true);
+      expect(res.exact.allCandidatesTied).toBe(true);
+      expect(res.exact.hasPartialTie).toBe(false);
+      expect(res.exact.topTieCandidateCount).toBe(3);
+      expect(res.scoreMargin).toBe(0.0);
+      expect(res.scoreRange).toBe(0.0);
+    });
+
+    it("Case 2: [5.0, 5.0, 3.0] -> 最高スコア部分同点", () => {
+      const res = analyzeScoresTie([5.0, 5.0, 3.0]);
+      expect(res.exact.hasTopScoreTie).toBe(true);
+      expect(res.exact.allCandidatesTied).toBe(false);
+      expect(res.exact.hasPartialTie).toBe(true);
+      expect(res.exact.topTieCandidateCount).toBe(2);
+      expect(res.scoreMargin).toBe(0.0);
+      expect(res.scoreRange).toBe(2.0);
+    });
+
+    it("Case 3: [5.0, 4.0, 3.0] -> 同点なし (単独1位)", () => {
+      const res = analyzeScoresTie([5.0, 4.0, 3.0]);
+      expect(res.exact.hasTopScoreTie).toBe(false);
+      expect(res.exact.allCandidatesTied).toBe(false);
+      expect(res.exact.hasPartialTie).toBe(false);
+      expect(res.exact.topTieCandidateCount).toBe(1);
+      expect(res.scoreMargin).toBe(1.0);
+      expect(res.scoreRange).toBe(2.0);
+    });
+
+    it("Case 4: [5.0, 4.0, 4.0] -> 下位同点 (最高スコアは単独1位)", () => {
+      const res = analyzeScoresTie([5.0, 4.0, 4.0]);
+      expect(res.exact.hasTopScoreTie).toBe(false);
+      expect(res.exact.allCandidatesTied).toBe(false);
+      expect(res.exact.hasPartialTie).toBe(false);
+      expect(res.exact.topTieCandidateCount).toBe(1);
+      expect(res.scoreMargin).toBe(1.0);
+      expect(res.scoreRange).toBe(1.0);
+    });
+
+    it("Case 5: [5.0, 5.0 - 1e-10, 3.0] -> 厳密比較と近似比較の差分検証", () => {
+      const res = analyzeScoresTie([5.0, 5.0 - 1e-10, 3.0]);
+      // exact: 厳密には不一致なので単独1位
+      expect(res.exact.hasTopScoreTie).toBe(false);
+      expect(res.exact.allCandidatesTied).toBe(false);
+      expect(res.exact.hasPartialTie).toBe(false);
+      expect(res.exact.topTieCandidateCount).toBe(1);
+
+      // approx: 1e-9 以内なので同点判定
+      expect(res.approx.hasTopScoreTie).toBe(true);
+      expect(res.approx.allCandidatesTied).toBe(false);
+      expect(res.approx.hasPartialTie).toBe(true);
+      expect(res.approx.topTieCandidateCount).toBe(2);
+    });
+
+    it("Case 6: [5.0, 5.0, 5.0, 4.0] -> 4候補中3件同点", () => {
+      const res = analyzeScoresTie([5.0, 5.0, 5.0, 4.0]);
+      expect(res.exact.hasTopScoreTie).toBe(true);
+      expect(res.exact.allCandidatesTied).toBe(false);
+      expect(res.exact.hasPartialTie).toBe(true);
+      expect(res.exact.topTieCandidateCount).toBe(3);
+      expect(res.scoreMargin).toBe(0.0);
+      expect(res.scoreRange).toBe(1.0);
+    });
+  });
+
+  // ===========================================================================
+  // 修正D: 合法手グループ化条件の厳密化テスト (D-4 必須ケース 1〜9)
+  // ===========================================================================
+  describe("修正D: 合法手グループ化条件の決定論的正規化 (D-4 必須ケース 1〜9)", () => {
+    it("D-4 Case 1: 同一アクション、同一コスト、同一対象、同一効果でキーカードのみ異なる合法手2件 -> PureKeyCardVarianceGroup", () => {
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m",
+        decisionId: "d",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "action.summonSoldier", actionName: "兵士召喚" }],
+          cardSelections: [
+            { cardIds: ["c1"], displayCodes: ["C1"] },
+            { cardIds: ["c2"], displayCodes: ["C2"] },
+          ],
+          unitSelections: [],
+          costPayments: [{ discardedCardIds: [], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 }],
+          targetSelections: [{ targetType: "none" }],
+          effectSelections: [{ selectionType: "none" }],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0 },
+          { patternId: "p2", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 1, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+      const res = classifyDecisionPatterns(req);
+      expect(res.pureKeyCardGroups.length).toBe(1);
+      expect(res.pureCostGroups.length).toBe(0);
+    });
+
+    it("D-4 Case 2: 同一アクション、同一キーカード、同一対象、同一効果でコストのみ異なる合法手2件 -> PureCostPaymentVarianceGroup", () => {
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m",
+        decisionId: "d",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "action.attack", actionName: "攻撃" }],
+          cardSelections: [{ cardIds: ["c1"], displayCodes: ["C1"] }],
+          unitSelections: [],
+          costPayments: [
+            { discardedCardIds: ["c-disc-1"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+            { discardedCardIds: ["c-disc-2"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+          ],
+          targetSelections: [{ targetType: "player", targetPlayerKey: "p2" }],
+          effectSelections: [{ selectionType: "none" }],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0 },
+          { patternId: "p2", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 1, targetSelectionRef: 0, effectSelectionRef: 0 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+      const res = classifyDecisionPatterns(req);
+      expect(res.pureKeyCardGroups.length).toBe(0);
+      expect(res.pureCostGroups.length).toBe(1);
+    });
+
+    it("D-4 Case 3: キーカードとコストが同時に異なる合法手2件 -> 純粋グループから除外", () => {
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m",
+        decisionId: "d",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "action.attack", actionName: "攻撃" }],
+          cardSelections: [
+            { cardIds: ["c1"], displayCodes: ["C1"] },
+            { cardIds: ["c2"], displayCodes: ["C2"] },
+          ],
+          unitSelections: [],
+          costPayments: [
+            { discardedCardIds: ["c-disc-1"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+            { discardedCardIds: ["c-disc-2"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+          ],
+          targetSelections: [{ targetType: "none" }],
+          effectSelections: [{ selectionType: "none" }],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0 },
+          { patternId: "p2", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 1, costPaymentRef: 1, targetSelectionRef: 0, effectSelectionRef: 0 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+      const res = classifyDecisionPatterns(req);
+      expect(res.pureKeyCardGroups.length).toBe(0);
+      expect(res.pureCostGroups.length).toBe(0);
+    });
+
+    it("D-4 Case 4: キーカードのみ異なるが、対象 (targetSelectionRef) が異なる2件 -> 純粋グループから除外", () => {
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m",
+        decisionId: "d",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "action.attack", actionName: "攻撃" }],
+          cardSelections: [
+            { cardIds: ["c1"], displayCodes: ["C1"] },
+            { cardIds: ["c2"], displayCodes: ["C2"] },
+          ],
+          unitSelections: [],
+          costPayments: [{ discardedCardIds: [], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 }],
+          targetSelections: [
+            { targetType: "unit", targetUnitId: "u1" },
+            { targetType: "unit", targetUnitId: "u2" }, // 対象が異なる
+          ],
+          effectSelections: [{ selectionType: "none" }],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0 },
+          { patternId: "p2", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 1, costPaymentRef: 0, targetSelectionRef: 1, effectSelectionRef: 0 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+      const res = classifyDecisionPatterns(req);
+      expect(res.pureKeyCardGroups.length).toBe(0);
+    });
+
+    it("D-4 Case 5: キーカードのみ異なるが、効果割り当て (effectSelectionRef.assignments) が異なる2件 -> 純粋グループから除外", () => {
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m",
+        decisionId: "d",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "action.block", actionName: "ブロック" }],
+          cardSelections: [
+            { cardIds: ["c1"], displayCodes: ["C1"] },
+            { cardIds: ["c2"], displayCodes: ["C2"] },
+          ],
+          unitSelections: [],
+          costPayments: [{ discardedCardIds: [], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 }],
+          targetSelections: [{ targetType: "none" }],
+          effectSelections: [
+            { selectionType: "unitAssignment", assignments: [{ sourceUnitId: "u1", selectedUnitIds: ["b1"] }] },
+            { selectionType: "unitAssignment", assignments: [{ sourceUnitId: "u1", selectedUnitIds: ["b2"] }] }, // 割当て先が異なる
+          ],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0 },
+          { patternId: "p2", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 1, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 1 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+      const res = classifyDecisionPatterns(req);
+      expect(res.pureKeyCardGroups.length).toBe(0);
+    });
+
+    it("D-4 Case 6: コストのみ異なるが、順序 (orderSelectionRef) が異なる2件 -> 純粋グループから除外", () => {
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m",
+        decisionId: "d",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "action.resolve", actionName: "解決" }],
+          cardSelections: [{ cardIds: ["c1"], displayCodes: ["C1"] }],
+          unitSelections: [],
+          costPayments: [
+            { discardedCardIds: ["c-disc-1"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+            { discardedCardIds: ["c-disc-2"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+          ],
+          targetSelections: [{ targetType: "none" }],
+          effectSelections: [{ selectionType: "none" }],
+          orderSelections: [
+            { orderedIds: ["o1", "o2"] },
+            { orderedIds: ["o2", "o1"] }, // 順序が異なる
+          ],
+        },
+        patterns: [
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0, orderSelectionRef: 0 },
+          { patternId: "p2", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 1, targetSelectionRef: 0, effectSelectionRef: 0, orderSelectionRef: 1 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+      const res = classifyDecisionPatterns(req);
+      expect(res.pureCostGroups.length).toBe(0);
+    });
+
+    it("D-4 Case 7: keyUnitSelectionRef が異なる2件 -> 純粋キーカードグループから除外", () => {
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m",
+        decisionId: "d",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "action.attack", actionName: "攻撃" }],
+          cardSelections: [
+            { cardIds: ["c1"], displayCodes: ["C1"] },
+            { cardIds: ["c2"], displayCodes: ["C2"] },
+          ],
+          unitSelections: [
+            { unitIds: ["u1"], displayNames: ["U1"] },
+            { unitIds: ["u2"], displayNames: ["U2"] }, // ユニットが異なる
+          ],
+          costPayments: [{ discardedCardIds: [], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 }],
+          targetSelections: [{ targetType: "none" }],
+          effectSelections: [{ selectionType: "none" }],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, keyUnitSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0 },
+          { patternId: "p2", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 1, keyUnitSelectionRef: 1, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+      const res = classifyDecisionPatterns(req);
+      expect(res.pureKeyCardGroups.length).toBe(0);
+    });
+
+    it("D-4 Case 8: カタログ参照番号が異なるが中身が完全同値な2件 -> 同一グループに正規化", () => {
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m",
+        decisionId: "d",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [
+            { actionId: "action.summonSoldier", actionName: "兵士召喚" },
+            { actionId: "action.summonSoldier", actionName: "兵士召喚" }, // 参照1: 同値
+          ],
+          cardSelections: [
+            { cardIds: ["c1"], displayCodes: ["C1"] },
+            { cardIds: ["c2"], displayCodes: ["C2"] },
+          ],
+          unitSelections: [],
+          costPayments: [
+            { discardedCardIds: [], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+            { discardedCardIds: [], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 }, // 参照1: 同値
+          ],
+          targetSelections: [{ targetType: "none" }, { targetType: "none" }],
+          effectSelections: [{ selectionType: "none" }, { selectionType: "none" }],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0 },
+          { patternId: "p2", kind: "ACTION", actionSelectionRef: 1, keyCardSelectionRef: 1, costPaymentRef: 1, targetSelectionRef: 1, effectSelectionRef: 1 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+      const res = classifyDecisionPatterns(req);
+      expect(res.pureKeyCardGroups.length).toBe(1);
+      expect(res.pureKeyCardGroups[0].candidateCount).toBe(2);
+    });
+
+    it("D-4 Case 9: effectSelectionRef の summary 文字列が空または欠落していても構造化情報で同一判定可能", () => {
+      const req: DecisionRequest = {
+        protocolVersion: "1.0",
+        matchId: "m",
+        decisionId: "d",
+        stateVersion: 1,
+        playerId: "p1",
+        source: { kind: "chance" } as any,
+        catalog: {
+          actions: [{ actionId: "action.summonSoldier", actionName: "兵士召喚" }],
+          cardSelections: [
+            { cardIds: ["c1"], displayCodes: ["C1"] },
+            { cardIds: ["c2"], displayCodes: ["C2"] },
+          ],
+          unitSelections: [],
+          costPayments: [{ discardedCardIds: [], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 }],
+          targetSelections: [{ targetType: "none" }],
+          effectSelections: [
+            { selectionType: "unit", selectedValues: ["val1"] }, // summary なし
+            { selectionType: "unit", selectedValues: ["val1"], summary: "説明文あり" }, // summary ありだが実体同値
+          ],
+          orderSelections: [],
+        },
+        patterns: [
+          { patternId: "p1", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 0, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 0 },
+          { patternId: "p2", kind: "ACTION", actionSelectionRef: 0, keyCardSelectionRef: 1, costPaymentRef: 0, targetSelectionRef: 0, effectSelectionRef: 1 },
+        ],
+        observation: { viewerPlayerId: "p1", players: [], stageRequests: [] } as any,
+      };
+      const res = classifyDecisionPatterns(req);
+      expect(res.pureKeyCardGroups.length).toBe(1);
+      expect(res.pureKeyCardGroups[0].candidateCount).toBe(2);
+    });
+  });
+
+  // ===========================================================================
+  // 修正B・修正C: 実選択分離とペア単位特徴量比較テスト
+  // ===========================================================================
+  describe("修正B & 修正C: 実選択分離とペア単位特徴量比較", () => {
+    it("修正B: グループ内最良とPolicy実選択が異なる場合、isGroupChosen=false となること", () => {
+      const candidateScores: EvaluatedCandidateScore[] = [
+        { patternRef: 0, baseScore: 5.0, tacticalAdjustment: 0, finalScore: 5.0 },
+        { patternRef: 1, baseScore: 5.0, tacticalAdjustment: 0, finalScore: 5.0 },
+        { patternRef: 2, baseScore: 10.0, tacticalAdjustment: 0, finalScore: 10.0 }, // グループ外で全体最良
+      ];
+
+      const group = { groupId: "GRP-1", patternRefs: [0, 1] };
+      const actualChoice = {
+        selectedPatternRef: 2, // グループ外の手が選ばれた
+        selectedActionId: "act",
+        selectedKeyCardIds: [],
+        selectedCostSignature: "",
+        finalScore: 10.0,
+        isGlobalTopScoreTie: false,
+        isGlobalTieBreakChosen: false,
+      };
+
+      const evalRes = evaluateGroupDistinguishability("TestPolicy", group, candidateScores, actualChoice);
+      expect(evalRes.bestPatternRef).toBe(0); // グループ内では 0 が最良
+      expect(evalRes.isGroupChosen).toBe(false); // しかしPolicy全体としてはこのグループを選んでいない
+      expect(evalRes.isGroupTieBreakChosen).toBe(false);
+    });
+
+    it("修正C: 特徴量未公開 (undefined) の場合に completeEqual が NOT_AVAILABLE (undefined) となること", () => {
+      const candidateScores: EvaluatedCandidateScore[] = [
+        { patternRef: 0, baseScore: 5.0, tacticalAdjustment: 0, finalScore: 5.0, baseFeatures: [1, 2] },
+        { patternRef: 1, baseScore: 5.0, tacticalAdjustment: 0, finalScore: 5.0, baseFeatures: [1, 2] }, // base は一致、tac は未公開
+      ];
+
+      const res = compareCandidatePairs(candidateScores);
+      expect(res.pairComparisons.length).toBe(1);
+      expect(res.pairComparisons[0].baseEqual).toBe(true);
+      expect(res.pairComparisons[0].tacticalEqual).toBeUndefined();
+      expect(res.pairComparisons[0].completeEqual).toBeUndefined(); // NOT_AVAILABLE
+      expect(res.hasPairBaseCollision).toBe(true);
+      expect(res.hasPairTacticalCollision).toBeUndefined();
+      expect(res.hasPairCompleteCollision).toBeUndefined();
+    });
   });
 });

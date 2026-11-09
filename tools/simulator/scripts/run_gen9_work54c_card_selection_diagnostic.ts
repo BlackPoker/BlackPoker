@@ -49,6 +49,7 @@ import {
   diagnoseDecisionRequest,
   classifyDecisionPatterns,
   computePolicyAggregateMetrics,
+  explainScoreDifferenceBetweenPatterns,
   DecisionDiagnosticRecord,
   PolicyAggregateMetrics,
 } from "../src/engine/ai/CardSelectionDiagnosticEngine.js";
@@ -142,20 +143,39 @@ export function assertCleanCommitState(
 }
 
 // =============================================================================
-// 3. メイン診断実行処理
+// 3. メイン診断実行処理 (Work 5-4C R2)
 // =============================================================================
 export async function main() {
   const tStart = performance.now();
   console.log("================================================================================");
-  console.log("  BlackPoker Gen 9 Work 5-4C: カード選択品質・特徴量識別能力診断");
+  console.log("  BlackPoker Gen 9 Work 5-4C R2: カード選択診断の精度修正・Evidence再検証");
   console.log("================================================================================");
+
+  const rootDir = process.cwd();
+
+  // 0. 既存 Work 5-4C Evidence の完全保護検証 (SHA-256 不変性アサーション)
+  const originalEvidencePath = path.resolve(
+    rootDir,
+    "tools/simulator/evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-46735ba3d704.json"
+  );
+  if (!fs.existsSync(originalEvidencePath)) {
+    throw new Error(`[PROTECTION_ERROR] 既存 Evidence JSON が見つかりません: ${originalEvidencePath}`);
+  }
+  const originalBuf = fs.readFileSync(originalEvidencePath);
+  const originalSha256 = crypto.createHash("sha256").update(originalBuf).digest("hex").toLowerCase();
+  const EXPECTED_ORIGINAL_SHA256 = "53f9c9b82c136a8026df79e9fbba8196435db7ac3520b186529308565939dcd6";
+  if (originalSha256 !== EXPECTED_ORIGINAL_SHA256) {
+    throw new Error(
+      `[PROTECTION_VIOLATION] 既存 Evidence JSON の改変を検知しました: 期待値=${EXPECTED_ORIGINAL_SHA256}, 実際=${originalSha256}`
+    );
+  }
+  console.log(`[EVIDENCE_PROTECTED] 既存 Evidence SHA-256 検証成功: ${originalSha256}`);
 
   // 1. Seed 検証
   assertSafeDiagnosticSeedRange(790001, 30);
   console.log(`[SEED_VERIFIED] 診断Seed: 790001〜790030 (30ペア＝60試合) 重複なし確認済`);
 
   // 2. コミット・クリーン状態検証
-  const rootDir = process.cwd();
   const { gitSha, commitTimeIso, repoRoot } = assertCleanCommitState(rootDir);
   console.log(`[GIT_COMMIT_VERIFIED] HEAD Commit: ${gitSha} (CommitTime: ${commitTimeIso})`);
   console.log(`[WORKTREE_VERIFIED] 作業ツリーは完全にクリーンです`);
@@ -211,12 +231,17 @@ export async function main() {
   // 6. 実対戦経路上での観測 (R4 vs Gen 8, 30ペア ＝ 60試合, 座席反転)
   console.log("\n[SIMULATION] 実対戦経路 (R4 v7.2 vs Gen 8) のシミュレーション実行中...");
 
-  const seenDecisionIds = new Set<string>();
+  let currentMatchSeed = 0;
+  let currentSeat = "p1";
+  const seenUniqueDecisionKeys = new Set<string>();
   const varianceDecisions: DecisionRequest[] = [];
 
   const onDecisionObserved = (req: Readonly<DecisionRequest>) => {
-    if (seenDecisionIds.has(req.decisionId)) return;
-    seenDecisionIds.add(req.decisionId);
+    // 修正F: 複合一意キー (matchSeed_seat_turn_decisionId)
+    const turnCount = req.observation.turnCount ?? 0;
+    const uniqueKey = `${currentMatchSeed}_${currentSeat}_${turnCount}_${req.decisionId}`;
+    if (seenUniqueDecisionKeys.has(uniqueKey)) return;
+    seenUniqueDecisionKeys.add(uniqueKey);
 
     // 軽量判定: カード選択またはコスト選択の差分がある局面のみ収集
     const { pureKeyCardGroups, pureCostGroups } = classifyDecisionPatterns(req);
@@ -238,7 +263,10 @@ export async function main() {
   let draws = 0;
 
   for (const seed of WORK54C_DIAGNOSTIC_SEEDS) {
+    currentMatchSeed = seed;
+
     // 正順: P1=R4, P2=Gen8
+    currentSeat = "p1";
     const setup1 = OfficialRegulationMatchSetup.setupMatch(
       reg,
       frame,
@@ -262,6 +290,7 @@ export async function main() {
     else if (res1.winner === "draw") draws++;
 
     // 逆順: P1=Gen8, P2=R4
+    currentSeat = "p2";
     const setup2 = OfficialRegulationMatchSetup.setupMatch(
       reg,
       frame,
@@ -287,7 +316,7 @@ export async function main() {
 
   console.log(`[SIMULATION_COMPLETE] 全 60 試合完了: R4=${winsR4}勝, Gen8=${winsGen8}勝, 引分=${draws}`);
   console.log(`[DECISIONS_COLLECTED] R4観測判断数: ${wrapperR4.totalDecisionsObserved}, Gen8観測判断数: ${wrapperGen8.totalDecisionsObserved}`);
-  console.log(`[UNIQUE_DECISIONS] 遭遇ユニーク判断総数: ${seenDecisionIds.size}`);
+  console.log(`[UNIQUE_DECISIONS] 遭遇ユニーク判断総数: ${seenUniqueDecisionKeys.size}`);
   console.log(`[VARIANCE_DECISIONS] 差分あり診断対象判断数: ${varianceDecisions.length}`);
 
   // 7. 差分が存在する DecisionRequest に対してのみ精密診断 (シャドウ評価) を実行
@@ -322,19 +351,64 @@ export async function main() {
     aggregateMetrics[pName] = computePolicyAggregateMetrics(pName, diagnosticRecords);
   }
 
-  // 9. 代表事例の抽出 (兵士召喚、Counter、コスト支払い)
-  const representativeExamples = {
-    summonSoldier: diagnosticRecords.filter((r) => r.hasSummonSoldierVariance).slice(0, 5),
-    counter: diagnosticRecords.filter((r) => r.hasCounterVariance).slice(0, 5),
-    costPayment: diagnosticRecords.filter((r) => r.hasCostVariance).slice(0, 5),
+  // 9. 代表事例の抽出とスコア寄与度分解 (修正E)
+  console.log("\n[EXPLANATION] 代表事例 (兵士召喚、Counter、コスト支払い) のスコア寄与度分解中...");
+
+  const explainRepresentativeGroup = (
+    reqRecord: DecisionDiagnosticRecord,
+    group: { patternRefs: readonly number[] }
+  ) => {
+    if (group.patternRefs.length < 2) return undefined;
+    const refA = group.patternRefs[0];
+    const refB = group.patternRefs[1];
+    // 元の DecisionRequest を取得
+    const origReq = varianceDecisions.find((r) => r.decisionId === reqRecord.decisionId);
+    if (!origReq) return undefined;
+
+    return {
+      candidateRefA: refA,
+      candidateRefB: refB,
+      explanation: explainScoreDifferenceBetweenPatterns(origReq, gen8DNA, refA, refB),
+    };
+  };
+
+  const sampleSummon = diagnosticRecords.find((r) => r.hasSummonSoldierVariance && (r.summonSoldierDetails?.groups.length ?? 0) > 0);
+  const sampleCounter = diagnosticRecords.find((r) => r.hasCounterVariance && (r.counterDetails?.groups.length ?? 0) > 0);
+  const sampleCost = diagnosticRecords.find((r) => r.hasCostVariance && (r.costPaymentDetails?.groups.length ?? 0) > 0);
+
+  const representativeExamplesWithExplanation = {
+    summonSoldier: sampleSummon
+      ? {
+          record: sampleSummon,
+          contributionAnalysis: sampleSummon.summonSoldierDetails?.groups[0]
+            ? explainRepresentativeGroup(sampleSummon, sampleSummon.summonSoldierDetails.groups[0])
+            : undefined,
+        }
+      : undefined,
+    counter: sampleCounter
+      ? {
+          record: sampleCounter,
+          contributionAnalysis: sampleCounter.counterDetails?.groups[0]
+            ? explainRepresentativeGroup(sampleCounter, sampleCounter.counterDetails.groups[0])
+            : undefined,
+        }
+      : undefined,
+    costPayment: sampleCost
+      ? {
+          record: sampleCost,
+          contributionAnalysis: sampleCost.costPaymentDetails?.groups[0]
+            ? explainRepresentativeGroup(sampleCost, sampleCost.costPaymentDetails.groups[0])
+            : undefined,
+        }
+      : undefined,
   };
 
   const elapsedSec = Number(((performance.now() - tStart) / 1000).toFixed(2));
 
-  // 10. Evidence JSON オブジェクトの構築
+  // 10. Evidence JSON オブジェクトの構築 (Work 5-4C R2)
   const evidenceReport = {
-    workId: "BP-SIM-AI-GEN9-WORK54C-CARD-SELECTION-DIAGNOSTIC",
-    schemaVersion: "1.0.0",
+    workId: "BP-SIM-AI-GEN9-WORK54C-DIAGNOSTIC-ACCURACY-R2",
+    schemaVersion: "2.0.0",
     generatedAt: new Date().toISOString(),
     executionEnvironment: {
       gitCommitSha: gitSha,
@@ -354,7 +428,7 @@ export async function main() {
       matchResults: { winsR4, winsGen8, draws, total: 60 },
     },
     sampleCounts: {
-      totalDecisionsCollected: seenDecisionIds.size,
+      totalDecisionsCollected: seenUniqueDecisionKeys.size,
       r4DecisionsCount: wrapperR4.totalDecisionsObserved,
       gen8DecisionsCount: wrapperGen8.totalDecisionsObserved,
       decisionsWithAnyVariance: diagnosticRecords.length,
@@ -364,18 +438,23 @@ export async function main() {
       decisionsWithCounterVariance: totalCounterVariance,
     },
     aggregateMetrics,
-    representativeExamples,
+    representativeExamples: {
+      summonSoldier: diagnosticRecords.filter((r) => r.hasSummonSoldierVariance).slice(0, 5),
+      counter: diagnosticRecords.filter((r) => r.hasCounterVariance).slice(0, 5),
+      costPayment: diagnosticRecords.filter((r) => r.hasCostVariance).slice(0, 5),
+    },
+    representativeExamplesWithExplanation,
     executionDurationSeconds: elapsedSec,
   };
 
-  // 11. Evidence JSON の排他的永続化保存
+  // 11. Evidence JSON の排他的永続化保存 (R2ファイル名)
   const shortSha = gitSha.substring(0, 12);
   const evidenceDir = path.resolve(repoRoot, "tools/simulator/evidence/gen9-work5-4c");
   if (!fs.existsSync(evidenceDir)) {
     fs.mkdirSync(evidenceDir, { recursive: true });
   }
 
-  const evidenceFileName = `gen9-work5-4c-card-selection-diagnostic-${shortSha}.json`;
+  const evidenceFileName = `gen9-work5-4c-card-selection-diagnostic-r2-${shortSha}.json`;
   const evidenceFilePath = path.join(evidenceDir, evidenceFileName);
 
   const jsonStr = JSON.stringify(evidenceReport, null, 2);
@@ -388,23 +467,28 @@ export async function main() {
 
   // 集計指標のコンソール表示
   console.log("\n================================================================================");
-  console.log("  診断結果サマリー (Policy別 特徴量衝突率・スコア同点率・列挙順依存率)");
+  console.log("  診断結果サマリー (Policy別 特徴量衝突率・スコア同点率・実選択タイブレーク率)");
   console.log("================================================================================");
   for (const [pName, m] of Object.entries(aggregateMetrics)) {
     console.log(`\n--- ${pName} ---`);
     console.log(`[キーカード選択] 評価グループ数: ${m.totalKeyCardGroupsEvaluated}`);
-    console.log(`  - スコア同点率: ${(m.keyCardScoreTieRate * 100).toFixed(1)}% (${m.keyCardScoreTieCount}/${m.totalKeyCardGroupsEvaluated})`);
-    console.log(`  - 列挙順依存率: ${(m.keyCardTieBreakRate * 100).toFixed(1)}% (${m.keyCardTieBreakCount}/${m.totalKeyCardGroupsEvaluated})`);
-    console.log(`  - ベース特徴量衝突率: ${(m.keyCardBaseFeatureCollisionRate * 100).toFixed(1)}% (${m.keyCardBaseFeatureCollisionCount}/${m.totalKeyCardGroupsEvaluated})`);
-    console.log(`  - 戦術特徴量衝突率: ${(m.keyCardTacticalFeatureCollisionRate * 100).toFixed(1)}% (${m.keyCardTacticalFeatureCollisionCount}/${m.totalKeyCardGroupsEvaluated})`);
-    console.log(`  - 完全特徴量衝突率: ${(m.keyCardCompleteCollisionRate * 100).toFixed(1)}% (${m.keyCardCompleteCollisionCount}/${m.totalKeyCardGroupsEvaluated})`);
-    console.log(`  - 平均スコア差: ${m.keyCardAvgScoreMargin}`);
+    console.log(`  - 最高スコア同点率 (Exact): ${(m.keyCardTopTieExactRate * 100).toFixed(1)}% (${m.keyCardTopTieExactCount}/${m.totalKeyCardGroupsEvaluated})`);
+    console.log(`  - 全候補同点率 (Exact): ${(m.keyCardAllTiedExactRate * 100).toFixed(1)}% (${m.keyCardAllTiedExactCount}/${m.totalKeyCardGroupsEvaluated})`);
+    console.log(`  - 部分同点率 (Exact): ${(m.keyCardPartialTieExactRate * 100).toFixed(1)}% (${m.keyCardPartialTieExactCount}/${m.totalKeyCardGroupsEvaluated})`);
+    console.log(`  - 最高スコア同点率 (Approx): ${(m.keyCardTopTieApproxRate * 100).toFixed(1)}% (${m.keyCardTopTieApproxCount}/${m.totalKeyCardGroupsEvaluated})`);
+    console.log(`  - 実選択グループ割合: ${(m.keyCardActualChosenGroupRate * 100).toFixed(1)}% (${m.keyCardActualChosenGroupCount}/${m.totalKeyCardGroupsEvaluated})`);
+    console.log(`  - 実選択タイブレーク率: ${(m.keyCardActualChosenTieBreakRate * 100).toFixed(1)}% (${m.keyCardActualChosenTieBreakCount}/${m.keyCardActualChosenGroupCount})`);
+    console.log(`  - ペア単位完全衝突率: ${m.keyCardPairCompleteCollisionRate !== undefined ? `${(m.keyCardPairCompleteCollisionRate * 100).toFixed(1)}%` : "N/A"}`);
+    console.log(`  - 全ペア衝突グループ率: ${m.keyCardAllPairsCompleteCollidingGroupRate !== undefined ? `${(m.keyCardAllPairsCompleteCollidingGroupRate * 100).toFixed(1)}%` : "N/A"}`);
+    console.log(`  - 平均スコア差 (Margin): ${m.keyCardAvgScoreMargin}, スコアレンジ (Range): ${m.keyCardAvgScoreRange}`);
 
     console.log(`[コスト支払い] 評価グループ数: ${m.totalCostGroupsEvaluated}`);
-    console.log(`  - スコア同点率: ${(m.costScoreTieRate * 100).toFixed(1)}% (${m.costScoreTieCount}/${m.totalCostGroupsEvaluated})`);
-    console.log(`  - 列挙順依存率: ${(m.costTieBreakRate * 100).toFixed(1)}% (${m.costTieBreakCount}/${m.totalCostGroupsEvaluated})`);
-    console.log(`  - ベース特徴量衝突率: ${(m.costBaseFeatureCollisionRate * 100).toFixed(1)}% (${m.costBaseFeatureCollisionCount}/${m.totalCostGroupsEvaluated})`);
-    console.log(`  - 平均スコア差: ${m.costAvgScoreMargin}`);
+    console.log(`  - 最高スコア同点率 (Exact): ${(m.costTopTieExactRate * 100).toFixed(1)}% (${m.costTopTieExactCount}/${m.totalCostGroupsEvaluated})`);
+    console.log(`  - 全候補同点率 (Exact): ${(m.costAllTiedExactRate * 100).toFixed(1)}% (${m.costAllTiedExactCount}/${m.totalCostGroupsEvaluated})`);
+    console.log(`  - 実選択グループ割合: ${(m.costActualChosenGroupRate * 100).toFixed(1)}% (${m.costActualChosenGroupCount}/${m.totalCostGroupsEvaluated})`);
+    console.log(`  - 実選択タイブレーク率: ${(m.costActualChosenTieBreakRate * 100).toFixed(1)}% (${m.costActualChosenTieBreakCount}/${m.costActualChosenGroupCount})`);
+    console.log(`  - ペア単位完全衝突率: ${m.costPairCompleteCollisionRate !== undefined ? `${(m.costPairCompleteCollisionRate * 100).toFixed(1)}%` : "N/A"}`);
+    console.log(`  - 平均スコア差 (Margin): ${m.costAvgScoreMargin}, スコアレンジ (Range): ${m.costAvgScoreRange}`);
   }
 
   return { evidenceFilePath, evidenceSha256, aggregateMetrics, elapsedSec };
