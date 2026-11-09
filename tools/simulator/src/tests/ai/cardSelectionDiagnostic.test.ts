@@ -424,6 +424,59 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
     expect(reportText).toContain("Q5.");
   });
 
+  it("8. Work 5-4C R2 Evidence JSON および Markdown レポートの真正性・完全性が保証されていること", () => {
+    const rootDir = process.cwd();
+    const evidenceDir = path.resolve(rootDir, "evidence/gen9-work5-4c");
+    const evidencePath = path.join(evidenceDir, "gen9-work5-4c-card-selection-diagnostic-r2-d78652a6ab98.json");
+    const reportPath = path.join(evidenceDir, "CARD_SELECTION_DIAGNOSTIC_REPORT_R2.md");
+
+    // 1. ファイルの存在確認
+    expect(fs.existsSync(evidencePath)).toBe(true);
+    expect(fs.existsSync(reportPath)).toBe(true);
+
+    // 2. SHA-256 検証
+    const fileContent = fs.readFileSync(evidencePath);
+    const actualSha256 = crypto.createHash("sha256").update(fileContent).digest("hex");
+    const EXPECTED_SHA256 = "6e94b81fcb18c780257ccc7104bf2f1ca4419b82d5a382e51664ee4497f4c49f";
+    expect(actualSha256).toBe(EXPECTED_SHA256);
+
+    // 3. Evidence 内容の整合性検証
+    const parsed = JSON.parse(fileContent.toString("utf8"));
+    expect(parsed.workId).toBe("BP-SIM-AI-GEN9-WORK54C-DIAGNOSTIC-ACCURACY-R2");
+    expect(parsed.schemaVersion).toBe("2.0.0");
+    expect(parsed.executionEnvironment.gitCommitSha).toBe("d78652a6ab983c5df9c8c5c087a1c45b96b3dc83");
+    expect(parsed.sampleCounts.totalDecisionsCollected).toBe(5480);
+    expect(parsed.sampleCounts.decisionsWithAnyVariance).toBe(3779);
+
+    // キーカード同点率は 0.01%, 実選択タイブレーク率は約 0.2%
+    for (const pName of ["Gen8", "R4_v72", "G0_IND7_v72", "G3_IND3_v72"]) {
+      const m = parsed.aggregateMetrics[pName];
+      expect(m.totalKeyCardGroupsEvaluated).toBe(103168);
+      expect(m.keyCardTopTieExactCount).toBe(9);
+      expect(m.keyCardTopTieExactRate).toBe(0.0001);
+      expect(m.keyCardActualChosenTieBreakRate).toBeLessThan(0.005); // 実選択タイブレーク率 < 0.5%
+
+      // コスト支払いは同点率 100%, 実選択タイブレーク率 100%
+      expect(m.totalCostGroupsEvaluated).toBe(59087);
+      expect(m.costTopTieExactRate).toBe(1.0);
+      expect(m.costActualChosenTieBreakRate).toBe(1.0);
+      expect(m.costAvgScoreMargin).toBe(0.0);
+    }
+
+    // 4. レポート内容の整合性検証
+    const reportText = fs.readFileSync(reportPath, "utf8");
+    expect(reportText).toContain("d78652a6ab98");
+    expect(reportText).toContain("6e94b81fcb18c780257ccc7104bf2f1ca4419b82d5a382e51664ee4497f4c49f");
+    expect(reportText).toContain("53f9c9b82c136a8026df79e9fbba8196435db7ac3520b186529308565939dcd6");
+    expect(reportText).toContain("103,168");
+    expect(reportText).toContain("59,087");
+    expect(reportText).toContain("Q1.");
+    expect(reportText).toContain("Q2.");
+    expect(reportText).toContain("Q3.");
+    expect(reportText).toContain("Q4.");
+    expect(reportText).toContain("Q5.");
+  });
+
   // ===========================================================================
   // 修正A: 同点判定精緻化テスト (A-3 必須ケース)
   // ===========================================================================
