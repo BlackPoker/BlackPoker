@@ -24,6 +24,7 @@ import { OfficialRegulationMatchSetup } from "../src/engine/regulation/OfficialR
 import { GameSession } from "../src/engine/session/GameSession.js";
 import { SimulationRunner } from "../src/engine/simulation/SimulationRunner.js";
 import { DecisionPolicy, PolicyDescriptor } from "../src/engine/simulation/DecisionPolicy.js";
+import { GenomePolicy } from "../src/engine/ai/GenomePolicy.js";
 import {
   Gen9LearnableTacticalPolicy,
   TACTICAL_FEATURE_ENCODER_VERSION_V72,
