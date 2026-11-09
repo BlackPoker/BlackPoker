@@ -20,9 +20,15 @@ import {
   G3_IND3_WEIGHTS,
   R4_PRESET_TACTICAL_WEIGHTS,
   BENCHMARK_TACTICAL_WEIGHTS_MAP,
+  GEN9_TACTICAL_FEATURE_DEFINITIONS,
+  formatTacticalWeightsWithDefinitions,
   validateBenchmarkWeights,
 } from "../../engine/ai/Gen9BenchmarkWeights.js";
-import { TACTICAL_FEATURE_DIMENSION } from "../../engine/ai/Gen9LearnableTacticalPolicy.js";
+import {
+  TACTICAL_FEATURE_DIMENSION,
+  TACTICAL_FEATURE_NAMES,
+  TACTICAL_FEATURE_CATEGORY_MAP,
+} from "../../engine/ai/Gen9LearnableTacticalPolicy.js";
 
 /**
  * TypeScript ソースファイルから配列定数の数値を抽出するパーサー
@@ -145,5 +151,42 @@ describe("Gen9BenchmarkWeights (SSOT) 整合性自動テスト", () => {
     expect(BENCHMARK_TACTICAL_WEIGHTS_MAP.G0_IND2).toBe(G0_IND2_WEIGHTS);
     expect(BENCHMARK_TACTICAL_WEIGHTS_MAP.G0_IND7).toBe(G0_IND7_WEIGHTS);
     expect(BENCHMARK_TACTICAL_WEIGHTS_MAP.G3_IND3).toBe(G3_IND3_WEIGHTS);
+  });
+
+  it("8. GEN9_TACTICAL_FEATURE_DEFINITIONS (全20次元) が正本仕様と完全に一致すること (作業D)", () => {
+    expect(GEN9_TACTICAL_FEATURE_DEFINITIONS.length).toBe(TACTICAL_FEATURE_DIMENSION);
+    expect(Object.isFrozen(GEN9_TACTICAL_FEATURE_DEFINITIONS)).toBe(true);
+
+    for (let i = 0; i < TACTICAL_FEATURE_DIMENSION; i++) {
+      const def = GEN9_TACTICAL_FEATURE_DEFINITIONS[i];
+      expect(def.index).toBe(i);
+      const expectedId = `t${i.toString().padStart(2, "0")}`;
+      expect(def.id).toBe(expectedId);
+      expect(def.name).toBe(TACTICAL_FEATURE_NAMES[i]);
+      expect(def.category).toBe(TACTICAL_FEATURE_CATEGORY_MAP[TACTICAL_FEATURE_NAMES[i]]);
+      expect(typeof def.descriptionJa).toBe("string");
+      expect(def.descriptionJa.length).toBeGreaterThan(0);
+    }
+
+    // 指示書で明示指定された各特徴量の正しい日本語説明の検証
+    const defMap = new Map(GEN9_TACTICAL_FEATURE_DEFINITIONS.map((d) => [d.id, d.descriptionJa]));
+    expect(defMap.get("t00")).toBe("PASS時の確定致死ダメージリスク");
+    expect(defMap.get("t03")).toBe("PASS時の推定致死ダメージリスク");
+    expect(defMap.get("t06")).toBe("Counterによる確定致死ダメージ阻止");
+    expect(defMap.get("t08")).toBe("Counterによるダメージ阻止量");
+    expect(defMap.get("t14")).toBe("ブロックによるトレード優位");
+    expect(defMap.get("t15")).toBe("未ブロック時の致死リスク");
+    expect(defMap.get("t16")).toBe("未ブロック時の危険度");
+    expect(defMap.get("t17")).toBe("低ライフ時の兵士召喚・防壁設置");
+    expect(defMap.get("t18")).toBe("未ブロック攻撃による致死機会");
+    expect(defMap.get("t19")).toBe("突破による致死機会");
+
+    // formatTacticalWeightsWithDefinitions の検証
+    const formatted = formatTacticalWeightsWithDefinitions(G0_IND7_WEIGHTS);
+    expect(formatted.length).toBe(TACTICAL_FEATURE_DIMENSION);
+    expect(formatted[0].weight).toBe(-0.20);
+    expect(formatted[0].id).toBe("t00");
+    expect(formatted[14].weight).toBe(0.22);
+    expect(formatted[14].descriptionJa).toBe("ブロックによるトレード優位");
   });
 });

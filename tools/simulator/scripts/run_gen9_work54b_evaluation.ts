@@ -44,6 +44,8 @@ import {
   G0_IND7_WEIGHTS,
   G3_IND3_WEIGHTS,
   R4_PRESET_TACTICAL_WEIGHTS,
+  GEN9_TACTICAL_FEATURE_DEFINITIONS,
+  formatTacticalWeightsWithDefinitions,
 } from "../src/engine/ai/Gen9BenchmarkWeights.js";
 import { GenericTacticalEvaluator } from "../src/engine/rules/GenericTacticalEvaluator.js";
 import { createGen8ChampionCandidatePolicy } from "../src/engine/ai/Gen8DNALoader.js";
@@ -236,7 +238,7 @@ function runSeatSwappedMatchup(params: {
           );
 
           const targetSeat = aIsP1 ? "p1" : "p2";
-          if (simRes.status === "FAILED" || simRes.status === "INCOMPLETE") {
+          if (!simRes.completed) {
             // INCOMPLETE や FAILED は決して DRAW と混同しない
             incompleteOrFailed++;
           } else if (simRes.winner === targetSeat) {
@@ -293,38 +295,173 @@ function runSeatSwappedMatchup(params: {
 }
 
 /**
- * 過去 Evidence ファイルの SHA-256 チェック
+ * 作業ツリーが完全にクリーンであり、指定コミットに必要ファイルが存在することを厳格に検証
  */
-function verifyPastEvidenceSha256(artifactsDir: string): Record<string, { expected: string; actual: string; valid: boolean }> {
-  const expectedHashes: Record<string, string | string[]> = {
-    "gen9-work5-2-pilot-results.json": "73de7dd1723f98772d9eb4202754b5bf882f987c517b83ba66851442c6c846b9",
-    "gen9-work5-2-r2-results.json": "f5099704b4b3e49f03f45e8612f96e25a71418e2f2004de6027df36de7715c01",
-    "gen9-work5-3-sensitivity-analysis.json": "c2275dd0ac2fbbc9a7a1b9d4dad7c79427f2e4d650d23cd015f63ae6579e6c83",
-    "gen9-work5-4a-block-evaluation.json": [
-      "85c78cae212bce0f056fa8bf06fb5a2ac7257cb76345a090abfbd2023b9881c3",
-      "26947bc8a97e407a59e40b7266decaf1635aac14094e342cbf10d4ad4b8128fa",
-    ],
-    "gen9-work5-4b-pass-evaluation.json": "ed3daf4c718e5fde64722323e09faeb673999b920f52b6feb3b404d78dcc0f0b",
-  };
-
-  const results: Record<string, { expected: string; actual: string; valid: boolean }> = {};
-  for (const [fileName, expected] of Object.entries(expectedHashes)) {
-    const fullPath = path.join(artifactsDir, fileName);
-    const expectedStr = Array.isArray(expected) ? expected.join(" OR ") : expected;
-    if (!fs.existsSync(fullPath)) {
-      results[fileName] = { expected: expectedStr, actual: "NOT_FOUND", valid: false };
-      continue;
+export function assertCleanCommitState(
+  rootDir: string,
+  options?: { allowDirtyForTesting?: boolean }
+): { gitSha: string; commitTimeIso: string } {
+  // A. 40桁のコミットSHAを取得
+  let gitSha: string;
+  try {
+    gitSha = execSync("git rev-parse HEAD", { cwd: rootDir, encoding: "utf8" }).trim();
+    if (!gitSha || !/^[0-9a-f]{40}$/i.test(gitSha)) {
+      throw new Error(`無効な Git SHA 形式: "${gitSha}"`);
     }
-    const content = fs.readFileSync(fullPath);
-    const actual = crypto.createHash("sha256").update(content).digest("hex").toLowerCase();
-    const valid = Array.isArray(expected)
-      ? expected.map((e) => e.toLowerCase()).includes(actual)
-      : actual === expected.toLowerCase();
-    results[fileName] = { expected: expectedStr, actual, valid };
-    if (!valid) {
-      throw new Error(`[EVIDENCE_CORRUPTION] 過去ファイル ${fileName} の SHA-256 が一致しません: 期待=${expectedStr}, 実際=${actual}`);
+  } catch (err: any) {
+    throw new Error(`[FATAL] Git SHA の取得に失敗しました: ${err.message || err}`);
+  }
+
+  // B. 作業ツリーのクリーン性を検証 (git status --porcelain)
+  if (!options?.allowDirtyForTesting) {
+    const statusOutput = execSync("git status --porcelain", { cwd: rootDir, encoding: "utf8" }).trim();
+    if (statusOutput.length > 0) {
+      const dirtyLines = statusOutput
+        .split("\n")
+        .map((l) => l.trim())
+        .filter((l) => l.length > 0);
+      if (dirtyLines.length > 0) {
+        throw new Error(
+          `[DIRTY_WORKTREE_ERROR] 作業ツリーに未コミットの変更が存在するため評価を開始できません:\n` +
+            dirtyLines.map((l) => `  ${l}`).join("\n") +
+            `\n必ず先にコミット・プッシュを完了し、クリーンな作業ツリーで実行してください。`
+        );
+      }
     }
   }
+
+  // C. 評価スクリプトおよび重み定義が当該コミットに含まれていることを確認
+  const requiredTrackedFiles = [
+    "tools/simulator/scripts/run_gen9_work54b_evaluation.ts",
+    "tools/simulator/src/engine/ai/Gen9BenchmarkWeights.ts",
+    "tools/simulator/src/engine/ai/Gen9LearnableTacticalPolicy.ts",
+  ];
+  for (const relPath of requiredTrackedFiles) {
+    try {
+      execSync(`git ls-tree HEAD ${relPath}`, { cwd: rootDir, stdio: "pipe" });
+    } catch {
+      throw new Error(`[UNTRACKED_FILE_ERROR] 必要なファイル ${relPath} が HEAD コミットに含まれていません`);
+    }
+  }
+
+  // D. コミット時刻を取得
+  const commitTimeIso = execSync("git log -1 --format=%cI HEAD", { cwd: rootDir, encoding: "utf8" }).trim();
+
+  return { gitSha, commitTimeIso };
+}
+
+export interface PastEvidenceVerificationItem {
+  readonly fileName: string;
+  readonly classification: "ORIGINAL" | "REGENERATED" | "INVALID" | "UNVERIFIED" | "NOT_FOUND";
+  readonly expectedSha256: string;
+  readonly actualSha256: string;
+  readonly valid: boolean;
+  readonly provenanceDescription: string;
+}
+
+/**
+ * 過去 Evidence ファイルの SHA-256 チェックおよび原本/再生成の明確な分類 (作業B)
+ */
+export function verifyPastEvidenceIntegrity(artifactsDir: string): Record<string, PastEvidenceVerificationItem> {
+  const WORK54A_ORIGINAL_SHA256 = "26947bc8a97e407a59e40b7266decaf1635aac14094e342cbf10d4ad4b8128fa";
+  const WORK54A_REGENERATED_SHA256 = "85c78cae212bce0f056fa8bf06fb5a2ac7257cb76345a090abfbd2023b9881c3";
+
+  const pastRules: Record<
+    string,
+    {
+      originalSha256: string;
+      description: string;
+      altHashes?: { sha256: string; classification: "REGENERATED"; description: string }[];
+    }
+  > = {
+    "gen9-work5-2-pilot-results.json": {
+      originalSha256: "73de7dd1723f98772d9eb4202754b5bf882f987c517b83ba66851442c6c846b9",
+      description: "Work 5-2 パイロット学習結果 (G0 Ind7 選抜確定原本)",
+    },
+    "gen9-work5-2-r2-results.json": {
+      originalSha256: "f5099704b4b3e49f03f45e8612f96e25a71418e2f2004de6027df36de7715c01",
+      description: "Work 5-2 R2 世代間公平比較結果 (G0 Ind7 vs G3 Ind3 確定原本)",
+    },
+    "gen9-work5-3-sensitivity-analysis.json": {
+      originalSha256: "c2275dd0ac2fbbc9a7a1b9d4dad7c79427f2e4d650d23cd015f63ae6579e6c83",
+      description: "Work 5-3 意思決定差分・感度分析結果 (確定原本)",
+    },
+    "gen9-work5-4a-block-evaluation.json": {
+      originalSha256: WORK54A_ORIGINAL_SHA256,
+      description: "Work 5-4A 通常ブロック戦術評価修正限定評価 (コミット 57e97e5 時点確定原本)",
+      altHashes: [
+        {
+          sha256: WORK54A_REGENERATED_SHA256,
+          classification: "REGENERATED",
+          description: "テストimport副作用によりWork 5-4B環境(HEAD 8f43434, v7.2)で同一シミュレーションが再実行された生成ファイル",
+        },
+      ],
+    },
+    "gen9-work5-4b-pass-evaluation.json": {
+      originalSha256: "ed3daf4c718e5fde64722323e09faeb673999b920f52b6feb3b404d78dcc0f0b",
+      description: "Work 5-4B 初回評価結果 (重み設定不一致により無効化・保護された旧成果物)",
+    },
+    "gen9-work5-4b-pass-evaluation-corrected.json": {
+      originalSha256: "f7bf8beb9dbd797c9a20f6463977d2125b8d76a8a943b5ec71e81612b05f425b",
+      description: "Work 5-4B 重み修正後限定評価結果 (コミット 8f43434 HEAD で計測された確定原本)",
+    },
+  };
+
+  const results: Record<string, PastEvidenceVerificationItem> = {};
+
+  for (const [fileName, rule] of Object.entries(pastRules)) {
+    const fullPath = path.join(artifactsDir, fileName);
+    if (!fs.existsSync(fullPath)) {
+      results[fileName] = {
+        fileName,
+        classification: "NOT_FOUND",
+        expectedSha256: rule.originalSha256,
+        actualSha256: "NOT_FOUND",
+        valid: false,
+        provenanceDescription: "ファイルが存在しません",
+      };
+      continue;
+    }
+
+    const content = fs.readFileSync(fullPath);
+    const actual = crypto.createHash("sha256").update(content).digest("hex").toLowerCase();
+
+    if (actual === rule.originalSha256.toLowerCase()) {
+      results[fileName] = {
+        fileName,
+        classification: "ORIGINAL",
+        expectedSha256: rule.originalSha256,
+        actualSha256: actual,
+        valid: true,
+        provenanceDescription: rule.description,
+      };
+    } else {
+      const matchedAlt = rule.altHashes?.find((a) => a.sha256.toLowerCase() === actual);
+      if (matchedAlt) {
+        results[fileName] = {
+          fileName,
+          classification: matchedAlt.classification,
+          expectedSha256: rule.originalSha256,
+          actualSha256: actual,
+          valid: true,
+          provenanceDescription: matchedAlt.description,
+        };
+      } else {
+        results[fileName] = {
+          fileName,
+          classification: "INVALID",
+          expectedSha256: rule.originalSha256,
+          actualSha256: actual,
+          valid: false,
+          provenanceDescription: `未知の改変または破損が検出されました (期待=${rule.originalSha256}, 実際=${actual})`,
+        };
+        throw new Error(
+          `[EVIDENCE_CORRUPTION] 過去 Evidence ファイル ${fileName} のハッシュが正本および既知の再生成版のいずれとも一致しません: 実際=${actual}`
+        );
+      }
+    }
+  }
+
   return results;
 }
 
@@ -341,27 +478,20 @@ export async function main() {
   };
 
   console.log("================================================================================");
-  console.log(" BlackPoker — Gen 9 PASS戦術評価適用条件改善 限定評価修正 (Work 5-4B Evidence Correction)");
+  console.log(" BlackPoker — Gen 9 Work 5-4B Evidence 最終整備限定評価 (Work 5-4B R2)");
   console.log("================================================================================");
 
   // 1. 禁止 Seed 範囲チェック
   assertWork54BSafeSeedRange("Work 5-4B Diagnostic", 780001, 30);
   console.log("[SEED_AUDIT_PASS] 診断 Seed 780001..780030 は全禁止領域から完全に隔離されています");
 
-  // 2. Git SHA の厳格取得 (失敗時は例外で終了)
-  let gitSha: string;
-  try {
-    gitSha = execSync("git rev-parse HEAD", { encoding: "utf8" }).trim();
-    if (!gitSha || !/^[0-9a-f]{40}$/i.test(gitSha)) {
-      throw new Error(`無効な Git SHA 形式: "${gitSha}"`);
-    }
-    console.log(`[GIT_SHA_VERIFIED] HEAD Commit: ${gitSha}`);
-  } catch (err) {
-    throw new Error(`[FATAL] Git SHA の取得に失敗しました。Evidence の完全性を保証できないため終了します: ${err}`);
-  }
+  // 2. ルートディレクトリとコミット状態の厳格検証 (作業A)
+  const rootDir = process.cwd();
+  const { gitSha, commitTimeIso } = assertCleanCommitState(rootDir);
+  console.log(`[GIT_COMMIT_VERIFIED] HEAD Commit: ${gitSha} (CommitTime: ${commitTimeIso})`);
+  console.log(`[WORKTREE_VERIFIED] 作業ツリーは完全にクリーンです (未コミット変更なし)`);
 
   // 3. ルールおよび Gen 8 Champion DNA のロード
-  const rootDir = process.cwd();
   const rulesDir = path.resolve(rootDir, "src/data/rules-vnext");
   const regulationsDir = path.resolve(rootDir, "src/data/regulations");
   const catalog = await loadRegulationCatalog(regulationsDir);
@@ -608,6 +738,15 @@ export async function main() {
       encoderVersionB: m.verB,
       checkTimeout,
     });
+    // 対戦数整合性検証 (作業C: 全対戦内訳の合計が totalMatches と完全一致すること)
+    const matchCountTotal =
+      summary.winsA + summary.winsB + summary.draws + summary.incompleteOrFailed + summary.exceptions;
+    if (matchCountTotal !== summary.totalMatches) {
+      throw new Error(
+        `[MATCH_COUNT_MISMATCH] マッチアップ "${summary.matchupName}" の対戦内訳合計 (${matchCountTotal}) が totalMatches (${summary.totalMatches}) と一致しません`
+      );
+    }
+
     matchupSummaries.push(summary);
     console.log(
       `    結果: ${summary.winsA}勝 - ${summary.winsB}敗 - ${summary.draws}分 ` +
@@ -617,7 +756,7 @@ export async function main() {
   }
 
   // ===========================================================================
-  // Part 3: 結果 JSON の保存 (過去 Evidence 保護 & 上書き防止)
+  // Part 3: 結果 JSON の保存 (排他的ファイル作成 & SHA-256 一意管理) (作業C)
   // ===========================================================================
   console.log("\n[Part 3] 結果の永続化と過去 Evidence 保護確認 (SHA-256)...");
 
@@ -626,38 +765,61 @@ export async function main() {
     fs.mkdirSync(artifactsDir, { recursive: true });
   }
 
-  // 過去 Evidence の SHA-256 不変性検証
-  const pastIntegrity = verifyPastEvidenceSha256(artifactsDir);
-  for (const [fName, status] of Object.entries(pastIntegrity)) {
-    console.log(`[SHA256_VERIFIED] ${fName}: ${status.actual}`);
+  const gitEvidenceDir = path.resolve(rootDir, "evidence/gen9-work5-4b");
+  if (!fs.existsSync(gitEvidenceDir)) {
+    fs.mkdirSync(gitEvidenceDir, { recursive: true });
   }
 
-  // 出力先: 過去の誤った結果ファイルとは区別し、新規ファイル名を使用
-  const outputFilename = "gen9-work5-4b-pass-evaluation-corrected.json";
-  const outputPath = path.join(artifactsDir, outputFilename);
+  // 過去 Evidence の SHA-256 不変性検証 (原本 ORIGINAL と再生成 REGENERATED の明確な分類)
+  const pastIntegrity = verifyPastEvidenceIntegrity(artifactsDir);
+  for (const [fName, status] of Object.entries(pastIntegrity)) {
+    console.log(`[SHA256_VERIFIED] ${fName} [${status.classification}]: ${status.actualSha256}`);
+  }
 
-  // 既存ファイルが存在する場合の上書き防止チェック (強制フラグがない場合はエラー)
-  if (fs.existsSync(outputPath) && !process.env.FORCE_OVERWRITE) {
-    throw new Error(`[OVERWRITE_PREVENTED] 出力ファイル ${outputPath} は既に存在します。上書きを防止しました。`);
+  // 出力ファイル名: 実行コミットSHAの先頭12桁を含めて一意化
+  const shortSha = gitSha.substring(0, 12);
+  const outputFilename = `gen9-work5-4b-pass-evaluation-final-${shortSha}.json`;
+
+  const primaryOutputPath = path.join(artifactsDir, outputFilename);
+  const evidenceOutputPath = path.join(gitEvidenceDir, outputFilename);
+
+  // 排他的ファイル作成チェック: 既存ファイルが存在した場合は上書きを拒否して例外送出
+  if (fs.existsSync(primaryOutputPath)) {
+    throw new Error(
+      `[EXCLUSIVE_CREATION_FAILED] 出力ファイル ${primaryOutputPath} は既に存在します。上書きを防止しました。`
+    );
+  }
+  if (fs.existsSync(evidenceOutputPath)) {
+    throw new Error(
+      `[EXCLUSIVE_CREATION_FAILED] 証跡ファイル ${evidenceOutputPath} は既に存在します。上書きを防止しました。`
+    );
   }
 
   const evaluationReport = {
-    workId: "BP-SIM-AI-GEN9-WORK54B-EVIDENCE-CORRECTION",
-    timestamp: new Date().toISOString(),
-    gitSha,
-    correctionContext: {
-      reason: "Work 5-4B初回評価スクリプトにおいて G0 IND7 および G3 IND3 の重み設定にコピーミスが存在したため、正本 (Gen9BenchmarkWeights.ts / Work 5-3 / Work 5-4A) の確定重みに修正して再計測を実施した。",
-      previousEvaluationFile: "gen9-work5-4b-pass-evaluation.json",
-      previousEvaluationStatus: "INVALIDATED_DUE_TO_WEIGHT_MISMATCH",
-      correctedEvaluationFile: outputFilename,
+    workId: "BP-SIM-AI-GEN9-WORK54B-EVIDENCE-FINALIZATION-R2",
+    schemaVersion: "1.0.0",
+    generatedAt: new Date().toISOString(),
+    executionEnvironment: {
+      gitCommitSha: gitSha,
+      commitTimeIso,
+      workingTreeClean: true,
+      rulePackageId: rulePackage.id,
+      rulePackageVersion: rulePackage.version,
+      regulationId: Array.from(catalog.regulations.values())[0]?.id || "regulation.official",
+      tacticalEncoderVersion: TACTICAL_FEATURE_ENCODER_VERSION_V72,
     },
-    tacticalWeightsDefinition: {
-      R4_PRESET: [...R4_PRESET_TACTICAL_WEIGHTS],
-      G0_IND2_CORRECTED: [...G0_IND2_WEIGHTS],
-      G0_IND7_CORRECTED: [...G0_IND7_WEIGHTS],
-      G0_IND7_OLD_INVALID: [...DEPRECATED_INVALID_G0_IND7_WEIGHTS],
-      G3_IND3_CORRECTED: [...G3_IND3_WEIGHTS],
-      G3_IND3_OLD_INVALID: [...DEPRECATED_INVALID_G3_IND3_WEIGHTS],
+    provenanceContext: {
+      workId: "BP-SIM-AI-GEN9-WORK54B-EVIDENCE-FINALIZATION-R2",
+      description: "Work 5-4B Evidence 最終整備 (正本戦術重み、完全特徴量定義、クリーンコミットHEAD実行、排他的証跡永続化)",
+      previousCorrectedEvidence: "gen9-work5-4b-pass-evaluation-corrected.json",
+      originalInvalidEvidence: "gen9-work5-4b-pass-evaluation.json",
+    },
+    tacticalFeatureDefinitions: GEN9_TACTICAL_FEATURE_DEFINITIONS,
+    tacticalWeightsDetailed: {
+      R4: formatTacticalWeightsWithDefinitions(R4_PRESET_TACTICAL_WEIGHTS),
+      G0_IND2: formatTacticalWeightsWithDefinitions(G0_IND2_WEIGHTS),
+      G0_IND7: formatTacticalWeightsWithDefinitions(G0_IND7_WEIGHTS),
+      G3_IND3: formatTacticalWeightsWithDefinitions(G3_IND3_WEIGHTS),
     },
     diagnosticSeedRange: {
       start: 780001,
@@ -665,7 +827,7 @@ export async function main() {
       count: 30,
       totalMatchesPerCard: 60,
     },
-    pastEvidenceSha256: pastIntegrity,
+    pastEvidenceVerification: pastIntegrity,
     shadowDecisionStats: {
       totalDecisions,
       stageRequestDecisions,
@@ -678,14 +840,27 @@ export async function main() {
       packOpenAvoidedToPassG0Ind7,
       decisionDivergedCountG3Ind3,
       packOpenAvoidedToPassG3Ind3,
+      interpretationNote:
+        "シャドウ評価は R4 v7.2 対 Gen 8 の対戦局面経路に沿って実施された診断計測であり、G0 IND7 および G3 IND3 の分岐が 0 件であったことは『R4 対 Gen 8 の対戦経路上で両個体の判断が変化しなかったこと』を示すものであり、すべての対戦局面で判断が不変であることを意味するものではありません。",
     },
     matchups: matchupSummaries,
     executionDurationSeconds: Number(((Date.now() - startTime) / 1000).toFixed(2)),
   };
 
-  fs.writeFileSync(outputPath, JSON.stringify(evaluationReport, null, 2), "utf8");
-  console.log(`\n[SUCCESS] 修正後評価結果を保存しました: ${outputPath}`);
-  console.log(`所要時間: ${evaluationReport.executionDurationSeconds} 秒`);
+  const reportJsonString = JSON.stringify(evaluationReport, null, 2);
+
+  // 排他的フラグ ("wx") で確実に新規ファイルとして保存
+  fs.writeFileSync(primaryOutputPath, reportJsonString, { encoding: "utf8", flag: "wx" });
+  fs.writeFileSync(evidenceOutputPath, reportJsonString, { encoding: "utf8", flag: "wx" });
+
+  const finalContent = fs.readFileSync(primaryOutputPath);
+  const finalSha256 = crypto.createHash("sha256").update(finalContent).digest("hex").toLowerCase();
+
+  console.log(`\n[SUCCESS] 最終整備 Evidence JSON を排他的に保存しました:`);
+  console.log(`  - Artifacts Path: ${primaryOutputPath}`);
+  console.log(`  - Evidence Path:  ${evidenceOutputPath}`);
+  console.log(`  - SHA-256:        ${finalSha256}`);
+  console.log(`  - 所要時間:       ${evaluationReport.executionDurationSeconds} 秒`);
 }
 
 // 直接実行時のエントリポイント
