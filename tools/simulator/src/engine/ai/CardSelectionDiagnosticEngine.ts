@@ -23,6 +23,7 @@ import {
   Gen9LearnableTacticalPolicy,
   LearnableTacticalEvaluationResult,
 } from "./Gen9LearnableTacticalPolicy.js";
+import { Gen9TacticalPrototypePolicy } from "./Gen9TacticalPrototypePolicy.js";
 import { GenomePolicy } from "./GenomePolicy.js";
 import { DecisionFeatureEncoder } from "./DecisionFeatureEncoder.js";
 import { GenomeScorer } from "./GenomeScorer.js";
@@ -334,6 +335,18 @@ export function evaluatePolicyOnDecisionRequest(
     return { candidateScores: Object.freeze(candidateScores), bestPatternRef: evalRes.bestPatternRef };
   }
 
+  if (policy instanceof Gen9TacticalPrototypePolicy) {
+    const evalRes = policy.evaluatePatterns(request);
+    const candidateScores: EvaluatedCandidateScore[] = evalRes.scoredPatterns.map((d, i) => ({
+      patternRef: d.patternRef,
+      baseScore: d.baseScore,
+      tacticalAdjustment: d.tacticalAdjustment,
+      finalScore: d.finalScore,
+      baseFeatures: encoded.patterns[i] ? Object.freeze(Array.from(encoded.patterns[i].values)) : undefined,
+    }));
+    return { candidateScores: Object.freeze(candidateScores), bestPatternRef: evalRes.bestPatternRef };
+  }
+
   if (policy instanceof GenomePolicy) {
     // Gen 8 (GenomePolicy)
     const scored = GenomeScorer.score(encoded, (policy as any).dna);
@@ -457,15 +470,31 @@ export class DiagnosticTransparentWrapperPolicy implements DecisionPolicy {
   public readonly descriptor: PolicyDescriptor;
   private readonly targetPolicy: DecisionPolicy;
   public readonly recordedDecisions: DecisionRequest[] = [];
+  public totalDecisionsObserved = 0;
+  private readonly onDecisionCallback?: (request: Readonly<DecisionRequest>) => void;
+  private readonly recordAll: boolean;
 
-  constructor(targetPolicy: DecisionPolicy) {
+  constructor(
+    targetPolicy: DecisionPolicy,
+    options?: {
+      onDecision?: (request: Readonly<DecisionRequest>) => void;
+      recordAllDecisions?: boolean;
+    }
+  ) {
     this.targetPolicy = targetPolicy;
     this.descriptor = targetPolicy.descriptor;
+    this.onDecisionCallback = options?.onDecision;
+    this.recordAll = options?.recordAllDecisions ?? (options?.onDecision ? false : true);
   }
 
   public choose(request: Readonly<DecisionRequest>): DecisionResponse {
-    // 診断用に DecisionRequest をクローン保存 (非公開情報混入なし、観測のみ)
-    this.recordedDecisions.push(request);
+    this.totalDecisionsObserved++;
+    if (this.recordAll) {
+      this.recordedDecisions.push(request as DecisionRequest);
+    }
+    if (this.onDecisionCallback) {
+      this.onDecisionCallback(request);
+    }
     // 元 Policy にそのまま委譲
     return this.targetPolicy.choose(request);
   }

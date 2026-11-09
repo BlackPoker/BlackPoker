@@ -208,10 +208,36 @@ export async function main() {
   };
 
   // 6. 実対戦経路上での観測 (R4 vs Gen 8, 30ペア ＝ 60試合, 座席反転)
-  console.log("\n[SIMULATION] 実対戦経路 (R4 v7.2 vs Gen 8) のシミュレーション実行中...");
+  console.log("\n[SIMULATION] 実対戦経路 (R4 v7.2 vs Gen 8) のシミュレーションおよび診断実行中...");
 
-  const wrapperR4 = new DiagnosticTransparentWrapperPolicy(policyR4);
-  const wrapperGen8 = new DiagnosticTransparentWrapperPolicy(policyGen8);
+  const seenDecisionIds = new Set<string>();
+  const diagnosticRecords: DecisionDiagnosticRecord[] = [];
+  let totalWithKeyCardVariance = 0;
+  let totalWithCostVariance = 0;
+  let totalSummonSoldierVariance = 0;
+  let totalCounterVariance = 0;
+
+  const onDecisionObserved = (req: Readonly<DecisionRequest>) => {
+    if (seenDecisionIds.has(req.decisionId)) return;
+    seenDecisionIds.add(req.decisionId);
+
+    // オンザフライで診断 (カード選択またはコスト選択の差分がある場合のみ記録)
+    const rec = diagnoseDecisionRequest(req, policiesForShadow);
+    if (!rec) return;
+
+    diagnosticRecords.push(rec);
+    if (rec.hasKeyCardVariance) totalWithKeyCardVariance++;
+    if (rec.hasCostVariance) totalWithCostVariance++;
+    if (rec.hasSummonSoldierVariance) totalSummonSoldierVariance++;
+    if (rec.hasCounterVariance) totalCounterVariance++;
+  };
+
+  const wrapperR4 = new DiagnosticTransparentWrapperPolicy(policyR4, {
+    onDecision: onDecisionObserved,
+  });
+  const wrapperGen8 = new DiagnosticTransparentWrapperPolicy(policyGen8, {
+    onDecision: onDecisionObserved,
+  });
 
   let matchCounter = 0;
   let winsR4 = 0;
@@ -267,40 +293,13 @@ export async function main() {
   }
 
   console.log(`[SIMULATION_COMPLETE] 全 60 試合完了: R4=${winsR4}勝, Gen8=${winsGen8}勝, 引分=${draws}`);
-  console.log(`[DECISIONS_COLLECTED] R4観測判断数: ${wrapperR4.recordedDecisions.length}, Gen8観測判断数: ${wrapperGen8.recordedDecisions.length}`);
-
-  // 7. 収集したすべての DecisionRequest に対する精密診断 (シャドウ評価)
-  console.log("\n[DIAGNOSTIC] 全観測判断に対するカード選択・コスト支払い精密診断中...");
-
-  // 重複排除 (同一 decisionId は1回のみ評価)
-  const allDecisionsMap = new Map<string, DecisionRequest>();
-  for (const req of wrapperR4.recordedDecisions) allDecisionsMap.set(req.decisionId, req);
-  for (const req of wrapperGen8.recordedDecisions) allDecisionsMap.set(req.decisionId, req);
-
-  const uniqueDecisions = Array.from(allDecisionsMap.values());
-  console.log(`[UNIQUE_DECISIONS] ユニーク判断数: ${uniqueDecisions.length}`);
-
-  const diagnosticRecords: DecisionDiagnosticRecord[] = [];
-  let totalWithKeyCardVariance = 0;
-  let totalWithCostVariance = 0;
-  let totalSummonSoldierVariance = 0;
-  let totalCounterVariance = 0;
-
-  for (const req of uniqueDecisions) {
-    const rec = diagnoseDecisionRequest(req, policiesForShadow);
-    if (!rec) continue;
-
-    diagnosticRecords.push(rec);
-    if (rec.hasKeyCardVariance) totalWithKeyCardVariance++;
-    if (rec.hasCostVariance) totalWithCostVariance++;
-    if (rec.hasSummonSoldierVariance) totalSummonSoldierVariance++;
-    if (rec.hasCounterVariance) totalCounterVariance++;
-  }
-
+  console.log(`[DECISIONS_COLLECTED] R4観測判断数: ${wrapperR4.totalDecisionsObserved}, Gen8観測判断数: ${wrapperGen8.totalDecisionsObserved}`);
+  console.log(`[UNIQUE_DECISIONS] 遭遇ユニーク判断総数: ${seenDecisionIds.size}`);
   console.log(`[VARIANCE_SUMMARY] カード選択肢差分あり判断数: ${totalWithKeyCardVariance}`);
   console.log(`[VARIANCE_SUMMARY] コスト選択肢差分あり判断数: ${totalWithCostVariance}`);
   console.log(`[VARIANCE_SUMMARY] 兵士召喚カード差分あり判断数: ${totalSummonSoldierVariance}`);
   console.log(`[VARIANCE_SUMMARY] Counterカード差分あり判断数: ${totalCounterVariance}`);
+  console.log(`[DIAGNOSTIC_RECORDS] 診断対象レコード総数: ${diagnosticRecords.length}`);
 
   // 8. 4 Policy の集計指標算出
   const aggregateMetrics: Record<string, PolicyAggregateMetrics> = {};
