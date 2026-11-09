@@ -1697,7 +1697,7 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
       expect(callbackObserved).toBe(true);
     });
 
-    it("T11: 過去 Evidence 3件の SHA-256 不変性確認", () => {
+    it("T11: 過去 Evidence 4件の SHA-256 不変性確認", () => {
       const checkHash = (filePath: string, expectedHash: string) => {
         if (!fs.existsSync(filePath)) {
           throw new Error(`File not found: ${filePath}`);
@@ -1721,10 +1721,15 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
       if (!fs.existsSync(p3)) {
         p3 = path.resolve(rootDir, "tools/simulator/evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r3-f986ed049a20.json");
       }
+      let p4 = path.resolve(rootDir, "evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r31-12daca3a488e.json");
+      if (!fs.existsSync(p4)) {
+        p4 = path.resolve(rootDir, "tools/simulator/evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r31-12daca3a488e.json");
+      }
 
       checkHash(p1, "53f9c9b82c136a8026df79e9fbba8196435db7ac3520b186529308565939dcd6");
       checkHash(p2, "6e94b81fcb18c780257ccc7104bf2f1ca4419b82d5a382e51664ee4497f4c49f");
       checkHash(p3, "24a5158c9cdd7041fd47dc5c31c823c53882dcc29804bc86603fe807896b24a0");
+      checkHash(p4, "94590b6c31d86a0b62bf5e136640de0e8b918acef759ebcdf4e9c78cf069efae");
     });
 
     it("T12: 集計の分母・分子整合性 (数理的アサーション)", () => {
@@ -1754,6 +1759,100 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
           expect(m.actualMatch.keyCard.chosenTieBreakRate).toBe(expectedRate);
         }
       }
+    });
+
+    it("T13: R3.1 Evidence JSON 内の代表事例の合法手範囲整合性 (patternRef < totalPatternsCount)", () => {
+      const rootDir = process.cwd();
+      let p4 = path.resolve(rootDir, "evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r31-12daca3a488e.json");
+      if (!fs.existsSync(p4)) {
+        p4 = path.resolve(rootDir, "tools/simulator/evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-r31-12daca3a488e.json");
+      }
+      const raw = JSON.parse(fs.readFileSync(p4, "utf8"));
+      const rEx = raw.representativeExamplesWithExplanation;
+
+      const cases = [
+        { name: "summonSoldier", data: rEx.summonSoldier },
+        { name: "counter", data: rEx.counter },
+        { name: "costPayment", data: rEx.costPayment },
+      ];
+
+      for (const c of cases) {
+        const total = c.data.record.totalPatternsCount;
+        const refA = c.data.contributionAnalysis.candidateRefA;
+        const refB = c.data.contributionAnalysis.candidateRefB;
+        const chosen = c.data.contributionAnalysis.actualMatchChoiceDetails.selectedPatternRef;
+
+        expect(Number.isInteger(total)).toBe(true);
+        expect(total).toBeGreaterThan(0);
+
+        expect(Number.isInteger(refA)).toBe(true);
+        expect(refA).toBeGreaterThanOrEqual(0);
+        expect(refA).toBeLessThan(total);
+
+        expect(Number.isInteger(refB)).toBe(true);
+        expect(refB).toBeGreaterThanOrEqual(0);
+        expect(refB).toBeLessThan(total);
+
+        expect(Number.isInteger(chosen)).toBe(true);
+        expect(chosen).toBeGreaterThanOrEqual(0);
+        expect(chosen).toBeLessThan(total);
+      }
+    });
+
+    it("T14: 診断コールバック例外の分離と非干渉性", () => {
+      const mockPolicy = createMockPolicy("TargetPolicy", 1);
+      let capturedError: any = null;
+
+      const wrapper = new DiagnosticTransparentWrapperPolicy(mockPolicy, {
+        onDecision: () => {
+          throw new Error("Intentional callback explosion for audit testing");
+        },
+      });
+
+      const req = createBasicMockRequest("dec-audit-err", "p1");
+      // choose は例外を送出せず、元Policyのレスポンスを返さなければならない
+      let res: DecisionResponse | undefined;
+      expect(() => {
+        res = wrapper.choose(req);
+      }).not.toThrow();
+
+      expect(res).toBeDefined();
+      expect(res?.selectedPatternRef).toBe(1);
+      expect(res?.decisionId).toBe("dec-audit-err");
+    });
+
+    it("T15: 実対戦評価 (actualMatch) と全Policy共通評価 (shadowEvaluation) の分母独立性", () => {
+      const req = createBasicMockRequest("dec-denom", "p1");
+      const obs: ObservedMatchDecision = {
+        observationId: `790001_FORWARD_1_p1_dec-denom`,
+        matchSeed: 790001,
+        matchLeg: "FORWARD",
+        decisionOrdinal: 1,
+        actingPlayerId: "p1",
+        policyName: "R4_v72",
+        request: req,
+        response: { decisionId: "dec-denom", stateVersion: 1, selectedPatternRef: 0 },
+      };
+
+      const policies = {
+        R4_v72: createMockPolicy("R4_v72", 0),
+        Gen8: createMockPolicy("Gen8", 0),
+      };
+
+      const rec = diagnoseDecisionRequest(req, policies, obs);
+      expect(rec).not.toBeNull();
+
+      const mR4 = computePolicyAggregateMetrics("R4_v72", [rec!]);
+      const mGen8 = computePolicyAggregateMetrics("Gen8", [rec!]);
+
+      // R4 は当事者なので actualMatch.decisionsCount === 1
+      expect(mR4.actualMatch?.decisionsCount).toBe(1);
+      // Gen8 は相手番なので actualMatch.decisionsCount === 0
+      expect(mGen8.actualMatch?.decisionsCount).toBe(0);
+
+      // shadowEvaluation は全Policy共通で 1 局面
+      expect(mR4.shadowEvaluation?.decisionsCount).toBe(1);
+      expect(mGen8.shadowEvaluation?.decisionsCount).toBe(1);
     });
   });
 });
