@@ -124,6 +124,43 @@ export const BENCHMARK_TACTICAL_WEIGHTS_MAP: Readonly<
 });
 
 /**
+ * 20次元戦術特徴量の完全な定義および4個体の重みを正本からMarkdown表形式で生成する純粋関数 (Work 5-4B R3 修正D)
+ */
+export function generateTacticalWeightsMarkdownTable(): string {
+  const headers = [
+    "ID",
+    "特徴量キー名",
+    "カテゴリ",
+    "日本語説明",
+    "R4",
+    "G0 IND2",
+    "G0 IND7",
+    "G3 IND3",
+  ];
+  const separator = ["---", "---", "---", "---", "---:", "---:", "---:", "---:"];
+  const rows: string[] = [
+    `| ${headers.join(" | ")} |`,
+    `| ${separator.join(" | ")} |`,
+  ];
+
+  for (let i = 0; i < TACTICAL_FEATURE_DIMENSION; i++) {
+    const def = GEN9_TACTICAL_FEATURE_DEFINITIONS[i];
+    const r4 = R4_PRESET_TACTICAL_WEIGHTS[i];
+    const g0Ind2 = G0_IND2_WEIGHTS[i];
+    const g0Ind7 = G0_IND7_WEIGHTS[i];
+    const g3Ind3 = G3_IND3_WEIGHTS[i];
+
+    const formatNum = (n: number) => (n > 0 ? `+${n}` : `${n}`);
+
+    rows.push(
+      `| \`${def.id}\` | \`${def.name}\` | \`${def.category}\` | ${def.descriptionJa} | ${formatNum(r4)} | ${formatNum(g0Ind2)} | ${formatNum(g0Ind7)} | ${formatNum(g3Ind3)} |`
+    );
+  }
+
+  return rows.join("\n");
+}
+
+/**
  * 重み配列の妥当性検証 (20次元、有限値)
  */
 export function validateBenchmarkWeights(

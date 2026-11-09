@@ -1,0 +1,36 @@
+{
+  "workId": "BP-SIM-AI-GEN9-WORK54B-EVIDENCE-ERRATA-R3",
+  "schemaVersion": "1.0.0",
+  "createdAt": "2026-11-09T12:38:00+09:00",
+  "targetEvidence": {
+    "relativePath": "tools/simulator/evidence/gen9-work5-4b/gen9-work5-4b-pass-evaluation-final-87260a562662.json",
+    "sha256": "3ea4f378569169c092e5ef792de97a16dd9ba7199064255a8e7612c0eb182adb",
+    "originalExecutionCommitSha": "87260a562662b8733c39bcf521b978e804d13585",
+    "work54bR2FinalCommitSha": "e76945bc0b1e960351ed8721b586bf0ac31ebe80"
+  },
+  "correctionReason": "Evidence JSON 生成時において、実際にシミュレーション実行へ渡したレギュレーション・フレームオブジェクトではなく、catalog.regulations の走査先頭要素 (light-entry16) を誤って参照・記録していたメタデータ不整合の訂正。",
+  "errata": {
+    "erroneouslyRecorded": {
+      "field": "executionEnvironment.regulationId",
+      "recordedValue": "light-entry16",
+      "cause": "Array.from(catalog.regulations.values())[0]?.id によるコレクション先頭要素の誤取得"
+    },
+    "correctedValues": {
+      "regulationLookupKey": "standard-pack",
+      "regulationId": "standard-pack",
+      "frameLookupKey": "pack",
+      "frameId": "pack"
+    }
+  },
+  "provenanceBasis": {
+    "executionScriptSource": "tools/simulator/scripts/run_gen9_work54b_evaluation.ts (コミット 87260a562662b8733c39bcf521b978e804d13585 L511-L512: catalog.regulations.get(\"standard-pack\")!, catalog.frames.get(\"pack\")!)",
+    "regulationDefinitionSource": "tools/simulator/src/data/regulations/regulations/standard-pack.yaml (id: standard-pack, formatId: standard, frameId: pack)",
+    "frameDefinitionSource": "tools/simulator/src/data/regulations/frames/pack.yaml (id: pack, actions: [action.packOpen])"
+  },
+  "matchResultsInvarianceRationale": "シミュレーション評価コードでは、実行開始時から一貫して standard-pack および pack の定義オブジェクトが OfficialRegulationMatchSetup に渡されて対戦が実行されており、対戦結果、勝敗数、判断分岐、平均判断時間はすべてこのレギュレーション・フレーム下で正しく計測された確定値です。誤っていたのは Evidence JSON 出力時のメタデータ構築処理 (819行目の辞書キー参照の誤り) のみであり、シミュレーションロジックおよび対戦結果には一切影響を与えません。",
+  "originalEvidenceIntegrityProtection": {
+    "status": "PROTECTED_UNMODIFIED",
+    "sha256": "3ea4f378569169c092e5ef792de97a16dd9ba7199064255a8e7612c0eb182adb",
+    "policy": "元の確定 Evidence ファイルは一切変更・上書きせず永続化保護し、本 Errata ファイルとの紐付けによって正確な評価条件を第三者が復元・追跡できるようにする。"
+  }
+}

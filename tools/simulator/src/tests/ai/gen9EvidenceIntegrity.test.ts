@@ -1,16 +1,18 @@
 /**
  * gen9EvidenceIntegrity.test.ts
  *
- * BlackPoker Simulator - Work 5-4B Evidence 真正性・排他保存・原本照合テスト (Work 5-4B R2)
+ * BlackPoker Simulator - Work 5-4B Evidence 真正性・排他保存・原本照合・Errata整合性テスト (Work 5-4B R3)
  */
 
 import { describe, it, expect } from "vitest";
 import * as fs from "fs";
 import * as path from "path";
 import * as crypto from "crypto";
+import { execSync } from "child_process";
 import {
   assertCleanCommitState,
   verifyPastEvidenceIntegrity,
+  buildExecutionEnvironmentMetadata,
 } from "../../../scripts/run_gen9_work54b_evaluation.js";
 
 describe("Gen 9 Evidence 真正性・整合性自動テスト", () => {
@@ -134,5 +136,119 @@ describe("Gen 9 Evidence 真正性・整合性自動テスト", () => {
     expect(parsed.workId).toBe("BP-SIM-AI-GEN9-WORK54B-EVIDENCE-FINALIZATION-R2");
     expect(parsed.executionEnvironment.gitCommitSha).toBe("87260a562662b8733c39bcf521b978e804d13585");
     expect(parsed.matchups).toHaveLength(6);
+  });
+
+  it("7. buildExecutionEnvironmentMetadata が実際に渡したレギュレーション・フレームオブジェクトのIDを正確に記録すること (修正A)", () => {
+    const mockRulePackage = { id: "test-package", version: "1.0.0" };
+    const selectedReg = { id: "standard-pack", name: "スタンダード + パック" };
+    const selectedFrame = { id: "pack", name: "パック" };
+
+    const meta = buildExecutionEnvironmentMetadata({
+      gitSha: "0123456789abcdef0123456789abcdef01234567",
+      commitTimeIso: "2026-11-09T12:00:00+09:00",
+      workingTreeClean: true,
+      rulePackage: mockRulePackage,
+      regulationLookupKey: "standard-pack",
+      regulation: selectedReg,
+      frameLookupKey: "pack",
+      frame: selectedFrame,
+      tacticalEncoderVersion: "v7.2-unified-block-conditional-pass",
+    });
+
+    expect(meta.regulationLookupKey).toBe("standard-pack");
+    expect(meta.regulationId).toBe("standard-pack");
+    expect(meta.frameLookupKey).toBe("pack");
+    expect(meta.frameId).toBe("pack");
+    expect(meta.rulePackageId).toBe("test-package");
+    expect(meta.tacticalEncoderVersion).toBe("v7.2-unified-block-conditional-pass");
+
+    // カタログ順序に非依存であることの検証: 仮に別レギュレーションが存在しても選択したオブジェクトのIDが記録されること
+    const dummyLeadingReg = { id: "light-entry16", name: "ライト" };
+    const catalogOrderMock = [dummyLeadingReg, selectedReg];
+    // コレクションの先頭要素 (catalogOrderMock[0]) ではなく、渡した selectedReg の ID が記録される
+    const metaWithOrder = buildExecutionEnvironmentMetadata({
+      gitSha: "0123456789abcdef0123456789abcdef01234567",
+      commitTimeIso: "2026-11-09T12:00:00+09:00",
+      workingTreeClean: true,
+      rulePackage: mockRulePackage,
+      regulationLookupKey: "standard-pack",
+      regulation: selectedReg, // 先頭要素ではなく実際に選択したオブジェクト
+      frameLookupKey: "pack",
+      frame: selectedFrame,
+      tacticalEncoderVersion: "v7.2-unified-block-conditional-pass",
+    });
+    expect(metaWithOrder.regulationId).toBe("standard-pack");
+    expect(metaWithOrder.regulationId).not.toBe(catalogOrderMock[0].id);
+
+    // 未存在・無効時の明確なエラー送出
+    expect(() =>
+      buildExecutionEnvironmentMetadata({
+        gitSha: "0123456789abcdef0123456789abcdef01234567",
+        commitTimeIso: "2026-11-09T12:00:00+09:00",
+        workingTreeClean: true,
+        rulePackage: mockRulePackage,
+        regulationLookupKey: "non-existent-reg",
+        regulation: undefined,
+        frameLookupKey: "pack",
+        frame: selectedFrame,
+        tacticalEncoderVersion: "v7.2-unified-block-conditional-pass",
+      })
+    ).toThrow(/\[REGULATION_NOT_FOUND_ERROR\]/);
+
+    expect(() =>
+      buildExecutionEnvironmentMetadata({
+        gitSha: "0123456789abcdef0123456789abcdef01234567",
+        commitTimeIso: "2026-11-09T12:00:00+09:00",
+        workingTreeClean: true,
+        rulePackage: mockRulePackage,
+        regulationLookupKey: "standard-pack",
+        regulation: selectedReg,
+        frameLookupKey: "non-existent-frame",
+        frame: null,
+        tacticalEncoderVersion: "v7.2-unified-block-conditional-pass",
+      })
+    ).toThrow(/\[FRAME_NOT_FOUND_ERROR\]/);
+  });
+
+  it("8. Errataファイル (gen9-work5-4b-evidence-errata-r3.json) が正しく構成され、対象Evidenceの完全性と紐づいていること (修正B)", () => {
+    let repoRoot = rootDir;
+    try {
+      repoRoot = execSync("git rev-parse --show-toplevel", { cwd: rootDir, encoding: "utf8" }).trim();
+    } catch {
+      repoRoot = rootDir;
+    }
+
+    const errataPath = path.resolve(
+      rootDir,
+      "evidence/gen9-work5-4b/gen9-work5-4b-evidence-errata-r3.json"
+    );
+    expect(fs.existsSync(errataPath)).toBe(true);
+
+    const errataContent = fs.readFileSync(errataPath, "utf8");
+    const errata = JSON.parse(errataContent);
+
+    expect(errata.workId).toBe("BP-SIM-AI-GEN9-WORK54B-EVIDENCE-ERRATA-R3");
+    expect(errata.schemaVersion).toBe("1.0.0");
+
+    // 対象 Evidence ファイルの存在確認 (リポジトリルート基準で解決)
+    const targetPath = path.resolve(repoRoot, errata.targetEvidence.relativePath);
+    expect(fs.existsSync(targetPath)).toBe(true);
+
+    // 対象 Evidence の SHA-256 が Errata 記載値および確定原本ハッシュと完全一致すること (元Evidenceの不変性)
+    const targetContent = fs.readFileSync(targetPath);
+    const targetHash = crypto.createHash("sha256").update(targetContent).digest("hex").toLowerCase();
+    expect(targetHash).toBe("3ea4f378569169c092e5ef792de97a16dd9ba7199064255a8e7612c0eb182adb");
+    expect(targetHash).toBe(errata.targetEvidence.sha256.toLowerCase());
+
+    // 誤記録された値と訂正値が明示されていること
+    expect(errata.errata.erroneouslyRecorded.recordedValue).toBe("light-entry16");
+    expect(errata.errata.correctedValues.regulationLookupKey).toBe("standard-pack");
+    expect(errata.errata.correctedValues.regulationId).toBe("standard-pack");
+    expect(errata.errata.correctedValues.frameLookupKey).toBe("pack");
+    expect(errata.errata.correctedValues.frameId).toBe("pack");
+
+    // 評価実行コミットとR2最終コミットが区別して記録されていること
+    expect(errata.targetEvidence.originalExecutionCommitSha).toBe("87260a562662b8733c39bcf521b978e804d13585");
+    expect(errata.targetEvidence.work54bR2FinalCommitSha).toBe("e76945bc0b1e960351ed8721b586bf0ac31ebe80");
   });
 });

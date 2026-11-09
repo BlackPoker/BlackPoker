@@ -23,6 +23,7 @@ import {
   GEN9_TACTICAL_FEATURE_DEFINITIONS,
   formatTacticalWeightsWithDefinitions,
   validateBenchmarkWeights,
+  generateTacticalWeightsMarkdownTable,
 } from "../../engine/ai/Gen9BenchmarkWeights.js";
 import {
   TACTICAL_FEATURE_DIMENSION,
@@ -188,5 +189,22 @@ describe("Gen9BenchmarkWeights (SSOT) 整合性自動テスト", () => {
     expect(formatted[0].id).toBe("t00");
     expect(formatted[14].weight).toBe(0.22);
     expect(formatted[14].descriptionJa).toBe("ブロックによるトレード優位");
+  });
+
+  it("9. generateTacticalWeightsMarkdownTable が全20次元の正本定義・重みを含むMarkdown表を出力すること (修正D)", () => {
+    const md = generateTacticalWeightsMarkdownTable();
+    const lines = md.split("\n");
+    // ヘッダー行 + 区切り行 + 20次元 = 22行
+    expect(lines.length).toBe(22);
+
+    expect(lines[0]).toBe(
+      "| ID | 特徴量キー名 | カテゴリ | 日本語説明 | R4 | G0 IND2 | G0 IND7 | G3 IND3 |"
+    );
+
+    // 指示書で誤記が指摘された項目が正本名で出力されていることを検証
+    expect(md).toContain("| `t01` | `t01_pass_certain_severe_ratio` | `CERTAIN_DAMAGE` | PASS時の確定重度ダメージ比率 | -0.8 | 0 | -0.05 | 0 |");
+    expect(md).toContain("| `t06` | `t06_counter_certain_lethal_prevent` | `COUNTER_PREVENTION` | Counterによる確定致死ダメージ阻止 | +2.2 | +2.6 | +2.6 | +2.7222 |");
+    expect(md).toContain("| `t15` | `t15_block_unblocked_lethal` | `COMBAT_OUTCOME` | 未ブロック時の致死リスク | -2.5 | -2.5 | -3 | -3 |");
+    expect(md).toContain("| `t17` | `t17_survival_critical_life_board_build` | `SURVIVAL` | 低ライフ時の兵士召喚・防壁設置 | +0.1 | 0 | +0.15 | +0.15 |");
   });
 });

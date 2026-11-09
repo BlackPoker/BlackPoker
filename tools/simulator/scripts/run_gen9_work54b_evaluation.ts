@@ -361,6 +361,62 @@ export function assertCleanCommitState(
   return { gitSha, commitTimeIso };
 }
 
+export interface ExecutionEnvironmentParams {
+  gitSha: string;
+  commitTimeIso: string;
+  workingTreeClean: boolean;
+  rulePackage: { id: string; version: string };
+  regulationLookupKey: string;
+  regulation: { id: string } | undefined | null;
+  frameLookupKey: string;
+  frame: { id: string } | undefined | null;
+  tacticalEncoderVersion: string;
+}
+
+export interface ExecutionEnvironmentMetadata {
+  gitCommitSha: string;
+  commitTimeIso: string;
+  workingTreeClean: boolean;
+  rulePackageId: string;
+  rulePackageVersion: string;
+  regulationLookupKey: string;
+  regulationId: string;
+  frameLookupKey: string;
+  frameId: string;
+  tacticalEncoderVersion: string;
+}
+
+/**
+ * 実際に評価へ渡したオブジェクトから評価環境メタデータを生成する純粋関数 (Work 5-4B R3 修正A)
+ */
+export function buildExecutionEnvironmentMetadata(
+  params: ExecutionEnvironmentParams
+): ExecutionEnvironmentMetadata {
+  if (!params.regulation || !params.regulation.id) {
+    throw new Error(
+      `[REGULATION_NOT_FOUND_ERROR] レギュレーション "${params.regulationLookupKey}" が見つからないか、IDが無効です`
+    );
+  }
+  if (!params.frame || !params.frame.id) {
+    throw new Error(
+      `[FRAME_NOT_FOUND_ERROR] フレーム "${params.frameLookupKey}" が見つからないか、IDが無効です`
+    );
+  }
+
+  return {
+    gitCommitSha: params.gitSha,
+    commitTimeIso: params.commitTimeIso,
+    workingTreeClean: params.workingTreeClean,
+    rulePackageId: params.rulePackage.id,
+    rulePackageVersion: params.rulePackage.version,
+    regulationLookupKey: params.regulationLookupKey,
+    regulationId: params.regulation.id,
+    frameLookupKey: params.frameLookupKey,
+    frameId: params.frame.id,
+    tacticalEncoderVersion: params.tacticalEncoderVersion,
+  };
+}
+
 export interface PastEvidenceVerificationItem {
   readonly fileName: string;
   readonly classification: "ORIGINAL" | "REGENERATED" | "INVALID" | "UNVERIFIED" | "NOT_FOUND";
@@ -508,8 +564,16 @@ export async function main() {
   const catalog = await loadRegulationCatalog(regulationsDir);
   const rulePackage = await loadRulePackageFromDirectory(rulesDir);
 
-  const reg = catalog.regulations.get("standard-pack")!;
-  const frame = catalog.frames.get("pack")!;
+  const regulationLookupKey = "standard-pack";
+  const frameLookupKey = "pack";
+  const reg = catalog.regulations.get(regulationLookupKey);
+  if (!reg) {
+    throw new Error(`[REGULATION_NOT_FOUND_ERROR] レギュレーション "${regulationLookupKey}" が catalog.regulations に存在しません`);
+  }
+  const frame = catalog.frames.get(frameLookupKey);
+  if (!frame) {
+    throw new Error(`[FRAME_NOT_FOUND_ERROR] フレーム "${frameLookupKey}" が catalog.frames に存在しません`);
+  }
 
   const tacticalEvaluator = new GenericTacticalEvaluator(rulePackage);
   Gen9TacticalPrototypePolicy.setDefaultEvaluator(tacticalEvaluator);
@@ -810,15 +874,17 @@ export async function main() {
     workId: "BP-SIM-AI-GEN9-WORK54B-EVIDENCE-FINALIZATION-R2",
     schemaVersion: "1.0.0",
     generatedAt: new Date().toISOString(),
-    executionEnvironment: {
-      gitCommitSha: gitSha,
+    executionEnvironment: buildExecutionEnvironmentMetadata({
+      gitSha,
       commitTimeIso,
       workingTreeClean: true,
-      rulePackageId: rulePackage.id,
-      rulePackageVersion: rulePackage.version,
-      regulationId: Array.from(catalog.regulations.values())[0]?.id || "regulation.official",
+      rulePackage,
+      regulationLookupKey,
+      regulation: reg,
+      frameLookupKey,
+      frame,
       tacticalEncoderVersion: TACTICAL_FEATURE_ENCODER_VERSION_V72,
-    },
+    }),
     provenanceContext: {
       workId: "BP-SIM-AI-GEN9-WORK54B-EVIDENCE-FINALIZATION-R2",
       description: "Work 5-4B Evidence 最終整備 (正本戦術重み、完全特徴量定義、クリーンコミットHEAD実行、排他的証跡永続化)",
