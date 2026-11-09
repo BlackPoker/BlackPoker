@@ -4,6 +4,9 @@
  * BlackPoker Simulator - カード選択品質・特徴量識別能力診断エンジン単体テスト (Work 5-4C)
  */
 
+import * as fs from "fs";
+import * as path from "path";
+import * as crypto from "crypto";
 import { describe, it, expect } from "vitest";
 import {
   classifyDecisionPatterns,
@@ -305,5 +308,64 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
     expect(metrics.keyCardCompleteCollisionCount).toBe(1);
     expect(metrics.keyCardCompleteCollisionRate).toBe(1.0);
     expect(metrics.keyCardAvgScoreMargin).toBe(0.0);
+  });
+
+  it("7. Work 5-4C Evidence JSON および Markdown レポートの真正性・完全性が保証されていること", () => {
+    const rootDir = process.cwd();
+    const evidenceDir = path.resolve(rootDir, "evidence/gen9-work5-4c");
+    const evidencePath = path.join(evidenceDir, "gen9-work5-4c-card-selection-diagnostic-46735ba3d704.json");
+    const reportPath = path.join(evidenceDir, "CARD_SELECTION_DIAGNOSTIC_REPORT.md");
+
+    // 1. ファイルの存在確認
+    expect(fs.existsSync(evidencePath)).toBe(true);
+    expect(fs.existsSync(reportPath)).toBe(true);
+
+    // 2. SHA-256 検証
+    const fileContent = fs.readFileSync(evidencePath);
+    const actualSha256 = crypto.createHash("sha256").update(fileContent).digest("hex");
+    const EXPECTED_SHA256 = "53f9c9b82c136a8026df79e9fbba8196435db7ac3520b186529308565939dcd6";
+    expect(actualSha256).toBe(EXPECTED_SHA256);
+
+    // 3. Evidence 内容の整合性検証
+    const parsed = JSON.parse(fileContent.toString("utf8"));
+    expect(parsed.workId).toBe("BP-SIM-AI-GEN9-WORK54C-CARD-SELECTION-DIAGNOSTIC");
+    expect(parsed.executionEnvironment.gitCommitSha).toBe("46735ba3d7045e7badf00f99350bb9068e90d335");
+    expect(parsed.diagnosticConditions.matchResults).toEqual({ winsR4: 42, winsGen8: 18, draws: 0, total: 60 });
+    expect(parsed.sampleCounts.totalDecisionsCollected).toBe(5480);
+    expect(parsed.sampleCounts.decisionsWithAnyVariance).toBe(3779);
+    expect(parsed.sampleCounts.decisionsWithKeyCardVariance).toBe(3337);
+    expect(parsed.sampleCounts.decisionsWithCostVariance).toBe(3765);
+    expect(parsed.sampleCounts.decisionsWithSummonSoldierVariance).toBe(520);
+    expect(parsed.sampleCounts.decisionsWithCounterVariance).toBe(222);
+
+    // 4. Q1〜Q5 診断結果の整合性検証
+    // コスト支払いは全Policyで同点率100%, 列挙順依存100%, マージン0
+    for (const pName of ["Gen8", "R4_v72", "G0_IND7_v72", "G3_IND3_v72"]) {
+      const m = parsed.aggregateMetrics[pName];
+      expect(m.totalCostGroupsEvaluated).toBe(59087);
+      expect(m.costScoreTieRate).toBe(1.0);
+      expect(m.costTieBreakRate).toBe(1.0);
+      expect(m.costBaseFeatureCollisionRate).toBe(1.0);
+      expect(m.costAvgScoreMargin).toBe(0.0);
+
+      // キーカード選択は103,168グループ
+      expect(m.totalKeyCardGroupsEvaluated).toBe(103168);
+      // Gen 9 G0/G3 では戦術特徴量衝突率が100%
+      if (pName.includes("v72") && !pName.includes("R4")) {
+        expect(m.keyCardTacticalFeatureCollisionRate).toBe(1.0);
+      }
+    }
+
+    // 5. レポート内容の整合性検証
+    const reportText = fs.readFileSync(reportPath, "utf8");
+    expect(reportText).toContain("46735ba3d704");
+    expect(reportText).toContain("53f9c9b82c136a8026df79e9fbba8196435db7ac3520b186529308565939dcd6");
+    expect(reportText).toContain("103,168");
+    expect(reportText).toContain("59,087");
+    expect(reportText).toContain("Q1.");
+    expect(reportText).toContain("Q2.");
+    expect(reportText).toContain("Q3.");
+    expect(reportText).toContain("Q4.");
+    expect(reportText).toContain("Q5.");
   });
 });
