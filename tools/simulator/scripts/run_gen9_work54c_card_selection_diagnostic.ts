@@ -354,9 +354,9 @@ export async function main() {
       matchResults: { winsR4, winsGen8, draws, total: 60 },
     },
     sampleCounts: {
-      totalDecisionsCollected: uniqueDecisions.length,
-      r4DecisionsCount: wrapperR4.recordedDecisions.length,
-      gen8DecisionsCount: wrapperGen8.recordedDecisions.length,
+      totalDecisionsCollected: seenDecisionIds.size,
+      r4DecisionsCount: wrapperR4.totalDecisionsObserved,
+      gen8DecisionsCount: wrapperGen8.totalDecisionsObserved,
       decisionsWithAnyVariance: diagnosticRecords.length,
       decisionsWithKeyCardVariance: totalWithKeyCardVariance,
       decisionsWithCostVariance: totalWithCostVariance,
