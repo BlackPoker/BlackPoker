@@ -480,6 +480,57 @@ describe("CardSelectionDiagnosticEngine 単体テスト (Work 5-4C)", () => {
     expect(reportText).toContain("Q5.");
   });
 
+  it("9. Work 5-4C R3 Evidence JSON および Markdown レポートの真正性・完全性が保証されていること", () => {
+    const rootDir = process.cwd();
+    const evidenceDir = path.resolve(rootDir, "evidence/gen9-work5-4c");
+    const evidencePath = path.join(evidenceDir, "gen9-work5-4c-card-selection-diagnostic-r3-f986ed049a20.json");
+    const reportPath = path.join(evidenceDir, "CARD_SELECTION_DIAGNOSTIC_REPORT_R3.md");
+
+    // 1. ファイルの存在確認
+    expect(fs.existsSync(evidencePath)).toBe(true);
+    expect(fs.existsSync(reportPath)).toBe(true);
+
+    // 2. SHA-256 検証
+    const fileContent = fs.readFileSync(evidencePath);
+    const actualSha256 = crypto.createHash("sha256").update(fileContent).digest("hex");
+    const EXPECTED_SHA256 = "24a5158c9cdd7041fd47dc5c31c823c53882dcc29804bc86603fe807896b24a0";
+    expect(actualSha256).toBe(EXPECTED_SHA256);
+
+    // 3. Evidence 内容の整合性検証
+    const parsed = JSON.parse(fileContent.toString("utf8"));
+    expect(parsed.workId).toBe("BP-SIM-AI-GEN9-WORK54C-EXPLANATION-ACCURACY-R3");
+    expect(parsed.schemaVersion).toBe("3.0.0");
+    expect(parsed.executionEnvironment.gitCommitSha).toBe("f986ed049a2039e2e4806c58ff09ab976f596d0b");
+    expect(parsed.sampleCounts.totalDecisionsCollected).toBe(5480);
+    expect(parsed.sampleCounts.decisionsWithAnyVariance).toBe(3779);
+
+    // 4 Policy の集計検証
+    for (const pName of ["Gen8", "R4_v72", "G0_IND7_v72", "G3_IND3_v72"]) {
+      const m = parsed.aggregateMetrics[pName];
+      expect(m.totalKeyCardGroupsEvaluated).toBe(103168);
+      expect(m.keyCardTopTieExactCount).toBe(9);
+      expect(m.keyCardActualChosenTieBreakRate).toBeLessThan(0.005);
+
+      expect(m.totalCostGroupsEvaluated).toBe(59087);
+      expect(m.costTopTieExactRate).toBe(1.0);
+      expect(m.costActualChosenTieBreakRate).toBe(1.0);
+      expect(m.costAvgScoreMargin).toBe(0.0);
+    }
+
+    // 代表事例の数理的一致検証
+    const ex = parsed.representativeExamplesWithExplanation;
+    expect(ex.summonSoldier.contributionAnalysis.explanation.isMathematicallyConsistent).toBe(true);
+    expect(ex.counter.contributionAnalysis.explanation.isMathematicallyConsistent).toBe(true);
+    expect(ex.costPayment.contributionAnalysis.explanation.isMathematicallyConsistent).toBe(true);
+
+    // 4. レポート内容の整合性検証
+    const reportText = fs.readFileSync(reportPath, "utf8");
+    expect(reportText).toContain("f986ed049a20");
+    expect(reportText).toContain("24a5158c9cdd7041fd47dc5c31c823c53882dcc29804bc86603fe807896b24a0");
+    expect(reportText).toContain("53f9c9b82c136a8026df79e9fbba8196435db7ac3520b186529308565939dcd6");
+    expect(reportText).toContain("6e94b81fcb18c780257ccc7104bf2f1ca4419b82d5a382e51664ee4497f4c49f");
+  });
+
   // ===========================================================================
   // 修正A: 同点判定精緻化テスト (A-3 必須ケース)
   // ===========================================================================
