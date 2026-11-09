@@ -1,0 +1,1011 @@
+{
+  "workId": "BP-SIM-AI-GEN9-WORK54B-EVIDENCE-FINALIZATION-R2",
+  "schemaVersion": "1.0.0",
+  "generatedAt": "2026-11-09T00:24:05.009Z",
+  "executionEnvironment": {
+    "gitCommitSha": "87260a562662b8733c39bcf521b978e804d13585",
+    "commitTimeIso": "2026-11-09T09:19:37+09:00",
+    "workingTreeClean": true,
+    "rulePackageId": "blackpoker-common",
+    "rulePackageVersion": "1.0.0",
+    "regulationId": "light-entry16",
+    "tacticalEncoderVersion": "v7.2-unified-block-conditional-pass"
+  },
+  "provenanceContext": {
+    "workId": "BP-SIM-AI-GEN9-WORK54B-EVIDENCE-FINALIZATION-R2",
+    "description": "Work 5-4B Evidence 最終整備 (正本戦術重み、完全特徴量定義、クリーンコミットHEAD実行、排他的証跡永続化)",
+    "previousCorrectedEvidence": "gen9-work5-4b-pass-evaluation-corrected.json",
+    "originalInvalidEvidence": "gen9-work5-4b-pass-evaluation.json"
+  },
+  "tacticalFeatureDefinitions": [
+    {
+      "index": 0,
+      "id": "t00",
+      "name": "t00_pass_certain_lethal",
+      "category": "CERTAIN_DAMAGE",
+      "descriptionJa": "PASS時の確定致死ダメージリスク"
+    },
+    {
+      "index": 1,
+      "id": "t01",
+      "name": "t01_pass_certain_severe_ratio",
+      "category": "CERTAIN_DAMAGE",
+      "descriptionJa": "PASS時の確定重度ダメージ比率"
+    },
+    {
+      "index": 2,
+      "id": "t02",
+      "name": "t02_pass_certain_moderate",
+      "category": "CERTAIN_DAMAGE",
+      "descriptionJa": "PASS時の確定中度ダメージ"
+    },
+    {
+      "index": 3,
+      "id": "t03",
+      "name": "t03_pass_estimated_lethal_risk",
+      "category": "ESTIMATED_DAMAGE",
+      "descriptionJa": "PASS時の推定致死ダメージリスク"
+    },
+    {
+      "index": 4,
+      "id": "t04",
+      "name": "t04_pass_estimated_severe_ratio",
+      "category": "ESTIMATED_DAMAGE",
+      "descriptionJa": "PASS時の推定重度ダメージ比率"
+    },
+    {
+      "index": 5,
+      "id": "t05",
+      "name": "t05_pass_estimated_moderate",
+      "category": "ESTIMATED_DAMAGE",
+      "descriptionJa": "PASS時の推定中度ダメージ"
+    },
+    {
+      "index": 6,
+      "id": "t06",
+      "name": "t06_counter_certain_lethal_prevent",
+      "category": "COUNTER_PREVENTION",
+      "descriptionJa": "Counterによる確定致死ダメージ阻止"
+    },
+    {
+      "index": 7,
+      "id": "t07",
+      "name": "t07_counter_estimated_lethal_prevent",
+      "category": "COUNTER_PREVENTION",
+      "descriptionJa": "Counterによる推定致死ダメージ阻止"
+    },
+    {
+      "index": 8,
+      "id": "t08",
+      "name": "t08_counter_damage_prevent_scaled",
+      "category": "COUNTER_PREVENTION",
+      "descriptionJa": "Counterによるダメージ阻止量"
+    },
+    {
+      "index": 9,
+      "id": "t09",
+      "name": "t09_counter_uncertain_cancel",
+      "category": "COUNTER_PREVENTION",
+      "descriptionJa": "不確実なCounter阻止期待値"
+    },
+    {
+      "index": 10,
+      "id": "t10",
+      "name": "t10_attack_unblocked_nonlethal",
+      "category": "COMBAT_OUTCOME",
+      "descriptionJa": "非致死未ブロック攻撃期待値"
+    },
+    {
+      "index": 11,
+      "id": "t11",
+      "name": "t11_attack_numerical_advantage",
+      "category": "COMBAT_OUTCOME",
+      "descriptionJa": "攻撃時の頭数優位性"
+    },
+    {
+      "index": 12,
+      "id": "t12",
+      "name": "t12_attack_favorable_or_equal_trade",
+      "category": "COMBAT_OUTCOME",
+      "descriptionJa": "有利または同等トレード攻撃"
+    },
+    {
+      "index": 13,
+      "id": "t13",
+      "name": "t13_attack_suicide_scaled",
+      "category": "COMBAT_OUTCOME",
+      "descriptionJa": "不利・自爆攻撃ペナルティ"
+    },
+    {
+      "index": 14,
+      "id": "t14",
+      "name": "t14_block_trade_advantage",
+      "category": "COMBAT_OUTCOME",
+      "descriptionJa": "ブロックによるトレード優位"
+    },
+    {
+      "index": 15,
+      "id": "t15",
+      "name": "t15_block_unblocked_lethal",
+      "category": "COMBAT_OUTCOME",
+      "descriptionJa": "未ブロック時の致死リスク"
+    },
+    {
+      "index": 16,
+      "id": "t16",
+      "name": "t16_block_unblocked_danger_ratio",
+      "category": "COMBAT_OUTCOME",
+      "descriptionJa": "未ブロック時の危険度"
+    },
+    {
+      "index": 17,
+      "id": "t17",
+      "name": "t17_survival_critical_life_board_build",
+      "category": "SURVIVAL",
+      "descriptionJa": "低ライフ時の兵士召喚・防壁設置"
+    },
+    {
+      "index": 18,
+      "id": "t18",
+      "name": "t18_attack_unblocked_lethal",
+      "category": "LETHAL_OPPORTUNITY",
+      "descriptionJa": "未ブロック攻撃による致死機会"
+    },
+    {
+      "index": 19,
+      "id": "t19",
+      "name": "t19_attack_breakthrough_lethal",
+      "category": "LETHAL_OPPORTUNITY",
+      "descriptionJa": "突破による致死機会"
+    }
+  ],
+  "tacticalWeightsDetailed": {
+    "R4": [
+      {
+        "index": 0,
+        "id": "t00",
+        "name": "t00_pass_certain_lethal",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定致死ダメージリスク",
+        "weight": -2.5
+      },
+      {
+        "index": 1,
+        "id": "t01",
+        "name": "t01_pass_certain_severe_ratio",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定重度ダメージ比率",
+        "weight": -0.8
+      },
+      {
+        "index": 2,
+        "id": "t02",
+        "name": "t02_pass_certain_moderate",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定中度ダメージ",
+        "weight": -0.35
+      },
+      {
+        "index": 3,
+        "id": "t03",
+        "name": "t03_pass_estimated_lethal_risk",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定致死ダメージリスク",
+        "weight": -1.8
+      },
+      {
+        "index": 4,
+        "id": "t04",
+        "name": "t04_pass_estimated_severe_ratio",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定重度ダメージ比率",
+        "weight": -0.5
+      },
+      {
+        "index": 5,
+        "id": "t05",
+        "name": "t05_pass_estimated_moderate",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定中度ダメージ",
+        "weight": -0.25
+      },
+      {
+        "index": 6,
+        "id": "t06",
+        "name": "t06_counter_certain_lethal_prevent",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによる確定致死ダメージ阻止",
+        "weight": 2.2
+      },
+      {
+        "index": 7,
+        "id": "t07",
+        "name": "t07_counter_estimated_lethal_prevent",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによる推定致死ダメージ阻止",
+        "weight": 1.8
+      },
+      {
+        "index": 8,
+        "id": "t08",
+        "name": "t08_counter_damage_prevent_scaled",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによるダメージ阻止量",
+        "weight": 1
+      },
+      {
+        "index": 9,
+        "id": "t09",
+        "name": "t09_counter_uncertain_cancel",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "不確実なCounter阻止期待値",
+        "weight": 0.2
+      },
+      {
+        "index": 10,
+        "id": "t10",
+        "name": "t10_attack_unblocked_nonlethal",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "非致死未ブロック攻撃期待値",
+        "weight": 0.2
+      },
+      {
+        "index": 11,
+        "id": "t11",
+        "name": "t11_attack_numerical_advantage",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "攻撃時の頭数優位性",
+        "weight": 0.25
+      },
+      {
+        "index": 12,
+        "id": "t12",
+        "name": "t12_attack_favorable_or_equal_trade",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "有利または同等トレード攻撃",
+        "weight": 0.05
+      },
+      {
+        "index": 13,
+        "id": "t13",
+        "name": "t13_attack_suicide_scaled",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "不利・自爆攻撃ペナルティ",
+        "weight": -0.35
+      },
+      {
+        "index": 14,
+        "id": "t14",
+        "name": "t14_block_trade_advantage",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "ブロックによるトレード優位",
+        "weight": 0.2
+      },
+      {
+        "index": 15,
+        "id": "t15",
+        "name": "t15_block_unblocked_lethal",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "未ブロック時の致死リスク",
+        "weight": -2.5
+      },
+      {
+        "index": 16,
+        "id": "t16",
+        "name": "t16_block_unblocked_danger_ratio",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "未ブロック時の危険度",
+        "weight": -0.5
+      },
+      {
+        "index": 17,
+        "id": "t17",
+        "name": "t17_survival_critical_life_board_build",
+        "category": "SURVIVAL",
+        "descriptionJa": "低ライフ時の兵士召喚・防壁設置",
+        "weight": 0.1
+      },
+      {
+        "index": 18,
+        "id": "t18",
+        "name": "t18_attack_unblocked_lethal",
+        "category": "LETHAL_OPPORTUNITY",
+        "descriptionJa": "未ブロック攻撃による致死機会",
+        "weight": 2
+      },
+      {
+        "index": 19,
+        "id": "t19",
+        "name": "t19_attack_breakthrough_lethal",
+        "category": "LETHAL_OPPORTUNITY",
+        "descriptionJa": "突破による致死機会",
+        "weight": 2.5
+      }
+    ],
+    "G0_IND2": [
+      {
+        "index": 0,
+        "id": "t00",
+        "name": "t00_pass_certain_lethal",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定致死ダメージリスク",
+        "weight": 0
+      },
+      {
+        "index": 1,
+        "id": "t01",
+        "name": "t01_pass_certain_severe_ratio",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定重度ダメージ比率",
+        "weight": 0
+      },
+      {
+        "index": 2,
+        "id": "t02",
+        "name": "t02_pass_certain_moderate",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定中度ダメージ",
+        "weight": 0
+      },
+      {
+        "index": 3,
+        "id": "t03",
+        "name": "t03_pass_estimated_lethal_risk",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定致死ダメージリスク",
+        "weight": 0
+      },
+      {
+        "index": 4,
+        "id": "t04",
+        "name": "t04_pass_estimated_severe_ratio",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定重度ダメージ比率",
+        "weight": 0
+      },
+      {
+        "index": 5,
+        "id": "t05",
+        "name": "t05_pass_estimated_moderate",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定中度ダメージ",
+        "weight": 0
+      },
+      {
+        "index": 6,
+        "id": "t06",
+        "name": "t06_counter_certain_lethal_prevent",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによる確定致死ダメージ阻止",
+        "weight": 2.6
+      },
+      {
+        "index": 7,
+        "id": "t07",
+        "name": "t07_counter_estimated_lethal_prevent",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによる推定致死ダメージ阻止",
+        "weight": 2
+      },
+      {
+        "index": 8,
+        "id": "t08",
+        "name": "t08_counter_damage_prevent_scaled",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによるダメージ阻止量",
+        "weight": 1.1
+      },
+      {
+        "index": 9,
+        "id": "t09",
+        "name": "t09_counter_uncertain_cancel",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "不確実なCounter阻止期待値",
+        "weight": 0.15
+      },
+      {
+        "index": 10,
+        "id": "t10",
+        "name": "t10_attack_unblocked_nonlethal",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "非致死未ブロック攻撃期待値",
+        "weight": 0
+      },
+      {
+        "index": 11,
+        "id": "t11",
+        "name": "t11_attack_numerical_advantage",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "攻撃時の頭数優位性",
+        "weight": 0
+      },
+      {
+        "index": 12,
+        "id": "t12",
+        "name": "t12_attack_favorable_or_equal_trade",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "有利または同等トレード攻撃",
+        "weight": 0
+      },
+      {
+        "index": 13,
+        "id": "t13",
+        "name": "t13_attack_suicide_scaled",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "不利・自爆攻撃ペナルティ",
+        "weight": -0.3
+      },
+      {
+        "index": 14,
+        "id": "t14",
+        "name": "t14_block_trade_advantage",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "ブロックによるトレード優位",
+        "weight": 0
+      },
+      {
+        "index": 15,
+        "id": "t15",
+        "name": "t15_block_unblocked_lethal",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "未ブロック時の致死リスク",
+        "weight": -2.5
+      },
+      {
+        "index": 16,
+        "id": "t16",
+        "name": "t16_block_unblocked_danger_ratio",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "未ブロック時の危険度",
+        "weight": 0
+      },
+      {
+        "index": 17,
+        "id": "t17",
+        "name": "t17_survival_critical_life_board_build",
+        "category": "SURVIVAL",
+        "descriptionJa": "低ライフ時の兵士召喚・防壁設置",
+        "weight": 0
+      },
+      {
+        "index": 18,
+        "id": "t18",
+        "name": "t18_attack_unblocked_lethal",
+        "category": "LETHAL_OPPORTUNITY",
+        "descriptionJa": "未ブロック攻撃による致死機会",
+        "weight": 2
+      },
+      {
+        "index": 19,
+        "id": "t19",
+        "name": "t19_attack_breakthrough_lethal",
+        "category": "LETHAL_OPPORTUNITY",
+        "descriptionJa": "突破による致死機会",
+        "weight": 2.5
+      }
+    ],
+    "G0_IND7": [
+      {
+        "index": 0,
+        "id": "t00",
+        "name": "t00_pass_certain_lethal",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定致死ダメージリスク",
+        "weight": -0.2
+      },
+      {
+        "index": 1,
+        "id": "t01",
+        "name": "t01_pass_certain_severe_ratio",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定重度ダメージ比率",
+        "weight": -0.05
+      },
+      {
+        "index": 2,
+        "id": "t02",
+        "name": "t02_pass_certain_moderate",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定中度ダメージ",
+        "weight": 0
+      },
+      {
+        "index": 3,
+        "id": "t03",
+        "name": "t03_pass_estimated_lethal_risk",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定致死ダメージリスク",
+        "weight": -0.15
+      },
+      {
+        "index": 4,
+        "id": "t04",
+        "name": "t04_pass_estimated_severe_ratio",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定重度ダメージ比率",
+        "weight": 0
+      },
+      {
+        "index": 5,
+        "id": "t05",
+        "name": "t05_pass_estimated_moderate",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定中度ダメージ",
+        "weight": 0
+      },
+      {
+        "index": 6,
+        "id": "t06",
+        "name": "t06_counter_certain_lethal_prevent",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによる確定致死ダメージ阻止",
+        "weight": 2.6
+      },
+      {
+        "index": 7,
+        "id": "t07",
+        "name": "t07_counter_estimated_lethal_prevent",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによる推定致死ダメージ阻止",
+        "weight": 2
+      },
+      {
+        "index": 8,
+        "id": "t08",
+        "name": "t08_counter_damage_prevent_scaled",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによるダメージ阻止量",
+        "weight": 1.1
+      },
+      {
+        "index": 9,
+        "id": "t09",
+        "name": "t09_counter_uncertain_cancel",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "不確実なCounter阻止期待値",
+        "weight": 0.15
+      },
+      {
+        "index": 10,
+        "id": "t10",
+        "name": "t10_attack_unblocked_nonlethal",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "非致死未ブロック攻撃期待値",
+        "weight": 0.1
+      },
+      {
+        "index": 11,
+        "id": "t11",
+        "name": "t11_attack_numerical_advantage",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "攻撃時の頭数優位性",
+        "weight": 0.2
+      },
+      {
+        "index": 12,
+        "id": "t12",
+        "name": "t12_attack_favorable_or_equal_trade",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "有利または同等トレード攻撃",
+        "weight": 0.05
+      },
+      {
+        "index": 13,
+        "id": "t13",
+        "name": "t13_attack_suicide_scaled",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "不利・自爆攻撃ペナルティ",
+        "weight": -0.38
+      },
+      {
+        "index": 14,
+        "id": "t14",
+        "name": "t14_block_trade_advantage",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "ブロックによるトレード優位",
+        "weight": 0.22
+      },
+      {
+        "index": 15,
+        "id": "t15",
+        "name": "t15_block_unblocked_lethal",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "未ブロック時の致死リスク",
+        "weight": -3
+      },
+      {
+        "index": 16,
+        "id": "t16",
+        "name": "t16_block_unblocked_danger_ratio",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "未ブロック時の危険度",
+        "weight": -0.4
+      },
+      {
+        "index": 17,
+        "id": "t17",
+        "name": "t17_survival_critical_life_board_build",
+        "category": "SURVIVAL",
+        "descriptionJa": "低ライフ時の兵士召喚・防壁設置",
+        "weight": 0.15
+      },
+      {
+        "index": 18,
+        "id": "t18",
+        "name": "t18_attack_unblocked_lethal",
+        "category": "LETHAL_OPPORTUNITY",
+        "descriptionJa": "未ブロック攻撃による致死機会",
+        "weight": 2
+      },
+      {
+        "index": 19,
+        "id": "t19",
+        "name": "t19_attack_breakthrough_lethal",
+        "category": "LETHAL_OPPORTUNITY",
+        "descriptionJa": "突破による致死機会",
+        "weight": 2.5
+      }
+    ],
+    "G3_IND3": [
+      {
+        "index": 0,
+        "id": "t00",
+        "name": "t00_pass_certain_lethal",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定致死ダメージリスク",
+        "weight": 0
+      },
+      {
+        "index": 1,
+        "id": "t01",
+        "name": "t01_pass_certain_severe_ratio",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定重度ダメージ比率",
+        "weight": 0
+      },
+      {
+        "index": 2,
+        "id": "t02",
+        "name": "t02_pass_certain_moderate",
+        "category": "CERTAIN_DAMAGE",
+        "descriptionJa": "PASS時の確定中度ダメージ",
+        "weight": 0
+      },
+      {
+        "index": 3,
+        "id": "t03",
+        "name": "t03_pass_estimated_lethal_risk",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定致死ダメージリスク",
+        "weight": -0.0756
+      },
+      {
+        "index": 4,
+        "id": "t04",
+        "name": "t04_pass_estimated_severe_ratio",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定重度ダメージ比率",
+        "weight": 0
+      },
+      {
+        "index": 5,
+        "id": "t05",
+        "name": "t05_pass_estimated_moderate",
+        "category": "ESTIMATED_DAMAGE",
+        "descriptionJa": "PASS時の推定中度ダメージ",
+        "weight": -0.0132
+      },
+      {
+        "index": 6,
+        "id": "t06",
+        "name": "t06_counter_certain_lethal_prevent",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによる確定致死ダメージ阻止",
+        "weight": 2.7222
+      },
+      {
+        "index": 7,
+        "id": "t07",
+        "name": "t07_counter_estimated_lethal_prevent",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによる推定致死ダメージ阻止",
+        "weight": 1.7719
+      },
+      {
+        "index": 8,
+        "id": "t08",
+        "name": "t08_counter_damage_prevent_scaled",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "Counterによるダメージ阻止量",
+        "weight": 1.1
+      },
+      {
+        "index": 9,
+        "id": "t09",
+        "name": "t09_counter_uncertain_cancel",
+        "category": "COUNTER_PREVENTION",
+        "descriptionJa": "不確実なCounter阻止期待値",
+        "weight": 0.0319
+      },
+      {
+        "index": 10,
+        "id": "t10",
+        "name": "t10_attack_unblocked_nonlethal",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "非致死未ブロック攻撃期待値",
+        "weight": 0.1
+      },
+      {
+        "index": 11,
+        "id": "t11",
+        "name": "t11_attack_numerical_advantage",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "攻撃時の頭数優位性",
+        "weight": 0.154
+      },
+      {
+        "index": 12,
+        "id": "t12",
+        "name": "t12_attack_favorable_or_equal_trade",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "有利または同等トレード攻撃",
+        "weight": 0.05
+      },
+      {
+        "index": 13,
+        "id": "t13",
+        "name": "t13_attack_suicide_scaled",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "不利・自爆攻撃ペナルティ",
+        "weight": -0.3243
+      },
+      {
+        "index": 14,
+        "id": "t14",
+        "name": "t14_block_trade_advantage",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "ブロックによるトレード優位",
+        "weight": 0.22
+      },
+      {
+        "index": 15,
+        "id": "t15",
+        "name": "t15_block_unblocked_lethal",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "未ブロック時の致死リスク",
+        "weight": -3
+      },
+      {
+        "index": 16,
+        "id": "t16",
+        "name": "t16_block_unblocked_danger_ratio",
+        "category": "COMBAT_OUTCOME",
+        "descriptionJa": "未ブロック時の危険度",
+        "weight": -0.4
+      },
+      {
+        "index": 17,
+        "id": "t17",
+        "name": "t17_survival_critical_life_board_build",
+        "category": "SURVIVAL",
+        "descriptionJa": "低ライフ時の兵士召喚・防壁設置",
+        "weight": 0.15
+      },
+      {
+        "index": 18,
+        "id": "t18",
+        "name": "t18_attack_unblocked_lethal",
+        "category": "LETHAL_OPPORTUNITY",
+        "descriptionJa": "未ブロック攻撃による致死機会",
+        "weight": 1.8984
+      },
+      {
+        "index": 19,
+        "id": "t19",
+        "name": "t19_attack_breakthrough_lethal",
+        "category": "LETHAL_OPPORTUNITY",
+        "descriptionJa": "突破による致死機会",
+        "weight": 2.5
+      }
+    ]
+  },
+  "diagnosticSeedRange": {
+    "start": 780001,
+    "end": 780030,
+    "count": 30,
+    "totalMatchesPerCard": 60
+  },
+  "pastEvidenceVerification": {
+    "gen9-work5-2-pilot-results.json": {
+      "fileName": "gen9-work5-2-pilot-results.json",
+      "classification": "ORIGINAL",
+      "expectedSha256": "73de7dd1723f98772d9eb4202754b5bf882f987c517b83ba66851442c6c846b9",
+      "actualSha256": "73de7dd1723f98772d9eb4202754b5bf882f987c517b83ba66851442c6c846b9",
+      "valid": true,
+      "provenanceDescription": "Work 5-2 パイロット学習結果 (G0 Ind7 選抜確定原本)"
+    },
+    "gen9-work5-2-r2-results.json": {
+      "fileName": "gen9-work5-2-r2-results.json",
+      "classification": "ORIGINAL",
+      "expectedSha256": "f5099704b4b3e49f03f45e8612f96e25a71418e2f2004de6027df36de7715c01",
+      "actualSha256": "f5099704b4b3e49f03f45e8612f96e25a71418e2f2004de6027df36de7715c01",
+      "valid": true,
+      "provenanceDescription": "Work 5-2 R2 世代間公平比較結果 (G0 Ind7 vs G3 Ind3 確定原本)"
+    },
+    "gen9-work5-3-sensitivity-analysis.json": {
+      "fileName": "gen9-work5-3-sensitivity-analysis.json",
+      "classification": "ORIGINAL",
+      "expectedSha256": "c2275dd0ac2fbbc9a7a1b9d4dad7c79427f2e4d650d23cd015f63ae6579e6c83",
+      "actualSha256": "c2275dd0ac2fbbc9a7a1b9d4dad7c79427f2e4d650d23cd015f63ae6579e6c83",
+      "valid": true,
+      "provenanceDescription": "Work 5-3 意思決定差分・感度分析結果 (確定原本)"
+    },
+    "gen9-work5-4a-block-evaluation.json": {
+      "fileName": "gen9-work5-4a-block-evaluation.json",
+      "classification": "REGENERATED",
+      "expectedSha256": "26947bc8a97e407a59e40b7266decaf1635aac14094e342cbf10d4ad4b8128fa",
+      "actualSha256": "85c78cae212bce0f056fa8bf06fb5a2ac7257cb76345a090abfbd2023b9881c3",
+      "valid": true,
+      "provenanceDescription": "テストimport副作用によりWork 5-4B環境(HEAD 8f43434, v7.2)で同一シミュレーションが再実行された生成ファイル"
+    },
+    "gen9-work5-4b-pass-evaluation.json": {
+      "fileName": "gen9-work5-4b-pass-evaluation.json",
+      "classification": "ORIGINAL",
+      "expectedSha256": "ed3daf4c718e5fde64722323e09faeb673999b920f52b6feb3b404d78dcc0f0b",
+      "actualSha256": "ed3daf4c718e5fde64722323e09faeb673999b920f52b6feb3b404d78dcc0f0b",
+      "valid": true,
+      "provenanceDescription": "Work 5-4B 初回評価結果 (重み設定不一致により無効化・保護された旧成果物)"
+    },
+    "gen9-work5-4b-pass-evaluation-corrected.json": {
+      "fileName": "gen9-work5-4b-pass-evaluation-corrected.json",
+      "classification": "ORIGINAL",
+      "expectedSha256": "f7bf8beb9dbd797c9a20f6463977d2125b8d76a8a943b5ec71e81612b05f425b",
+      "actualSha256": "f7bf8beb9dbd797c9a20f6463977d2125b8d76a8a943b5ec71e81612b05f425b",
+      "valid": true,
+      "provenanceDescription": "Work 5-4B 重み修正後限定評価結果 (コミット 8f43434 HEAD で計測された確定原本)"
+    }
+  },
+  "shadowDecisionStats": {
+    "totalDecisions": 2563,
+    "stageRequestDecisions": 902,
+    "oppRequestWithCounter": 56,
+    "oppRequestWithoutCounter": 846,
+    "passPenaltyExemptedCount": 846,
+    "decisionDivergedCountR4": 51,
+    "packOpenAvoidedToPassR4": 31,
+    "decisionDivergedCountG0Ind7": 0,
+    "packOpenAvoidedToPassG0Ind7": 0,
+    "decisionDivergedCountG3Ind3": 0,
+    "packOpenAvoidedToPassG3Ind3": 0,
+    "interpretationNote": "シャドウ評価は R4 v7.2 対 Gen 8 の対戦局面経路に沿って実施された診断計測であり、G0 IND7 および G3 IND3 の分岐が 0 件であったことは『R4 対 Gen 8 の対戦経路上で両個体の判断が変化しなかったこと』を示すものであり、すべての対戦局面で判断が不変であることを意味するものではありません。"
+  },
+  "matchups": [
+    {
+      "matchupName": "R4_v7.2 vs R4_v7.1",
+      "policyAName": "Work51_R4_v7.2",
+      "policyBName": "Work51_R4_v7.1",
+      "encoderVersionA": "v7.2",
+      "encoderVersionB": "v7.1",
+      "seedPairs": 30,
+      "totalMatches": 60,
+      "winsA": 32,
+      "winsB": 28,
+      "draws": 0,
+      "winRateA": 0.5333,
+      "confidenceIntervalA": {
+        "lower": 0.4089,
+        "upper": 0.6537
+      },
+      "avgDecisionTimeUsA": 2704.5,
+      "avgDecisionTimeUsB": 2274.39,
+      "exceptions": 0,
+      "incompleteOrFailed": 0
+    },
+    {
+      "matchupName": "R4_v7.2 vs Gen8",
+      "policyAName": "Work51_R4_v7.2",
+      "policyBName": "Gen8_Champion",
+      "encoderVersionA": "v7.2",
+      "encoderVersionB": "Gen8",
+      "seedPairs": 30,
+      "totalMatches": 60,
+      "winsA": 41,
+      "winsB": 19,
+      "draws": 0,
+      "winRateA": 0.6833,
+      "confidenceIntervalA": {
+        "lower": 0.5577,
+        "upper": 0.7869
+      },
+      "avgDecisionTimeUsA": 2781.89,
+      "avgDecisionTimeUsB": 3319.32,
+      "exceptions": 0,
+      "incompleteOrFailed": 0
+    },
+    {
+      "matchupName": "G0_IND7_v7.2 vs G0_IND7_v7.1",
+      "policyAName": "G0_IND7_v7.2",
+      "policyBName": "G0_IND7_v7.1",
+      "encoderVersionA": "v7.2",
+      "encoderVersionB": "v7.1",
+      "seedPairs": 30,
+      "totalMatches": 60,
+      "winsA": 30,
+      "winsB": 30,
+      "draws": 0,
+      "winRateA": 0.5,
+      "confidenceIntervalA": {
+        "lower": 0.3773,
+        "upper": 0.6227
+      },
+      "avgDecisionTimeUsA": 2769.44,
+      "avgDecisionTimeUsB": 2744,
+      "exceptions": 0,
+      "incompleteOrFailed": 0
+    },
+    {
+      "matchupName": "G0_IND7_v7.2 vs Gen8",
+      "policyAName": "G0_IND7_v7.2",
+      "policyBName": "Gen8_Champion",
+      "encoderVersionA": "v7.2",
+      "encoderVersionB": "Gen8",
+      "seedPairs": 30,
+      "totalMatches": 60,
+      "winsA": 39,
+      "winsB": 21,
+      "draws": 0,
+      "winRateA": 0.65,
+      "confidenceIntervalA": {
+        "lower": 0.5236,
+        "upper": 0.7583
+      },
+      "avgDecisionTimeUsA": 2839.99,
+      "avgDecisionTimeUsB": 3277.39,
+      "exceptions": 0,
+      "incompleteOrFailed": 0
+    },
+    {
+      "matchupName": "G3_IND3_v7.2 vs G3_IND3_v7.1",
+      "policyAName": "G3_IND3_v7.2",
+      "policyBName": "G3_IND3_v7.1",
+      "encoderVersionA": "v7.2",
+      "encoderVersionB": "v7.1",
+      "seedPairs": 30,
+      "totalMatches": 60,
+      "winsA": 30,
+      "winsB": 30,
+      "draws": 0,
+      "winRateA": 0.5,
+      "confidenceIntervalA": {
+        "lower": 0.3773,
+        "upper": 0.6227
+      },
+      "avgDecisionTimeUsA": 2743.03,
+      "avgDecisionTimeUsB": 2767.68,
+      "exceptions": 0,
+      "incompleteOrFailed": 0
+    },
+    {
+      "matchupName": "G3_IND3_v7.2 vs Gen8",
+      "policyAName": "G3_IND3_v7.2",
+      "policyBName": "Gen8_Champion",
+      "encoderVersionA": "v7.2",
+      "encoderVersionB": "Gen8",
+      "seedPairs": 30,
+      "totalMatches": 60,
+      "winsA": 39,
+      "winsB": 21,
+      "draws": 0,
+      "winRateA": 0.65,
+      "confidenceIntervalA": {
+        "lower": 0.5236,
+        "upper": 0.7583
+      },
+      "avgDecisionTimeUsA": 2899.16,
+      "avgDecisionTimeUsB": 3306.15,
+      "exceptions": 0,
+      "incompleteOrFailed": 0
+    }
+  ],
+  "executionDurationSeconds": 245.94
+}
