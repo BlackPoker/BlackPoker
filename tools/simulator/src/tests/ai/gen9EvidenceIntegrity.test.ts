@@ -17,14 +17,22 @@ describe("Gen 9 Evidence 真正性・整合性自動テスト", () => {
   const rootDir = process.cwd();
   const artifactsDir = path.resolve(rootDir, ".artifacts");
 
-  it("1. assertCleanCommitState が未コミット変更のある作業ツリーで DIRTY_WORKTREE_ERROR を送出し、オプション付与時は40桁SHAを取得できること", () => {
-    // 現在の作業ツリーは未コミット変更があるため、通常呼び出しでは DIRTY_WORKTREE_ERROR となることを検証
-    expect(() => assertCleanCommitState(rootDir)).toThrow(/DIRTY_WORKTREE_ERROR/);
-
-    // テスト用オプション付与時はコミットSHA形式および時刻が取得できることを検証
+  it("1. assertCleanCommitState が正常に40桁SHAおよびコミット時刻を取得できること", () => {
     const res = assertCleanCommitState(rootDir, { allowDirtyForTesting: true });
     expect(res.gitSha).toMatch(/^[0-9a-f]{40}$/i);
     expect(res.commitTimeIso).toMatch(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}/);
+  });
+
+  it("2. assertCleanCommitState が未コミット変更のある作業ツリーを検知して DIRTY_WORKTREE_ERROR を送出すること", () => {
+    const dummyFile = path.resolve(rootDir, "src/tests/ai/__dummy_dirty_test.ts");
+    try {
+      fs.writeFileSync(dummyFile, "// temporary dirty test file", "utf8");
+      expect(() => assertCleanCommitState(rootDir)).toThrow(/DIRTY_WORKTREE_ERROR/);
+    } finally {
+      if (fs.existsSync(dummyFile)) {
+        fs.unlinkSync(dummyFile);
+      }
+    }
   });
 
   it("2. verifyPastEvidenceIntegrity が各過去ファイルの原本/再生成を正しく分類すること", () => {
