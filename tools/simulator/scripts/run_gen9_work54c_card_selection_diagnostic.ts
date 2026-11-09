@@ -153,11 +153,26 @@ export async function main() {
 
   const rootDir = process.cwd();
 
+  // 1. Seed 検証
+  assertSafeDiagnosticSeedRange(790001, 30);
+  console.log(`[SEED_VERIFIED] 診断Seed: 790001〜790030 (30ペア＝60試合) 重複なし確認済`);
+
+  // 2. コミット・クリーン状態検証
+  const { gitSha, commitTimeIso, repoRoot } = assertCleanCommitState(rootDir);
+  console.log(`[GIT_COMMIT_VERIFIED] HEAD Commit: ${gitSha} (CommitTime: ${commitTimeIso})`);
+  console.log(`[WORKTREE_VERIFIED] 作業ツリーは完全にクリーンです`);
+
   // 0. 既存 Work 5-4C Evidence の完全保護検証 (SHA-256 不変性アサーション)
-  const originalEvidencePath = path.resolve(
+  let originalEvidencePath = path.resolve(
     rootDir,
-    "tools/simulator/evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-46735ba3d704.json"
+    "evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-46735ba3d704.json"
   );
+  if (!fs.existsSync(originalEvidencePath)) {
+    originalEvidencePath = path.resolve(
+      repoRoot,
+      "tools/simulator/evidence/gen9-work5-4c/gen9-work5-4c-card-selection-diagnostic-46735ba3d704.json"
+    );
+  }
   if (!fs.existsSync(originalEvidencePath)) {
     throw new Error(`[PROTECTION_ERROR] 既存 Evidence JSON が見つかりません: ${originalEvidencePath}`);
   }
@@ -170,15 +185,6 @@ export async function main() {
     );
   }
   console.log(`[EVIDENCE_PROTECTED] 既存 Evidence SHA-256 検証成功: ${originalSha256}`);
-
-  // 1. Seed 検証
-  assertSafeDiagnosticSeedRange(790001, 30);
-  console.log(`[SEED_VERIFIED] 診断Seed: 790001〜790030 (30ペア＝60試合) 重複なし確認済`);
-
-  // 2. コミット・クリーン状態検証
-  const { gitSha, commitTimeIso, repoRoot } = assertCleanCommitState(rootDir);
-  console.log(`[GIT_COMMIT_VERIFIED] HEAD Commit: ${gitSha} (CommitTime: ${commitTimeIso})`);
-  console.log(`[WORKTREE_VERIFIED] 作業ツリーは完全にクリーンです`);
 
   // 3. ルールおよびレギュレーションのロード
   const rulesDir = path.resolve(rootDir, "src/data/rules-vnext");
@@ -449,7 +455,10 @@ export async function main() {
 
   // 11. Evidence JSON の排他的永続化保存 (R2ファイル名)
   const shortSha = gitSha.substring(0, 12);
-  const evidenceDir = path.resolve(repoRoot, "tools/simulator/evidence/gen9-work5-4c");
+  let evidenceDir = path.resolve(rootDir, "evidence/gen9-work5-4c");
+  if (!fs.existsSync(evidenceDir)) {
+    evidenceDir = path.resolve(repoRoot, "tools/simulator/evidence/gen9-work5-4c");
+  }
   if (!fs.existsSync(evidenceDir)) {
     fs.mkdirSync(evidenceDir, { recursive: true });
   }
