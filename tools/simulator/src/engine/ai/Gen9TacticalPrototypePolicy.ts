@@ -35,6 +35,7 @@ import {
 import {
   TacticalFeatureEncoderVersion,
   TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
+  supportsConditionalPass,
   BlockTacticalEvaluationContext,
   createBlockTacticalContext,
   extractBlockAssignmentsFromPattern,
@@ -217,7 +218,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     // Work 5-4B: 有効な対抗手段の有無を事前判定
     let precomputedHasCounter: boolean | undefined = undefined;
     if (
-      this.encoderVersion === "v7.2-unified-block-conditional-pass" &&
+      supportsConditionalPass(this.encoderVersion) &&
       this.tacticalEvaluator
     ) {
       const stageRequests = request.observation.stageRequests ?? [];
@@ -311,8 +312,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
         // (A-1) PASS を選択した場合の損害ペナルティ
         if (pattern.kind === "PASS") {
           // Work 5-4B: v7.2 以降では、同一 DecisionRequest 内に有効な対抗手段がない場合、PASS の損害減点を免除する
-          const isConditionalPassVersion =
-            this.encoderVersion === "v7.2-unified-block-conditional-pass";
+          const isConditionalPassVersion = supportsConditionalPass(this.encoderVersion);
           const hasCounter = isConditionalPassVersion
             ? precomputedHasCounter !== undefined
               ? precomputedHasCounter

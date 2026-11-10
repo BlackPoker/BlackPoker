@@ -513,7 +513,7 @@ describe("Work 5-5B: コスト支払い戦術特徴量 (t20〜t23) 実装 & ゼ�
   // 2. ID解決3状態テスト (KNOWN / HIDDEN / INVALID_REFERENCE)
   // ===========================================================================
   describe("2. ID解決3状態テスト (KNOWN / HIDDEN / INVALID_REFERENCE)", () => {
-    it("HIDDEN (伏せカード) は推測チート禁止によりランク加算されず 0.0 となる", () => {
+    it("HIDDEN (伏せカード) は推測チート禁止によりランク加算されず 0.0 となり、不正IDとしても扱われない", () => {
       const hiddenCard = createTestCard({
         cardInstanceId: "card-hidden-1",
         suit: "S",
@@ -531,17 +531,19 @@ describe("Work 5-5B: コスト支払い戦術特徴量 (t20〜t23) 実装 & ゼ�
         selfHand: [hiddenCard],
         costPayments: [cp],
       });
-      const { features } = encodeTacticalPatternFeatures(
+      const res = encodeTacticalPatternFeatures(
         req,
         req.patterns[1],
         evaluator,
         TACTICAL_FEATURE_ENCODER_VERSION_V73
       );
-      expect(features[20]).toBe(0.0);
-      expect(features[21]).toBe(0.0);
+      expect(res.features[20]).toBe(0.0);
+      expect(res.features[21]).toBe(0.0);
+      // HIDDEN は正当な観測内カードなので INVALID_REFERENCE には入らない
+      expect(res.invalidCardReferenceIds).toEqual([]);
     });
 
-    it("INVALID_REFERENCE (観測外のカードID) は Joker と混同されず、フェイルクローズで 0.0 となる", () => {
+    it("INVALID_REFERENCE (観測外のカードID) は Joker と混同されず、フェイルクローズで 0.0 となり診断検出される", () => {
       const cp: CostPayment = {
         discardedCardIds: ["non-existent-card-id-999"],
         drivenBulwarkUnitIds: [],
@@ -552,18 +554,20 @@ describe("Work 5-5B: コスト支払い戦術特徴量 (t20〜t23) 実装 & ゼ�
         selfHand: [],
         costPayments: [cp],
       });
-      const { features } = encodeTacticalPatternFeatures(
+      const res = encodeTacticalPatternFeatures(
         req,
         req.patterns[1],
         evaluator,
         TACTICAL_FEATURE_ENCODER_VERSION_V73
       );
       // Joker(t21) としてカウントされてはならない！
-      expect(features[20]).toBe(0.0);
-      expect(features[21]).toBe(0.0);
+      expect(res.features[20]).toBe(0.0);
+      expect(res.features[21]).toBe(0.0);
+      // 不正参照IDとして診断検出されること
+      expect(res.invalidCardReferenceIds).toEqual(["non-existent-card-id-999"]);
     });
 
-    it("INVALID_REFERENCE (観測外のユニットID) はフェイルクローズで 0.0 となる", () => {
+    it("INVALID_REFERENCE (観測外のユニットID) はフェイルクローズで 0.0 となり診断検出される", () => {
       const cp: CostPayment = {
         discardedCardIds: [],
         drivenBulwarkUnitIds: [],
@@ -574,13 +578,33 @@ describe("Work 5-5B: コスト支払い戦術特徴量 (t20〜t23) 実装 & ゼ�
         selfField: [],
         costPayments: [cp],
       });
-      const { features } = encodeTacticalPatternFeatures(
+      const res = encodeTacticalPatternFeatures(
         req,
         req.patterns[1],
         evaluator,
         TACTICAL_FEATURE_ENCODER_VERSION_V73
       );
-      expect(features[22]).toBe(0.0);
+      expect(res.features[22]).toBe(0.0);
+      // 不正参照ユニットIDとして診断検出されること
+      expect(res.invalidUnitReferenceIds).toEqual(["non-existent-unit-id-888"]);
+    });
+
+    it("INVALID_REFERENCE (カタログ範囲外の costPaymentRef) は診断検出され特徴量は 0.0 となる", () => {
+      const req = createMockRequest({
+        costPayments: [], // カタログは空
+      });
+      // pattern の costPaymentRef: 0 は範囲外
+      const res = encodeTacticalPatternFeatures(
+        req,
+        req.patterns[1], // costPaymentRef: 0
+        evaluator,
+        TACTICAL_FEATURE_ENCODER_VERSION_V73
+      );
+      expect(res.features[20]).toBe(0.0);
+      expect(res.features[21]).toBe(0.0);
+      expect(res.features[22]).toBe(0.0);
+      expect(res.features[23]).toBe(0.0);
+      expect(res.invalidCostPaymentRefs).toEqual([0]);
     });
   });
 
@@ -737,6 +761,48 @@ describe("Work 5-5B: コスト支払い戦術特徴量 (t20〜t23) 実装 & ゼ�
       const gZero = fromV6CompatibleDNA(baseDNA, "zero");
       expect(gZero.tacticalWeights.length).toBe(24);
       expect(gZero.tacticalWeights.every((w) => w === 0.0)).toBe(true);
+    });
+
+    it("DNA-T6: 未知の encoderVersion 文字列を持つ DNA は明示的に例外をスローして拒否する", () => {
+      const cloned: DecisionDNA = {
+        ...DecisionDNACodec.clone(gen8DNA),
+        metadata: {
+          notes: JSON.stringify({
+            tacticalSchemaVersion: 7,
+            tacticalWeights: R4_PRESET_TACTICAL_WEIGHTS,
+            encoderVersion: "v8.0-unknown-unsupported-version",
+          }),
+        },
+      };
+      expect(() => fromV6CompatibleDNA(cloned)).toThrow(
+        /encoderVersion が未知または不正です/
+      );
+    });
+
+    it("DNA-T7: encoderVersion が省略された旧20次元 DNA は v7.2 として復元され、24次元にゼロ拡張される", () => {
+      const old20Weights = [
+        -2.5, -0.8, -0.35, -1.8, -0.5, -0.25,
+        +2.2, +1.8, +1.0, +0.2,
+        +0.2, +0.25, +0.05, -0.35,
+        +0.2, -2.5, -0.5,
+        +0.1,
+        +2.0, +2.5,
+      ];
+      const cloned: DecisionDNA = {
+        ...DecisionDNACodec.clone(gen8DNA),
+        metadata: {
+          notes: JSON.stringify({
+            tacticalSchemaVersion: 7,
+            tacticalWeights: old20Weights,
+            // encoderVersion をあえて省略
+          }),
+        },
+      };
+      const restored = fromV6CompatibleDNA(cloned);
+      expect(restored.tacticalWeights.length).toBe(24);
+      expect(restored.metadata?.encoderVersion).toBe("v7.2-unified-block-conditional-pass");
+      expect(restored.tacticalWeights.slice(0, 20)).toEqual(old20Weights);
+      expect(restored.tacticalWeights.slice(20)).toEqual([0, 0, 0, 0]);
     });
   });
 

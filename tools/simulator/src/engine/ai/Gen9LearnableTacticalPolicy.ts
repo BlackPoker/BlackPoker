@@ -76,6 +76,28 @@ export const TACTICAL_FEATURE_ENCODER_VERSION_CURRENT: TacticalFeatureEncoderVer
   "v7.3-cost-evaluated-v24";
 
 /**
+ * 有効な全戦術特徴量エンコーダーバージョン一覧 (Work 5-5B R1)
+ */
+export const VALID_TACTICAL_FEATURE_ENCODER_VERSIONS: readonly TacticalFeatureEncoderVersion[] = [
+  TACTICAL_FEATURE_ENCODER_VERSION_LEGACY,
+  TACTICAL_FEATURE_ENCODER_VERSION_V71,
+  TACTICAL_FEATURE_ENCODER_VERSION_V72,
+  TACTICAL_FEATURE_ENCODER_VERSION_V73,
+];
+
+/**
+ * 与えられた文字列が正当な TacticalFeatureEncoderVersion かどうかを判定
+ */
+export function isValidTacticalFeatureEncoderVersion(
+  v: unknown
+): v is TacticalFeatureEncoderVersion {
+  return (
+    typeof v === "string" &&
+    VALID_TACTICAL_FEATURE_ENCODER_VERSIONS.includes(v as TacticalFeatureEncoderVersion)
+  );
+}
+
+/**
  * PASS ペナルティの条件付き免除 (Work 5-4B) をサポートするバージョンか判定
  * - v7.2-unified-block-conditional-pass
  * - v7.3-cost-evaluated-v24
@@ -480,15 +502,22 @@ export function fromV6CompatibleDNA(
         ? rawParents.filter((x): x is string => typeof x === "string")
         : undefined;
 
-      const validEncoderVersions: TacticalFeatureEncoderVersion[] = [
-        "v7.0-legacy-block-stream-only",
-        "v7.1-unified-block-assignment",
-        "v7.2-unified-block-conditional-pass",
-        "v7.3-cost-evaluated-v24",
-      ];
-      const encoderVersion = validEncoderVersions.includes(parsed.encoderVersion)
-        ? (parsed.encoderVersion as TacticalFeatureEncoderVersion)
-        : undefined;
+      let encoderVersion: TacticalFeatureEncoderVersion;
+      if (parsed.encoderVersion !== undefined) {
+        if (!isValidTacticalFeatureEncoderVersion(parsed.encoderVersion)) {
+          throw new Error(
+            `notes 内の encoderVersion が未知または不正です: ${parsed.encoderVersion}`
+          );
+        }
+        encoderVersion = parsed.encoderVersion;
+      } else {
+        // encoderVersion 省略時の互換フォールバック: 旧20次元はv7.2、24次元はv7.3
+        if (rawLen === TACTICAL_FEATURE_DIMENSION_V70) {
+          encoderVersion = "v7.2-unified-block-conditional-pass";
+        } else {
+          encoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT;
+        }
+      }
 
       return fromV6DNA(dna, parsed.tacticalWeights, {
         id: typeof dna.metadata.id === "string" ? dna.metadata.id : undefined,
@@ -939,11 +968,15 @@ export function hasEffectiveCounterMeasure(
 }
 
 /**
- * コスト支払い戦術特徴量評価用の観測コンテキスト (Work 5-5B)
+ * コスト支払い戦術特徴量評価用の観測コンテキスト (Work 5-5B R1: 3状態区分・不正参照検知対応)
  */
 export interface TacticalCostEvaluationContext {
   readonly knownCardsMap: ReadonlyMap<string, KnownCardView>;
+  readonly allCardsMap: ReadonlyMap<string, CardView>;
   readonly unitsMap: ReadonlyMap<string, UnitView>;
+  readonly invalidCardReferenceIds: string[];
+  readonly invalidUnitReferenceIds: string[];
+  readonly invalidCostPaymentRefs: number[];
 }
 
 export function createCostTacticalContext(
@@ -951,11 +984,20 @@ export function createCostTacticalContext(
 ): TacticalCostEvaluationContext {
   const obs = request.observation;
   const knownCardsMap = new Map<string, KnownCardView>();
+  const allCardsMap = new Map<string, CardView>();
   const unitsMap = new Map<string, UnitView>();
+  const invalidCardReferenceIds: string[] = [];
+  const invalidUnitReferenceIds: string[] = [];
+  const invalidCostPaymentRefs: number[] = [];
 
   const registerCard = (c?: CardView) => {
-    if (c && c.visibility === "KNOWN") {
-      knownCardsMap.set(c.cardInstanceId, c);
+    if (!c) return;
+    const cid = (c as any).cardInstanceId ?? (c as any).opaqueCardId;
+    if (cid && typeof cid === "string") {
+      allCardsMap.set(cid, c);
+    }
+    if (c.visibility === "KNOWN" && (c as KnownCardView).cardInstanceId) {
+      knownCardsMap.set((c as KnownCardView).cardInstanceId, c as KnownCardView);
     }
   };
 
@@ -969,7 +1011,9 @@ export function createCostTacticalContext(
   const registerUnits = (units?: readonly UnitView[]) => {
     if (!units) return;
     for (const u of units) {
-      unitsMap.set(u.unitId, u);
+      if (u.unitId) {
+        unitsMap.set(u.unitId, u);
+      }
       if (u.cards) {
         registerCards(u.cards);
       }
@@ -986,8 +1030,7 @@ export function createCostTacticalContext(
         if ("visibility" in g && g.visibility === "KNOWN") {
           registerCard(g as KnownCardView);
         } else if ("unitId" in g) {
-          unitsMap.set((g as UnitView).unitId, g as UnitView);
-          if ((g as UnitView).cards) registerCards((g as UnitView).cards);
+          registerUnits([g as UnitView]);
         }
       }
     }
@@ -1012,7 +1055,25 @@ export function createCostTacticalContext(
     }
   }
 
-  return { knownCardsMap, unitsMap };
+  return {
+    knownCardsMap,
+    allCardsMap,
+    unitsMap,
+    invalidCardReferenceIds,
+    invalidUnitReferenceIds,
+    invalidCostPaymentRefs,
+  };
+}
+
+/**
+ * 戦術特徴量エンコード結果 (Work 5-5B R1: 不正参照診断情報を含む)
+ */
+export interface TacticalPatternEncodingResult {
+  readonly features: Float64Array;
+  readonly reasons: readonly string[];
+  readonly invalidCardReferenceIds?: readonly string[];
+  readonly invalidUnitReferenceIds?: readonly string[];
+  readonly invalidCostPaymentRefs?: readonly number[];
 }
 
 /**
@@ -1026,7 +1087,7 @@ export function encodeTacticalPatternFeatures(
   precomputedBlockContext?: BlockTacticalEvaluationContext,
   precomputedHasCounter?: boolean,
   precomputedCostContext?: TacticalCostEvaluationContext
-): { features: Float64Array; reasons: string[] } {
+): TacticalPatternEncodingResult {
   const features = new Float64Array(TACTICAL_FEATURE_DIMENSION);
   const reasons: string[] = [];
 
@@ -1215,16 +1276,22 @@ export function encodeTacticalPatternFeatures(
   // ===========================================================================
   // カテゴリ 7: コスト支払いリソース評価 (RESOURCE_COST, Work 5-5B)
   // ===========================================================================
+  let activeCostCtx: TacticalCostEvaluationContext | undefined = precomputedCostContext;
+
   if (supportsCostEvaluation(encoderVersion)) {
     if (
       pattern.costPaymentRef !== undefined &&
-      pattern.costPaymentRef >= 0 &&
-      request.catalog?.costPayments
+      pattern.costPaymentRef >= 0
     ) {
-      const cp = request.catalog.costPayments[pattern.costPaymentRef];
-      if (cp) {
-        const costCtx = precomputedCostContext ?? createCostTacticalContext(request);
-        const { knownCardsMap, unitsMap } = costCtx;
+      if (!activeCostCtx) {
+        activeCostCtx = createCostTacticalContext(request);
+      }
+      const cp = request.catalog?.costPayments?.[pattern.costPaymentRef];
+      if (!cp) {
+        // カタログに costPayments が存在しないか範囲外 -> 不正参照検知
+        activeCostCtx.invalidCostPaymentRefs.push(pattern.costPaymentRef);
+      } else {
+        const { allCardsMap, unitsMap } = activeCostCtx;
 
         // t20: 手札廃棄カードの数字合計 (非Joker)
         // t21: 廃棄カード中のJoker枚数
@@ -1235,15 +1302,21 @@ export function encodeTacticalPatternFeatures(
         let discardJokerCount = 0;
 
         for (const cardId of discardedCardIds) {
-          const card = knownCardsMap.get(cardId);
+          const card = allCardsMap.get(cardId);
           if (!card) {
-            // 未解決カードID (INVALID_REFERENCE / HIDDEN) は Joker と混同せずスキップ
+            // 観測情報に存在しない -> INVALID_REFERENCE (診断検知し、0.0でフェイルクローズ)
+            activeCostCtx.invalidCardReferenceIds.push(cardId);
             continue;
           }
-          const suit = (card.suit || "").toUpperCase();
-          const rawRank = String(card.rank || "").trim().toUpperCase();
+          if (card.visibility !== "KNOWN") {
+            // 伏せカード (HIDDEN) -> 秘密情報推測禁止のため 0.0 として正常スキップ
+            continue;
+          }
+          const knownCard = card as KnownCardView;
+          const suit = (knownCard.suit || "").toUpperCase();
+          const rawRank = String(knownCard.rank || "").trim().toUpperCase();
           const isJoker =
-            (card as any).isJoker === true ||
+            (knownCard as any).isJoker === true ||
             suit === "J" ||
             suit === "JOKER" ||
             rawRank === "JOKER";
@@ -1252,8 +1325,8 @@ export function encodeTacticalPatternFeatures(
             discardJokerCount++;
           } else {
             let rankVal = 0;
-            if (typeof card.value === "number" && Number.isFinite(card.value) && card.value > 0) {
-              rankVal = card.value;
+            if (typeof knownCard.value === "number" && Number.isFinite(knownCard.value) && knownCard.value > 0) {
+              rankVal = knownCard.value;
             } else if (rawRank === "A" || rawRank === "1") {
               rankVal = 1;
             } else if (rawRank === "J" || rawRank === "11") {
@@ -1298,7 +1371,8 @@ export function encodeTacticalPatternFeatures(
         for (const unitId of sacrificedUnitIds) {
           const unit = unitsMap.get(unitId);
           if (!unit) {
-            // 未解決ユニットIDはスキップ
+            // 観測情報に存在しない -> INVALID_REFERENCE (診断検知し、0.0でフェイルクローズ)
+            activeCostCtx.invalidUnitReferenceIds.push(unitId);
             continue;
           }
           const sz =
@@ -1339,7 +1413,13 @@ export function encodeTacticalPatternFeatures(
     }
   }
 
-  return { features, reasons };
+  return {
+    features,
+    reasons,
+    invalidCardReferenceIds: activeCostCtx?.invalidCardReferenceIds,
+    invalidUnitReferenceIds: activeCostCtx?.invalidUnitReferenceIds,
+    invalidCostPaymentRefs: activeCostCtx?.invalidCostPaymentRefs,
+  };
 }
 
 /**
@@ -1473,6 +1553,10 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
       }
     } else {
       this.genome = fromV6CompatibleDNA(genomeOrDNA, "r4");
+    }
+
+    if (encoderVersionOverride && !isValidTacticalFeatureEncoderVersion(encoderVersionOverride)) {
+      throw new Error(`未知の encoderVersionOverride です: ${encoderVersionOverride}`);
     }
 
     this.encoderVersion =

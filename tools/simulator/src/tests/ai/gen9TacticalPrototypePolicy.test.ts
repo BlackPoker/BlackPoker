@@ -755,4 +755,359 @@ describe("Gen9TacticalPrototypePolicy (Work 5-1 R2)", () => {
       expect(outUnknown.netDamageToSelf.isUnknown).toBe(true);
     });
   });
+
+  describe("Work 5-5B R1 回帰修正: Gen9TacticalPrototypePolicy デフォルトインスタンス (v7.3) の PASS 免除検証 (PA-1〜PA-6)", () => {
+    it("PA-1: 確定致死ダメージ + 有効なCounterあり -> PASSにペナルティが適用されCounterが優先される", () => {
+      const policy = new Gen9TacticalPrototypePolicy(dna);
+      // デフォルトの encoderVersion が v7.3 であること
+      expect(policy.getEncoderVersion()).toBe("v7.3-cost-evaluated-v24");
+
+      const req = createBaseRequest({
+        observation: {
+          ...createBaseRequest().observation,
+          players: [
+            {
+              playerId: "p1",
+              name: "Alice",
+              isViewer: false,
+              lifeCount: 15,
+              lifeDisplay: "15",
+              handCount: 4,
+              handCards: [],
+              field: [],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: false,
+            },
+            {
+              playerId: "p2",
+              name: "Bob",
+              isViewer: true,
+              lifeCount: 10,
+              lifeDisplay: "10",
+              handCount: 5,
+              handCards: [],
+              field: [
+                {
+                  unitId: "u-my-soldier-target",
+                  kind: "soldier",
+                  state: "charge",
+                  face: "up",
+                  cards: [],
+                  labels: [],
+                  currentSize: 10,
+                },
+              ],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: true,
+            },
+          ],
+          stageRequests: [
+            {
+              requestId: "req-deathlance-1" as any,
+              actionId: "action.deathLance",
+              controller: "p1",
+              status: "PENDING",
+              sequence: 1,
+              target: {
+                targetType: "unit",
+                targetUnitId: "u-my-soldier-target",
+              },
+              keyCards: [
+                { visibility: "KNOWN", cardInstanceId: "c1", suit: "diamond", rank: "A", value: 1, faceUp: true },
+                { visibility: "KNOWN", cardInstanceId: "c2", suit: "spade", rank: "K", value: 13, faceUp: true },
+              ],
+            },
+          ],
+        },
+        catalog: {
+          ...createBaseRequest().catalog,
+          targetSelections: [
+            { targetType: "request", targetRequestId: "req-deathlance-1" } as any,
+          ],
+        },
+      });
+
+      const res = policy.choose(req);
+      const scored = policy.evaluatePatterns(req);
+      const passDetail = scored.scoredPatterns.find((p) => p.patternRef === 0);
+      expect(passDetail?.tacticalAdjustment).toBeLessThan(0);
+      expect(passDetail?.reason).toContain("lethal PASS penalty");
+      expect(res.selectedPatternRef).toBe(1); // Counter が選ばれる
+    });
+
+    it("PA-2: 確定致死ダメージ + 有効なCounterなし (PASS手のみ) -> デフォルトインスタンス (v7.3) でPASSペナルティが免除される", () => {
+      const policy = new Gen9TacticalPrototypePolicy(dna);
+      const req = createBaseRequest({
+        observation: {
+          ...createBaseRequest().observation,
+          players: [
+            {
+              playerId: "p1",
+              name: "Alice",
+              isViewer: false,
+              lifeCount: 15,
+              lifeDisplay: "15",
+              handCount: 4,
+              handCards: [],
+              field: [],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: false,
+            },
+            {
+              playerId: "p2",
+              name: "Bob",
+              isViewer: true,
+              lifeCount: 10,
+              lifeDisplay: "10",
+              handCount: 5,
+              handCards: [],
+              field: [
+                {
+                  unitId: "u-my-soldier-target",
+                  kind: "soldier",
+                  state: "charge",
+                  face: "up",
+                  cards: [],
+                  labels: [],
+                  currentSize: 10,
+                },
+              ],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: true,
+            },
+          ],
+          stageRequests: [
+            {
+              requestId: "req-deathlance-1" as any,
+              actionId: "action.deathLance",
+              controller: "p1",
+              status: "PENDING",
+              sequence: 1,
+              target: {
+                targetType: "unit",
+                targetUnitId: "u-my-soldier-target",
+              },
+              keyCards: [
+                { visibility: "KNOWN", cardInstanceId: "c1", suit: "diamond", rank: "A", value: 1, faceUp: true },
+                { visibility: "KNOWN", cardInstanceId: "c2", suit: "spade", rank: "K", value: 13, faceUp: true },
+              ],
+            },
+          ],
+        },
+        patterns: [
+          { patternId: "pat-pass", kind: "PASS" },
+        ],
+      });
+
+      const scored = policy.evaluatePatterns(req);
+      const passDetail = scored.scoredPatterns[0];
+      expect(passDetail.tacticalAdjustment).toBe(0);
+      expect(passDetail.reason).toContain("PASS penalty exempted: no effective counter available");
+    });
+
+    it("PA-3: 推定ダメージ + 確定Counterあり -> Counterで損害が阻止されCounterが選ばれる", () => {
+      const policy = new Gen9TacticalPrototypePolicy(dna);
+      const req = createBaseRequest({
+        observation: {
+          ...createBaseRequest().observation,
+          players: [
+            {
+              playerId: "p1",
+              name: "Alice",
+              isViewer: false,
+              lifeCount: 15,
+              lifeDisplay: "15",
+              handCount: 4,
+              handCards: [],
+              field: [
+                {
+                  unitId: "u-my-soldier-target",
+                  kind: "soldier",
+                  state: "charge",
+                  face: "up",
+                  cards: [],
+                  labels: [],
+                  currentSize: 10,
+                },
+              ],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: false,
+            },
+            {
+              playerId: "p2",
+              name: "Bob",
+              isViewer: true,
+              lifeCount: 10,
+              lifeDisplay: "10",
+              handCount: 5,
+              handCards: [],
+              field: [
+                {
+                  unitId: "u-my-soldier-target",
+                  kind: "soldier",
+                  state: "charge",
+                  face: "up",
+                  cards: [],
+                  labels: [],
+                  currentSize: 10,
+                },
+              ],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: true,
+            },
+          ],
+          stageRequests: [
+            {
+              requestId: "req-deathlance-1" as any,
+              actionId: "action.deathLance",
+              controller: "p1",
+              status: "PENDING",
+              sequence: 1,
+              target: {
+                targetType: "unit",
+                targetUnitId: "u-my-soldier-target",
+              },
+              keyCards: [
+                { visibility: "KNOWN", cardInstanceId: "c1", suit: "diamond", rank: "A", value: 1, faceUp: true },
+                { visibility: "HIDDEN", faceUp: false },
+              ],
+            },
+          ],
+        },
+      });
+
+      const scored = policy.evaluatePatterns(req);
+      expect(scored.bestPatternRef).toBe(1); // Counter が選ばれる
+      const passDetail = scored.scoredPatterns.find((p) => p.patternRef === 0);
+      expect(passDetail?.tacticalAdjustment).toBeLessThan(0); // PASS に推定ペナルティ
+    });
+
+    it("PA-4: UNKNOWN_CANCEL は有効な対抗手段とみなされず、PASSペナルティが免除される", () => {
+      const policy = new Gen9TacticalPrototypePolicy(dna);
+      const req = createBaseRequest({
+        observation: {
+          ...createBaseRequest().observation,
+          stageRequests: [
+            {
+              requestId: "req-unknown-1" as any,
+              actionId: "action.throwing",
+              controller: "p1",
+              status: "PENDING",
+              sequence: 1,
+              // target 欠落のため outcome は UNKNOWN
+              keyCards: [
+                { visibility: "KNOWN", cardInstanceId: "c1", suit: "spade", rank: "10", value: 10, faceUp: true },
+              ],
+            },
+          ],
+        },
+        patterns: [
+          { patternId: "pat-pass", kind: "PASS" },
+        ],
+      });
+
+      const scored = policy.evaluatePatterns(req);
+      const passDetail = scored.scoredPatterns[0];
+      // UNKNOWN は損害未確定のため、PASS に損害ペナルティはつかない
+      expect(passDetail.tacticalAdjustment).toBe(0);
+    });
+
+    it("PA-5: packOpen しか代替手がない局面でも、packOpen は counter ではないため PASS 免除が維持される", () => {
+      const policy = new Gen9TacticalPrototypePolicy(dna);
+      const req = createBaseRequest({
+        observation: {
+          ...createBaseRequest().observation,
+          players: [
+            {
+              playerId: "p1",
+              name: "Alice",
+              isViewer: false,
+              lifeCount: 15,
+              lifeDisplay: "15",
+              handCount: 4,
+              handCards: [],
+              field: [],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: false,
+            },
+            {
+              playerId: "p2",
+              name: "Bob",
+              isViewer: true,
+              lifeCount: 5,
+              lifeDisplay: "5",
+              handCount: 5,
+              handCards: [],
+              field: [],
+              fog: [],
+              trumps: [],
+              graveCount: 0,
+              grave: [],
+              canViewFullGrave: true,
+            },
+          ],
+          stageRequests: [
+            {
+              requestId: "req-throw-1" as any,
+              actionId: "action.throwing",
+              controller: "p1",
+              status: "PENDING",
+              sequence: 1,
+              target: { targetType: "player", targetPlayerKey: "p2" },
+              keyCards: [
+                { visibility: "KNOWN", cardInstanceId: "c1", suit: "spade", rank: "10", value: 10, faceUp: true },
+              ],
+            },
+          ],
+        },
+        patterns: [
+          { patternId: "pat-pass", kind: "PASS" },
+          { patternId: "pat-packopen", kind: "ACTION", actionSelectionRef: 1 },
+        ],
+      });
+
+      const scored = policy.evaluatePatterns(req);
+      const passDetail = scored.scoredPatterns.find((p) => p.patternRef === 0);
+      expect(passDetail?.tacticalAdjustment).toBe(0);
+      expect(passDetail?.reason).toContain("PASS penalty exempted: no effective counter available");
+    });
+
+    it("PA-6: 相手リクエストが存在しない通常局面での PASS は戦術減点なし (0.0)", () => {
+      const policy = new Gen9TacticalPrototypePolicy(dna);
+      const req = createBaseRequest({
+        observation: {
+          ...createBaseRequest().observation,
+          stageRequests: [],
+        },
+        patterns: [
+          { patternId: "pat-pass", kind: "PASS" },
+        ],
+      });
+
+      const scored = policy.evaluatePatterns(req);
+      const passDetail = scored.scoredPatterns[0];
+      expect(passDetail.tacticalAdjustment).toBe(0);
+    });
+  });
 });
