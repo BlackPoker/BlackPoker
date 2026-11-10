@@ -26,6 +26,7 @@ import {
 import { GenericTacticalEvaluator } from "../rules/GenericTacticalEvaluator.js";
 import {
   classifyDecisionPatterns,
+  resolvePatternInfo,
   PureCostPaymentVarianceGroup,
   ResolvedPatternInfo,
 } from "./CardSelectionDiagnosticEngine.js";
@@ -66,6 +67,74 @@ export type CostFeatureCollisionReason =
   | "COMPLEX_MATCH" // 複数要素の組み合わせが偶然同一
   | "INVALID_OR_HIDDEN" // 非公開情報または不正参照
   | "UNKNOWN";
+
+// =============================================================================
+// 2. 監査用型定義 (Work 5-5C R1)
+// =============================================================================
+
+export type TieTransitionCategory =
+  | "A1_TIED_TO_TIED"
+  | "A2_TIED_TO_UNTIED"
+  | "A3_UNTIED_TO_TIED"
+  | "A4_UNTIED_TO_UNTIED";
+
+export type TieIncreaseReason =
+  | "CANCELLATION" // t20とt21(Joker等)の差分が打ち消し合い同点化
+  | "TOP_CANDIDATE_SWAP" // Jokerペナルティ等により元々同点だった別候補群が最高評価に繰り上がり
+  | "TOLERANCE_APPROX" // 1e-12以内の許容誤差による同点
+  | "OTHER";
+
+export interface GroupTieTransitionDiagnostic {
+  readonly groupId: string;
+  readonly t20Tied: boolean;
+  readonly allFourTied: boolean;
+  readonly category: TieTransitionCategory;
+  readonly exactT20Tied: boolean;
+  readonly exactAllFourTied: boolean;
+  readonly t20Margin: number;
+  readonly allFourMargin: number;
+  readonly tieIncreaseReason?: TieIncreaseReason;
+}
+
+export type ArgmaxDetailedCategory =
+  | "UNCHANGED"
+  | "COST_PAYMENT_ONLY_CHANGED"
+  | "KEY_CARD_CHANGED"
+  | "KEY_UNIT_CHANGED"
+  | "TARGET_CHANGED"
+  | "EFFECT_OR_ORDER_CHANGED"
+  | "ACTION_TYPE_CHANGED"
+  | "COUNTER_TO_PASS"
+  | "SUMMON_TO_PASS"
+  | "CHANGED_TO_PASS"
+  | "CHANGED_FROM_PASS"
+  | "OTHER_OR_UNCLASSIFIED";
+
+export interface ArgmaxDetailedClassification {
+  readonly isArgmaxChanged: boolean;
+  readonly primaryCategory: ArgmaxDetailedCategory;
+  readonly changedAttributes: readonly string[];
+  readonly zeroBestRef: number;
+  readonly diagBestRef: number;
+  readonly zeroActionId?: string;
+  readonly diagActionId?: string;
+  readonly zeroCostSig?: string;
+  readonly diagCostSig?: string;
+  readonly scoreZero: number;
+  readonly scoreDiag: number;
+  readonly deltaScore: number;
+}
+
+export interface SingleDecisionParityResult {
+  readonly totalPatterns: number;
+  readonly exactMatches: number;
+  readonly approxMatches: number;
+  readonly mismatches: number;
+  readonly bestPatternMatches: boolean;
+  readonly chooseMatches: boolean;
+  readonly maxAbsoluteDifference: number;
+  readonly nonFiniteOccurrences: number;
+}
 
 // =============================================================================
 // 2. データ構造・型定義
@@ -132,6 +201,8 @@ export interface GroupCostDiagnostic {
     readonly t22_only: boolean;
     readonly t23_only: boolean;
   };
+  // 監査A: 同点遷移診断 (t20のみ vs 4特徴量併用)
+  readonly tieTransition?: GroupTieTransitionDiagnostic;
 }
 
 export type ArgmaxChangeCategory =
@@ -161,6 +232,8 @@ export interface SingleDecisionCostDiagnosticResult {
   readonly decisionId: string;
   readonly groups: readonly GroupCostDiagnostic[];
   readonly argmaxEffect: DecisionArgmaxSideEffect;
+  readonly detailedArgmax?: ArgmaxDetailedClassification;
+  readonly parityCheck?: SingleDecisionParityResult;
   readonly invalidReferences: {
     readonly cardIds: readonly string[];
     readonly unitIds: readonly string[];
@@ -173,7 +246,7 @@ export interface SingleDecisionCostDiagnosticResult {
 // =============================================================================
 
 /**
- * 2つのコスト支払い候補間の衝突原因を分類
+ * 2つのコスト支払い候補間の衝突原因を厳密に分類 (Work 5-5C R1 厳密集合一致版)
  */
 export function classifyCostPairCollisionReason(
   candA: EvaluatedCostCandidate,
@@ -200,11 +273,56 @@ export function classifyCostPairCollisionReason(
     return "ALL_COSTS_ZERO";
   }
 
-  // 1. 捨て札がある場合の判定
   const cardsA = cpA.discardedCardIds ?? [];
   const cardsB = cpB.discardedCardIds ?? [];
+  const sacsA = cpA.sacrificedUnitIds ?? [];
+  const sacsB = cpB.sacrificedUnitIds ?? [];
+  const bulwarksA = cpA.drivenBulwarkUnitIds ?? [];
+  const bulwarksB = cpB.drivenBulwarkUnitIds ?? [];
+  const lifeA = cpA.lifeCount ?? 0;
+  const lifeB = cpB.lifeCount ?? 0;
 
-  if (cardsA.length > 0 && cardsB.length > 0 && cardsA.length === cardsB.length) {
+  const sortedCardsA = [...cardsA].sort().join(",");
+  const sortedCardsB = [...cardsB].sort().join(",");
+  const sortedSacsA = [...sacsA].sort().join(",");
+  const sortedSacsB = [...sacsB].sort().join(",");
+  const sortedBulwarksA = [...bulwarksA].sort().join(",");
+  const sortedBulwarksB = [...bulwarksB].sort().join(",");
+
+  // 0. すべてのコスト指定が完全同一
+  if (
+    sortedCardsA === sortedCardsB &&
+    sortedSacsA === sortedSacsB &&
+    sortedBulwarksA === sortedBulwarksB &&
+    lifeA === lifeB
+  ) {
+    if (cardsA.length === 0 && sacsA.length === 0 && bulwarksA.length === 0 && lifeA === 0) {
+      return "ALL_COSTS_ZERO";
+    }
+    return "COMPLEX_MATCH";
+  }
+
+  // 1. 防壁ドライブ対象のみ異なる場合 (厳密集合一致: 他コスト要素は完全に一致)
+  if (
+    sortedCardsA === sortedCardsB &&
+    sortedSacsA === sortedSacsB &&
+    lifeA === lifeB &&
+    sortedBulwarksA !== sortedBulwarksB &&
+    bulwarksA.length > 0 &&
+    bulwarksB.length > 0
+  ) {
+    return "BULWARK_DRIVE_DIFF_ONLY";
+  }
+
+  // 2. 捨て札がある場合の判定 (他コスト要素は一致)
+  if (
+    sortedSacsA === sortedSacsB &&
+    sortedBulwarksA === sortedBulwarksB &&
+    lifeA === lifeB &&
+    cardsA.length > 0 &&
+    cardsB.length > 0 &&
+    cardsA.length === cardsB.length
+  ) {
     // 観測情報からカード情報を解決
     const pView = request.observation.players.find((p) => p.playerId === request.playerId);
     const handCards = pView?.handCards ?? [];
@@ -220,7 +338,7 @@ export function classifyCostPairCollisionReason(
       const suitsA = [...cA.map((c) => c.suit)].sort();
       const suitsB = [...cB.map((c) => c.suit)].sort();
 
-      // ランク一致でスート不一致
+      // ランク多重集合一致でスート不一致
       if (
         ranksA.join(",") === ranksB.join(",") &&
         suitsA.join(",") !== suitsB.join(",")
@@ -228,39 +346,48 @@ export function classifyCostPairCollisionReason(
         return "SAME_RANK_DIFF_SUIT";
       }
 
-      // 数値合計一致
+      // 数値合計一致 (ランク多重集合は不一致)
       const valSumA = cA.reduce((sum, c) => sum + (c.value ?? 0), 0);
       const valSumB = cB.reduce((sum, c) => sum + (c.value ?? 0), 0);
       if (valSumA === valSumB && ranksA.join(",") !== ranksB.join(",")) {
         return "SAME_RANK_VALUE_SUM";
       }
+
+      // Joker枚数一致 (Joker以外は数値合計一致)
+      const isJk = (c: KnownCardView) =>
+        (c.suit || "").toUpperCase() === "J" ||
+        (c.suit || "").toUpperCase() === "JOKER" ||
+        (c.rank || "").toUpperCase() === "JOKER";
+      const jkA = cA.filter(isJk).length;
+      const jkB = cB.filter(isJk).length;
+      if (jkA === jkB && jkA > 0) {
+        return "SAME_JOKER_COUNT";
+      }
+    } else {
+      return "INVALID_OR_HIDDEN";
     }
   }
 
-  // 2. 防壁ドライブ対象のみ異なる場合
-  const bulwarksA = cpA.drivenBulwarkUnitIds ?? [];
-  const bulwarksB = cpB.drivenBulwarkUnitIds ?? [];
+  // 3. 犠牲ユニットサイズが同一 (他コスト要素は一致)
   if (
-    bulwarksA.length > 0 &&
-    bulwarksB.length > 0 &&
-    cardsA.length === cardsB.length &&
-    cpA.lifeCount === cpB.lifeCount &&
-    (cpA.sacrificedUnitIds ?? []).length === (cpB.sacrificedUnitIds ?? []).length
+    sortedCardsA === sortedCardsB &&
+    sortedBulwarksA === sortedBulwarksB &&
+    lifeA === lifeB &&
+    sacsA.length > 0 &&
+    sacsB.length > 0 &&
+    sortedSacsA !== sortedSacsB
   ) {
-    if ([...bulwarksA].sort().join(",") !== [...bulwarksB].sort().join(",")) {
-      return "BULWARK_DRIVE_DIFF_ONLY";
-    }
-  }
-
-  // 3. 犠牲ユニットサイズが同一
-  const sacsA = cpA.sacrificedUnitIds ?? [];
-  const sacsB = cpB.sacrificedUnitIds ?? [];
-  if (sacsA.length > 0 && sacsB.length > 0 && [...sacsA].sort().join(",") !== [...sacsB].sort().join(",")) {
     return "SAME_SACRIFICE_SIZE";
   }
 
-  // 4. ライフ支払い枚数が同一
-  if (cpA.lifeCount > 0 && cpA.lifeCount === cpB.lifeCount) {
+  // 4. ライフ支払い枚数が同一 (他コスト要素は一致)
+  if (
+    sortedCardsA === sortedCardsB &&
+    sortedSacsA === sortedSacsB &&
+    sortedBulwarksA === sortedBulwarksB &&
+    lifeA > 0 &&
+    lifeA === lifeB
+  ) {
     return "SAME_LIFE_RATIO";
   }
 
@@ -272,13 +399,160 @@ export function classifyCostPairCollisionReason(
     bulwarksB.length === 0 &&
     sacsA.length === 0 &&
     sacsB.length === 0 &&
-    cpA.lifeCount === 0 &&
-    cpB.lifeCount === 0
+    lifeA === 0 &&
+    lifeB === 0
   ) {
     return "ALL_COSTS_ZERO";
   }
 
   return "COMPLEX_MATCH";
+}
+
+/**
+ * Argmax 変更の詳細再分類 (Work 5-5C R1 監査B)
+ */
+export function classifyDetailedArgmaxChange(
+  request: Readonly<DecisionRequest>,
+  zeroBestRef: number,
+  diagBestRef: number,
+  scoreZero: number,
+  scoreDiag: number
+): ArgmaxDetailedClassification {
+  const deltaScore = scoreDiag - scoreZero;
+  if (zeroBestRef === diagBestRef) {
+    return {
+      isArgmaxChanged: false,
+      primaryCategory: "UNCHANGED",
+      changedAttributes: [],
+      zeroBestRef,
+      diagBestRef,
+      scoreZero,
+      scoreDiag,
+      deltaScore,
+    };
+  }
+
+  const patZero = request.patterns[zeroBestRef];
+  const patDiag = request.patterns[diagBestRef];
+  const catalog = request.catalog;
+
+  const resZero = resolvePatternInfo(patZero, zeroBestRef, catalog);
+  const resDiag = resolvePatternInfo(patDiag, diagBestRef, catalog);
+
+  const changedAttributes: string[] = [];
+  if (resZero.actionId !== resDiag.actionId) changedAttributes.push("action");
+  if (resZero.keyCardSignature !== resDiag.keyCardSignature) changedAttributes.push("keyCard");
+  if (resZero.keyUnitSignature !== resDiag.keyUnitSignature) changedAttributes.push("keyUnit");
+  if (resZero.targetSignature !== resDiag.targetSignature) changedAttributes.push("target");
+  if (
+    resZero.effectSignature !== resDiag.effectSignature ||
+    resZero.orderSignature !== resDiag.orderSignature
+  ) {
+    changedAttributes.push("effectOrOrder");
+  }
+  if (resZero.costSignature !== resDiag.costSignature) changedAttributes.push("costPayment");
+  if (resZero.kind !== resDiag.kind) changedAttributes.push("kind");
+
+  let primaryCategory: ArgmaxDetailedCategory = "OTHER_OR_UNCLASSIFIED";
+
+  if (patZero?.kind === "ACTION" && patDiag?.kind === "PASS") {
+    const actId = resZero.actionId?.toLowerCase() ?? "";
+    if (actId.includes("counter")) {
+      primaryCategory = "COUNTER_TO_PASS";
+    } else if (actId.includes("summon")) {
+      primaryCategory = "SUMMON_TO_PASS";
+    } else {
+      primaryCategory = "CHANGED_TO_PASS";
+    }
+  } else if (patZero?.kind === "PASS" && patDiag?.kind !== "PASS") {
+    primaryCategory = "CHANGED_FROM_PASS";
+  } else if (changedAttributes.length === 1 && changedAttributes[0] === "costPayment") {
+    primaryCategory = "COST_PAYMENT_ONLY_CHANGED";
+  } else if (changedAttributes.includes("action")) {
+    primaryCategory = "ACTION_TYPE_CHANGED";
+  } else if (changedAttributes.includes("keyCard")) {
+    primaryCategory = "KEY_CARD_CHANGED";
+  } else if (changedAttributes.includes("keyUnit")) {
+    primaryCategory = "KEY_UNIT_CHANGED";
+  } else if (changedAttributes.includes("target")) {
+    primaryCategory = "TARGET_CHANGED";
+  } else if (changedAttributes.includes("effectOrOrder")) {
+    primaryCategory = "EFFECT_OR_ORDER_CHANGED";
+  }
+
+  return {
+    isArgmaxChanged: true,
+    primaryCategory,
+    changedAttributes,
+    zeroBestRef,
+    diagBestRef,
+    zeroActionId: resZero.actionId,
+    diagActionId: resDiag.actionId,
+    zeroCostSig: resZero.costSignature,
+    diagCostSig: resDiag.costSignature,
+    scoreZero,
+    scoreDiag,
+    deltaScore,
+  };
+}
+
+/**
+ * v7.2 と v7.3 zero 重みの単一決定パリティ検証 (Work 5-5C R1 監査C)
+ */
+export function checkSingleDecisionParity(
+  request: Readonly<DecisionRequest>,
+  policyV72: Gen9LearnableTacticalPolicy,
+  policyZero: Gen9LearnableTacticalPolicy
+): SingleDecisionParityResult {
+  const evalV72 = policyV72.evaluatePatterns(request);
+  const evalZero = policyZero.evaluatePatterns(request);
+
+  const totalPatterns = request.patterns.length;
+  let exactMatches = 0;
+  let approxMatches = 0;
+  let mismatches = 0;
+  let nonFiniteOccurrences = 0;
+  let maxAbsoluteDifference = 0;
+
+  const scoreMapZero = new Map(evalZero.scoredPatterns.map((p) => [p.patternRef, p.finalScore]));
+
+  for (const spV72 of evalV72.scoredPatterns) {
+    const sV72 = spV72.finalScore;
+    const sZero = scoreMapZero.get(spV72.patternRef) ?? 0;
+
+    if (!Number.isFinite(sV72) || !Number.isFinite(sZero)) {
+      nonFiniteOccurrences++;
+    }
+
+    const diff = Math.abs(sV72 - sZero);
+    if (diff > maxAbsoluteDifference) {
+      maxAbsoluteDifference = diff;
+    }
+
+    if (diff === 0) {
+      exactMatches++;
+    } else if (diff <= 1e-12) {
+      approxMatches++;
+    } else {
+      mismatches++;
+    }
+  }
+
+  const bestPatternMatches = evalV72.bestPatternRef === evalZero.bestPatternRef;
+  const chooseV72 = policyV72.choose(request);
+  const chooseZero = policyZero.choose(request);
+  const chooseMatches = chooseV72.selectedPatternRef === chooseZero.selectedPatternRef;
+
+  return {
+    totalPatterns,
+    exactMatches,
+    approxMatches,
+    mismatches,
+    bestPatternMatches,
+    chooseMatches,
+    maxAbsoluteDifference,
+    nonFiniteOccurrences,
+  };
 }
 
 /**
@@ -294,7 +568,8 @@ export function diagnoseDecisionCostFeatures(
     t21: Gen9LearnableTacticalPolicy;
     t22: Gen9LearnableTacticalPolicy;
     t23: Gen9LearnableTacticalPolicy;
-  }
+  },
+  policyV72?: Gen9LearnableTacticalPolicy
 ): SingleDecisionCostDiagnosticResult {
   const { pureCostGroups } = classifyDecisionPatterns(request);
   const costCtx = createCostTacticalContext(request);
@@ -451,6 +726,69 @@ export function diagnoseDecisionCostFeatures(
       return Math.abs(sorted[0].ablationScores[key] - sorted[1].ablationScores[key]) <= 1e-12;
     };
 
+    // 監査A: 同点遷移診断 (t20のみ vs 4特徴量併用)
+    const sortedByT20 = [...evaluatedCandidates].sort((a, b) => {
+      if (b.ablationScores.t20_only !== a.ablationScores.t20_only) {
+        return b.ablationScores.t20_only - a.ablationScores.t20_only;
+      }
+      return a.patternRef - b.patternRef;
+    });
+
+    const t20Best = sortedByT20[0];
+    const t20Second = sortedByT20.length > 1 ? sortedByT20[1] : undefined;
+    const t20Margin = t20Second ? t20Best.ablationScores.t20_only - t20Second.ablationScores.t20_only : 0;
+    const t20Tied = t20Second ? Math.abs(t20Margin) <= 1e-12 : false;
+    const exactT20Tied = t20Second ? t20Best.ablationScores.t20_only === t20Second.ablationScores.t20_only : false;
+
+    const allFourTied = isTopScoreTied;
+    const exactAllFourTied = secondCand ? bestScore === secondCand.diagScore : false;
+
+    let tieCategory: TieTransitionCategory;
+    if (t20Tied && allFourTied) {
+      tieCategory = "A1_TIED_TO_TIED";
+    } else if (t20Tied && !allFourTied) {
+      tieCategory = "A2_TIED_TO_UNTIED";
+    } else if (!t20Tied && allFourTied) {
+      tieCategory = "A3_UNTIED_TO_TIED";
+    } else {
+      tieCategory = "A4_UNTIED_TO_UNTIED";
+    }
+
+    let tieIncreaseReason: TieIncreaseReason | undefined;
+    if (tieCategory === "A3_UNTIED_TO_TIED") {
+      if (scoreMargin > 0 && scoreMargin <= 1e-12) {
+        tieIncreaseReason = "TOLERANCE_APPROX";
+      } else {
+        // TOP_CANDIDATE_SWAP か CANCELLATION かの判定
+        // diag のトップ集団 (bestCand と同スコア)
+        const diagTopRefs = new Set(
+          sortedByDiag.filter((c) => Math.abs(c.diagScore - bestScore) <= 1e-12).map((c) => c.patternRef)
+        );
+        // t20 の単独1位が diagTopRefs に含まれているか？
+        const t20BestInDiagTop = diagTopRefs.has(t20Best.patternRef);
+
+        if (!t20BestInDiagTop) {
+          // t20 単独トップが脱落し、下位が同点でトップに繰り上がった
+          tieIncreaseReason = "TOP_CANDIDATE_SWAP";
+        } else {
+          // t20 単独トップと他候補の差が、追加特徴量（Joker等）で相殺されて同点になった
+          tieIncreaseReason = "CANCELLATION";
+        }
+      }
+    }
+
+    const tieTransition: GroupTieTransitionDiagnostic = {
+      groupId: group.groupId,
+      t20Tied,
+      allFourTied,
+      category: tieCategory,
+      exactT20Tied,
+      exactAllFourTied,
+      t20Margin,
+      allFourMargin: scoreMargin,
+      tieIncreaseReason,
+    };
+
     diagnosedGroups.push({
       groupId: group.groupId,
       actionId: group.actionId,
@@ -478,6 +816,7 @@ export function diagnoseDecisionCostFeatures(
         t22_only: checkAblTopTie("t22_only"),
         t23_only: checkAblTopTie("t23_only"),
       },
+      tieTransition,
     });
   }
 
@@ -545,10 +884,26 @@ export function diagnoseDecisionCostFeatures(
     note,
   };
 
+  // 監査B: Argmax 詳細再分類
+  const bestZeroScore = zeroScoresMap.get(zeroBestRef) ?? 0;
+  const bestDiagScore = diagScoresMap.get(diagBestRef) ?? 0;
+  const detailedArgmax = classifyDetailedArgmaxChange(
+    request,
+    zeroBestRef,
+    diagBestRef,
+    bestZeroScore,
+    bestDiagScore
+  );
+
+  // 監査C: v7.2 vs v7.3 zero パリティ検証
+  const parityCheck = policyV72 ? checkSingleDecisionParity(request, policyV72, policyZero) : undefined;
+
   return {
     decisionId: request.decisionId,
     groups: diagnosedGroups,
     argmaxEffect,
+    detailedArgmax,
+    parityCheck,
     invalidReferences: {
       cardIds: [...costCtx.invalidCardReferenceIds],
       unitIds: [...costCtx.invalidUnitReferenceIds],
@@ -635,6 +990,53 @@ export interface CostDiagnosticAggregateSummary {
     readonly invalidUnitIdCount: number;
     readonly invalidCostRefCount: number;
   };
+
+  // 監査A: 同点遷移監査集計 (Work 5-5C R1)
+  readonly auditA_tieTransitions?: {
+    readonly totalPureCostGroups: number;
+    readonly a1_tiedToTiedCount: number;
+    readonly a2_tiedToUntiedCount: number;
+    readonly a3_untiedToTiedCount: number;
+    readonly a4_untiedToUntiedCount: number;
+    readonly netTieIncreaseCount: number;
+    readonly a3_reasons: Record<TieIncreaseReason, number>;
+    readonly exactTieCount: {
+      readonly t20_only: number;
+      readonly all_four: number;
+    };
+    readonly approxTieCount: {
+      readonly t20_only: number;
+      readonly all_four: number;
+    };
+  };
+
+  // 監査B: Argmax詳細再分類集計 (Work 5-5C R1)
+  readonly auditB_argmaxReclassification?: {
+    readonly totalDecisions: number;
+    readonly argmaxChangedCount: number;
+    readonly breakdownByDetailedCategory: Record<ArgmaxDetailedCategory, number>;
+    readonly changedAttributeCounts: Record<string, number>;
+    readonly costPaymentOnlyDecisions: readonly ArgmaxDetailedClassification[];
+    readonly actionChangedDecisions: readonly ArgmaxDetailedClassification[];
+    readonly keyCardChangedDecisions: readonly ArgmaxDetailedClassification[];
+    readonly passRelatedDecisions: readonly ArgmaxDetailedClassification[];
+  };
+
+  // 監査C: v7.2 vs v7.3 zero 重みパリティ集計 (Work 5-5C R1)
+  readonly auditC_zeroWeightParity?: {
+    readonly evaluatedDecisions: number;
+    readonly totalPatterns: number;
+    readonly exactMatches: number;
+    readonly approxMatches: number;
+    readonly mismatches: number;
+    readonly bestPatternMatches: number;
+    readonly chooseMatches: number;
+    readonly maxAbsoluteDifference: number;
+    readonly nonFiniteOccurrences: number;
+    readonly parityMatchRate: number;
+    readonly bestPatternMatchRate: number;
+    readonly chooseMatchRate: number;
+  };
 }
 
 export function aggregateCostDiagnosticResults(
@@ -710,6 +1112,54 @@ export function aggregateCostDiagnosticResults(
   let invalidUnits = 0;
   let invalidCosts = 0;
 
+  // 監査A 集計
+  let a1Count = 0;
+  let a2Count = 0;
+  let a3Count = 0;
+  let a4Count = 0;
+  let exactT20TieCount = 0;
+  let exactAllFourTieCount = 0;
+  let approxT20TieCount = 0;
+  let approxAllFourTieCount = 0;
+  const a3Reasons: Record<TieIncreaseReason, number> = {
+    CANCELLATION: 0,
+    TOP_CANDIDATE_SWAP: 0,
+    TOLERANCE_APPROX: 0,
+    OTHER: 0,
+  };
+
+  // 監査B 集計
+  const detailedArgmaxBreakdown: Record<ArgmaxDetailedCategory, number> = {
+    UNCHANGED: 0,
+    COST_PAYMENT_ONLY_CHANGED: 0,
+    KEY_CARD_CHANGED: 0,
+    KEY_UNIT_CHANGED: 0,
+    TARGET_CHANGED: 0,
+    EFFECT_OR_ORDER_CHANGED: 0,
+    ACTION_TYPE_CHANGED: 0,
+    COUNTER_TO_PASS: 0,
+    SUMMON_TO_PASS: 0,
+    CHANGED_TO_PASS: 0,
+    CHANGED_FROM_PASS: 0,
+    OTHER_OR_UNCLASSIFIED: 0,
+  };
+  const changedAttrCounts: Record<string, number> = {};
+  const costPaymentOnlyList: ArgmaxDetailedClassification[] = [];
+  const actionChangedList: ArgmaxDetailedClassification[] = [];
+  const keyCardChangedList: ArgmaxDetailedClassification[] = [];
+  const passRelatedList: ArgmaxDetailedClassification[] = [];
+
+  // 監査C 集計
+  let parityEvaluatedDecisions = 0;
+  let parityTotalPatterns = 0;
+  let parityExactMatches = 0;
+  let parityApproxMatches = 0;
+  let parityMismatches = 0;
+  let parityBestMatches = 0;
+  let parityChooseMatches = 0;
+  let parityMaxDiff = 0;
+  let parityNonFinite = 0;
+
   for (const res of results) {
     if (res.groups.length > 0) {
       decisionsWithCostGroups++;
@@ -731,6 +1181,43 @@ export function aggregateCostDiagnosticResults(
     }
     if (res.argmaxEffect.category === "SUMMON_TO_PASS") {
       summonToPassList.push(res.argmaxEffect);
+    }
+
+    // 監査B 集計
+    if (res.detailedArgmax) {
+      detailedArgmaxBreakdown[res.detailedArgmax.primaryCategory]++;
+      for (const attr of res.detailedArgmax.changedAttributes) {
+        changedAttrCounts[attr] = (changedAttrCounts[attr] ?? 0) + 1;
+      }
+      if (res.detailedArgmax.primaryCategory === "COST_PAYMENT_ONLY_CHANGED") {
+        costPaymentOnlyList.push(res.detailedArgmax);
+      } else if (res.detailedArgmax.primaryCategory === "ACTION_TYPE_CHANGED") {
+        actionChangedList.push(res.detailedArgmax);
+      } else if (res.detailedArgmax.primaryCategory === "KEY_CARD_CHANGED") {
+        keyCardChangedList.push(res.detailedArgmax);
+      } else if (
+        res.detailedArgmax.primaryCategory === "COUNTER_TO_PASS" ||
+        res.detailedArgmax.primaryCategory === "SUMMON_TO_PASS" ||
+        res.detailedArgmax.primaryCategory === "CHANGED_TO_PASS" ||
+        res.detailedArgmax.primaryCategory === "CHANGED_FROM_PASS"
+      ) {
+        passRelatedList.push(res.detailedArgmax);
+      }
+    }
+
+    // 監査C 集計
+    if (res.parityCheck) {
+      parityEvaluatedDecisions++;
+      parityTotalPatterns += res.parityCheck.totalPatterns;
+      parityExactMatches += res.parityCheck.exactMatches;
+      parityApproxMatches += res.parityCheck.approxMatches;
+      parityMismatches += res.parityCheck.mismatches;
+      if (res.parityCheck.bestPatternMatches) parityBestMatches++;
+      if (res.parityCheck.chooseMatches) parityChooseMatches++;
+      if (res.parityCheck.maxAbsoluteDifference > parityMaxDiff) {
+        parityMaxDiff = res.parityCheck.maxAbsoluteDifference;
+      }
+      parityNonFinite += res.parityCheck.nonFiniteOccurrences;
     }
 
     // Groups
@@ -783,6 +1270,24 @@ export function aggregateCostDiagnosticResults(
       if (g.ablationTopTied.t22_only) ablTopCounts.t22_only++;
       if (g.ablationTopTied.t23_only) ablTopCounts.t23_only++;
       if (g.isTopScoreTied) ablTopCounts.all_four++;
+
+      // 監査A 集計
+      if (g.tieTransition) {
+        if (g.tieTransition.category === "A1_TIED_TO_TIED") a1Count++;
+        else if (g.tieTransition.category === "A2_TIED_TO_UNTIED") a2Count++;
+        else if (g.tieTransition.category === "A3_UNTIED_TO_TIED") {
+          a3Count++;
+          if (g.tieTransition.tieIncreaseReason) {
+            a3Reasons[g.tieTransition.tieIncreaseReason]++;
+          }
+        } else if (g.tieTransition.category === "A4_UNTIED_TO_UNTIED") a4Count++;
+
+        if (g.tieTransition.exactT20Tied) exactT20TieCount++;
+        else if (g.tieTransition.t20Tied) approxT20TieCount++;
+
+        if (g.tieTransition.exactAllFourTied) exactAllFourTieCount++;
+        else if (g.tieTransition.allFourTied) approxAllFourTieCount++;
+      }
     }
   }
 
@@ -850,5 +1355,58 @@ export function aggregateCostDiagnosticResults(
       invalidUnitIdCount: invalidUnits,
       invalidCostRefCount: invalidCosts,
     },
+    auditA_tieTransitions: {
+      totalPureCostGroups: totalCostGroups,
+      a1_tiedToTiedCount: a1Count,
+      a2_tiedToUntiedCount: a2Count,
+      a3_untiedToTiedCount: a3Count,
+      a4_untiedToUntiedCount: a4Count,
+      netTieIncreaseCount: a3Count - a2Count,
+      a3_reasons: a3Reasons,
+      exactTieCount: {
+        t20_only: exactT20TieCount,
+        all_four: exactAllFourTieCount,
+      },
+      approxTieCount: {
+        t20_only: approxT20TieCount,
+        all_four: approxAllFourTieCount,
+      },
+    },
+    auditB_argmaxReclassification: {
+      totalDecisions: results.length,
+      argmaxChangedCount,
+      breakdownByDetailedCategory: detailedArgmaxBreakdown,
+      changedAttributeCounts: changedAttrCounts,
+      costPaymentOnlyDecisions: costPaymentOnlyList,
+      actionChangedDecisions: actionChangedList,
+      keyCardChangedDecisions: keyCardChangedList,
+      passRelatedDecisions: passRelatedList,
+    },
+    auditC_zeroWeightParity:
+      parityEvaluatedDecisions > 0
+        ? {
+            evaluatedDecisions: parityEvaluatedDecisions,
+            totalPatterns: parityTotalPatterns,
+            exactMatches: parityExactMatches,
+            approxMatches: parityApproxMatches,
+            mismatches: parityMismatches,
+            bestPatternMatches: parityBestMatches,
+            chooseMatches: parityChooseMatches,
+            maxAbsoluteDifference: parityMaxDiff,
+            nonFiniteOccurrences: parityNonFinite,
+            parityMatchRate:
+              parityTotalPatterns > 0
+                ? (parityExactMatches + parityApproxMatches) / parityTotalPatterns
+                : 0,
+            bestPatternMatchRate:
+              parityEvaluatedDecisions > 0
+                ? parityBestMatches / parityEvaluatedDecisions
+                : 0,
+            chooseMatchRate:
+              parityEvaluatedDecisions > 0
+                ? parityChooseMatches / parityEvaluatedDecisions
+                : 0,
+          }
+        : undefined,
   };
 }

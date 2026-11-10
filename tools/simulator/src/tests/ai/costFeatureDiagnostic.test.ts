@@ -42,6 +42,9 @@ import {
   COST_DIAGNOSTIC_WEIGHTS,
   diagnoseDecisionCostFeatures,
   aggregateCostDiagnosticResults,
+  classifyDetailedArgmaxChange,
+  checkSingleDecisionParity,
+  classifyCostPairCollisionReason,
 } from "../../engine/ai/CostFeatureDiagnosticEngine.js";
 
 describe("Work 5-5C: コスト支払い特徴量の識別能力診断 単体テスト (D1〜D14)", () => {
@@ -752,5 +755,235 @@ describe("Work 5-5C: コスト支払い特徴量の識別能力診断 単体テ�
     expect(agg.totalCostGroups).toBe(result.groups.length);
     expect(agg.stageC.totalDecisions).toBe(1);
     expect(agg.invalidReferences.invalidCardIdCount).toBe(result.invalidReferences.cardIds.length);
+  });
+
+  // ===========================================================================
+  // Work 5-5C R1 追加テスト (R1-T1 〜 R1-T6)
+  // ===========================================================================
+
+  // ---------------------------------------------------------------------------
+  // R1-T1: A1〜A4 クロス集計と数理的一致アサーション
+  // ---------------------------------------------------------------------------
+  it("R1-T1: 監査A - A1〜A4クロス集計の数理的一致が保証される", () => {
+    const { policyZero, policyDiag, ablationPolicies } = setupDiagnosticPolicies();
+
+    const card3 = createTestCard({ cardInstanceId: "c-3", suit: "C", rank: "3", value: 3 });
+    const card8 = createTestCard({ cardInstanceId: "c-8", suit: "C", rank: "8", value: 8 });
+
+    const request = createBaseRequest({
+      selfHand: [card3, card8],
+      costPayments: [
+        { discardedCardIds: ["c-3"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+        { discardedCardIds: ["c-8"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+      ],
+      patterns: [
+        { patternId: "p-0", kind: "ACTION", actionSelectionRef: 0, costPaymentRef: 0 },
+        { patternId: "p-1", kind: "ACTION", actionSelectionRef: 0, costPaymentRef: 1 },
+      ],
+    });
+
+    const result = diagnoseDecisionCostFeatures(request, evaluator, policyZero, policyDiag, ablationPolicies);
+    const agg = aggregateCostDiagnosticResults([result], 1, 1);
+
+    expect(agg.auditA_tieTransitions).toBeDefined();
+    const auditA = agg.auditA_tieTransitions!;
+    const sumA =
+      auditA.a1_tiedToTiedCount +
+      auditA.a2_tiedToUntiedCount +
+      auditA.a3_untiedToTiedCount +
+      auditA.a4_untiedToUntiedCount;
+    expect(sumA).toBe(auditA.totalPureCostGroups);
+    expect(auditA.netTieIncreaseCount).toBe(auditA.a3_untiedToTiedCount - auditA.a2_tiedToUntiedCount);
+  });
+
+  // ---------------------------------------------------------------------------
+  // R1-T2: 寄与打ち消し (CANCELLATION) および最上位入替 (TOP_CANDIDATE_SWAP) の検出
+  // ---------------------------------------------------------------------------
+  it("R1-T2: 監査A - TOP_CANDIDATE_SWAP の原因が正しく検出される", () => {
+    const { policyZero, policyDiag, ablationPolicies } = setupDiagnosticPolicies();
+
+    const card3 = createTestCard({ cardInstanceId: "c-3", suit: "C", rank: "3", value: 3 });
+    const cardJk = createTestCard({ cardInstanceId: "c-jk", suit: "JOKER", rank: "JOKER", value: 0 });
+    const card8_1 = createTestCard({ cardInstanceId: "c-8-1", suit: "C", rank: "8", value: 8 });
+    const card8_2 = createTestCard({ cardInstanceId: "c-8-2", suit: "D", rank: "8", value: 8 });
+
+    const request = createBaseRequest({
+      selfHand: [card3, cardJk, card8_1, card8_2],
+      costPayments: [
+        { discardedCardIds: ["c-3", "c-jk"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+        { discardedCardIds: ["c-8-1"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+        { discardedCardIds: ["c-8-2"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+      ],
+      patterns: [
+        { patternId: "p-0", kind: "ACTION", actionSelectionRef: 0, costPaymentRef: 0 },
+        { patternId: "p-1", kind: "ACTION", actionSelectionRef: 0, costPaymentRef: 1 },
+        { patternId: "p-2", kind: "ACTION", actionSelectionRef: 0, costPaymentRef: 2 },
+      ],
+    });
+
+    const result = diagnoseDecisionCostFeatures(request, evaluator, policyZero, policyDiag, ablationPolicies);
+    expect(result.groups.length).toBe(1);
+    const grp = result.groups[0];
+    expect(grp.tieTransition).toBeDefined();
+    if (grp.tieTransition?.category === "A3_UNTIED_TO_TIED") {
+      expect(grp.tieTransition.tieIncreaseReason).toBe("TOP_CANDIDATE_SWAP");
+    }
+  });
+
+  // ---------------------------------------------------------------------------
+  // R1-T3: Argmax 変更の全属性分解
+  // ---------------------------------------------------------------------------
+  it("R1-T3: 監査B - Argmax 変更が各属性（コストのみ、アクション、キーカード、PASS逃避）へ厳密に分解される", () => {
+    const card1 = createTestCard({ cardInstanceId: "c-1", suit: "S", rank: "A", value: 1 });
+    const card2 = createTestCard({ cardInstanceId: "c-2", suit: "H", rank: "2", value: 2 });
+
+    const baseReq = createBaseRequest({
+      selfHand: [card1, card2],
+      costPayments: [
+        { discardedCardIds: ["c-1"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+        { discardedCardIds: ["c-2"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+      ],
+      patterns: [
+        { patternId: "p-cost-0", kind: "ACTION", actionSelectionRef: 0, costPaymentRef: 0 },
+        { patternId: "p-cost-1", kind: "ACTION", actionSelectionRef: 0, costPaymentRef: 1 },
+        { patternId: "p-act-1", kind: "ACTION", actionSelectionRef: 1, costPaymentRef: 0 },
+        { patternId: "p-pass", kind: "PASS" },
+      ],
+    });
+
+    // 1. COST_PAYMENT_ONLY_CHANGED
+    const resCost = classifyDetailedArgmaxChange(baseReq, 0, 1, 10.0, 12.0);
+    expect(resCost.isArgmaxChanged).toBe(true);
+    expect(resCost.primaryCategory).toBe("COST_PAYMENT_ONLY_CHANGED");
+    expect(resCost.changedAttributes).toEqual(["costPayment"]);
+
+    // 2. ACTION_TYPE_CHANGED
+    const resAct = classifyDetailedArgmaxChange(baseReq, 0, 2, 10.0, 12.0);
+    expect(resAct.isArgmaxChanged).toBe(true);
+    expect(resAct.primaryCategory).toBe("ACTION_TYPE_CHANGED");
+    expect(resAct.changedAttributes).toContain("action");
+
+    // 3. COUNTER_TO_PASS または CHANGED_TO_PASS
+    const resPass = classifyDetailedArgmaxChange(baseReq, 0, 3, 10.0, 5.0);
+    expect(resPass.isArgmaxChanged).toBe(true);
+    expect(["COUNTER_TO_PASS", "SUMMON_TO_PASS", "CHANGED_TO_PASS"]).toContain(resPass.primaryCategory);
+  });
+
+  // ---------------------------------------------------------------------------
+  // R1-T4: v7.2 vs v7.3 ゼロ重みの全手パリティ
+  // ---------------------------------------------------------------------------
+  it("R1-T4: 監査C - v7.2 と v7.3 ゼロ重みのパリティ検証が厳密一致・許容誤差を正しく集計する", () => {
+    const { policyV72, policyZero } = setupDiagnosticPolicies();
+
+    const cardA = createTestCard({ cardInstanceId: "c-1", suit: "S", rank: "3", value: 3 });
+    const cardB = createTestCard({ cardInstanceId: "c-2", suit: "D", rank: "5", value: 5 });
+
+    const request = createBaseRequest({
+      selfHand: [cardA, cardB],
+      costPayments: [
+        { discardedCardIds: ["c-1"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+        { discardedCardIds: ["c-2"], drivenBulwarkUnitIds: [], sacrificedUnitIds: [], lifeCount: 0 },
+      ],
+      patterns: [
+        { patternId: "p-0", kind: "ACTION", actionSelectionRef: 0, costPaymentRef: 0 },
+        { patternId: "p-1", kind: "ACTION", actionSelectionRef: 0, costPaymentRef: 1 },
+      ],
+    });
+
+    const parity = checkSingleDecisionParity(request, policyV72, policyZero);
+    expect(parity.totalPatterns).toBe(2);
+    expect(parity.exactMatches + parity.approxMatches).toBe(2);
+    expect(parity.mismatches).toBe(0);
+    expect(parity.maxAbsoluteDifference).toBeLessThanOrEqual(1e-12);
+    expect(parity.bestPatternMatches).toBe(true);
+    expect(parity.chooseMatches).toBe(true);
+    expect(parity.nonFiniteOccurrences).toBe(0);
+  });
+
+  // ---------------------------------------------------------------------------
+  // R1-T5: 防壁ドライブ対象のみ異なる判定の厳密性
+  // ---------------------------------------------------------------------------
+  it("R1-T5: 監査D - 他コスト要素が一致し防壁ドライブ対象のみ異なる場合のみ BULWARK_DRIVE_DIFF_ONLY と判定される", () => {
+    const candA: any = {
+      features: [0, 0, 0, 0],
+      costPayment: {
+        discardedCardIds: [],
+        sacrificedUnitIds: [],
+        drivenBulwarkUnitIds: ["bw-1"],
+        lifeCount: 0,
+      },
+    };
+    const candB: any = {
+      features: [0, 0, 0, 0],
+      costPayment: {
+        discardedCardIds: [],
+        sacrificedUnitIds: [],
+        drivenBulwarkUnitIds: ["bw-2"],
+        lifeCount: 0,
+      },
+    };
+
+    const dummyReq = createBaseRequest({ patterns: [] });
+    const reason = classifyCostPairCollisionReason(candA, candB, dummyReq);
+    expect(reason).toBe("BULWARK_DRIVE_DIFF_ONLY");
+
+    // 捨て札が異なる場合は BULWARK_DRIVE_DIFF_ONLY にならない
+    const candC: any = {
+      features: [0, 0, 0, 0],
+      costPayment: {
+        discardedCardIds: ["c-1"],
+        sacrificedUnitIds: [],
+        drivenBulwarkUnitIds: ["bw-1"],
+        lifeCount: 0,
+      },
+    };
+    const candD: any = {
+      features: [0, 0, 0, 0],
+      costPayment: {
+        discardedCardIds: ["c-2"],
+        sacrificedUnitIds: [],
+        drivenBulwarkUnitIds: ["bw-2"],
+        lifeCount: 0,
+      },
+    };
+    const reasonDiff = classifyCostPairCollisionReason(candC, candD, dummyReq);
+    expect(reasonDiff).not.toBe("BULWARK_DRIVE_DIFF_ONLY");
+  });
+
+  // ---------------------------------------------------------------------------
+  // R1-T6: 同ランク異スート判定の厳密性 (多重集合対応)
+  // ---------------------------------------------------------------------------
+  it("R1-T6: 監査D - 複数枚のカード廃棄でランク多重集合が一致しスートが異なる場合、SAME_RANK_DIFF_SUIT と判定される", () => {
+    const cardS5 = createTestCard({ cardInstanceId: "c-s5", suit: "S", rank: "5", value: 5 });
+    const cardH7 = createTestCard({ cardInstanceId: "c-h7", suit: "H", rank: "7", value: 7 });
+    const cardC5 = createTestCard({ cardInstanceId: "c-c5", suit: "C", rank: "5", value: 5 });
+    const cardD7 = createTestCard({ cardInstanceId: "c-d7", suit: "D", rank: "7", value: 7 });
+
+    const request = createBaseRequest({
+      selfHand: [cardS5, cardH7, cardC5, cardD7],
+      patterns: [],
+    });
+
+    const candA: any = {
+      features: [0, 0, 0, 0],
+      costPayment: {
+        discardedCardIds: ["c-s5", "c-h7"],
+        sacrificedUnitIds: [],
+        drivenBulwarkUnitIds: [],
+        lifeCount: 0,
+      },
+    };
+    const candB: any = {
+      features: [0, 0, 0, 0],
+      costPayment: {
+        discardedCardIds: ["c-c5", "c-d7"],
+        sacrificedUnitIds: [],
+        drivenBulwarkUnitIds: [],
+        lifeCount: 0,
+      },
+    };
+
+    const reason = classifyCostPairCollisionReason(candA, candB, request);
+    expect(reason).toBe("SAME_RANK_DIFF_SUIT");
   });
 });
