@@ -27,6 +27,8 @@ import {
 } from "../../engine/ai/Gen9BenchmarkWeights.js";
 import {
   TACTICAL_FEATURE_DIMENSION,
+  TACTICAL_FEATURE_DIMENSION_V70,
+  TACTICAL_FEATURE_DIMENSION_V73,
   TACTICAL_FEATURE_NAMES,
   TACTICAL_FEATURE_CATEGORY_MAP,
 } from "../../engine/ai/Gen9LearnableTacticalPolicy.js";
@@ -76,11 +78,11 @@ describe("Gen9BenchmarkWeights (SSOT) 整合性自動テスト", () => {
   const work53_g0_ind7 = extractWeightsFromSource(work53Source, "G0_IND7_WEIGHTS");
   const work53_g3_ind3 = extractWeightsFromSource(work53Source, "G3_IND3_WEIGHTS");
 
-  it("1. 各重み配列の次元数が 20 であり、Object.isFrozen で凍結されていること", () => {
-    expect(G0_IND2_WEIGHTS.length).toBe(TACTICAL_FEATURE_DIMENSION);
-    expect(G0_IND7_WEIGHTS.length).toBe(TACTICAL_FEATURE_DIMENSION);
-    expect(G3_IND3_WEIGHTS.length).toBe(TACTICAL_FEATURE_DIMENSION);
-    expect(R4_PRESET_TACTICAL_WEIGHTS.length).toBe(TACTICAL_FEATURE_DIMENSION);
+  it("1. 各重み配列の次元数が 20 または 24 であり、Object.isFrozen で凍結されていること", () => {
+    expect(G0_IND2_WEIGHTS.length).toBe(TACTICAL_FEATURE_DIMENSION_V70);
+    expect(G0_IND7_WEIGHTS.length).toBe(TACTICAL_FEATURE_DIMENSION_V70);
+    expect(G3_IND3_WEIGHTS.length).toBe(TACTICAL_FEATURE_DIMENSION_V70);
+    expect(R4_PRESET_TACTICAL_WEIGHTS.length).toBe(TACTICAL_FEATURE_DIMENSION_V73);
 
     expect(Object.isFrozen(G0_IND2_WEIGHTS)).toBe(true);
     expect(Object.isFrozen(G0_IND7_WEIGHTS)).toBe(true);
@@ -97,7 +99,7 @@ describe("Gen9BenchmarkWeights (SSOT) 整合性自動テスト", () => {
     expect(G0_IND2_WEIGHTS.length).toBe(work54a_g0_ind2.length);
     expect(G0_IND2_WEIGHTS.length).toBe(work53_g0_ind2.length);
 
-    for (let i = 0; i < TACTICAL_FEATURE_DIMENSION; i++) {
+    for (let i = 0; i < TACTICAL_FEATURE_DIMENSION_V70; i++) {
       expect(G0_IND2_WEIGHTS[i]).toBe(work54a_g0_ind2[i]);
       expect(G0_IND2_WEIGHTS[i]).toBe(work53_g0_ind2[i]);
     }
@@ -107,7 +109,7 @@ describe("Gen9BenchmarkWeights (SSOT) 整合性自動テスト", () => {
     expect(G0_IND7_WEIGHTS.length).toBe(work54a_g0_ind7.length);
     expect(G0_IND7_WEIGHTS.length).toBe(work53_g0_ind7.length);
 
-    for (let i = 0; i < TACTICAL_FEATURE_DIMENSION; i++) {
+    for (let i = 0; i < TACTICAL_FEATURE_DIMENSION_V70; i++) {
       expect(G0_IND7_WEIGHTS[i]).toBe(work54a_g0_ind7[i]);
       expect(G0_IND7_WEIGHTS[i]).toBe(work53_g0_ind7[i]);
     }
@@ -117,7 +119,7 @@ describe("Gen9BenchmarkWeights (SSOT) 整合性自動テスト", () => {
     expect(G3_IND3_WEIGHTS.length).toBe(work54a_g3_ind3.length);
     expect(G3_IND3_WEIGHTS.length).toBe(work53_g3_ind3.length);
 
-    for (let i = 0; i < TACTICAL_FEATURE_DIMENSION; i++) {
+    for (let i = 0; i < TACTICAL_FEATURE_DIMENSION_V70; i++) {
       expect(G3_IND3_WEIGHTS[i]).toBe(work54a_g3_ind3[i]);
       expect(G3_IND3_WEIGHTS[i]).toBe(work53_g3_ind3[i]);
     }
@@ -154,7 +156,7 @@ describe("Gen9BenchmarkWeights (SSOT) 整合性自動テスト", () => {
     expect(BENCHMARK_TACTICAL_WEIGHTS_MAP.G3_IND3).toBe(G3_IND3_WEIGHTS);
   });
 
-  it("8. GEN9_TACTICAL_FEATURE_DEFINITIONS (全20次元) が正本仕様と完全に一致すること (作業D)", () => {
+  it("8. GEN9_TACTICAL_FEATURE_DEFINITIONS (全24次元) が正本仕様と完全に一致すること (Work 5-5B)", () => {
     expect(GEN9_TACTICAL_FEATURE_DEFINITIONS.length).toBe(TACTICAL_FEATURE_DIMENSION);
     expect(Object.isFrozen(GEN9_TACTICAL_FEATURE_DEFINITIONS)).toBe(true);
 
@@ -181,6 +183,10 @@ describe("Gen9BenchmarkWeights (SSOT) 整合性自動テスト", () => {
     expect(defMap.get("t17")).toBe("低ライフ時の兵士召喚・防壁設置");
     expect(defMap.get("t18")).toBe("未ブロック攻撃による致死機会");
     expect(defMap.get("t19")).toBe("突破による致死機会");
+    expect(defMap.get("t20")).toBe("手札廃棄カードの数字合計 (非Joker)");
+    expect(defMap.get("t21")).toBe("廃棄カード中のJoker枚数");
+    expect(defMap.get("t22")).toBe("生贄ユニットのサイズ合計");
+    expect(defMap.get("t23")).toBe("消費ライフの相対割合");
 
     // formatTacticalWeightsWithDefinitions の検証
     const formatted = formatTacticalWeightsWithDefinitions(G0_IND7_WEIGHTS);
@@ -189,13 +195,14 @@ describe("Gen9BenchmarkWeights (SSOT) 整合性自動テスト", () => {
     expect(formatted[0].id).toBe("t00");
     expect(formatted[14].weight).toBe(0.22);
     expect(formatted[14].descriptionJa).toBe("ブロックによるトレード優位");
+    expect(formatted[20].weight).toBe(0.0);
   });
 
-  it("9. generateTacticalWeightsMarkdownTable が全20次元の正本定義・重みを含むMarkdown表を出力すること (修正D)", () => {
+  it("9. generateTacticalWeightsMarkdownTable が全24次元の正本定義・重みを含むMarkdown表を出力すること (Work 5-5B)", () => {
     const md = generateTacticalWeightsMarkdownTable();
     const lines = md.split("\n");
-    // ヘッダー行 + 区切り行 + 20次元 = 22行
-    expect(lines.length).toBe(22);
+    // ヘッダー行 + 区切り行 + 24次元 = 26行
+    expect(lines.length).toBe(26);
 
     expect(lines[0]).toBe(
       "| ID | 特徴量キー名 | カテゴリ | 日本語説明 | R4 | G0 IND2 | G0 IND7 | G3 IND3 |"
@@ -206,5 +213,6 @@ describe("Gen9BenchmarkWeights (SSOT) 整合性自動テスト", () => {
     expect(md).toContain("| `t06` | `t06_counter_certain_lethal_prevent` | `COUNTER_PREVENTION` | Counterによる確定致死ダメージ阻止 | +2.2 | +2.6 | +2.6 | +2.7222 |");
     expect(md).toContain("| `t15` | `t15_block_unblocked_lethal` | `COMBAT_OUTCOME` | 未ブロック時の致死リスク | -2.5 | -2.5 | -3 | -3 |");
     expect(md).toContain("| `t17` | `t17_survival_critical_life_board_build` | `SURVIVAL` | 低ライフ時の兵士召喚・防壁設置 | +0.1 | 0 | +0.15 | +0.15 |");
+    expect(md).toContain("| `t20` | `t20_cost_discard_value_sum` | `RESOURCE_COST` | 手札廃棄カードの数字合計 (非Joker) | 0 | 0 | 0 | 0 |");
   });
 });

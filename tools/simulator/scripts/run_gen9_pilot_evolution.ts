@@ -582,6 +582,7 @@ export function breedEvolvedOffspring(
     0.22, 0.28, 0.18, 0.30, 0.25, 0.50, 0.30, // t10..t16 (Combat & Block)
     0.22,                               // t17 (Survival)
     0.45, 0.50,                         // t18..t19 (Lethal opportunity)
+    0.20, 0.20, 0.20, 0.20,             // t20..t23 (Resource cost, Work 5-5B)
   ];
 
   const newWeights: number[] = new Array(TACTICAL_FEATURE_DIMENSION);
@@ -618,7 +619,7 @@ export function breedEvolvedOffspring(
         if (Math.abs(w) < 0.02) w = 0.0;
       }
 
-      const isPenaltyFeature = k <= 5 || k === 13 || k === 15 || k === 16;
+      const isPenaltyFeature = k <= 5 || k === 13 || k === 15 || k === 16 || k >= 20;
       if (isPenaltyFeature) {
         w = Math.max(-3.5, Math.min(0.0, w));
       } else {

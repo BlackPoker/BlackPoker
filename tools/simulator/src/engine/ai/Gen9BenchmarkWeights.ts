@@ -16,6 +16,8 @@
 
 import {
   TACTICAL_FEATURE_DIMENSION,
+  TACTICAL_FEATURE_DIMENSION_V70,
+  TACTICAL_FEATURE_DIMENSION_V73,
   TACTICAL_FEATURE_NAMES,
   TACTICAL_FEATURE_CATEGORY_MAP,
   TacticalFeatureName,
@@ -24,7 +26,7 @@ import {
 } from "./Gen9LearnableTacticalPolicy.js";
 
 /**
- * 20次元戦術特徴量の完全定義情報
+ * 戦術特徴量の完全定義情報
  */
 export interface TacticalFeatureDefinition {
   readonly index: number;
@@ -35,7 +37,7 @@ export interface TacticalFeatureDefinition {
 }
 
 /**
- * Gen 9 20次元戦術特徴量の正本定義 (Gen9LearnableTacticalPolicy.ts に完全準拠)
+ * Gen 9 戦術特徴量の正本定義 (全24次元, Gen9LearnableTacticalPolicy.ts に完全準拠)
  */
 export const GEN9_TACTICAL_FEATURE_DEFINITIONS: readonly TacticalFeatureDefinition[] = Object.freeze([
   { index: 0, id: "t00", name: "t00_pass_certain_lethal", category: "CERTAIN_DAMAGE", descriptionJa: "PASS時の確定致死ダメージリスク" },
@@ -58,6 +60,11 @@ export const GEN9_TACTICAL_FEATURE_DEFINITIONS: readonly TacticalFeatureDefiniti
   { index: 17, id: "t17", name: "t17_survival_critical_life_board_build", category: "SURVIVAL", descriptionJa: "低ライフ時の兵士召喚・防壁設置" },
   { index: 18, id: "t18", name: "t18_attack_unblocked_lethal", category: "LETHAL_OPPORTUNITY", descriptionJa: "未ブロック攻撃による致死機会" },
   { index: 19, id: "t19", name: "t19_attack_breakthrough_lethal", category: "LETHAL_OPPORTUNITY", descriptionJa: "突破による致死機会" },
+  // Work 5-5B: コスト支払い戦術特徴量 (全24次元)
+  { index: 20, id: "t20", name: "t20_cost_discard_value_sum", category: "RESOURCE_COST", descriptionJa: "手札廃棄カードの数字合計 (非Joker)" },
+  { index: 21, id: "t21", name: "t21_cost_discard_joker_count", category: "RESOURCE_COST", descriptionJa: "廃棄カード中のJoker枚数" },
+  { index: 22, id: "t22", name: "t22_cost_sacrifice_unit_size_sum", category: "RESOURCE_COST", descriptionJa: "生贄ユニットのサイズ合計" },
+  { index: 23, id: "t23", name: "t23_cost_life_fraction", category: "RESOURCE_COST", descriptionJa: "消費ライフの相対割合" },
 ]);
 
 /**
@@ -69,7 +76,7 @@ export function formatTacticalWeightsWithDefinitions(
   validateBenchmarkWeights(weights);
   return GEN9_TACTICAL_FEATURE_DEFINITIONS.map((def, i) => ({
     ...def,
-    weight: weights[i],
+    weight: weights[i] ?? 0.0,
   }));
 }
 
@@ -143,12 +150,12 @@ export function generateTacticalWeightsMarkdownTable(): string {
     `| ${separator.join(" | ")} |`,
   ];
 
-  for (let i = 0; i < TACTICAL_FEATURE_DIMENSION; i++) {
+  for (let i = 0; i < GEN9_TACTICAL_FEATURE_DEFINITIONS.length; i++) {
     const def = GEN9_TACTICAL_FEATURE_DEFINITIONS[i];
     const r4 = R4_PRESET_TACTICAL_WEIGHTS[i];
-    const g0Ind2 = G0_IND2_WEIGHTS[i];
-    const g0Ind7 = G0_IND7_WEIGHTS[i];
-    const g3Ind3 = G3_IND3_WEIGHTS[i];
+    const g0Ind2 = G0_IND2_WEIGHTS[i] ?? 0.0;
+    const g0Ind7 = G0_IND7_WEIGHTS[i] ?? 0.0;
+    const g3Ind3 = G3_IND3_WEIGHTS[i] ?? 0.0;
 
     const formatNum = (n: number) => (n > 0 ? `+${n}` : `${n}`);
 
@@ -161,15 +168,20 @@ export function generateTacticalWeightsMarkdownTable(): string {
 }
 
 /**
- * 重み配列の妥当性検証 (20次元、有限値)
+ * 重み配列の妥当性検証 (旧20次元または新24次元、有限値)
  */
 export function validateBenchmarkWeights(
   weights: readonly number[],
-  expectedDimension: number = TACTICAL_FEATURE_DIMENSION
+  expectedDimension?: number
 ): void {
-  if (!Array.isArray(weights) || weights.length !== expectedDimension) {
+  const validLen =
+    expectedDimension !== undefined
+      ? weights?.length === expectedDimension
+      : weights?.length === TACTICAL_FEATURE_DIMENSION_V70 ||
+        weights?.length === TACTICAL_FEATURE_DIMENSION_V73;
+  if (!Array.isArray(weights) || !validLen) {
     throw new Error(
-      `戦術重み配列の次元数が不正です: 期待値=${expectedDimension}, 実際=${weights?.length}`
+      `戦術重み配列の次元数が不正です: 期待値=${expectedDimension ?? `${TACTICAL_FEATURE_DIMENSION_V70} または ${TACTICAL_FEATURE_DIMENSION_V73}`}, 実際=${weights?.length}`
     );
   }
   for (let i = 0; i < weights.length; i++) {

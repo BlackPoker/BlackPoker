@@ -16,6 +16,8 @@ import { Gen9TacticalPrototypePolicy } from "../../engine/ai/Gen9TacticalPrototy
 import {
   Gen9LearnableTacticalPolicy,
   TACTICAL_FEATURE_DIMENSION,
+  TACTICAL_FEATURE_DIMENSION_V70,
+  TACTICAL_FEATURE_DIMENSION_V73,
   TACTICAL_FEATURE_NAMES,
   TACTICAL_FEATURE_CATEGORY_MAP,
   ZERO_TACTICAL_WEIGHTS,
@@ -713,9 +715,11 @@ describe("Work 5-2: R1/R4意思決定比較検証 & Gen9LearnableTacticalPolicy 
   // ===========================================================================
   // 3. 6つの戦術特徴量カテゴリの独立評価検証
   // ===========================================================================
-  describe("3. 6つの戦術特徴量カテゴリの独立評価検証", () => {
-    it("全20次元の戦術特徴量が6カテゴリすべてに漏れなくマッピングされ、カテゴリ単位で独立して寄与度を分離評価できる", () => {
-      expect(TACTICAL_FEATURE_DIMENSION).toBe(20);
+  describe("3. 7つの戦術特徴量カテゴリの独立評価検証 (Work 5-5B)", () => {
+    it("全24次元の戦術特徴量が7カテゴリすべてに漏れなくマッピングされ、カテゴリ単位で独立して寄与度を分離評価できる", () => {
+      expect(TACTICAL_FEATURE_DIMENSION_V70).toBe(20);
+      expect(TACTICAL_FEATURE_DIMENSION_V73).toBe(24);
+      expect(TACTICAL_FEATURE_DIMENSION).toBe(24);
       const seenCategories = new Set<string>();
       for (const name of TACTICAL_FEATURE_NAMES) {
         const cat = TACTICAL_FEATURE_CATEGORY_MAP[name];
@@ -729,6 +733,7 @@ describe("Work 5-2: R1/R4意思決定比較検証 & Gen9LearnableTacticalPolicy 
           "COUNTER_PREVENTION",
           "ESTIMATED_DAMAGE",
           "LETHAL_OPPORTUNITY",
+          "RESOURCE_COST",
           "SURVIVAL",
         ].sort()
       );

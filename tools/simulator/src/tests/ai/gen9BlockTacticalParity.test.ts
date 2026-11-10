@@ -42,6 +42,7 @@ import {
   TACTICAL_FEATURE_ENCODER_VERSION_LEGACY,
   TACTICAL_FEATURE_ENCODER_VERSION_V71,
   TACTICAL_FEATURE_ENCODER_VERSION_V72,
+  TACTICAL_FEATURE_ENCODER_VERSION_V73,
   extractBlockAssignmentsFromPattern,
   createBlockTacticalContext,
 } from "../../engine/ai/Gen9LearnableTacticalPolicy.js";
@@ -731,7 +732,7 @@ describe("Work 5-4A: Gen 9 通常ブロック戦術評価とストリーミン�
     );
   });
 
-  it("7. 過去の評価結果保護・バージョン識別: v7.0-legacy-block-stream-only と v7.1-unified-block-assignment および v7.2 が明確に区別されること", () => {
+  it("7. 過去の評価結果保護・バージョン識別: v7.0-legacy-block-stream-only と v7.1-unified-block-assignment および v7.2, v7.3 が明確に区別されること", () => {
     const evaluator = Gen9TacticalPrototypePolicy.getDefaultEvaluator();
     const legacyGenome = fromV6DNA(gen8DNA, R4_PRESET_TACTICAL_WEIGHTS, {
       id: "legacy-v7.0",
@@ -741,26 +742,35 @@ describe("Work 5-4A: Gen 9 通常ブロック戦術評価とストリーミン�
       id: "current-v7.1",
       encoderVersion: TACTICAL_FEATURE_ENCODER_VERSION_V71,
     });
+    const v72Genome = fromV6DNA(gen8DNA, R4_PRESET_TACTICAL_WEIGHTS, {
+      id: "version-v7.2",
+      encoderVersion: TACTICAL_FEATURE_ENCODER_VERSION_V72,
+    });
     const currentGenome = fromV6DNA(gen8DNA, R4_PRESET_TACTICAL_WEIGHTS, {
-      id: "current-v7.2",
+      id: "current-v7.3",
       encoderVersion: TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
     });
 
     const legacyPolicy = new Gen9LearnableTacticalPolicy(legacyGenome, "Legacy_v7.0", evaluator);
     const v71Policy = new Gen9LearnableTacticalPolicy(v71Genome, "V71", evaluator);
-    const currentPolicy = new Gen9LearnableTacticalPolicy(currentGenome, "Current_v7.2", evaluator);
+    const v72Policy = new Gen9LearnableTacticalPolicy(v72Genome, "V72", evaluator);
+    const currentPolicy = new Gen9LearnableTacticalPolicy(currentGenome, "Current_v7.3", evaluator);
 
     expect(legacyPolicy.getEncoderVersion()).toBe("v7.0-legacy-block-stream-only");
     expect(v71Policy.getEncoderVersion()).toBe("v7.1-unified-block-assignment");
-    expect(currentPolicy.getEncoderVersion()).toBe("v7.2-unified-block-conditional-pass");
+    expect(v72Policy.getEncoderVersion()).toBe("v7.2-unified-block-conditional-pass");
+    expect(currentPolicy.getEncoderVersion()).toBe("v7.3-cost-evaluated-v24");
     expect(legacyPolicy.descriptor.metadata?.tacticalFeatureEncoderVersion).toBe(
       "v7.0-legacy-block-stream-only"
     );
     expect(v71Policy.descriptor.metadata?.tacticalFeatureEncoderVersion).toBe(
       "v7.1-unified-block-assignment"
     );
-    expect(currentPolicy.descriptor.metadata?.tacticalFeatureEncoderVersion).toBe(
+    expect(v72Policy.descriptor.metadata?.tacticalFeatureEncoderVersion).toBe(
       "v7.2-unified-block-conditional-pass"
+    );
+    expect(currentPolicy.descriptor.metadata?.tacticalFeatureEncoderVersion).toBe(
+      "v7.3-cost-evaluated-v24"
     );
 
     const { state, attackers, candidateBlockers } = createBlockDecisionTestState({

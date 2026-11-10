@@ -26,14 +26,20 @@ import { DecisionFeatureEncoder } from "./DecisionFeatureEncoder.js";
 import { GenomeScorer } from "./GenomeScorer.js";
 import { LegalPattern } from "../../domain/decision/LegalPattern.js";
 import { UnitAssignment } from "../../domain/decision/DecisionCatalog.js";
-import { UnitView, PlayerObservationView, KnownCardView, RequestView } from "../../domain/decision/PlayerObservation.js";
+import { UnitView, PlayerObservationView, KnownCardView, CardView, RequestView } from "../../domain/decision/PlayerObservation.js";
 import { TacticalEvaluator, TacticalRequestOutcome } from "../../domain/decision/TacticalEvaluationTypes.js";
 import { Gen9TacticalPrototypePolicy } from "./Gen9TacticalPrototypePolicy.js";
 
 export const TACTICAL_FEATURE_SCHEMA_VERSION = 7;
 
+/** 旧 20 次元戦術特徴量仕様 (Work 5-2 〜 Work 5-4B) */
+export const TACTICAL_FEATURE_DIMENSION_V70 = 20;
+
+/** 新 24 次元戦術特徴量仕様 (Work 5-5B コスト支払い評価拡張) */
+export const TACTICAL_FEATURE_DIMENSION_V73 = 24;
+
 /**
- * 戦術特徴量エンコーダ仕様バージョン (Work 5-4B)
+ * 戦術特徴量エンコーダ仕様バージョン (Work 5-5B)
  * - "v7.0-legacy-block-stream-only":
  *   Work 5-2 / Work 5-3 時点の仕様。通常ブロック (patterns 列挙) では t14〜t16 が 0 のままとなり、
  *   ストリーミングブロック時のみ単体サイズ比較で t14〜t16 を計算。PASS 減点は対抗手段の有無にかかわらず無条件適用。
@@ -41,14 +47,18 @@ export const TACTICAL_FEATURE_SCHEMA_VERSION = 7;
  *   Work 5-4A の仕様。通常ブロックとストリーミングブロックの双方で同一の評価関数を用い、
  *   複数アタッカー・複数兵士合算サイズ・防壁ブロック・致死/危険域ダメージを完全一致で計算。PASS 減点は無条件適用。
  * - "v7.2-unified-block-conditional-pass":
- *   Work 5-4B 以降の標準仕様。ブロック特徴量の統一評価 (v7.1) を完全に維持した上で、
+ *   Work 5-4B の仕様。ブロック特徴量の統一評価 (v7.1) を完全に維持した上で、
  *   同一 DecisionRequest 内に相手リクエストに対する有効な対抗手段（Counter 等）が存在しない場合、
  *   PASS に対する追加減点 (t00〜t05) を免除し、無関係なアクション (action.packOpen 等) への逃避を防ぐ。
+ * - "v7.3-cost-evaluated-v24":
+ *   Work 5-5B 以降の標準仕様。v7.2 の統一ブロック評価および PASS ペナルティ条件付き免除を 100% 継承した上で、
+ *   コスト支払い対象の質的属性（手札廃棄値 t20、Joker t21、犠牲戦力 t22、相対ライフ t23）を評価する 4 次元を追加（全 24 次元）。
  */
 export type TacticalFeatureEncoderVersion =
   | "v7.0-legacy-block-stream-only"
   | "v7.1-unified-block-assignment"
-  | "v7.2-unified-block-conditional-pass";
+  | "v7.2-unified-block-conditional-pass"
+  | "v7.3-cost-evaluated-v24";
 
 export const TACTICAL_FEATURE_ENCODER_VERSION_LEGACY: TacticalFeatureEncoderVersion =
   "v7.0-legacy-block-stream-only";
@@ -59,11 +69,34 @@ export const TACTICAL_FEATURE_ENCODER_VERSION_V71: TacticalFeatureEncoderVersion
 export const TACTICAL_FEATURE_ENCODER_VERSION_V72: TacticalFeatureEncoderVersion =
   "v7.2-unified-block-conditional-pass";
 
+export const TACTICAL_FEATURE_ENCODER_VERSION_V73: TacticalFeatureEncoderVersion =
+  "v7.3-cost-evaluated-v24";
+
 export const TACTICAL_FEATURE_ENCODER_VERSION_CURRENT: TacticalFeatureEncoderVersion =
-  "v7.2-unified-block-conditional-pass";
+  "v7.3-cost-evaluated-v24";
 
 /**
- * 独立評価可能な6つの戦術特徴量カテゴリ
+ * PASS ペナルティの条件付き免除 (Work 5-4B) をサポートするバージョンか判定
+ * - v7.2-unified-block-conditional-pass
+ * - v7.3-cost-evaluated-v24
+ */
+export function supportsConditionalPass(version: TacticalFeatureEncoderVersion): boolean {
+  return (
+    version === "v7.2-unified-block-conditional-pass" ||
+    version === "v7.3-cost-evaluated-v24"
+  );
+}
+
+/**
+ * コスト支払い戦術特徴量 (t20〜t23) の評価をサポートするバージョンか判定
+ * - v7.3-cost-evaluated-v24
+ */
+export function supportsCostEvaluation(version: TacticalFeatureEncoderVersion): boolean {
+  return version === "v7.3-cost-evaluated-v24";
+}
+
+/**
+ * 独立評価可能な7つの戦術特徴量カテゴリ (Work 5-5B: RESOURCE_COST 追加)
  */
 export type TacticalFeatureCategory =
   | "CERTAIN_DAMAGE"
@@ -71,10 +104,11 @@ export type TacticalFeatureCategory =
   | "COUNTER_PREVENTION"
   | "COMBAT_OUTCOME"
   | "SURVIVAL"
-  | "LETHAL_OPPORTUNITY";
+  | "LETHAL_OPPORTUNITY"
+  | "RESOURCE_COST";
 
 /**
- * Gen 9 学習可能戦術特徴量名リスト (全20次元)
+ * Gen 9 学習可能戦術特徴量名リスト (全24次元, Work 5-5B)
  */
 export const TACTICAL_FEATURE_NAMES = [
   // Category 1: DSLから計算した確定損害 (CERTAIN_DAMAGE)
@@ -108,6 +142,12 @@ export const TACTICAL_FEATURE_NAMES = [
   // Category 6: 攻撃機会・リーサル完遂 (LETHAL_OPPORTUNITY)
   "t18_attack_unblocked_lethal",
   "t19_attack_breakthrough_lethal",
+
+  // Category 7: コスト支払いリソース評価 (RESOURCE_COST, Work 5-5B)
+  "t20_cost_discard_value_sum",
+  "t21_cost_discard_joker_count",
+  "t22_cost_sacrifice_unit_size_sum",
+  "t23_cost_life_fraction",
 ] as const;
 
 export type TacticalFeatureName = (typeof TACTICAL_FEATURE_NAMES)[number];
@@ -143,6 +183,11 @@ export const TACTICAL_FEATURE_CATEGORY_MAP: Readonly<Record<TacticalFeatureName,
 
   t18_attack_unblocked_lethal: "LETHAL_OPPORTUNITY",
   t19_attack_breakthrough_lethal: "LETHAL_OPPORTUNITY",
+
+  t20_cost_discard_value_sum: "RESOURCE_COST",
+  t21_cost_discard_joker_count: "RESOURCE_COST",
+  t22_cost_sacrifice_unit_size_sum: "RESOURCE_COST",
+  t23_cost_life_fraction: "RESOURCE_COST",
 };
 
 /**
@@ -153,7 +198,7 @@ export const ZERO_TACTICAL_WEIGHTS: readonly number[] = Object.freeze(
 );
 
 /**
- * Work 5-1 R4 プリセット戦術重みベクトル（Gen9TacticalPrototypePolicy と完全一致）
+ * Work 5-1 R4 プリセット戦術重みベクトル（24次元, コスト特徴量4つは 0.0）
  */
 export const R4_PRESET_TACTICAL_WEIGHTS: readonly number[] = Object.freeze([
   -2.5,  // t00_pass_certain_lethal
@@ -176,6 +221,11 @@ export const R4_PRESET_TACTICAL_WEIGHTS: readonly number[] = Object.freeze([
   +0.1,  // t17_survival_critical_life_board_build
   +2.0,  // t18_attack_unblocked_lethal
   +2.5,  // t19_attack_breakthrough_lethal
+  // コスト支払い戦術特徴量 (t20〜t23): R4 初期値はすべて 0.0 (互換性維持)
+  0.0,   // t20_cost_discard_value_sum
+  0.0,   // t21_cost_discard_joker_count
+  0.0,   // t22_cost_sacrifice_unit_size_sum
+  0.0,   // t23_cost_life_fraction
 ]);
 
 /**
@@ -244,6 +294,7 @@ export interface TacticalCategoryBreakdown {
   readonly COMBAT_OUTCOME: number;
   readonly SURVIVAL: number;
   readonly LETHAL_OPPORTUNITY: number;
+  readonly RESOURCE_COST: number;
   readonly totalTacticalScore: number;
   readonly finalScore: number;
 }
@@ -278,12 +329,26 @@ export function fromV6DNA(
   } else if (preset === "r4") {
     weights = [...R4_PRESET_TACTICAL_WEIGHTS];
   } else {
-    if (preset.length !== TACTICAL_FEATURE_DIMENSION) {
+    if (!Array.isArray(preset)) {
+      throw new Error(`tacticalWeights は配列である必要があります`);
+    }
+    for (let i = 0; i < preset.length; i++) {
+      if (!Number.isFinite(preset[i])) {
+        throw new Error(
+          `tacticalWeights[${i}] が有限な数値ではありません: ${preset[i]}`
+        );
+      }
+    }
+    if (preset.length === TACTICAL_FEATURE_DIMENSION_V70) {
+      // 旧 20 次元 DNA の完全復元: 元の 20 重みを維持し、末尾 4 つに 0.0 を追加
+      weights = [...preset, 0.0, 0.0, 0.0, 0.0];
+    } else if (preset.length === TACTICAL_FEATURE_DIMENSION_V73) {
+      weights = [...preset];
+    } else {
       throw new Error(
-        `tacticalWeights の次元数が不正です: expected=${TACTICAL_FEATURE_DIMENSION}, actual=${preset.length}`
+        `tacticalWeights の次元数が不正です: expected=${TACTICAL_FEATURE_DIMENSION_V73} (または旧仕様 ${TACTICAL_FEATURE_DIMENSION_V70}), actual=${preset.length}`
       );
     }
-    weights = [...preset];
   }
 
   const defaultOrigin: TacticalGenomeOriginType =
@@ -384,41 +449,63 @@ export function fromV6CompatibleDNA(
 ): Gen9TacticalGenome {
   DecisionDNACodec.validate(dna);
   if (typeof dna.metadata?.notes === "string") {
+    let parsed: any;
     try {
-      const parsed = JSON.parse(dna.metadata.notes);
-      if (
-        parsed &&
-        Array.isArray(parsed.tacticalWeights) &&
-        parsed.tacticalWeights.length === TACTICAL_FEATURE_DIMENSION
-      ) {
-        const rawParents = dna.metadata.parentIds;
-        const parentIds = Array.isArray(rawParents)
-          ? rawParents.filter((x): x is string => typeof x === "string")
-          : undefined;
-        return fromV6DNA(dna, parsed.tacticalWeights, {
-          id: typeof dna.metadata.id === "string" ? dna.metadata.id : undefined,
-          name: typeof dna.metadata.name === "string" ? dna.metadata.name : undefined,
-          generation: typeof dna.metadata.generation === "number" ? dna.metadata.generation : undefined,
-          createdGeneration:
-            typeof parsed.createdGeneration === "number" ? parsed.createdGeneration : undefined,
-          originType:
-            parsed.originType === "HAND_DESIGNED_G0" ||
-            parsed.originType === "EVOLVED_OFFSPRING" ||
-            parsed.originType === "V6_BASELINE"
-              ? parsed.originType
-              : undefined,
-          parentIds,
-          notes: typeof parsed.userNotes === "string" ? parsed.userNotes : undefined,
-          encoderVersion:
-            parsed.encoderVersion === "v7.0-legacy-block-stream-only" ||
-            parsed.encoderVersion === "v7.1-unified-block-assignment" ||
-            parsed.encoderVersion === "v7.2-unified-block-conditional-pass"
-              ? parsed.encoderVersion
-              : undefined,
-        });
-      }
+      parsed = JSON.parse(dna.metadata.notes);
     } catch {
       // 通常文字列の notes の場合はフォールバックを使用
+      return fromV6DNA(dna, fallbackPreset);
+    }
+
+    if (parsed && typeof parsed === "object" && "tacticalWeights" in parsed) {
+      if (!Array.isArray(parsed.tacticalWeights)) {
+        throw new Error(`notes 内の tacticalWeights が配列ではありません`);
+      }
+      for (let i = 0; i < parsed.tacticalWeights.length; i++) {
+        if (!Number.isFinite(parsed.tacticalWeights[i])) {
+          throw new Error(
+            `notes 内の tacticalWeights[${i}] が有限な数値ではありません: ${parsed.tacticalWeights[i]}`
+          );
+        }
+      }
+      const rawLen = parsed.tacticalWeights.length;
+      if (rawLen !== TACTICAL_FEATURE_DIMENSION_V70 && rawLen !== TACTICAL_FEATURE_DIMENSION_V73) {
+        throw new Error(
+          `notes 内の tacticalWeights の次元数が不正です: expected=${TACTICAL_FEATURE_DIMENSION_V73} (または旧仕様 ${TACTICAL_FEATURE_DIMENSION_V70}), actual=${rawLen}`
+        );
+      }
+
+      const rawParents = dna.metadata.parentIds;
+      const parentIds = Array.isArray(rawParents)
+        ? rawParents.filter((x): x is string => typeof x === "string")
+        : undefined;
+
+      const validEncoderVersions: TacticalFeatureEncoderVersion[] = [
+        "v7.0-legacy-block-stream-only",
+        "v7.1-unified-block-assignment",
+        "v7.2-unified-block-conditional-pass",
+        "v7.3-cost-evaluated-v24",
+      ];
+      const encoderVersion = validEncoderVersions.includes(parsed.encoderVersion)
+        ? (parsed.encoderVersion as TacticalFeatureEncoderVersion)
+        : undefined;
+
+      return fromV6DNA(dna, parsed.tacticalWeights, {
+        id: typeof dna.metadata.id === "string" ? dna.metadata.id : undefined,
+        name: typeof dna.metadata.name === "string" ? dna.metadata.name : undefined,
+        generation: typeof dna.metadata.generation === "number" ? dna.metadata.generation : undefined,
+        createdGeneration:
+          typeof parsed.createdGeneration === "number" ? parsed.createdGeneration : undefined,
+        originType:
+          parsed.originType === "HAND_DESIGNED_G0" ||
+          parsed.originType === "EVOLVED_OFFSPRING" ||
+          parsed.originType === "V6_BASELINE"
+            ? parsed.originType
+            : undefined,
+        parentIds,
+        notes: typeof parsed.userNotes === "string" ? parsed.userNotes : undefined,
+        encoderVersion,
+      });
     }
   }
   return fromV6DNA(dna, fallbackPreset);
@@ -852,7 +939,84 @@ export function hasEffectiveCounterMeasure(
 }
 
 /**
- * 単一パターンの戦術特徴量ベクトル (20次元) をエンコード
+ * コスト支払い戦術特徴量評価用の観測コンテキスト (Work 5-5B)
+ */
+export interface TacticalCostEvaluationContext {
+  readonly knownCardsMap: ReadonlyMap<string, KnownCardView>;
+  readonly unitsMap: ReadonlyMap<string, UnitView>;
+}
+
+export function createCostTacticalContext(
+  request: Readonly<DecisionRequest>
+): TacticalCostEvaluationContext {
+  const obs = request.observation;
+  const knownCardsMap = new Map<string, KnownCardView>();
+  const unitsMap = new Map<string, UnitView>();
+
+  const registerCard = (c?: CardView) => {
+    if (c && c.visibility === "KNOWN") {
+      knownCardsMap.set(c.cardInstanceId, c);
+    }
+  };
+
+  const registerCards = (cards?: readonly CardView[]) => {
+    if (!cards) return;
+    for (const c of cards) {
+      registerCard(c);
+    }
+  };
+
+  const registerUnits = (units?: readonly UnitView[]) => {
+    if (!units) return;
+    for (const u of units) {
+      unitsMap.set(u.unitId, u);
+      if (u.cards) {
+        registerCards(u.cards);
+      }
+    }
+  };
+
+  for (const p of obs.players || []) {
+    registerCards(p.handCards);
+    registerUnits(p.field);
+    registerUnits(p.trumps);
+    registerCard(p.graveTopCard);
+    if (p.isViewer && p.grave) {
+      for (const g of p.grave) {
+        if ("visibility" in g && g.visibility === "KNOWN") {
+          registerCard(g as KnownCardView);
+        } else if ("unitId" in g) {
+          unitsMap.set((g as UnitView).unitId, g as UnitView);
+          if ((g as UnitView).cards) registerCards((g as UnitView).cards);
+        }
+      }
+    }
+    if (p.fog) {
+      for (const f of p.fog) {
+        if (f.card) registerCard(f.card);
+      }
+    }
+    if (p.pack?.canViewCards && p.pack.cards) {
+      registerCards(p.pack.cards);
+    }
+    if (p.rareCards?.canViewCards && p.rareCards.cards) {
+      registerCards(p.rareCards.cards);
+    }
+  }
+
+  if (obs.stageRequests) {
+    for (const reqView of obs.stageRequests) {
+      if (reqView.keyCards) {
+        registerCards(reqView.keyCards);
+      }
+    }
+  }
+
+  return { knownCardsMap, unitsMap };
+}
+
+/**
+ * 単一パターンの戦術特徴量ベクトル (24次元, Work 5-5B) をエンコード
  */
 export function encodeTacticalPatternFeatures(
   request: Readonly<DecisionRequest>,
@@ -860,7 +1024,8 @@ export function encodeTacticalPatternFeatures(
   tacticalEvaluator?: TacticalEvaluator,
   encoderVersion: TacticalFeatureEncoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
   precomputedBlockContext?: BlockTacticalEvaluationContext,
-  precomputedHasCounter?: boolean
+  precomputedHasCounter?: boolean,
+  precomputedCostContext?: TacticalCostEvaluationContext
 ): { features: Float64Array; reasons: string[] } {
   const features = new Float64Array(TACTICAL_FEATURE_DIMENSION);
   const reasons: string[] = [];
@@ -886,8 +1051,7 @@ export function encodeTacticalPatternFeatures(
 
       if (pattern.kind === "PASS") {
         // Work 5-4B: v7.2 以降では、同一 DecisionRequest 内に有効な対抗手段がない場合、PASS の損害減点を免除する
-        const isConditionalPassVersion =
-          encoderVersion === "v7.2-unified-block-conditional-pass";
+        const isConditionalPassVersion = supportsConditionalPass(encoderVersion);
         const hasCounter = isConditionalPassVersion
           ? precomputedHasCounter !== undefined
             ? precomputedHasCounter
@@ -1048,6 +1212,133 @@ export function encodeTacticalPatternFeatures(
     }
   }
 
+  // ===========================================================================
+  // カテゴリ 7: コスト支払いリソース評価 (RESOURCE_COST, Work 5-5B)
+  // ===========================================================================
+  if (supportsCostEvaluation(encoderVersion)) {
+    if (
+      pattern.costPaymentRef !== undefined &&
+      pattern.costPaymentRef >= 0 &&
+      request.catalog?.costPayments
+    ) {
+      const cp = request.catalog.costPayments[pattern.costPaymentRef];
+      if (cp) {
+        const costCtx = precomputedCostContext ?? createCostTacticalContext(request);
+        const { knownCardsMap, unitsMap } = costCtx;
+
+        // t20: 手札廃棄カードの数字合計 (非Joker)
+        // t21: 廃棄カード中のJoker枚数
+        const discardedCardIds: readonly string[] =
+          (cp as any).discardedCardIds ?? (cp as any).discardCardIds ?? [];
+
+        let discardRankSum = 0;
+        let discardJokerCount = 0;
+
+        for (const cardId of discardedCardIds) {
+          const card = knownCardsMap.get(cardId);
+          if (!card) {
+            // 未解決カードID (INVALID_REFERENCE / HIDDEN) は Joker と混同せずスキップ
+            continue;
+          }
+          const suit = (card.suit || "").toUpperCase();
+          const rawRank = String(card.rank || "").trim().toUpperCase();
+          const isJoker =
+            (card as any).isJoker === true ||
+            suit === "J" ||
+            suit === "JOKER" ||
+            rawRank === "JOKER";
+
+          if (isJoker) {
+            discardJokerCount++;
+          } else {
+            let rankVal = 0;
+            if (typeof card.value === "number" && Number.isFinite(card.value) && card.value > 0) {
+              rankVal = card.value;
+            } else if (rawRank === "A" || rawRank === "1") {
+              rankVal = 1;
+            } else if (rawRank === "J" || rawRank === "11") {
+              rankVal = 11;
+            } else if (rawRank === "Q" || rawRank === "12") {
+              rankVal = 12;
+            } else if (rawRank === "K" || rawRank === "13") {
+              rankVal = 13;
+            } else {
+              const num = Number(rawRank);
+              if (Number.isFinite(num) && num >= 1 && num <= 13) {
+                rankVal = num;
+              }
+            }
+            discardRankSum += rankVal;
+          }
+        }
+
+        // t20: discardRankSum / (discardRankSum + 10)
+        if (discardRankSum > 0) {
+          const t20 = discardRankSum / (discardRankSum + 10);
+          features[20] = t20;
+          reasons.push(
+            `t20_cost_discard_value_sum=${t20.toFixed(3)} (sum=${discardRankSum})`
+          );
+        }
+
+        // t21: saturating_rational(jokerCount, 1) = jokerCount / (jokerCount + 1)
+        if (discardJokerCount > 0) {
+          const t21 = discardJokerCount / (discardJokerCount + 1);
+          features[21] = t21;
+          reasons.push(
+            `t21_cost_discard_joker_count=${t21.toFixed(3)} (count=${discardJokerCount})`
+          );
+        }
+
+        // t22: 生贄ユニットのサイズ合計
+        const sacrificedUnitIds: readonly string[] =
+          (cp as any).sacrificedUnitIds ?? (cp as any).sacrificeUnitIds ?? [];
+
+        let sacrificeSizeSum = 0;
+        for (const unitId of sacrificedUnitIds) {
+          const unit = unitsMap.get(unitId);
+          if (!unit) {
+            // 未解決ユニットIDはスキップ
+            continue;
+          }
+          const sz =
+            typeof unit.currentSize === "number" && Number.isFinite(unit.currentSize)
+              ? unit.currentSize
+              : 0;
+          if (sz > 0) {
+            sacrificeSizeSum += sz;
+          }
+        }
+
+        // t22: sacrificeSizeSum / (sacrificeSizeSum + 3)
+        if (sacrificeSizeSum > 0) {
+          const t22 = sacrificeSizeSum / (sacrificeSizeSum + 3);
+          features[22] = t22;
+          reasons.push(
+            `t22_cost_sacrifice_unit_size_sum=${t22.toFixed(3)} (sizeSum=${sacrificeSizeSum})`
+          );
+        }
+
+        // t23: 消費ライフの相対割合 (min(1.0, payLife / max(1, selfLife)))
+        const rawLifeCount =
+          typeof (cp as any).lifeCount === "number"
+            ? (cp as any).lifeCount
+            : typeof (cp as any).payLifeCount === "number"
+              ? (cp as any).payLifeCount
+              : 0;
+        const payLife = Math.max(0, rawLifeCount);
+        if (payLife > 0) {
+          const denom = Math.max(1, selfLife);
+          const t23 = Math.min(1.0, payLife / denom);
+          features[23] = t23;
+          reasons.push(
+            `t23_cost_life_fraction=${t23.toFixed(3)} (pay=${payLife}, life=${selfLife})`
+          );
+        }
+      }
+    }
+  }
+
   return { features, reasons };
 }
 
@@ -1094,6 +1385,7 @@ export function computeCategoryBreakdown(
   let COMBAT_OUTCOME = 0;
   let SURVIVAL = 0;
   let LETHAL_OPPORTUNITY = 0;
+  let RESOURCE_COST = 0;
 
   for (let k = 0; k < TACTICAL_FEATURE_DIMENSION; k++) {
     const contrib = features[k] * tacticalWeights[k];
@@ -1119,6 +1411,9 @@ export function computeCategoryBreakdown(
       case "LETHAL_OPPORTUNITY":
         LETHAL_OPPORTUNITY += contrib;
         break;
+      case "RESOURCE_COST":
+        RESOURCE_COST += contrib;
+        break;
     }
   }
 
@@ -1128,7 +1423,8 @@ export function computeCategoryBreakdown(
     COUNTER_PREVENTION +
     COMBAT_OUTCOME +
     SURVIVAL +
-    LETHAL_OPPORTUNITY;
+    LETHAL_OPPORTUNITY +
+    RESOURCE_COST;
 
   return {
     baseDNAScore: baseScore,
@@ -1138,6 +1434,7 @@ export function computeCategoryBreakdown(
     COMBAT_OUTCOME,
     SURVIVAL,
     LETHAL_OPPORTUNITY,
+    RESOURCE_COST,
     totalTacticalScore,
     finalScore: baseScore + totalTacticalScore,
   };
@@ -1160,12 +1457,20 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
   ) {
     if ("tacticalSchemaVersion" in genomeOrDNA) {
       DecisionDNACodec.validate(genomeOrDNA.baseDNA);
-      if (genomeOrDNA.tacticalWeights.length !== TACTICAL_FEATURE_DIMENSION) {
+      if (genomeOrDNA.tacticalWeights.length === TACTICAL_FEATURE_DIMENSION_V70) {
+        // 旧 20 次元 Genome を渡された場合のゼロ拡張
+        const extended: Gen9TacticalGenome = {
+          ...genomeOrDNA,
+          tacticalWeights: [...genomeOrDNA.tacticalWeights, 0.0, 0.0, 0.0, 0.0],
+        };
+        this.genome = cloneTacticalGenome(extended);
+      } else if (genomeOrDNA.tacticalWeights.length === TACTICAL_FEATURE_DIMENSION_V73) {
+        this.genome = cloneTacticalGenome(genomeOrDNA);
+      } else {
         throw new Error(
-          `tacticalWeights の次元数が不正です: expected=${TACTICAL_FEATURE_DIMENSION}, actual=${genomeOrDNA.tacticalWeights.length}`
+          `tacticalWeights の次元数が不正です: expected=${TACTICAL_FEATURE_DIMENSION_V73} (または旧仕様 ${TACTICAL_FEATURE_DIMENSION_V70}), actual=${genomeOrDNA.tacticalWeights.length}`
         );
       }
-      this.genome = cloneTacticalGenome(genomeOrDNA);
     } else {
       this.genome = fromV6CompatibleDNA(genomeOrDNA, "r4");
     }
@@ -1384,7 +1689,7 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
       (r) => r.controller !== request.playerId
     );
     const precomputedHasCounter =
-      this.encoderVersion === "v7.2-unified-block-conditional-pass" &&
+      supportsConditionalPass(this.encoderVersion) &&
       oppRequests.length > 0 &&
       this.tacticalEvaluator
         ? hasEffectiveCounterMeasure(
@@ -1399,6 +1704,11 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
           )
         : undefined;
 
+    // Work 5-5B: コスト支払い戦術特徴量の観測マップを1回だけ事前構築
+    const precomputedCostContext = supportsCostEvaluation(this.encoderVersion)
+      ? createCostTacticalContext(request)
+      : undefined;
+
     let bestScore = -Infinity;
     let bestPatternRef = baseScored[0]?.patternRef ?? 0;
 
@@ -1412,7 +1722,8 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
         this.tacticalEvaluator,
         this.encoderVersion,
         blockContext,
-        precomputedHasCounter
+        precomputedHasCounter,
+        precomputedCostContext
       );
       const breakdown = computeCategoryBreakdown(sp.score, features, weights);
 
