@@ -62,6 +62,59 @@ describe("PlaytestPolicyFactory Tests", () => {
       ).toThrow(/Evolution g1 Best AI は公式レギュレーション light-entry16 専用です/);
     });
 
+    it("Gen 8 Champion Candidate AI は公式レギュレーション standard-pack 専用であること", () => {
+      const policy = PlaytestPolicyFactory.createPolicy("gen8-champion-candidate", undefined, "p2", "standard-pack");
+      expect(policy).toBeDefined();
+      expect(policy.descriptor.kind).toBe("genome");
+      expect(policy.descriptor.name).toBe("Gen 8 Champion Candidate");
+
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("gen8-champion-candidate", undefined, "p2")
+      ).toThrow(/Gen 8 Champion Candidate AI は公式レギュレーション standard-pack 専用です/);
+
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("gen8-champion-candidate", undefined, "p2", "core-battle")
+      ).toThrow(/Gen 8 Champion Candidate AI は公式レギュレーション standard-pack 専用です/);
+    });
+
+    it("Gen 9 R4 戦術AI が正常に生成されること (standard-pack)", () => {
+      const policy = PlaytestPolicyFactory.createPolicy("gen9-r4-v72", undefined, "p2", "standard-pack");
+      expect(policy).toBeDefined();
+      expect(policy.descriptor.name).toBe("Gen 9 R4 — 戦術AI");
+      expect(policy.descriptor.kind).toBe("genome");
+    });
+
+    it("Gen 9 R4 戦術AI で未対応環境は拒絶されること (Fail-Closed)", () => {
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("gen9-r4-v72", undefined, "p2")
+      ).toThrow(/Gen 9 R4 戦術AI は公式レギュレーション standard-pack 専用です/);
+
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("gen9-r4-v72", undefined, "p2", "core-battle")
+      ).toThrow(/Gen 9 R4 戦術AI は公式レギュレーション standard-pack 専用です/);
+
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("gen9-r4-v72", undefined, "p2", "light-entry16")
+      ).toThrow(/Gen 9 R4 戦術AI は公式レギュレーション standard-pack 専用です/);
+    });
+
+    it("Gen 9 v7.3 コスト評価AI（実験版）が正常に生成されること (standard-pack)", () => {
+      const policy = PlaytestPolicyFactory.createPolicy("gen9-cost-preview-v73", undefined, "p2", "standard-pack");
+      expect(policy).toBeDefined();
+      expect(policy.descriptor.name).toBe("Gen 9 v7.3 — コスト評価AI（実験版）");
+      expect(policy.descriptor.kind).toBe("genome");
+    });
+
+    it("Gen 9 v7.3 コスト評価AI で未対応環境は拒絶されること (Fail-Closed)", () => {
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("gen9-cost-preview-v73", undefined, "p2")
+      ).toThrow(/Gen 9 v7.3 コスト評価AI（実験版）は公式レギュレーション standard-pack 専用です/);
+
+      expect(() =>
+        PlaytestPolicyFactory.createPolicy("gen9-cost-preview-v73", undefined, "p2", "core-battle")
+      ).toThrow(/Gen 9 v7.3 コスト評価AI（実験版）は公式レギュレーション standard-pack 専用です/);
+    });
+
     it("未知の policyId の場合は fail-fast すること", () => {
       expect(() => PlaytestPolicyFactory.createPolicy("unknown" as any, 12345, "p2")).toThrow(
         /Unknown PlaytestPolicyId/

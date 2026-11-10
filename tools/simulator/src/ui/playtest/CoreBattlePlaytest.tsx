@@ -674,7 +674,8 @@ export const CoreBattlePlaytest: React.FC = () => {
         policies = PlaytestPolicyFactory.createPoliciesForMatch(
           seatControllers,
           outcome.activeMatch.seed,
-          outcome.activeMatch.regulationId
+          outcome.activeMatch.regulationId,
+          outcome.activeMatch.rulePackage
         );
       } catch (err: any) {
         setRuntimeNotice({
@@ -1371,7 +1372,8 @@ export const CoreBattlePlaytest: React.FC = () => {
         const freshPolicies = PlaytestPolicyFactory.createPoliciesForMatch(
           activeSeatControllers,
           activeMatch.seed,
-          activeMatch.regulationId
+          activeMatch.regulationId,
+          activeMatch.rulePackage
         );
 
         for (const item of recon.replayedDecisions) {

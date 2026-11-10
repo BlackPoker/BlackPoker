@@ -99,6 +99,34 @@ describe("HumanVsPolicyController Tests", () => {
         /範囲外の selectedPatternRef/
       );
     });
+
+    it("ストリーミングブロック時 (patterns.length === 0, blockAssignmentStream あり) に patternCount 範囲内の選択がパスすること", () => {
+      const streamRequest: DecisionRequest = {
+        ...dummyRequest,
+        patterns: [],
+        blockAssignmentStream: {
+          patternCount: 16,
+          instantiatePatternAt: () => null as any,
+          getAssignmentAt: () => null as any,
+        } as any,
+      };
+
+      const validResponse: DecisionResponse = {
+        decisionId: "dec-100",
+        stateVersion: 5,
+        selectedPatternRef: 15,
+      };
+      expect(() => validateDecisionResponse(streamRequest, validResponse)).not.toThrow();
+
+      const outOfRangeResponse: DecisionResponse = {
+        decisionId: "dec-100",
+        stateVersion: 5,
+        selectedPatternRef: 16,
+      };
+      expect(() => validateDecisionResponse(streamRequest, outOfRangeResponse)).toThrow(
+        /範囲外の selectedPatternRef/
+      );
+    });
   });
 
   describe("2. advanceAutomatedDecisions 自動進行挙動", () => {

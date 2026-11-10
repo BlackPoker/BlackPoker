@@ -73,9 +73,16 @@ export function validateDecisionResponse(
     );
   }
 
-  if (response.selectedPatternRef < 0 || response.selectedPatternRef >= request.patterns.length) {
+  const isStream = Boolean(
+    request.blockAssignmentStream && (!request.patterns || request.patterns.length === 0)
+  );
+  const maxPatterns = isStream
+    ? (request.blockAssignmentStream?.patternCount ?? 0)
+    : request.patterns.length;
+
+  if (response.selectedPatternRef < 0 || response.selectedPatternRef >= maxPatterns) {
     throw new Error(
-      `Policy "${policyName}" が範囲外の selectedPatternRef を返しました: ${response.selectedPatternRef} (パターン総数: ${request.patterns.length})`
+      `Policy "${policyName}" が範囲外の selectedPatternRef を返しました: ${response.selectedPatternRef} (有効パターン総数: ${maxPatterns})`
     );
   }
 }

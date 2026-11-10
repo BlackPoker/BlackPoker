@@ -17,7 +17,9 @@ export type PlaytestPolicyId =
   | "manualGenericGenome"
   | "zeroGenome"
   | "evolution-g1-best"
-  | "gen8-champion-candidate";
+  | "gen8-champion-candidate"
+  | "gen9-r4-v72"
+  | "gen9-cost-preview-v73";
 
 /**
  * UI表示用メタデータ
@@ -91,6 +93,32 @@ export const PLAYTEST_POLICY_OPTIONS: readonly PlaytestPolicyOption[] = [
       dnaSchema: "v6",
       humanPerformance: "評価中",
       disclaimer: "※正式Holdout 240試合でGen 7に統計的優位性 (p = 0.0001663) を確立。人間対戦における戦術の自然さ・操作感は現在評価中です。",
+    },
+  },
+  {
+    id: "gen9-r4-v72",
+    label: "Gen 9 R4 — 戦術AI",
+    description: "攻撃・防御・Counter・PASSを戦術的に判断するGen9 AI。Gen8 Championとの検証対戦60試合で41勝19敗。人間との対戦での強さは未検証です。",
+    supportedRegulationIds: ["standard-pack"],
+    evolutionDetails: {
+      generation: "Gen 9 R4 (v7.2)",
+      baselineRecord: "Gen8 Championとの検証対戦 60試合 41勝19敗 (勝率68.3%, 95% CI [55.8%, 78.7%])",
+      dnaSchema: "v7.2",
+      humanPerformance: "未検証",
+      disclaimer: "※Gen8 Championとの検証対戦60試合で41勝19敗を記録。人間との対戦における強さや自然さは未検証です。",
+    },
+  },
+  {
+    id: "gen9-cost-preview-v73",
+    label: "Gen 9 v7.3 — コスト評価AI（実験版）",
+    description: "最新のコスト支払い特徴量を使用する実験版。Jokerや高ランクカードの廃棄、ユニット犠牲、ライフ支払いを評価します。固定診断重みを使用しており、学習済みの最強AIではありません。",
+    supportedRegulationIds: ["standard-pack"],
+    evolutionDetails: {
+      generation: "Gen 9 v7.3 (コスト評価プレビュー)",
+      baselineRecord: "コスト支払い特徴量識別可能率 93.55% (固定診断重み適用)",
+      dnaSchema: "v7.3",
+      humanPerformance: "未検証",
+      disclaimer: "※固定診断重みを使用した実験版であり、学習済みの最適重みではありません。最強AIと誤認しないでください。",
     },
   },
 ];
