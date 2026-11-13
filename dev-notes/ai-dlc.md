@@ -175,15 +175,16 @@ if ($LASTEXITCODE -ne 0) { throw 'workflow起動失敗。既存Actionsの状態�
 gh run list --repo $repo --workflow refresh_docs.yaml --branch $branch --event workflow_dispatch --limit 10 --json databaseId,headSha,status,conclusion,createdAt,url
 ```
 
-今起動した日時・ブランチ・`headSha == $sha` に一致するrun IDを特定します。古い成功runを流用しません。
+今起動した日時・ブランチ・`headSha == $sha` に一致するrun IDを特定し、Actions runのURLを記録します。古い成功runを流用しません。
 `gh run view <run-id> --repo <repo> --json headSha,status,conclusion,url` で完了を確認します。
 失敗したら `gh run view <run-id> --repo <repo> --log-failed` で原因を確認し、失敗として報告します。
 同じSHAのrunが複数ある場合は起動時刻で区別します。
 
 公式ルールの確認先は `https://blackpoker.github.io/BlackPoker/<ブランチ>/` です。
 実際のブランチ名をURLエンコードして提示します。公開先はこのルール用workflowで確認したものです。
-Pagesへの反映が遅れることがあるため、生成成功だけで表示確認済みにしません。変更箇所が実際に反映されたかも確認します。
-目視結果にはURL、生成元SHA、確認した見出し・リンク・表・図・表示崩れ、確認者、日時を残します。
+Pagesへの反映が遅れることがあるため、生成成功だけで表示確認済みにしません。変更対象のHTMLへ直接移動できるURLを特定し、そのページに変更が反映されたことを確認します。サイトのトップページURLだけで代用しません。
+目視結果には対象HTMLのURL、生成元SHA、Actions runのURL、確認した見出し・リンク・表・図・表示崩れ、確認者、日時を残します。
+追加pushで生成元SHAが変わった場合は、同じブランチで`refresh_docs`を再実行し、新しいSHAのrun成功と対象HTMLの表示を再確認します。PR本文のURL・生成元SHA・run URL・確認結果を更新し、古いSHAの結果を現在の確認結果として残しません。
 ユーザーの目視確認待ちは待ちとして記録します。AIが確認してもユーザーの確認を代筆しません。
 
 既存CIの失敗で公開できない場合は、ローカルで可能な検証を進め、公開確認は未完了と報告します。
@@ -192,7 +193,7 @@ Pagesへの反映が遅れることがあるため、生成成功だけで表示
 ## 6. Draft PR
 
 1. 作成時点の `.github/PULL_REQUEST_TEMPLATE.md` を読み、全見出しを保って `.ai-dlc/pr-body.md` を作ります。
-2. 「チケットへのリンク」に完全なIssue URLを記載し、差分・検証・サイトURLと生成元SHA・目視結果・未実施項目を既存の適切な欄へ記入します。
+2. 「チケットへのリンク」に完全なIssue URLを記載し、差分・検証・未実施項目を適切な欄へ記入します。サイトに影響する変更では「確認サイト」に変更対象HTMLへの直リンク、生成元SHA、対象SHAで成功したActions runのURL、目視結果（確認者・日時・確認箇所）を記入します。サイトに影響しない変更ではURL・SHA・run・表示確認結果を「無し」とし、省略理由を記入します。
 3. このPRのマージでIssueの受入条件を満たす場合は、デフォルトブランチ向けPR本文に `Closes #<番号>` を記載し、完全なIssue URLも残します。部分対応や別作業が残る場合は `Closes` を付けず、残作業を明記します。どちらか判断できない場合は確認します。GitHubの自動closeはデフォルトブランチ向けの関連付けとリポジトリ設定に依存します。
 4. 本文案を提示し、PR作成指示を受けます。確認用pushの承認だけでPRを作りません。
 5. 現在の作業ブランチ、push先、基点、最新SHAを再確認します。検証後の変更があれば再検証します。
