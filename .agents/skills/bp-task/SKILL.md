@@ -1,11 +1,11 @@
 ---
-name: blackpoker-task
+name: bp-task
 description: BlackPoker/BlackPokerで、既存Issueまたは短い改善・修正依頼からIssue専用worktreeでの調査・実装・検証とDraft PR準備を進める。一般的なルールの質問には使わない。
 ---
 
 # BlackPokerの作業を開始する
 
-入力例: `$blackpoker-task Issue #123`、`$blackpoker-task https://github.com/BlackPoker/BlackPoker/issues/123`、`$blackpoker-task チュートリアルの説明を読みやすくしたい`。
+入力例: `$bp-task Issue #123`、`$bp-task https://github.com/BlackPoker/BlackPoker/issues/123`、`$bp-task チュートリアルの説明を読みやすくしたい`。
 
 1. 現在のリポジトリルートを確認し、その [AGENTS.md](../../../AGENTS.md) と [共通開発手順](../../../dev-notes/ai-dlc.md) を読む。
 2. 共通開発手順の「短い依頼の扱い」に従って入力と今回の指示範囲を整理し、「Issueの入口」から順に進める。作業領域の準備には [既存の開始スクリプト](../../../tools/dev/start-issue.ps1) を `-Agent codex` で使用する。

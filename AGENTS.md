@@ -18,7 +18,7 @@ Gitのコミットメッセージを生成する際（「Generate Commit Message
 # Issue起点の開発（Codex / Antigravity 共通）
 - 対象は `BlackPoker/BlackPoker` です。Issueは常にリポジトリ名と番号の組で記録します。
 - 作業を開始する前に `dev-notes/ai-dlc.md` を読み、対象worktree・基点ブランチとSHA・作業ブランチ・Issueを確認してください。
-- 短い依頼の入口はCodexの `$blackpoker-task` とAntigravityの `/blackpoker-task` です。入力の扱い・承認範囲・再開判断は `dev-notes/ai-dlc.md` に集約し、入口ごとに複製しません。
+- 短い依頼の入口はCodexの `$bp-task` とAntigravityの `/bp-task` です。入力の扱い・承認範囲・再開判断は `dev-notes/ai-dlc.md` に集約し、入口ごとに複製しません。
 - 既存worktreeは別作業で使用中です。編集・checkout・stash・reset・削除・既存コンテナの停止をしないでください。新しいIssueは専用worktreeで扱います。
 - ブランチ名やデフォルトブランチを推測しないでください。明示された基点を優先し、未指定ならローカルの `gh` CLIで現在のデフォルトブランチを取得してください。
 - Issueが簡単な記述でも、関連ファイルを調べ、受入条件・変更範囲・必要な検証を整理できます。判断が必要な不明点のみ質問し、実装計画の承認後に編集します。

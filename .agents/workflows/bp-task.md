@@ -2,9 +2,9 @@
 description: 短い要望または既存IssueからBlackPokerの共通開発手順を開始する
 ---
 
-# BlackPokerの作業を開始する (/blackpoker-task)
+# BlackPokerの作業を開始する (/bp-task)
 
-入力例: `/blackpoker-task Issue #123`、`/blackpoker-task チュートリアルの説明を読みやすくしたい`。
+入力例: `/bp-task Issue #123`、`/bp-task チュートリアルの説明を読みやすくしたい`。
 
 このworktreeの [AGENTS.md](../../AGENTS.md) と [共通開発手順](../../dev-notes/ai-dlc.md) を読む。
 共通開発手順の「短い依頼の扱い」から進め、作業領域の準備には [開始スクリプト](../../tools/dev/start-issue.ps1) を `-Agent antigravity` で使用する。

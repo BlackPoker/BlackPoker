@@ -16,11 +16,11 @@ Issue → 調査・計画承認 → 実装 → 検証 → 確認用push → ブ�
 
 ### 短い依頼の扱い
 
-Codexではプロジェクト用スキル [blackpoker-task](../.agents/skills/blackpoker-task/SKILL.md) を使用します。
-このスキルを含むworktreeを開き、`$blackpoker-task Issue #123` または `$blackpoker-task <要望>` と依頼します。
+Codexではプロジェクト用スキル [bp-task](../.agents/skills/bp-task/SKILL.md) を使用します。
+このスキルを含むworktreeを開き、`$bp-task Issue #123` または `$bp-task <要望>` と依頼します。
 スキルが一覧に反映されない場合は、対象worktreeを確認してCodexを再起動してください。
 配置と呼び出しは [OpenAI公式のスキル資料](https://learn.chatgpt.com/docs/build-skills) を参照してください。
-Antigravityでは [blackpoker-taskワークフロー](../.agents/workflows/blackpoker-task.md) に同じ入力を渡します。
+Antigravityでは [bp-taskワークフロー](../.agents/workflows/bp-task.md) に同じ入力を渡します。
 どちらの入口もこの文書を正本とし、Issue/PRのテンプレートやGit操作を別実装にしません。
 
 | 入力 | 進め方 |
