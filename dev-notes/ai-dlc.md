@@ -17,7 +17,8 @@ Issue → 調査・計画承認 → 実装 → 検証 → 確認用push → ブ�
 ### 短い依頼の扱い
 
 Codexではプロジェクト用スキル [bp-task](../.agents/skills/bp-task/SKILL.md) を使用します。
-このスキルを含むworktreeを開き、`$bp-task Issue #123` または `$bp-task <要望>` と依頼します。
+このスキルを含むworktreeを開き、`$bp-task 123` または `$bp-task Issue #123` と依頼します。
+Issue発行前の相談には [bp-task-plan](../.agents/skills/bp-task-plan/SKILL.md) を使います。`$bp-task-plan` から要望を相談し、起票の指示があれば共通手順で起票します。`$bp-task` は既存Issueの番号またはURLを受け付けます。
 スキルが一覧に反映されない場合は、対象worktreeを確認してCodexを再起動してください。
 配置と呼び出しは [OpenAI公式のスキル資料](https://learn.chatgpt.com/docs/build-skills) を参照してください。
 Antigravityでは [bp-taskワークフロー](../.agents/workflows/bp-task.md) に同じ入力を渡します。
@@ -27,7 +28,7 @@ Antigravityでは [bp-taskワークフロー](../.agents/workflows/bp-task.md) �
 | --- | --- |
 | `Issue #123`、`#123`、`123` | BlackPoker/BlackPokerのIssue番号 `123` として既存Issueの手順へ進む |
 | `https://github.com/BlackPoker/BlackPoker/issues/123` | 同リポジトリの既存Issueとして扱う |
-| 改善・修正の短い要望 | 関連する既存Issueを確認し、未起票なら作成時点のテンプレートから本文案を作る |
+| `$bp-task-plan` と改善・修正の要望 | 相談しながら関連する既存Issueを確認し、未起票なら作成時点のテンプレートから本文案を作る |
 | 入力なし、対象が複数、別リポジトリのIssue URL、不正なIssue指定 | 対象を確認する。新規要望へ読み替えて起票しない |
 
 文章中の数字だけで既存Issueと判断しません。「Issue #123の説明を改善」のように対象が明確なら、そのIssueと追加要望を合わせて扱います。
