@@ -1,0 +1,877 @@
+{
+  "workId": "BP-SIM-AI-GEN9-WORK57A-BEHAVIOR-QUALITY-AUDIT",
+  "timestamp": "2026-11-17T17:25:19.413Z",
+  "totalScenarios": 21,
+  "results": [
+    {
+      "scenarioId": "BP-AI-01",
+      "name": "致死攻撃への防御",
+      "priority": "P0",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.45964653773038905,
+          "tactical": 0,
+          "final": 0.45964653773038905
+        },
+        {
+          "ref": 1,
+          "base": -0.1821445758526142,
+          "tactical": 0,
+          "final": -0.1821445758526142
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.45964653773038905,
+          "tactical": 0,
+          "final": 0.45964653773038905
+        },
+        {
+          "ref": 1,
+          "base": -0.1821445758526142,
+          "tactical": 0,
+          "final": -0.1821445758526142
+        }
+      ],
+      "notes": "致死ダメージ回避ブロック。通常列挙・ストリーミング共にブロックを選択。"
+    },
+    {
+      "scenarioId": "BP-AI-02",
+      "name": "防壁による有利な相打ち",
+      "priority": "P1",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.4583616149300535,
+          "tactical": 0,
+          "final": 0.4583616149300535
+        },
+        {
+          "ref": 1,
+          "base": -0.13380320622370792,
+          "tactical": 0,
+          "final": -0.13380320622370792
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.4583616149300535,
+          "tactical": 0,
+          "final": 0.4583616149300535
+        },
+        {
+          "ref": 1,
+          "base": -0.13380320622370792,
+          "tactical": 0,
+          "final": -0.13380320622370792
+        }
+      ],
+      "notes": "防壁ブロック選択: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-03",
+      "name": "大きい兵士によるブロック",
+      "priority": "P1",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.40540049516688087,
+          "tactical": 0,
+          "final": 0.40540049516688087
+        },
+        {
+          "ref": 1,
+          "base": 0.40540049516688087,
+          "tactical": 0,
+          "final": 0.40540049516688087
+        },
+        {
+          "ref": 2,
+          "base": -0.15983144130149177,
+          "tactical": 0,
+          "final": -0.15983144130149177
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.40540049516688087,
+          "tactical": 0,
+          "final": 0.40540049516688087
+        },
+        {
+          "ref": 1,
+          "base": 0.40540049516688087,
+          "tactical": 0,
+          "final": 0.40540049516688087
+        },
+        {
+          "ref": 2,
+          "base": -0.15983144130149177,
+          "tactical": 0,
+          "final": -0.15983144130149177
+        }
+      ],
+      "notes": "大型兵士ブロック選択: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-04",
+      "name": "複数兵士によるブロック",
+      "priority": "P1",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.40540049516688087,
+          "tactical": 0,
+          "final": 0.40540049516688087
+        },
+        {
+          "ref": 1,
+          "base": 0.40540049516688087,
+          "tactical": 0,
+          "final": 0.40540049516688087
+        },
+        {
+          "ref": 2,
+          "base": -0.15983144130149177,
+          "tactical": 0,
+          "final": -0.15983144130149177
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.40540049516688087,
+          "tactical": 0,
+          "final": 0.40540049516688087
+        },
+        {
+          "ref": 1,
+          "base": 0.40540049516688087,
+          "tactical": 0,
+          "final": 0.40540049516688087
+        },
+        {
+          "ref": 2,
+          "base": -0.15983144130149177,
+          "tactical": 0,
+          "final": -0.15983144130149177
+        }
+      ],
+      "notes": "複数兵士合算ブロック選択: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-05",
+      "name": "不要なブロックを避ける",
+      "priority": "P1",
+      "v72Status": "AMBIGUOUS",
+      "v73Status": "AMBIGUOUS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 1,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.4440337786700593,
+          "tactical": 0,
+          "final": 0.4440337786700593
+        },
+        {
+          "ref": 1,
+          "base": -0.13326546106583034,
+          "tactical": 0,
+          "final": -0.13326546106583034
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.4440337786700593,
+          "tactical": 0,
+          "final": 0.4440337786700593
+        },
+        {
+          "ref": 1,
+          "base": -0.13326546106583034,
+          "tactical": 0,
+          "final": -0.13326546106583034
+        }
+      ],
+      "notes": "ブロック回避/スルー選択: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-06",
+      "name": "投擲へのCounter",
+      "priority": "P0",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.436176173725666,
+          "tactical": 0,
+          "final": 0.436176173725666
+        },
+        {
+          "ref": 1,
+          "base": -0.16779778700608475,
+          "tactical": 0,
+          "final": -0.16779778700608475,
+          "reason": "PASS penalty exempted: no effective counter available against action.throwing"
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.436176173725666,
+          "tactical": 0,
+          "final": 0.436176173725666
+        },
+        {
+          "ref": 1,
+          "base": -0.16779778700608475,
+          "tactical": 0,
+          "final": -0.16779778700608475,
+          "reason": "t00_t05_pass_penalty_exempted: no effective counter available against action.throwing"
+        }
+      ],
+      "notes": "投擲Counter選択: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-07",
+      "name": "死の槍へのCounter",
+      "priority": "P0",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.4013159303025716,
+          "tactical": 0,
+          "final": 0.4013159303025716
+        },
+        {
+          "ref": 1,
+          "base": -0.14795086502750993,
+          "tactical": 0,
+          "final": -0.14795086502750993,
+          "reason": "PASS penalty exempted: no effective counter available against action.deathLance"
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.4013159303025716,
+          "tactical": 0,
+          "final": 0.4013159303025716
+        },
+        {
+          "ref": 1,
+          "base": -0.14795086502750993,
+          "tactical": 0,
+          "final": -0.14795086502750993,
+          "reason": "t00_t05_pass_penalty_exempted: no effective counter available against action.deathLance"
+        }
+      ],
+      "notes": "死の槍Counter選択: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-08",
+      "name": "アップ・ダウンによる死の槍回避",
+      "priority": "P1",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": -0.024262592195892524,
+          "tactical": 0,
+          "final": -0.024262592195892524
+        },
+        {
+          "ref": 1,
+          "base": -0.1496408452743139,
+          "tactical": 0,
+          "final": -0.1496408452743139,
+          "reason": "PASS penalty exempted: no effective counter available against action.deathLance"
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": -0.024262592195892524,
+          "tactical": 0,
+          "final": -0.024262592195892524
+        },
+        {
+          "ref": 1,
+          "base": -0.1496408452743139,
+          "tactical": 0,
+          "final": -0.1496408452743139,
+          "reason": "t00_t05_pass_penalty_exempted: no effective counter available against action.deathLance"
+        }
+      ],
+      "notes": "サイズ変更による死の槍回避評価: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-09",
+      "name": "高威力の死の槍",
+      "priority": "P1",
+      "v72Status": "FAIL",
+      "v73Status": "FAIL",
+      "v72ChosenRef": 1,
+      "v73ChosenRef": 1,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": -0.43790949290171116,
+          "tactical": 0,
+          "final": -0.43790949290171116
+        },
+        {
+          "ref": 1,
+          "base": -0.061383521695792795,
+          "tactical": 0,
+          "final": -0.061383521695792795
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": -0.43790949290171116,
+          "tactical": 0,
+          "final": -0.43790949290171116
+        },
+        {
+          "ref": 1,
+          "base": -0.061383521695792795,
+          "tactical": 0,
+          "final": -0.061383521695792795
+        }
+      ],
+      "notes": "高威力死の槍選択: v7.2=1, v7.3=1"
+    },
+    {
+      "scenarioId": "BP-AI-10",
+      "name": "相手の対抗可能性を考慮した攻撃魔法",
+      "priority": "P1",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.181642147322079,
+          "tactical": 0,
+          "final": 0.181642147322079,
+          "reason": "Diff(A-B)=0.0024"
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.181642147322079,
+          "tactical": 0,
+          "final": 0.181642147322079,
+          "reason": "Diff(A-B)=0.0024"
+        }
+      ],
+      "notes": "相手手札0枚 vs 5枚での投擲スコア差: v7.2差=0.0024, v7.3差=0.0024"
+    },
+    {
+      "scenarioId": "BP-AI-11",
+      "name": "ハンデスによる妨害",
+      "priority": "P1",
+      "v72Status": "AMBIGUOUS",
+      "v73Status": "AMBIGUOUS",
+      "v72ChosenRef": 1,
+      "v73ChosenRef": 1,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": -0.16587679212267217,
+          "tactical": 0,
+          "final": -0.16587679212267217
+        },
+        {
+          "ref": 1,
+          "base": -0.06553423764346007,
+          "tactical": 0,
+          "final": -0.06553423764346007
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": -0.16587679212267217,
+          "tactical": 0,
+          "final": -0.16587679212267217
+        },
+        {
+          "ref": 1,
+          "base": -0.06553423764346007,
+          "tactical": 0,
+          "final": -0.06553423764346007
+        }
+      ],
+      "notes": "ハンデス選択: v7.2=1, v7.3=1"
+    },
+    {
+      "scenarioId": "BP-AI-12",
+      "name": "Jokerのリアニメイト",
+      "priority": "P1",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.23141782095197003,
+          "tactical": 0,
+          "final": 0.23141782095197003
+        },
+        {
+          "ref": 1,
+          "base": -0.03764133053226072,
+          "tactical": 0,
+          "final": -0.03764133053226072
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.23141782095197003,
+          "tactical": 0,
+          "final": 0.23141782095197003
+        },
+        {
+          "ref": 1,
+          "base": -0.03764133053226072,
+          "tactical": 0,
+          "final": -0.03764133053226072
+        }
+      ],
+      "notes": "Jokerリアニメイト選択: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-13",
+      "name": "有利なアタック",
+      "priority": "P1",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.14406700756722116,
+          "tactical": 0,
+          "final": 0.14406700756722116
+        },
+        {
+          "ref": 1,
+          "base": -0.02565155207138239,
+          "tactical": 0,
+          "final": -0.02565155207138239
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.14406700756722116,
+          "tactical": 0,
+          "final": 0.14406700756722116
+        },
+        {
+          "ref": 1,
+          "base": -0.02565155207138239,
+          "tactical": 0,
+          "final": -0.02565155207138239
+        }
+      ],
+      "notes": "有利アタック選択: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-14",
+      "name": "無謀なアタックの回避",
+      "priority": "P0",
+      "v72Status": "FAIL",
+      "v73Status": "FAIL",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 1,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.15497931793853117,
+          "tactical": 0,
+          "final": 0.15497931793853117
+        },
+        {
+          "ref": 1,
+          "base": -0.06907519698420879,
+          "tactical": 0,
+          "final": -0.06907519698420879
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.15497931793853117,
+          "tactical": 0,
+          "final": 0.15497931793853117
+        },
+        {
+          "ref": 1,
+          "base": -0.06907519698420879,
+          "tactical": 0,
+          "final": -0.06907519698420879
+        }
+      ],
+      "rootCauseCategory": "C",
+      "notes": "自滅アタック回避: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-15",
+      "name": "エース＋装備",
+      "priority": "P2",
+      "v72Status": "AMBIGUOUS",
+      "v73Status": "AMBIGUOUS",
+      "v72ChosenRef": 1,
+      "v73ChosenRef": 1,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": -0.35676990322299784,
+          "tactical": 0,
+          "final": -0.35676990322299784
+        },
+        {
+          "ref": 1,
+          "base": -0.03423334935328344,
+          "tactical": 0,
+          "final": -0.03423334935328344
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": -0.35676990322299784,
+          "tactical": 0,
+          "final": -0.35676990322299784
+        },
+        {
+          "ref": 1,
+          "base": -0.03423334935328344,
+          "tactical": 0,
+          "final": -0.03423334935328344
+        }
+      ],
+      "notes": "装備アクション選択: v7.2=1, v7.3=1"
+    },
+    {
+      "scenarioId": "BP-AI-16",
+      "name": "手札温存",
+      "priority": "P2",
+      "v72Status": "AMBIGUOUS",
+      "v73Status": "AMBIGUOUS",
+      "v72ChosenRef": 1,
+      "v73ChosenRef": 1,
+      "expectedPatternRef": [
+        0,
+        1
+      ],
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": -0.16234750636529804,
+          "tactical": 0,
+          "final": -0.16234750636529804
+        },
+        {
+          "ref": 1,
+          "base": -0.07044663151383122,
+          "tactical": 0,
+          "final": -0.07044663151383122
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": -0.16234750636529804,
+          "tactical": 0,
+          "final": -0.16234750636529804
+        },
+        {
+          "ref": 1,
+          "base": -0.07044663151383122,
+          "tactical": 0,
+          "final": -0.07044663151383122
+        }
+      ],
+      "notes": "手札温存 vs 召喚: v7.2=1, v7.3=1"
+    },
+    {
+      "scenarioId": "BP-AI-17",
+      "name": "パック開封による勝利準備",
+      "priority": "P1",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.02550942480980929,
+          "tactical": 0,
+          "final": 0.02550942480980929
+        },
+        {
+          "ref": 1,
+          "base": -0.05741327992686026,
+          "tactical": 0,
+          "final": -0.05741327992686026
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.02550942480980929,
+          "tactical": 0,
+          "final": 0.02550942480980929
+        },
+        {
+          "ref": 1,
+          "base": -0.05741327992686026,
+          "tactical": 0,
+          "final": -0.05741327992686026
+        }
+      ],
+      "notes": "パック開封選択: v7.2=0, v7.3=0"
+    },
+    {
+      "scenarioId": "BP-AI-18",
+      "name": "防壁の確保",
+      "priority": "P2",
+      "v72Status": "AMBIGUOUS",
+      "v73Status": "AMBIGUOUS",
+      "v72ChosenRef": 1,
+      "v73ChosenRef": 1,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": -0.1833982801103925,
+          "tactical": 0,
+          "final": -0.1833982801103925
+        },
+        {
+          "ref": 1,
+          "base": -0.05741327992686026,
+          "tactical": 0,
+          "final": -0.05741327992686026
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": -0.1833982801103925,
+          "tactical": 0,
+          "final": -0.1833982801103925
+        },
+        {
+          "ref": 1,
+          "base": -0.05741327992686026,
+          "tactical": 0,
+          "final": -0.05741327992686026
+        }
+      ],
+      "notes": "防壁設置選択: v7.2=1, v7.3=1"
+    },
+    {
+      "scenarioId": "BP-AI-19",
+      "name": "防壁補充・防壁破壊",
+      "priority": "P2",
+      "v72Status": "AMBIGUOUS",
+      "v73Status": "AMBIGUOUS",
+      "v72ChosenRef": 1,
+      "v73ChosenRef": 1,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": -0.1822067714237668,
+          "tactical": 0,
+          "final": -0.1822067714237668
+        },
+        {
+          "ref": 1,
+          "base": -0.05741327992686026,
+          "tactical": 0,
+          "final": -0.05741327992686026
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": -0.1822067714237668,
+          "tactical": 0,
+          "final": -0.1822067714237668
+        },
+        {
+          "ref": 1,
+          "base": -0.05741327992686026,
+          "tactical": 0,
+          "final": -0.05741327992686026
+        }
+      ],
+      "notes": "防壁破壊選択: v7.2=1, v7.3=1"
+    },
+    {
+      "scenarioId": "BP-AI-20",
+      "name": "英雄召喚とリアニメイト",
+      "priority": "P2",
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 1,
+      "v73ChosenRef": 1,
+      "expectedPatternRef": [
+        0,
+        1
+      ],
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": -0.2809993237647794,
+          "tactical": 0,
+          "final": -0.2809993237647794
+        },
+        {
+          "ref": 1,
+          "base": 0.2316459079085927,
+          "tactical": 0,
+          "final": 0.2316459079085927
+        },
+        {
+          "ref": 2,
+          "base": -0.027479493696131653,
+          "tactical": 0,
+          "final": -0.027479493696131653
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": -0.2809993237647794,
+          "tactical": 0,
+          "final": -0.2809993237647794
+        },
+        {
+          "ref": 1,
+          "base": 0.2316459079085927,
+          "tactical": 0,
+          "final": 0.2316459079085927
+        },
+        {
+          "ref": 2,
+          "base": -0.027479493696131653,
+          "tactical": 0,
+          "final": -0.027479493696131653
+        }
+      ],
+      "notes": "手札召喚(0) vs リアニメイト(1): v7.2=1, v7.3=1"
+    },
+    {
+      "scenarioId": "BP-AI-21",
+      "name": "攻撃後のリアニメイト",
+      "priority": "P2",
+      "v72Status": "AMBIGUOUS",
+      "v73Status": "AMBIGUOUS",
+      "v72ChosenRef": 1,
+      "v73ChosenRef": 1,
+      "expectedPatternRef": 0,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "base": 0.14793823290171096,
+          "tactical": 0,
+          "final": 0.14793823290171096
+        },
+        {
+          "ref": 1,
+          "base": 0.22762768806674158,
+          "tactical": 0,
+          "final": 0.22762768806674158
+        },
+        {
+          "ref": 2,
+          "base": -0.04051284528310264,
+          "tactical": 0,
+          "final": -0.04051284528310264
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "base": 0.14793823290171096,
+          "tactical": 0,
+          "final": 0.14793823290171096
+        },
+        {
+          "ref": 1,
+          "base": 0.22762768806674158,
+          "tactical": 0,
+          "final": 0.22762768806674158
+        },
+        {
+          "ref": 2,
+          "base": -0.04051284528310264,
+          "tactical": 0,
+          "final": -0.04051284528310264
+        }
+      ],
+      "notes": "攻撃優先(0) vs 直前リアニメイト(1): v7.2=1, v7.3=1"
+    }
+  ]
+}
