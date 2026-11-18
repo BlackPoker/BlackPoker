@@ -1,0 +1,938 @@
+{
+  "workId": "BP-SIM-AI-GEN9-BLOCK-QUALITY-DIAGNOSTIC",
+  "timestamp": "2026-11-18T11:29:57.489Z",
+  "scenarios": {
+    "scenario-1-favorable-soldier-block": {
+      "description": "ライフ15、敵サイズ3、自軍チャージ兵士サイズ6 (有利ブロック可能: 撃破かつ自軍生存)",
+      "expectedAction": "BLOCK",
+      "patternCount": 2,
+      "candidateBlockersCount": 1,
+      "v72b": {
+        "chosenIndex": 1,
+        "chosenAssignments": [
+          {
+            "sourceUnitId": "u-atk-3",
+            "selectedUnitIds": [
+              "u-blk-6"
+            ]
+          }
+        ],
+        "actualBlockedCount": 1,
+        "didBlock": true,
+        "streamParity": true
+      },
+      "v73b": {
+        "chosenIndex": 1,
+        "chosenAssignments": [
+          {
+            "sourceUnitId": "u-atk-3",
+            "selectedUnitIds": [
+              "u-blk-6"
+            ]
+          }
+        ],
+        "actualBlockedCount": 1,
+        "didBlock": true,
+        "streamParity": true
+      },
+      "patterns": [
+        {
+          "patternIndex": 0,
+          "isPass": true,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-3",
+              "selectedUnitIds": []
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.06934502935455271,
+            "tacticalAdjustment": 0,
+            "finalScore": 0.06934502935455271
+          },
+          "v73b": {
+            "baseScore": 0.06934502935455271,
+            "tacticalAdjustment": 0,
+            "finalScore": 0.06934502935455271
+          }
+        },
+        {
+          "patternIndex": 1,
+          "isPass": false,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-3",
+              "selectedUnitIds": [
+                "u-blk-6"
+              ]
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.13230980526634573,
+            "tacticalAdjustment": 0.2,
+            "finalScore": 0.33230980526634574,
+            "reason": "t14_favorable_block(+1.0: sumBlkSize=6>atkSize=3, count=1)"
+          },
+          "v73b": {
+            "baseScore": 0.13230980526634573,
+            "tacticalAdjustment": 0.2,
+            "finalScore": 0.33230980526634574,
+            "reason": "t14_favorable_block(+1.0: sumBlkSize=6>atkSize=3, count=1)"
+          }
+        }
+      ]
+    },
+    "scenario-2-unfavorable-soldier-block-safe-life": {
+      "description": "ライフ15、敵サイズ5、自軍チャージ兵士サイズ2 (自滅犬死ブロックを回避してスルー)",
+      "expectedAction": "NO_BLOCK",
+      "patternCount": 2,
+      "candidateBlockersCount": 1,
+      "v72b": {
+        "chosenIndex": 1,
+        "chosenAssignments": [
+          {
+            "sourceUnitId": "u-atk-5",
+            "selectedUnitIds": [
+              "u-blk-2"
+            ]
+          }
+        ],
+        "actualBlockedCount": 1,
+        "didBlock": true,
+        "streamParity": true
+      },
+      "v73b": {
+        "chosenIndex": 1,
+        "chosenAssignments": [
+          {
+            "sourceUnitId": "u-atk-5",
+            "selectedUnitIds": [
+              "u-blk-2"
+            ]
+          }
+        ],
+        "actualBlockedCount": 1,
+        "didBlock": true,
+        "streamParity": true
+      },
+      "patterns": [
+        {
+          "patternIndex": 0,
+          "isPass": true,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-5",
+              "selectedUnitIds": []
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.04592725908723655,
+            "tacticalAdjustment": 0,
+            "finalScore": 0.04592725908723655
+          },
+          "v73b": {
+            "baseScore": 0.04592725908723655,
+            "tacticalAdjustment": 0,
+            "finalScore": 0.04592725908723655
+          }
+        },
+        {
+          "patternIndex": 1,
+          "isPass": false,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-5",
+              "selectedUnitIds": [
+                "u-blk-2"
+              ]
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.13775090962646183,
+            "tacticalAdjustment": -0.05,
+            "finalScore": 0.08775090962646183,
+            "reason": "t14_unfavorable_block(-0.25: sumBlkSize=2<atkSize=5, count=1)"
+          },
+          "v73b": {
+            "baseScore": 0.13775090962646183,
+            "tacticalAdjustment": -0.05,
+            "finalScore": 0.08775090962646183,
+            "reason": "t14_unfavorable_block(-0.25: sumBlkSize=2<atkSize=5, count=1)"
+          }
+        }
+      ]
+    },
+    "scenario-3-lethal-block-required": {
+      "description": "ライフ4、敵サイズ5、自軍チャージ兵士サイズ2 (未ブロックなら即死するためブロック必須)",
+      "expectedAction": "BLOCK",
+      "patternCount": 2,
+      "candidateBlockersCount": 1,
+      "v72b": {
+        "chosenIndex": 1,
+        "chosenAssignments": [
+          {
+            "sourceUnitId": "u-atk-5",
+            "selectedUnitIds": [
+              "u-blk-2"
+            ]
+          }
+        ],
+        "actualBlockedCount": 1,
+        "didBlock": true,
+        "streamParity": true
+      },
+      "v73b": {
+        "chosenIndex": 1,
+        "chosenAssignments": [
+          {
+            "sourceUnitId": "u-atk-5",
+            "selectedUnitIds": [
+              "u-blk-2"
+            ]
+          }
+        ],
+        "actualBlockedCount": 1,
+        "didBlock": true,
+        "streamParity": true
+      },
+      "patterns": [
+        {
+          "patternIndex": 0,
+          "isPass": true,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-5",
+              "selectedUnitIds": []
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.0007625949549820354,
+            "tacticalAdjustment": -2.5,
+            "finalScore": -2.499237405045018,
+            "reason": "t15_block_unblocked_lethal=1.0 (unblockedDmg=5>=life=4)"
+          },
+          "v73b": {
+            "baseScore": 0.0007625949549820354,
+            "tacticalAdjustment": -2.5,
+            "finalScore": -2.499237405045018,
+            "reason": "t15_block_unblocked_lethal=1.0 (unblockedDmg=5>=life=4)"
+          }
+        },
+        {
+          "patternIndex": 1,
+          "isPass": false,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-5",
+              "selectedUnitIds": [
+                "u-blk-2"
+              ]
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.11142196573811546,
+            "tacticalAdjustment": -0.05,
+            "finalScore": 0.06142196573811545,
+            "reason": "t14_unfavorable_block(-0.25: sumBlkSize=2<atkSize=5, count=1)"
+          },
+          "v73b": {
+            "baseScore": 0.11142196573811546,
+            "tacticalAdjustment": -0.05,
+            "finalScore": 0.06142196573811545,
+            "reason": "t14_unfavorable_block(-0.25: sumBlkSize=2<atkSize=5, count=1)"
+          }
+        }
+      ]
+    },
+    "scenario-4-bulwark-destroy-attacker": {
+      "description": "防壁で攻撃兵士を撃破できる局面 (ランク一致 5 によるアタッカー破壊)",
+      "expectedAction": "BLOCK",
+      "patternCount": 2,
+      "candidateBlockersCount": 1,
+      "v72b": {
+        "chosenIndex": 1,
+        "chosenAssignments": [
+          {
+            "sourceUnitId": "u-atk-5",
+            "selectedUnitIds": [
+              "u-bw-5"
+            ]
+          }
+        ],
+        "actualBlockedCount": 1,
+        "didBlock": true,
+        "streamParity": true
+      },
+      "v73b": {
+        "chosenIndex": 1,
+        "chosenAssignments": [
+          {
+            "sourceUnitId": "u-atk-5",
+            "selectedUnitIds": [
+              "u-bw-5"
+            ]
+          }
+        ],
+        "actualBlockedCount": 1,
+        "didBlock": true,
+        "streamParity": true
+      },
+      "patterns": [
+        {
+          "patternIndex": 0,
+          "isPass": true,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-5",
+              "selectedUnitIds": []
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.04863139576441769,
+            "tacticalAdjustment": 0,
+            "finalScore": 0.04863139576441769
+          },
+          "v73b": {
+            "baseScore": 0.04863139576441769,
+            "tacticalAdjustment": 0,
+            "finalScore": 0.04863139576441769
+          }
+        },
+        {
+          "patternIndex": 1,
+          "isPass": false,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-5",
+              "selectedUnitIds": [
+                "u-bw-5"
+              ]
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.15050527456715437,
+            "tacticalAdjustment": 0.2,
+            "finalScore": 0.3505052745671544,
+            "reason": "t14_bulwark_destroy(+1.0: blk=u-bw-5 destroys atk=u-atk-5)"
+          },
+          "v73b": {
+            "baseScore": 0.15050527456715437,
+            "tacticalAdjustment": 0.2,
+            "finalScore": 0.3505052745671544,
+            "reason": "t14_bulwark_destroy(+1.0: blk=u-bw-5 destroys atk=u-atk-5)"
+          }
+        }
+      ]
+    },
+    "scenario-5-multi-soldier-favorable-block": {
+      "description": "複数兵士による有利ブロック (敵6 vs 自軍4+4=8: 合体防衛で一方的撃破)",
+      "expectedAction": "BLOCK",
+      "patternCount": 4,
+      "candidateBlockersCount": 2,
+      "v72b": {
+        "chosenIndex": 3,
+        "chosenAssignments": [
+          {
+            "sourceUnitId": "u-atk-6",
+            "selectedUnitIds": [
+              "u-blk-4",
+              "u-blk-4-2"
+            ]
+          }
+        ],
+        "actualBlockedCount": 2,
+        "didBlock": true,
+        "streamParity": true
+      },
+      "v73b": {
+        "chosenIndex": 3,
+        "chosenAssignments": [
+          {
+            "sourceUnitId": "u-atk-6",
+            "selectedUnitIds": [
+              "u-blk-4",
+              "u-blk-4-2"
+            ]
+          }
+        ],
+        "actualBlockedCount": 2,
+        "didBlock": true,
+        "streamParity": true
+      },
+      "patterns": [
+        {
+          "patternIndex": 0,
+          "isPass": true,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-6",
+              "selectedUnitIds": []
+            }
+          ],
+          "v72b": {
+            "baseScore": -0.009623689660668344,
+            "tacticalAdjustment": 0,
+            "finalScore": -0.009623689660668344
+          },
+          "v73b": {
+            "baseScore": -0.009623689660668344,
+            "tacticalAdjustment": 0,
+            "finalScore": -0.009623689660668344
+          }
+        },
+        {
+          "patternIndex": 1,
+          "isPass": false,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-6",
+              "selectedUnitIds": [
+                "u-blk-4"
+              ]
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.002176196173569985,
+            "tacticalAdjustment": -0.05,
+            "finalScore": -0.04782380382643002,
+            "reason": "t14_unfavorable_block(-0.25: sumBlkSize=4<atkSize=6, count=1)"
+          },
+          "v73b": {
+            "baseScore": 0.002176196173569985,
+            "tacticalAdjustment": -0.05,
+            "finalScore": -0.04782380382643002,
+            "reason": "t14_unfavorable_block(-0.25: sumBlkSize=4<atkSize=6, count=1)"
+          }
+        },
+        {
+          "patternIndex": 2,
+          "isPass": false,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-6",
+              "selectedUnitIds": [
+                "u-blk-4-2"
+              ]
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.002176196173569985,
+            "tacticalAdjustment": -0.05,
+            "finalScore": -0.04782380382643002,
+            "reason": "t14_unfavorable_block(-0.25: sumBlkSize=4<atkSize=6, count=1)"
+          },
+          "v73b": {
+            "baseScore": 0.002176196173569985,
+            "tacticalAdjustment": -0.05,
+            "finalScore": -0.04782380382643002,
+            "reason": "t14_unfavorable_block(-0.25: sumBlkSize=4<atkSize=6, count=1)"
+          }
+        },
+        {
+          "patternIndex": 3,
+          "isPass": false,
+          "assignments": [
+            {
+              "sourceUnitId": "u-atk-6",
+              "selectedUnitIds": [
+                "u-blk-4",
+                "u-blk-4-2"
+              ]
+            }
+          ],
+          "v72b": {
+            "baseScore": 0.058090333643489075,
+            "tacticalAdjustment": 0.2,
+            "finalScore": 0.2580903336434891,
+            "reason": "t14_favorable_block(+1.0: sumBlkSize=8>atkSize=6, count=2)"
+          },
+          "v73b": {
+            "baseScore": 0.058090333643489075,
+            "tacticalAdjustment": 0.2,
+            "finalScore": 0.2580903336434891,
+            "reason": "t14_favorable_block(+1.0: sumBlkSize=8>atkSize=6, count=2)"
+          }
+        }
+      ]
+    },
+    "scenario-6-zero-candidates": {
+      "description": "ブロック可能なユニットが0体の局面 (ドライブ状態のみ)",
+      "patternCount": 1,
+      "candidateBlockersCount": 0,
+      "v72b": {
+        "chosenIndex": 0,
+        "actualBlockedCount": 0,
+        "didBlock": false
+      },
+      "v73b": {
+        "chosenIndex": 0,
+        "actualBlockedCount": 0,
+        "didBlock": false
+      }
+    },
+    "scenario-7-step-trace": {
+      "description": "p1のアタック宣言から解決・ブロックまでのステップ別トレース",
+      "traceLog": [
+        {
+          "stepNum": 3,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p1",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 20
+        },
+        {
+          "stepNum": 4,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p2",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 20
+        },
+        {
+          "stepNum": 5,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p1",
+          "sourceType": "EFFECT_RESOLUTION",
+          "sourceActionId": "action.attack",
+          "effectStepId": "selectUnits",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "effectPatternsCount": 4,
+          "catalogSelectionsCount": 4,
+          "catalogSelections": [
+            {
+              "selectionType": "unit",
+              "selectedValues": [],
+              "summary": "アタッカーなし (0体)",
+              "candidateCount": 2
+            },
+            {
+              "selectionType": "unit",
+              "selectedValues": [
+                "soldier-p1-1"
+              ],
+              "summary": "アタッカー: 一般兵",
+              "candidateCount": 2
+            },
+            {
+              "selectionType": "unit",
+              "selectedValues": [
+                "soldier-p1-2"
+              ],
+              "summary": "アタッカー: 一般兵",
+              "candidateCount": 2
+            },
+            {
+              "selectionType": "unit",
+              "selectedValues": [
+                "soldier-p1-1",
+                "soldier-p1-2"
+              ],
+              "summary": "アタッカー: 一般兵, 一般兵",
+              "candidateCount": 2
+            }
+          ],
+          "attackerCount": 0,
+          "chosenNonPassPatIdx": 1
+        },
+        {
+          "stepNum": 6,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p1",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 20
+        },
+        {
+          "stepNum": 7,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p2",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 20
+        },
+        {
+          "stepNum": 8,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p2",
+          "sourceType": "EFFECT_RESOLUTION",
+          "sourceActionId": "action.block",
+          "effectStepId": "selectBlockAssignments",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "effectPatternsCount": 5,
+          "catalogSelectionsCount": 5,
+          "catalogSelections": [
+            {
+              "selectionType": "unitAssignment",
+              "assignments": [
+                {
+                  "sourceUnitId": "soldier-p1-1",
+                  "selectedUnitIds": []
+                }
+              ],
+              "summary": "一般兵 -> [ブロックなし]",
+              "candidateCount": 3
+            },
+            {
+              "selectionType": "unitAssignment",
+              "assignments": [
+                {
+                  "sourceUnitId": "soldier-p1-1",
+                  "selectedUnitIds": [
+                    "soldier-p2-1"
+                  ]
+                }
+              ],
+              "summary": "一般兵 -> [一般兵]",
+              "candidateCount": 3
+            },
+            {
+              "selectionType": "unitAssignment",
+              "assignments": [
+                {
+                  "sourceUnitId": "soldier-p1-1",
+                  "selectedUnitIds": [
+                    "soldier-p2-2"
+                  ]
+                }
+              ],
+              "summary": "一般兵 -> [一般兵]",
+              "candidateCount": 3
+            },
+            {
+              "selectionType": "unitAssignment",
+              "assignments": [
+                {
+                  "sourceUnitId": "soldier-p1-1",
+                  "selectedUnitIds": [
+                    "bw-p2"
+                  ]
+                }
+              ],
+              "summary": "一般兵 -> [防壁]",
+              "candidateCount": 3
+            },
+            {
+              "selectionType": "unitAssignment",
+              "assignments": [
+                {
+                  "sourceUnitId": "soldier-p1-1",
+                  "selectedUnitIds": [
+                    "soldier-p2-1",
+                    "soldier-p2-2"
+                  ]
+                }
+              ],
+              "summary": "一般兵 -> [一般兵, 一般兵]",
+              "candidateCount": 3
+            }
+          ],
+          "attackerCount": 1,
+          "chosenNonPassPatIdx": 1
+        },
+        {
+          "stepNum": 9,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p1",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 20
+        },
+        {
+          "stepNum": 10,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p2",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 20
+        },
+        {
+          "stepNum": 11,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p1",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 0,
+          "bufferLength": 0,
+          "passIdx": -1
+        },
+        {
+          "stepNum": 12,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p1",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 0
+        },
+        {
+          "stepNum": 13,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p2",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 14
+        },
+        {
+          "stepNum": 14,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p1",
+          "sourceType": "EFFECT_RESOLUTION",
+          "sourceActionId": "action.addBulwark",
+          "effectStepId": "selectOption",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "effectPatternsCount": 2,
+          "catalogSelectionsCount": 2,
+          "catalogSelections": [
+            {
+              "selectionType": "option",
+              "selectedValues": [
+                "charge1"
+              ],
+              "summary": "ライフから1枚をチャージ状態の防壁として出す",
+              "candidateCount": 2
+            },
+            {
+              "selectionType": "option",
+              "selectedValues": [
+                "drive2"
+              ],
+              "summary": "ライフから2枚をドライブ状態の防壁として出す",
+              "candidateCount": 2
+            }
+          ],
+          "attackerCount": 0,
+          "chosenNonPassPatIdx": 0
+        },
+        {
+          "stepNum": 15,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p1",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 0,
+          "bufferLength": 0,
+          "passIdx": -1
+        },
+        {
+          "stepNum": 16,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p1",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 0
+        },
+        {
+          "stepNum": 17,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p2",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 1,
+          "turnPlayer": "p1",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 14
+        },
+        {
+          "stepNum": 18,
+          "type": "WAITING_FOR_DECISION",
+          "playerId": "p2",
+          "sourceType": "ACTION_REQUEST",
+          "turnCount": 2,
+          "turnPlayer": "p2",
+          "stageLength": 1,
+          "bufferLength": 0,
+          "passIdx": 14
+        }
+      ]
+    },
+    "scenario-7-gamesession-attack-block-trace": {
+      "description": "GameSession / Playtest 環境下でのアタック解決とブロック自動処理追跡",
+      "v72b": {
+        "allRecordsCount": 4,
+        "allRecordsSummary": [
+          {
+            "idx": 0,
+            "player": "p2",
+            "sourceType": "ACTION_REQUEST",
+            "patternsCount": 21,
+            "chosenPatternRef": 20,
+            "chosenKind": "PASS"
+          },
+          {
+            "idx": 1,
+            "player": "p2",
+            "sourceType": "ACTION_REQUEST",
+            "patternsCount": 21,
+            "chosenPatternRef": 20,
+            "chosenKind": "PASS"
+          },
+          {
+            "idx": 2,
+            "player": "p2",
+            "sourceType": "EFFECT_RESOLUTION",
+            "sourceActionId": "action.block",
+            "effectStepId": "selectBlockAssignments",
+            "patternsCount": 5,
+            "chosenPatternRef": 4,
+            "chosenKind": "EFFECT_SELECTION",
+            "chosenEffectRef": 4
+          },
+          {
+            "idx": 3,
+            "player": "p2",
+            "sourceType": "ACTION_REQUEST",
+            "patternsCount": 21,
+            "chosenPatternRef": 20,
+            "chosenKind": "PASS"
+          }
+        ],
+        "blockRecordsCount": 1,
+        "blockRecords": [
+          {
+            "decisionId": "dec-eff-req-3-selectBlockAssignments-1795001397676",
+            "source": {
+              "type": "EFFECT_RESOLUTION",
+              "sourceRequestRef": "req-3",
+              "sourceActionId": "action.block",
+              "effectStepId": "selectBlockAssignments",
+              "playerId": "p2"
+            },
+            "patternCount": 5,
+            "chosenPatternRef": 4,
+            "chosenPattern": {
+              "patternId": "pat-block-4",
+              "kind": "EFFECT_SELECTION",
+              "effectSelectionRef": 4
+            },
+            "isStream": true,
+            "assignments": [
+              {
+                "sourceUnitId": "soldier-p1-1",
+                "selectedUnitIds": [
+                  "soldier-p2-1",
+                  "soldier-p2-2"
+                ]
+              }
+            ]
+          }
+        ],
+        "finalStateTurn": 1
+      },
+      "v73b": {
+        "allRecordsCount": 4,
+        "allRecordsSummary": [
+          {
+            "idx": 0,
+            "player": "p2",
+            "sourceType": "ACTION_REQUEST",
+            "patternsCount": 21,
+            "chosenPatternRef": 20,
+            "chosenKind": "PASS"
+          },
+          {
+            "idx": 1,
+            "player": "p2",
+            "sourceType": "ACTION_REQUEST",
+            "patternsCount": 21,
+            "chosenPatternRef": 20,
+            "chosenKind": "PASS"
+          },
+          {
+            "idx": 2,
+            "player": "p2",
+            "sourceType": "EFFECT_RESOLUTION",
+            "sourceActionId": "action.block",
+            "effectStepId": "selectBlockAssignments",
+            "patternsCount": 5,
+            "chosenPatternRef": 4,
+            "chosenKind": "EFFECT_SELECTION",
+            "chosenEffectRef": 4
+          },
+          {
+            "idx": 3,
+            "player": "p2",
+            "sourceType": "ACTION_REQUEST",
+            "patternsCount": 21,
+            "chosenPatternRef": 20,
+            "chosenKind": "PASS"
+          }
+        ],
+        "blockRecordsCount": 1,
+        "blockRecords": [
+          {
+            "decisionId": "dec-eff-req-3-selectBlockAssignments-1795001397697",
+            "source": {
+              "type": "EFFECT_RESOLUTION",
+              "sourceRequestRef": "req-3",
+              "sourceActionId": "action.block",
+              "effectStepId": "selectBlockAssignments",
+              "playerId": "p2"
+            },
+            "patternCount": 5,
+            "chosenPatternRef": 4,
+            "chosenPattern": {
+              "patternId": "pat-block-4",
+              "kind": "EFFECT_SELECTION",
+              "effectSelectionRef": 4
+            },
+            "isStream": true,
+            "assignments": [
+              {
+                "sourceUnitId": "soldier-p1-1",
+                "selectedUnitIds": [
+                  "soldier-p2-1",
+                  "soldier-p2-2"
+                ]
+              }
+            ]
+          }
+        ],
+        "finalStateTurn": 1
+      }
+    }
+  },
+  "summary": {
+    "totalScenarios": 7,
+    "actualBlockCountV72b": 5,
+    "actualBlockCountV73b": 5,
+    "streamParityMatches": 5
+  }
+}
