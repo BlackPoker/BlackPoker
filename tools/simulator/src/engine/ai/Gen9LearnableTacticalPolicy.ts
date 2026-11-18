@@ -746,7 +746,8 @@ export function evaluateBlockAssignmentTacticalFeatures(
   assignments: readonly StreamingBlockAssignmentEntry[],
   blockContext: BlockTacticalEvaluationContext,
   encoderVersion: TacticalFeatureEncoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
-  collectReasons: boolean = false
+  collectReasons: boolean = false,
+  behaviorVersion: Gen9BehaviorVersion = "improved"
 ): BlockTacticalFeatureValues {
   const { myUnitsMap, oppAttackersMap, selfLife } = blockContext;
   const reasons: string[] = [];
@@ -865,10 +866,21 @@ export function evaluateBlockAssignmentTacticalFeatures(
       }
     } else if (blockerTotalSize < atkSize) {
       // 不利トレード（ブロッカー全員が一方的に破壊され、アタッカーは生存）
-      const unitLossPenalty =
-        selfLife > 8 && blockerTotalSize >= 5
-          ? 0.75 * blockerUnitIds.length
-          : 0.25 * blockerUnitIds.length;
+      let unitLossPenalty: number;
+      if (behaviorVersion === "v7.2c") {
+        // v7.2c: 安全圏ライフ (selfLife > 8) では、Gen8 DNA のブロック加点 (約 +0.09) を
+        // 確実に相殺して小兵士の無駄死に（犬死ブロック）を回避できるよう、必要最小限の減点 (0.60, final換算 -0.12) を適用
+        unitLossPenalty =
+          selfLife > 8
+            ? (blockerTotalSize >= 5 ? 0.75 : 0.60) * blockerUnitIds.length
+            : 0.25 * blockerUnitIds.length;
+      } else {
+        // legacy / improved 挙動
+        unitLossPenalty =
+          selfLife > 8 && blockerTotalSize >= 5
+            ? 0.75 * blockerUnitIds.length
+            : 0.25 * blockerUnitIds.length;
+      }
       tradeAdvantageUnits -= unitLossPenalty;
       if (collectReasons) {
         reasons.push(
@@ -1205,7 +1217,7 @@ export function encodeTacticalPatternFeatures(
     );
 
     if (myAttackers.length === 0) {
-      if (behaviorVersion === "improved") {
+      if (behaviorVersion === "improved" || behaviorVersion === "v7.2c") {
         features[13] = 0.50 / 0.35; // 空集合アタックへのベースバイアス相殺ペナルティ (-0.50)
         reasons.push("Empty attacker attack penalty (-0.50)");
       }
@@ -1213,7 +1225,7 @@ export function encodeTacticalPatternFeatures(
       const totalAtk = myAttackers.reduce((sum, u) => sum + getUnitSize(u), 0);
 
       if (activeBlockers.length === 0) {
-        if (behaviorVersion === "improved") {
+        if (behaviorVersion === "improved" || behaviorVersion === "v7.2c") {
           // 改善版: 相手ライフが確定公開 (9枚以下) のときのみ確定リーサルと判定
           const isCertainOppLife = typeof oppView?.lifeCount === "number";
           if (isCertainOppLife && totalAtk >= oppView!.lifeCount!) {
@@ -1240,7 +1252,7 @@ export function encodeTacticalPatternFeatures(
           .slice(0, unblockedCount)
           .reduce((sum, u) => sum + getUnitSize(u), 0);
 
-        if (behaviorVersion === "improved") {
+        if (behaviorVersion === "improved" || behaviorVersion === "v7.2c") {
           // 改善版: 相手ライフが確定公開 (9枚以下) のときのみ確定リーサルと判定
           const isCertainOppLife = typeof oppView?.lifeCount === "number";
           if (isCertainOppLife && minBreakthrough >= oppView!.lifeCount!) {
@@ -1268,7 +1280,7 @@ export function encodeTacticalPatternFeatures(
           features[12] = 1.0; // t12_attack_favorable_or_equal_trade
           reasons.push(`t12_attack_favorable_or_equal_trade=1.0 (maxMyAtk=${maxMyAtk}>=minOppBlk=${minOppBlk})`);
         } else {
-          if (behaviorVersion === "improved") {
+          if (behaviorVersion === "improved" || behaviorVersion === "v7.2c") {
             const lostSizeSum = myAttackers.reduce((sum, u) => sum + getUnitSize(u), 0);
             const penalty = 0.50 + Math.min(0.20, 0.05 * lostSizeSum);
             features[13] = penalty / 0.35; // t13_attack_suicide_scaled (R4 weight -0.35 で -penalty を再現)
@@ -1295,7 +1307,8 @@ export function encodeTacticalPatternFeatures(
         blockAssignments,
         blockCtx,
         encoderVersion,
-        true
+        true,
+        behaviorVersion
       );
       features[14] = blockEval.t14_block_trade_advantage;
       features[15] = blockEval.t15_block_unblocked_lethal;
@@ -1461,7 +1474,7 @@ export function encodeTacticalPatternFeatures(
   // ===========================================================================
   let proactiveAdjustment = 0;
   if (
-    behaviorVersion === "improved" &&
+    (behaviorVersion === "improved" || behaviorVersion === "v7.2c") &&
     act &&
     act.actionId !== "action.attack" &&
     act.actionId !== "action.end" &&
@@ -1473,6 +1486,23 @@ export function encodeTacticalPatternFeatures(
       for (const r of proactiveOutcome.reasons) {
         reasons.push(r);
       }
+    }
+  }
+
+  // ===========================================================================
+  // カテゴリ 9: アタッカー選択時の兵士温存評価 (Work: Gen 9 実戦品質改善)
+  // ===========================================================================
+  if (behaviorVersion === "v7.2c") {
+    const atkOutcome = evaluateAttackerSelectionTactics(
+      request,
+      pattern,
+      selfView,
+      oppView,
+      behaviorVersion
+    );
+    if (atkOutcome.adjustment !== 0) {
+      proactiveAdjustment += atkOutcome.adjustment;
+      if (atkOutcome.reason) reasons.push(atkOutcome.reason);
     }
   }
 
@@ -1513,6 +1543,124 @@ export function computeStreamingBlockTacticalScore(
     tacticalWeights[15] * blockEval.t15_block_unblocked_lethal +
     tacticalWeights[16] * blockEval.t16_block_unblocked_danger_ratio
   );
+}
+
+/**
+ * アタッカー選択 (EFFECT_RESOLUTION: selectUnits on action.attack) における兵士温存の戦術評価
+ * (Work: Gen 9 実戦品質改善 ― ブロック判断と兵士温存)
+ */
+export function evaluateAttackerSelectionTactics(
+  request: Readonly<DecisionRequest>,
+  pattern: Readonly<LegalPattern>,
+  selfView?: PlayerObservationView,
+  oppView?: PlayerObservationView,
+  behaviorVersion: Gen9BehaviorVersion = "improved"
+): { adjustment: number; reason?: string } {
+  if (behaviorVersion !== "v7.2c") {
+    return { adjustment: 0 };
+  }
+
+  // アタッカー選択 DecisionRequest であることの厳密な確認
+  const isAttackerSelection =
+    request.source?.type === "EFFECT_RESOLUTION" &&
+    (request.source as any).sourceActionId === "action.attack" &&
+    (request.source as any).effectStepId === "selectUnits";
+  if (!isAttackerSelection) {
+    return { adjustment: 0 };
+  }
+
+  // パターンからアタッカーとして指定されたユニットID群を抽出
+  const eff = pattern.effectSelectionRef !== undefined
+    ? request.catalog.effectSelections?.[pattern.effectSelectionRef]
+    : undefined;
+  if (!eff) {
+    return { adjustment: 0 };
+  }
+
+  const selectedAttackerIds: string[] = eff.selectedValues ?? (eff as any).unitIds ?? [];
+  const selectedCount = selectedAttackerIds.length;
+
+  const getUnitSize = (u: any): number => u.currentSize ?? u.size ?? 0;
+
+  // 自軍のチャージ状態の兵士 (アタッカー候補になり得た兵士)
+  const myChargeSoldiers = (selfView?.field ?? []).filter(
+    (u) => u.state === "charge" && u.kind !== "bulwark" && u.componentId !== "character.bulwark" && getUnitSize(u) > 0
+  );
+  const totalMyChargeSoldierCount = myChargeSoldiers.length;
+
+  // 自軍兵士が1体以下の場合は温存の余地がない (出撃するか空アタックかの2択)
+  if (totalMyChargeSoldierCount <= 1) {
+    return { adjustment: 0 };
+  }
+
+  // 出撃後に自陣に残るチャージ兵士数
+  const remainingChargeSoldiers = totalMyChargeSoldierCount - selectedCount;
+
+  // 自軍のチャージ状態の防壁
+  const myChargeBulwarks = (selfView?.field ?? []).filter(
+    (u) => u.state === "charge" && (u.componentId === "character.bulwark" || u.kind === "防壁")
+  );
+  const hasChargeBulwark = myChargeBulwarks.length > 0;
+
+  // 相手陣地のチャージ兵士 (返しのターンにアタッカーとなり得る脅威)
+  const oppChargeSoldiers = (oppView?.field ?? []).filter(
+    (u) => u.state === "charge" && u.kind !== "bulwark" && u.componentId !== "character.bulwark" && getUnitSize(u) > 0
+  );
+  const hasOppThreat = oppChargeSoldiers.length > 0;
+
+  // 相手ライフとリーサル判定
+  const attackPower = myChargeSoldiers
+    .filter((u) => selectedAttackerIds.includes(u.unitId))
+    .reduce((sum, u) => sum + getUnitSize(u), 0);
+  const oppLife = oppView?.lifeCount;
+  const isCertainOppLife = typeof oppLife === "number";
+  const isGuaranteedLethal = isCertainOppLife && attackPower >= oppLife;
+
+  // -------------------------------------------------------------------------
+  // 全軍アタックが合理的な局面 (温存不要)
+  // -------------------------------------------------------------------------
+  // (A) 確定リーサルの場合は相手を倒し切るため全軍アタックを強力に推進 (リーサルボーナス +1.0)
+  if (isGuaranteedLethal) {
+    return {
+      adjustment: 1.0,
+      reason: `Guaranteed lethal attack bonus (+1.00): attackPower=${attackPower} >= oppLife=${oppLife}`,
+    };
+  }
+
+  // (B) 自陣にチャージ防壁が存在する場合、兵士全員でアタックしても防壁で防御可能なため全軍アタック許容
+  if (hasChargeBulwark) {
+    return { adjustment: 0 };
+  }
+
+  // (C) 相手陣地にチャージ兵士が存在しない場合 (反撃の脅威がない) は全軍アタック許容
+  if (!hasOppThreat) {
+    return { adjustment: 0 };
+  }
+
+  // (D) アタッカー0体 (空アタック) の場合は温存ペナルティの対象外
+  if (selectedCount === 0) {
+    return { adjustment: 0 };
+  }
+
+  // -------------------------------------------------------------------------
+  // 兵士温存が合理的な局面
+  // -------------------------------------------------------------------------
+  // リーサルに届かず、防壁もなく、相手に反撃兵士がいる局面で、
+  // 全兵士を出撃させて自陣を完全に無防備 (remaining === 0) にする場合:
+  if (remainingChargeSoldiers === 0) {
+    // 無防備全軍アタックペナルティ: Gen 8 DNA のサイズ加点 (約 +0.05〜+0.08) を相殺
+    return {
+      adjustment: -0.15,
+      reason: `All-out attack leaves board defenseless penalty (-0.15): remainingChargeSoldiers=0, oppThreatCount=${oppChargeSoldiers.length}`,
+    };
+  }
+
+  // 少なくとも1体のチャージ兵士を守備に残してアタックする場合:
+  // 合理的な兵士温存ボーナス
+  return {
+    adjustment: 0.10,
+    reason: `Reserved blocker attack bonus (+0.10): remainingChargeSoldiers=${remainingChargeSoldiers}`,
+  };
 }
 
 /**
@@ -1729,7 +1877,8 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
       assignments,
       blockContext,
       this.encoderVersion,
-      true
+      true,
+      this.behaviorVersion
     );
     features[14] = blockEval.t14_block_trade_advantage;
     features[15] = blockEval.t15_block_unblocked_lethal;
@@ -1802,7 +1951,8 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
           assignments,
           blockContext,
           this.encoderVersion,
-          false
+          false,
+          this.behaviorVersion
         );
         tacticalAdj =
           weights[14] * blockEval.t14_block_trade_advantage +

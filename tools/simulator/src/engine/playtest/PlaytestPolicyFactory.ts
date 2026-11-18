@@ -28,6 +28,8 @@ export const GEN9_R4_V72_SUPPORTED_REGULATION_ID = "standard-pack";
 export const GEN9_COST_PREVIEW_V73_SUPPORTED_REGULATION_ID = "standard-pack";
 export const GEN9_R4_V72B_SUPPORTED_REGULATION_ID = "standard-pack";
 export const GEN9_COST_V73B_SUPPORTED_REGULATION_ID = "standard-pack";
+export const GEN9_R4_V72C_SUPPORTED_REGULATION_ID = "standard-pack";
+export const GEN9_COST_V73C_SUPPORTED_REGULATION_ID = "standard-pack";
 
 /**
  * Playtest UI 用 AI Policy ファクトリ。
@@ -180,6 +182,46 @@ export class PlaytestPolicyFactory {
           evaluator,
           TACTICAL_FEATURE_ENCODER_VERSION_V73,
           "improved"
+        );
+      }
+
+      case "gen9-r4-v72c": {
+        if (regulationId !== GEN9_R4_V72C_SUPPORTED_REGULATION_ID) {
+          throw new Error(
+            `Gen 9 R4 実戦品質改善AI (v7.2c) は公式レギュレーション ${GEN9_R4_V72C_SUPPORTED_REGULATION_ID} 専用です (現在の環境: ${regulationId ?? "undefined"})`
+          );
+        }
+        const dna = loadAndValidateGen8ChampionCandidateDNA();
+        const evaluator = rulePackage ? new GenericTacticalEvaluator(rulePackage) : undefined;
+        return new Gen9TacticalPrototypePolicy(
+          dna,
+          "Gen 9 R4 — 実戦品質改善AI (v7.2c)",
+          evaluator,
+          TACTICAL_FEATURE_ENCODER_VERSION_V72,
+          "v7.2c"
+        );
+      }
+
+      case "gen9-cost-v73c": {
+        if (regulationId !== GEN9_COST_V73C_SUPPORTED_REGULATION_ID) {
+          throw new Error(
+            `Gen 9 v7.3c コスト・実戦改善AI (v7.3c) は公式レギュレーション ${GEN9_COST_V73C_SUPPORTED_REGULATION_ID} 専用です (現在の環境: ${regulationId ?? "undefined"})`
+          );
+        }
+        const dna = loadAndValidateGen8ChampionCandidateDNA();
+        const weights = [...R4_PRESET_TACTICAL_WEIGHTS];
+        weights[20] = COST_DIAGNOSTIC_WEIGHTS[0];
+        weights[21] = COST_DIAGNOSTIC_WEIGHTS[1];
+        weights[22] = COST_DIAGNOSTIC_WEIGHTS[2];
+        weights[23] = COST_DIAGNOSTIC_WEIGHTS[3];
+        const genome = fromV6DNA(dna, weights);
+        const evaluator = rulePackage ? new GenericTacticalEvaluator(rulePackage) : undefined;
+        return new Gen9LearnableTacticalPolicy(
+          genome,
+          "Gen 9 v7.3c — コスト・実戦改善AI (v7.3c)",
+          evaluator,
+          TACTICAL_FEATURE_ENCODER_VERSION_V73,
+          "v7.2c"
         );
       }
 

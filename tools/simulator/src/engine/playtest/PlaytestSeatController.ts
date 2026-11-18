@@ -21,7 +21,9 @@ export type PlaytestPolicyId =
   | "gen9-r4-v72"
   | "gen9-cost-preview-v73"
   | "gen9-r4-v72b"
-  | "gen9-cost-v73b";
+  | "gen9-cost-v73b"
+  | "gen9-r4-v72c"
+  | "gen9-cost-v73c";
 
 /**
  * UI表示用メタデータ
@@ -147,6 +149,32 @@ export const PLAYTEST_POLICY_OPTIONS: readonly PlaytestPolicyOption[] = [
       dnaSchema: "v7.3b",
       humanPerformance: "Playtest推奨",
       disclaimer: "※コスト支払い特徴量と最新の行動品質改善を統合した実験・完成版です。",
+    },
+  },
+  {
+    id: "gen9-r4-v72c",
+    label: "Gen 9 R4 — 実戦品質改善AI (v7.2c)",
+    description: "不利な犬死ブロックの抑制と、アタッカー選択時の兵士温存を統合した実戦品質改善版AI。",
+    supportedRegulationIds: ["standard-pack"],
+    evolutionDetails: {
+      generation: "Gen 9 R4 (v7.2c 実戦改善版)",
+      baselineRecord: "犬死ブロック回避 + 兵士温存戦術統合",
+      dnaSchema: "v7.2c",
+      humanPerformance: "Playtest推奨",
+      disclaimer: "※実戦プレイテストのフィードバックに基づき、守備ブロック判断と兵士温存を改善した最新AIです。",
+    },
+  },
+  {
+    id: "gen9-cost-v73c",
+    label: "Gen 9 v7.3c — コスト・実戦改善AI (v7.3c)",
+    description: "コスト評価に加え、不利ブロック抑制・兵士温存戦術を統合した24次元実戦品質改善版AI。",
+    supportedRegulationIds: ["standard-pack"],
+    evolutionDetails: {
+      generation: "Gen 9 v7.3c (実戦改善版)",
+      baselineRecord: "24次元コスト評価 + 不利ブロック回避 + 兵士温存",
+      dnaSchema: "v7.3c",
+      humanPerformance: "Playtest推奨",
+      disclaimer: "※コスト支払い特徴量と最新のブロック・兵士温存改善を統合した最新AIです。",
     },
   },
 ];

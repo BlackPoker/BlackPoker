@@ -40,6 +40,7 @@ import {
   createBlockTacticalContext,
   extractBlockAssignmentsFromPattern,
   evaluateBlockAssignmentTacticalFeatures,
+  evaluateAttackerSelectionTactics,
   hasEffectiveCounterMeasure,
 } from "./Gen9LearnableTacticalPolicy.js";
 
@@ -56,7 +57,7 @@ export interface TacticalEvaluationResult {
   readonly bestPatternRef: number;
 }
 
-export type Gen9BehaviorVersion = "legacy" | "improved";
+export type Gen9BehaviorVersion = "legacy" | "improved" | "v7.2c";
 
 export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
   public readonly descriptor: PolicyDescriptor;
@@ -186,7 +187,8 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
         assignments,
         blockContext,
         this.encoderVersion,
-        false
+        false,
+        this.behaviorVersion
       );
       const tacticalAdj =
         0.2 * blockEval.t14_block_trade_advantage +
@@ -406,7 +408,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     // 戦術評価 B-1: 能動アクション（攻撃魔法・除去・直接ダメージ等）の汎用評価 (Work 5-7B)
     // =========================================================================
     if (
-      this.behaviorVersion === "improved" &&
+      (this.behaviorVersion === "improved" || this.behaviorVersion === "v7.2c") &&
       act &&
       act.actionId !== "action.attack" &&
       act.actionId !== "action.end" &&
@@ -432,7 +434,8 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
           blockAssignments,
           blockCtx,
           this.encoderVersion,
-          true
+          true,
+          this.behaviorVersion
         );
         const blockAdj =
           0.2 * blockEval.t14_block_trade_advantage +
@@ -442,6 +445,23 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
         for (const r of blockEval.reasons) {
           reasons.push(r);
         }
+      }
+    }
+
+    // =========================================================================
+    // 戦術評価 B-3: アタッカー選択時の兵士温存評価 (Work: Gen 9 実戦品質改善)
+    // =========================================================================
+    if (this.behaviorVersion === "v7.2c") {
+      const atkSelAdj = evaluateAttackerSelectionTactics(
+        request,
+        pattern,
+        selfView,
+        oppView,
+        this.behaviorVersion
+      );
+      if (atkSelAdj.adjustment !== 0) {
+        adjustment += atkSelAdj.adjustment;
+        if (atkSelAdj.reason) reasons.push(atkSelAdj.reason);
       }
     }
 
@@ -487,7 +507,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     );
 
     if (myAttackers.length === 0) {
-      if (this.behaviorVersion === "improved") {
+      if (this.behaviorVersion === "improved" || this.behaviorVersion === "v7.2c") {
         return { adjustment: -0.50, reason: "Empty attacker attack penalty (-0.50)" };
       }
       return { adjustment: 0 };
@@ -499,7 +519,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     // ケース 1: 相手ブロッカー不在
     // -------------------------------------------------------------------------
     if (activeBlockers.length === 0) {
-      if (this.behaviorVersion === "improved") {
+      if (this.behaviorVersion === "improved" || this.behaviorVersion === "v7.2c") {
         // 改善版: 相手ライフが確定公開 (9枚以下) のときのみ確定リーサルと判定
         const isCertainOppLife = typeof oppView?.lifeCount === "number";
         if (isCertainOppLife && totalAtk >= oppView!.lifeCount!) {
@@ -526,7 +546,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
       // 相手が最大サイズのアタッカーをすべてブロックしたと仮定した際の最小突破ダメージ
       const minBreakthrough = sortedAttackers.slice(0, unblockedCount).reduce((sum, u) => sum + getUnitSize(u), 0);
 
-      if (this.behaviorVersion === "improved") {
+      if (this.behaviorVersion === "improved" || this.behaviorVersion === "v7.2c") {
         // 改善版: 相手ライフが確定公開 (9枚以下) のときのみ確定リーサルと判定
         const isCertainOppLife = typeof oppView?.lifeCount === "number";
         if (isCertainOppLife && minBreakthrough >= oppView!.lifeCount!) {
@@ -565,7 +585,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
 
     // 自軍の全アタッカーが相手のどのブロッカーよりも小さく、一方的に討ち取られる場合 (完全犬死)
     if (maxMyAtk < minOppBlk) {
-      if (this.behaviorVersion === "improved") {
+      if (this.behaviorVersion === "improved" || this.behaviorVersion === "v7.2c") {
         const lostSizeSum = myAttackers.reduce((sum, u) => sum + getUnitSize(u), 0);
         const penalty = 0.50 + Math.min(0.20, 0.05 * lostSizeSum);
         return {

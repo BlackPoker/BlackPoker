@@ -700,10 +700,7 @@ describe("Gen 9 ブロック判断品質の診断テスト", () => {
         rulePackage
       );
 
-      const seatControllers = createSeatControllers({
-        p1Mode: "human",
-        p2Mode: "policy",
-      });
+      const seatControllers = createSeatControllers("humanVsAi", "p1", policyKey);
       const policies = { p2: policy };
 
       // 1. 初期ステップ進行 (Turn 1: p1 のメインタイミング)
@@ -777,7 +774,7 @@ describe("Gen 9 ブロック判断品質の診断テスト", () => {
         );
 
         allAiRecords.push(...advRes.records);
-        currentStep = advRes.step;
+        currentStep = advRes.status === "STOPPED" ? advRes.step : advRes.lastStep!;
 
         // もしアタック解決・ブロック処理が一巡して p1 のメインタイミングに戻ったら終了
         if (
