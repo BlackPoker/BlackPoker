@@ -39,7 +39,7 @@ import { GameStatusBar } from "../game/GameStatusBar";
 import { PlayerBoard } from "../game/PlayerBoard";
 import { StagePanel } from "../game/StagePanel";
 import { MatchSetupScreen } from "./MatchSetupScreen";
-import { DecisionPanel } from "../decision/DecisionPanel";
+import { DecisionPanel, DecisionPanelDraftState } from "../decision/DecisionPanel";
 import { GameLog, LogEntry } from "../game/GameLog";
 import { PassAndPlayOverlay } from "../game/PassAndPlayOverlay";
 import { GameOverOverlay } from "../game/GameOverOverlay";
@@ -250,6 +250,9 @@ export const CoreBattlePlaytest: React.FC = () => {
     new Map()
   );
   const [selectedUnitIds, setSelectedUnitIds] = useState<string[]>([]);
+  const [lastBoardUnitClick, setLastBoardUnitClick] = useState<{ unitId: string; seq: number } | null>(null);
+  const boardUnitClickSeqRef = useRef<number>(0);
+  const decisionDraftStateRef = useRef<DecisionPanelDraftState | null>(null);
 
   // Pass-and-Play 制御
   const [enablePassAndPlay, setEnablePassAndPlay] = useState(true);
@@ -361,6 +364,8 @@ export const CoreBattlePlaytest: React.FC = () => {
     decisionSeqRef.current = 1;
     decisionTranscriptRef.current = [];
     setSelectedUnitIds([]);
+    setLastBoardUnitClick(null);
+    decisionDraftStateRef.current = null;
     setSheetMode("collapsed");
     setIsPassAndPlayWaiting(false);
     setPresetValidationErrors([]);
@@ -1007,6 +1012,8 @@ export const CoreBattlePlaytest: React.FC = () => {
     (unitId: string) => {
       if (!unitSelectionMarkers.has(unitId)) return;
 
+      boardUnitClickSeqRef.current += 1;
+      setLastBoardUnitClick({ unitId, seq: boardUnitClickSeqRef.current });
       setSelectedUnitIds((prev) => {
         if (prev.includes(unitId)) {
           return prev.filter((id) => id !== unitId);
@@ -1782,6 +1789,8 @@ export const CoreBattlePlaytest: React.FC = () => {
       onSubmit={handleDecisionSubmit}
       onSelectionMarkersChange={setUnitSelectionMarkers}
       selectedUnitIdsFromBoard={selectedUnitIds}
+      lastBoardUnitClick={lastBoardUnitClick}
+      draftStateRef={decisionDraftStateRef}
       onHighlightRequest={(reqId) => setHighlightedRequestId(reqId || null)}
       battleRelationMap={battleRelationMap}
       onUndo={handleUndo}

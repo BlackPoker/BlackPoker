@@ -30,12 +30,12 @@ export const MobileVisibleHandStrip: React.FC<MobileVisibleHandStripProps> = ({
   return (
     <div
       data-testid="mobile-sheet-hand-strip"
-      className={`flex items-center gap-1.5 overflow-x-auto no-scrollbar touch-pan-x py-1 px-1 min-w-0 ${className}`}
+      className={`flex items-center gap-1.5 md:gap-2 overflow-x-auto no-scrollbar touch-pan-x py-1 px-1 md:px-2 min-w-0 ${className}`}
     >
       <span className="text-[10px] font-mono font-bold text-zinc-500 shrink-0 select-none mr-0.5">
         {`HAND (${visibleCards.length})`}
       </span>
-      <div className="flex items-center gap-1 flex-nowrap shrink-0">
+      <div className="flex items-center gap-1 md:gap-1.5 flex-nowrap shrink-0">
         {visibleCards.map((card, idx) => (
           <div
             key={card.id || card.cardInstanceId || idx}

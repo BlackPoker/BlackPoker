@@ -93,7 +93,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
       onClick={handleClick}
       title={`Debug ID: ${unit.unitId}`}
       data-testid={`unit-card-${unit.unitId}`}
-      className={`relative flex flex-col items-center p-1 rounded border transition-all select-none min-w-[76px] lg:min-w-[96px] ${
+      className={`relative shrink-0 flex flex-col items-center p-1 rounded border transition-all select-none min-w-[76px] lg:min-w-[96px] ${
         isClickable
           ? "cursor-pointer hover:border-zinc-950 hover:scale-[1.02] active:scale-[0.98]"
           : "cursor-pointer lg:cursor-default"

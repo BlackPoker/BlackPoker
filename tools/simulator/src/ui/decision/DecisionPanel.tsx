@@ -8,12 +8,26 @@ import { BattleRelationPresenter, type UnitBattleDisplayInfo } from "../game/Bat
 import { RichCardText } from "../common/RichCardText";
 import { CardView } from "../game/CardView";
 
+export interface DecisionPanelDraftState {
+  readonly decisionId: string;
+  readonly selectedActionRef: number | null;
+  readonly selectedKeyRef: number | null;
+  readonly selectedCostRef: number | null;
+  readonly selectedTargetRef: number | null;
+  readonly selectedEffectPatternRef: number | null;
+  readonly selectedBlockPatternRef: number | null;
+  readonly firstSelectedCardId: string | null;
+  readonly blockAssignments?: Record<string, string[]>;
+}
+
 export interface DecisionPanelProps {
   readonly request: DecisionRequest;
   readonly onSubmit: (response: DecisionResponse, options?: { autoPass?: boolean }) => void;
   readonly onCancel?: () => void;
   readonly onSelectionMarkersChange?: (markers: Map<string, { badge: string; isSelected: boolean }>) => void;
   readonly selectedUnitIdsFromBoard?: string[];
+  readonly lastBoardUnitClick?: { unitId: string; seq: number } | null;
+  readonly draftStateRef?: React.MutableRefObject<DecisionPanelDraftState | null>;
   readonly onHighlightRequest?: (requestId?: string) => void;
   readonly initialActionRef?: number;
   readonly initialCostRef?: number;
@@ -83,6 +97,8 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   onSubmit,
   onSelectionMarkersChange,
   selectedUnitIdsFromBoard,
+  lastBoardUnitClick,
+  draftStateRef,
   onHighlightRequest,
   initialActionRef,
   initialCostRef,
@@ -96,16 +112,40 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   const catalog = request.catalog;
   const patterns = request.patterns;
 
+  // 同一 decisionId でブレークポイント跨ぎ (1023px <-> 1024px) が発生した場合、draftStateRef から復元
+  const matchingDraft =
+    draftStateRef?.current && draftStateRef.current.decisionId === request.decisionId
+      ? draftStateRef.current
+      : null;
+
   // 選択状態
-  const [selectedActionRef, setSelectedActionRef] = useState<number | null>(initialActionRef ?? null);
-  const [selectedKeyRef, setSelectedKeyRef] = useState<number | null>(null);
-  const [selectedCostRef, setSelectedCostRef] = useState<number | null>(initialCostRef ?? null);
-  const [selectedTargetRef, setSelectedTargetRef] = useState<number | null>(initialTargetRef ?? null);
-  const [selectedEffectPatternRef, setSelectedEffectPatternRef] = useState<number | null>(null);
-  const [selectedBlockPatternRef, setSelectedBlockPatternRef] = useState<number | null>(null);
-  const [firstSelectedCardId, setFirstSelectedCardId] = useState<string | null>(null);
+  const [selectedActionRef, setSelectedActionRef] = useState<number | null>(
+    matchingDraft ? matchingDraft.selectedActionRef : (initialActionRef ?? null)
+  );
+  const [selectedKeyRef, setSelectedKeyRef] = useState<number | null>(
+    matchingDraft ? matchingDraft.selectedKeyRef : null
+  );
+  const [selectedCostRef, setSelectedCostRef] = useState<number | null>(
+    matchingDraft ? matchingDraft.selectedCostRef : (initialCostRef ?? null)
+  );
+  const [selectedTargetRef, setSelectedTargetRef] = useState<number | null>(
+    matchingDraft ? matchingDraft.selectedTargetRef : (initialTargetRef ?? null)
+  );
+  const [selectedEffectPatternRef, setSelectedEffectPatternRef] = useState<number | null>(
+    matchingDraft ? matchingDraft.selectedEffectPatternRef : null
+  );
+  const [selectedBlockPatternRef, setSelectedBlockPatternRef] = useState<number | null>(
+    matchingDraft ? matchingDraft.selectedBlockPatternRef : null
+  );
+  const [firstSelectedCardId, setFirstSelectedCardId] = useState<string | null>(
+    matchingDraft ? matchingDraft.firstSelectedCardId : null
+  );
+  const [blockAssignmentsDraft, setBlockAssignmentsDraft] = useState<Record<string, string[]> | undefined>(
+    matchingDraft?.blockAssignments
+  );
   const isSubmittedRef = useRef(false);
   const lastDecisionIdRef = useRef(request.decisionId);
+  const lastProcessedBoardClickSeqRef = useRef<number>(lastBoardUnitClick?.seq ?? 0);
 
   // decisionId 切替時の選択状態リセット (Defense-in-depth)
   useEffect(() => {
@@ -118,9 +158,37 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       setSelectedEffectPatternRef(null);
       setSelectedBlockPatternRef(null);
       setFirstSelectedCardId(null);
+      setBlockAssignmentsDraft(undefined);
       isSubmittedRef.current = false;
     }
   }, [request.decisionId, initialActionRef, initialCostRef, initialTargetRef]);
+
+  // draftStateRef への選択状態同期 (ブレークポイント跨ぎでの状態保持)
+  useEffect(() => {
+    if (!draftStateRef) return;
+    draftStateRef.current = {
+      decisionId: request.decisionId,
+      selectedActionRef,
+      selectedKeyRef,
+      selectedCostRef,
+      selectedTargetRef,
+      selectedEffectPatternRef,
+      selectedBlockPatternRef,
+      firstSelectedCardId,
+      blockAssignments: blockAssignmentsDraft,
+    };
+  }, [
+    draftStateRef,
+    request.decisionId,
+    selectedActionRef,
+    selectedKeyRef,
+    selectedCostRef,
+    selectedTargetRef,
+    selectedEffectPatternRef,
+    selectedBlockPatternRef,
+    firstSelectedCardId,
+    blockAssignmentsDraft,
+  ]);
 
   // 選択中ターゲットのリクエストIDハイライト連携
   useEffect(() => {
@@ -625,10 +693,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     });
   }, [patterns, catalog, unitNumberMap]);
 
-  // 盤面クリック選択 (selectedUnitIdsFromBoard) との連動
+  // 盤面クリック選択 (selectedUnitIdsFromBoard / lastBoardUnitClick) との連動
   useEffect(() => {
-    if (selectedUnitIdsFromBoard && selectedUnitIdsFromBoard.length > 0) {
-      // 選択された unitIds と一致する pattern を検索
+    if (selectedUnitIdsFromBoard && selectedUnitIdsFromBoard.length > 0 && !lastBoardUnitClick) {
+      // 従来互換: selectedUnitIdsFromBoard 配列と完全一致する EFFECT_RESOLUTION pattern を検索
       const targetIds = new Set(selectedUnitIdsFromBoard);
       const matchIdx = humanReadableEffectPatterns.findIndex((hp) => {
         if (hp.selectedValues.length !== targetIds.size) return false;
@@ -636,28 +704,167 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       });
       if (matchIdx !== -1) {
         setSelectedEffectPatternRef(matchIdx);
+      } else if (request.source?.type === "ACTION_REQUEST" && availableTargetRefs.length > 0) {
+        const lastClickedId = selectedUnitIdsFromBoard[selectedUnitIdsFromBoard.length - 1];
+        const matchedTargetRef = availableTargetRefs.find(
+          (tRef) => catalog.targetSelections[tRef]?.targetUnitId === lastClickedId
+        );
+        if (matchedTargetRef !== undefined) {
+          handleSelectTarget(matchedTargetRef);
+        }
       }
     }
-  }, [selectedUnitIdsFromBoard, humanReadableEffectPatterns]);
+  }, [selectedUnitIdsFromBoard, lastBoardUnitClick, humanReadableEffectPatterns, request.source?.type, availableTargetRefs, catalog.targetSelections]);
 
-  // 盤面マーカー（①, ②）と選択状態の通知
+  // 盤面ユニットタップイベント (lastBoardUnitClick) による ACTION_REQUEST 対象選択 & EFFECT_RESOLUTION 単体/複数ユニット選択
+  useEffect(() => {
+    if (!lastBoardUnitClick || lastBoardUnitClick.seq === lastProcessedBoardClickSeqRef.current) return;
+    lastProcessedBoardClickSeqRef.current = lastBoardUnitClick.seq;
+    const clickedUnitId = lastBoardUnitClick.unitId;
+
+    if (request.source?.type === "ACTION_REQUEST") {
+      if (selectedActionRef !== null && availableTargetRefs.length > 0) {
+        const matchedTargetRef = availableTargetRefs.find(
+          (tRef) => catalog.targetSelections[tRef]?.targetUnitId === clickedUnitId
+        );
+        if (matchedTargetRef !== undefined) {
+          handleSelectTarget(matchedTargetRef);
+        }
+      }
+      return;
+    }
+
+    if (request.source?.type === "EFFECT_RESOLUTION") {
+      const isBlockAssignment = (catalog.effectSelections || []).some(
+        (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
+      );
+      if (isBlockAssignment) {
+        // BlockAssignmentEditor 側で処理
+        return;
+      }
+
+      const supportsMultiUnit = humanReadableEffectPatterns.some((hp) => hp.selectedValues.length > 1);
+      if (!supportsMultiUnit) {
+        // 単一ユニット選択: タップしたユニットを直接選択 (既に選択中なら解除または0体パターン)
+        const currentVals =
+          selectedEffectPatternRef !== null
+            ? humanReadableEffectPatterns[selectedEffectPatternRef]?.selectedValues || []
+            : [];
+        if (currentVals.length === 1 && currentVals[0] === clickedUnitId) {
+          const zeroIdx = humanReadableEffectPatterns.findIndex((hp) => hp.selectedValues.length === 0);
+          setSelectedEffectPatternRef(zeroIdx !== -1 ? zeroIdx : null);
+        } else {
+          const singleIdx = humanReadableEffectPatterns.findIndex(
+            (hp) => hp.selectedValues.length === 1 && hp.selectedValues[0] === clickedUnitId
+          );
+          if (singleIdx !== -1) {
+            setSelectedEffectPatternRef(singleIdx);
+          }
+        }
+      } else {
+        // 複数ユニット選択 (アタッカー指定等): 現在の選択集合に対して clickedUnitId をトグル
+        const currentVals =
+          selectedEffectPatternRef !== null
+            ? humanReadableEffectPatterns[selectedEffectPatternRef]?.selectedValues || []
+            : [];
+        const nextSet = new Set(currentVals);
+        if (nextSet.has(clickedUnitId)) {
+          nextSet.delete(clickedUnitId);
+        } else {
+          nextSet.add(clickedUnitId);
+        }
+        if (nextSet.size === 0) {
+          const zeroIdx = humanReadableEffectPatterns.findIndex((hp) => hp.selectedValues.length === 0);
+          setSelectedEffectPatternRef(zeroIdx !== -1 ? zeroIdx : null);
+        } else {
+          const matchIdx = humanReadableEffectPatterns.findIndex((hp) => {
+            if (hp.selectedValues.length !== nextSet.size) return false;
+            return hp.selectedValues.every((id) => nextSet.has(id));
+          });
+          if (matchIdx !== -1) {
+            setSelectedEffectPatternRef(matchIdx);
+          }
+        }
+      }
+    }
+  }, [
+    lastBoardUnitClick,
+    request.source?.type,
+    selectedActionRef,
+    availableTargetRefs,
+    catalog.targetSelections,
+    catalog.effectSelections,
+    humanReadableEffectPatterns,
+    selectedEffectPatternRef,
+  ]);
+
+  // 盤面マーカー（①, ②）と選択状態の通知 (EFFECT_RESOLUTION および ACTION_REQUEST のユニット対象選択に対応)
   useEffect(() => {
     if (!onSelectionMarkersChange) return;
 
     const markers = new Map<string, { badge: string; isSelected: boolean }>();
-    const currentSelectedPattern =
-      selectedEffectPatternRef !== null ? humanReadableEffectPatterns[selectedEffectPatternRef] : undefined;
-    const currentSelectedValues = new Set(currentSelectedPattern?.selectedValues || []);
+    const NUMBER_BADGES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯"];
 
-    unitNumberMap.forEach((info, unitId) => {
-      markers.set(unitId, {
-        badge: info.badge,
-        isSelected: currentSelectedValues.has(unitId),
-      });
-    });
+    if (request.source?.type === "EFFECT_RESOLUTION" || request.source?.type === "ZONE_TOP_SELECTION") {
+      const isBlockAssignment = (catalog.effectSelections || []).some(
+        (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
+      );
+      if (isBlockAssignment) {
+        const assignedBlockerIds = new Set<string>();
+        if (blockAssignmentsDraft) {
+          for (const bList of Object.values(blockAssignmentsDraft)) {
+            for (const bId of bList) assignedBlockerIds.add(bId);
+          }
+        }
+        unitNumberMap.forEach((info, unitId) => {
+          markers.set(unitId, {
+            badge: info.badge,
+            isSelected: assignedBlockerIds.has(unitId),
+          });
+        });
+      } else {
+        const currentSelectedPattern =
+          selectedEffectPatternRef !== null ? humanReadableEffectPatterns[selectedEffectPatternRef] : undefined;
+        const currentSelectedValues = new Set(currentSelectedPattern?.selectedValues || []);
+
+        unitNumberMap.forEach((info, unitId) => {
+          markers.set(unitId, {
+            badge: info.badge,
+            isSelected: currentSelectedValues.has(unitId),
+          });
+        });
+      }
+    } else if (request.source?.type === "ACTION_REQUEST" && selectedActionRef !== null && availableTargetRefs.length > 0) {
+      let unitBadgeIdx = 0;
+      for (const targetRef of availableTargetRefs) {
+        const target = catalog.targetSelections[targetRef];
+        if (target?.targetUnitId) {
+          const relInfo = effectiveBattleRelationMap.get(target.targetUnitId);
+          const badge = relInfo?.badge || NUMBER_BADGES[unitBadgeIdx] || `[${unitBadgeIdx + 1}]`;
+          unitBadgeIdx++;
+          markers.set(target.targetUnitId, {
+            badge,
+            isSelected: selectedTargetRef === targetRef,
+          });
+        }
+      }
+    }
 
     onSelectionMarkersChange(markers);
-  }, [unitNumberMap, selectedEffectPatternRef, humanReadableEffectPatterns, onSelectionMarkersChange]);
+  }, [
+    request.source?.type,
+    catalog.effectSelections,
+    catalog.targetSelections,
+    unitNumberMap,
+    selectedEffectPatternRef,
+    humanReadableEffectPatterns,
+    blockAssignmentsDraft,
+    selectedActionRef,
+    availableTargetRefs,
+    selectedTargetRef,
+    effectiveBattleRelationMap,
+    onSelectionMarkersChange,
+  ]);
 
   // パターン一致検索
   const finalMatchedPatternIndex = useMemo(() => {
@@ -849,7 +1056,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       >
         <div
           data-testid="decision-panel-header"
-          className="flex items-center justify-between border-b border-zinc-200 pb-1.5 mb-2 shrink-0"
+          className="sticky top-0 z-10 bg-white flex items-center justify-between border-b border-zinc-200 pb-1.5 mb-2 shrink-0"
         >
           <div>
             <span className="inline-block rounded bg-zinc-950 text-white px-1.5 py-0.2 text-[9px] font-mono font-black uppercase tracking-wider">
@@ -892,6 +1099,9 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               }}
               unitNumberMap={unitNumberMap}
               onExactPatternRefChange={setSelectedBlockPatternRef}
+              initialAssignments={blockAssignmentsDraft}
+              onAssignmentsChange={setBlockAssignmentsDraft}
+              lastBoardUnitClick={lastBoardUnitClick}
             />
           ) : (
             <div className="space-y-2">
@@ -937,7 +1147,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         {/* 常時固定フッター: 決定ボタン + ショートカット操作ガイド */}
         <div
           data-testid="decision-panel-sticky-footer"
-          className="shrink-0 bg-white pt-1.5 mt-1.5 border-t border-zinc-200"
+          className="shrink-0 sticky bottom-0 z-10 bg-white pt-1.5 mt-1.5 border-t border-zinc-200"
         >
           {!isBlockAssignment && selectedEffectPatternRef !== null && (
             <div className="pb-1.5 mb-1.5 border-b border-zinc-200 flex items-center justify-between gap-2">
@@ -978,7 +1188,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       {/* ヘッダー (常時上部固定: 1つ戻る / PASS [P]) */}
       <div
         data-testid="decision-panel-header"
-        className="flex items-center justify-between border-b border-zinc-200 pb-1.5 mb-2 shrink-0"
+        className="sticky top-0 z-10 bg-white flex items-center justify-between border-b border-zinc-200 pb-1.5 mb-2 shrink-0"
       >
         <div>
           <div className="flex items-center gap-1.5 font-mono">
@@ -1321,7 +1531,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       {/* 常時固定フッター: 決定ボタン (リクエスト / リクエスト＆PASS) + ショートカット操作ガイド */}
       <div
         data-testid="decision-panel-sticky-footer"
-        className="shrink-0 bg-white pt-1.5 mt-1.5 border-t border-zinc-200"
+        className="shrink-0 sticky bottom-0 z-10 bg-white pt-1.5 mt-1.5 border-t border-zinc-200"
       >
         {finalMatchedPatternIndex !== null && finalMatchedPatternIndex !== -1 && (
           <div className="pb-1.5 mb-1.5 border-b border-zinc-200 flex flex-col sm:flex-row gap-1.5">

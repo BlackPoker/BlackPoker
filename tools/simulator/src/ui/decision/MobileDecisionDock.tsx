@@ -53,10 +53,16 @@ export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
   const isSheetOpen = sheetMode !== "collapsed";
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-zinc-300 shadow-2xl p-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden">
-      <div className="max-w-md mx-auto flex flex-col gap-1.5">
+    <div
+      data-testid="mobile-decision-dock"
+      className="fixed bottom-0 left-0 right-0 z-30 bg-white/95 backdrop-blur-md border-t border-zinc-300 shadow-2xl p-2 pb-[max(0.75rem,env(safe-area-inset-bottom))] lg:hidden"
+    >
+      <div
+        data-testid="mobile-decision-dock-inner"
+        className="max-w-md md:max-w-3xl mx-auto flex flex-col md:flex-row md:items-center md:justify-between gap-1.5 md:gap-4 md:px-2"
+      >
         {/* サマリーバー */}
-        <div className="flex items-center justify-between text-[11px] font-mono px-1 min-h-[26px]">
+        <div className="flex items-center justify-between md:justify-start md:gap-3 text-[11px] font-mono px-1 min-h-[26px] shrink-0">
           <div className="flex items-center gap-1.5 shrink-0">
             <span className="w-2 h-2 rounded-full bg-zinc-950 animate-pulse" />
             <span className="font-bold text-zinc-950 whitespace-nowrap">
@@ -70,7 +76,7 @@ export const MobileDecisionDock: React.FC<MobileDecisionDockProps> = ({
         </div>
 
         {/* アクションボタン群 (min-h-[44px] 確保) */}
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 md:flex-1 md:max-w-xl md:justify-end">
           {/* Undo ボタン */}
           {onUndo && (
             <button

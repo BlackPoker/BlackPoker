@@ -38,13 +38,13 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
       className="flex flex-col gap-1 p-1.5 bg-white rounded border border-zinc-200 shadow-sm"
     >
       {/* 主要ステータスバッジ群 */}
-      <div className="flex flex-wrap items-center justify-between gap-1.5">
+      <div className="flex flex-wrap items-center justify-between gap-1">
         <div className="flex flex-wrap items-center gap-1 font-mono">
           {/* 環境バッジ */}
           {environmentName && (
-            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
-              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">環境:</span>
-              <span className="text-xs font-bold text-zinc-950 font-mono">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-100 border border-zinc-300 shadow-sm max-w-[148px] xl:max-w-none">
+              <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider shrink-0">環境:</span>
+              <span className="text-[10.5px] xl:text-xs font-bold text-zinc-950 font-mono truncate">
                 {environmentName}
               </span>
             </div>
@@ -57,23 +57,23 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
               title="初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。"
             >
               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">対戦SEED:</span>
-              <span className="text-xs font-bold text-zinc-950 font-mono">
+              <span className="text-[10.5px] xl:text-xs font-bold text-zinc-950 font-mono">
                 {matchSeed}
               </span>
             </div>
           )}
           {/* ターン数バッジ */}
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
+          <div className="flex items-center gap-1 px-1.5 xl:px-2 py-0.5 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
             <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">TURN</span>
-            <span className="text-xs font-black text-zinc-950 font-mono">
+            <span className="text-[10.5px] xl:text-xs font-black text-zinc-950 font-mono">
               {turnCount || 1}
             </span>
           </div>
 
           {/* ターンプレイヤーバッジ */}
-          <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
+          <div className="flex items-center gap-1 px-1.5 xl:px-2 py-0.5 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
             <span className="text-[10px] text-zinc-500 font-bold">手番:</span>
-            <span className="text-xs font-bold text-zinc-900">
+            <span className="text-[10.5px] xl:text-xs font-bold text-zinc-900">
               {turnPlayerName}
             </span>
             <span className="text-[9px] font-mono text-zinc-500 font-bold">
@@ -82,17 +82,17 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
           </div>
 
           {/* チャンスプレイヤーバッジ (最重要・反転黒地白文字で強調) */}
-          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-zinc-950 text-white shadow-sm font-bold">
+          <div className="flex items-center gap-1 xl:gap-1.5 px-1.5 xl:px-2.5 py-0.5 rounded bg-zinc-950 text-white shadow-sm font-bold">
             <span className="text-[10px] font-black uppercase tracking-wider">CHANCE:</span>
-            <span className="text-xs font-black">
+            <span className="text-[10.5px] xl:text-xs font-black">
               {chancePlayerName} ({chancePlayer.toUpperCase()})
             </span>
           </div>
 
           {/* フォーカスプレイヤーバッジ (白背景・太めの黒枠・黒文字でCHANCE/手番と明確に区別) */}
-          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-white border-2 border-zinc-950 text-zinc-950 shadow-sm font-bold">
+          <div className="flex items-center gap-1 xl:gap-1.5 px-1.5 xl:px-2 py-0.5 rounded bg-white border-2 border-zinc-950 text-zinc-950 shadow-sm font-bold">
             <span className="text-[10px] font-black uppercase tracking-wider text-zinc-700">FOCUS:</span>
-            <span className="text-xs font-black">
+            <span className="text-[10.5px] xl:text-xs font-black">
               {focusPlayer ? `${focusPlayerName} (${focusPlayer.toUpperCase()})` : "未設定"}
             </span>
           </div>

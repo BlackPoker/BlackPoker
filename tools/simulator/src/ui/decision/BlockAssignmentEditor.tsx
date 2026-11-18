@@ -12,6 +12,9 @@ interface BlockAssignmentEditorProps {
   onSelectPattern: (patternRef: number) => void;
   unitNumberMap: Map<string, { badge: string; label: string; fullLabel?: string; unitView: any }>;
   onExactPatternRefChange?: (patternRef: number | null) => void;
+  initialAssignments?: AttackerBlockMap;
+  onAssignmentsChange?: (assignments: AttackerBlockMap) => void;
+  lastBoardUnitClick?: { unitId: string; seq: number } | null;
 }
 
 export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
@@ -19,6 +22,9 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
   onSelectPattern,
   unitNumberMap,
   onExactPatternRefChange,
+  initialAssignments,
+  onAssignmentsChange,
+  lastBoardUnitClick,
 }) => {
   const effectSelections = request.catalog.effectSelections || [];
 
@@ -64,14 +70,60 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
     };
   }, [effectSelections, request.observation]);
 
-  // 各アタッカーに対するブロッカー割当て状態 (初期状態: 各アタッカー = [])
+  // 各アタッカーに対するブロッカー割当て状態 (初期状態: initialAssignments または 各アタッカー = [])
   const [assignments, setAssignments] = useState<AttackerBlockMap>(() => {
     const initial: AttackerBlockMap = {};
     for (const atk of attackers) {
-      initial[atk.unitId] = [];
+      initial[atk.unitId] = initialAssignments?.[atk.unitId] ? [...initialAssignments[atk.unitId]] : [];
     }
     return initial;
   });
+  const [activeAttackerUnitId, setActiveAttackerUnitId] = useState<string | null>(
+    () => attackers[0]?.unitId ?? null
+  );
+  const lastProcessedBoardClickSeqRef = React.useRef<number>(lastBoardUnitClick?.seq ?? 0);
+
+  useEffect(() => {
+    onAssignmentsChange?.(assignments);
+  }, [assignments, onAssignmentsChange]);
+
+  // 盤面ユニットタップ連動: アタッカーをタップで対象アタッカー切替、ブロッカー候補をタップで割当てトグル
+  useEffect(() => {
+    if (!lastBoardUnitClick || lastBoardUnitClick.seq === lastProcessedBoardClickSeqRef.current) return;
+    lastProcessedBoardClickSeqRef.current = lastBoardUnitClick.seq;
+    const clickedId = lastBoardUnitClick.unitId;
+
+    if (attackers.some((a) => a.unitId === clickedId)) {
+      setActiveAttackerUnitId(clickedId);
+      return;
+    }
+
+    if (candidateBlockers.some((b) => b.unitId === clickedId)) {
+      const targetAttackerId =
+        activeAttackerUnitId && attackers.some((a) => a.unitId === activeAttackerUnitId)
+          ? activeAttackerUnitId
+          : attackers[0]?.unitId;
+      if (!targetAttackerId) return;
+
+      setAssignments((prev) => {
+        const curList = prev[targetAttackerId] || [];
+        const isSelected = curList.includes(clickedId);
+        if (isSelected) {
+          return {
+            ...prev,
+            [targetAttackerId]: curList.filter((id) => id !== clickedId),
+          };
+        }
+        if (canAssignBlocker(prev, targetAttackerId, clickedId, effectSelections)) {
+          return {
+            ...prev,
+            [targetAttackerId]: [...curList, clickedId],
+          };
+        }
+        return prev;
+      });
+    }
+  }, [lastBoardUnitClick, attackers, candidateBlockers, activeAttackerUnitId, effectSelections]);
 
   // ブロッカーのトグル操作
   const handleToggleBlocker = (attackerUnitId: string, blockerUnitId: string) => {
@@ -222,9 +274,9 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
         })}
       </div>
 
-      {/* 現在の割当てサマリー & 決定ボタン */}
-      <div className="pt-2.5 border-t border-zinc-200">
-        <div className="mb-2.5 p-2 rounded bg-zinc-50 border border-zinc-200 text-xs">
+      {/* 現在の割当てサマリー (スクロール領域内) */}
+      <div className="pt-2 border-t border-zinc-200">
+        <div className="p-2 rounded bg-zinc-50 border border-zinc-200 text-xs">
           <div className="font-mono font-bold text-zinc-500 text-[10px] uppercase mb-1">現在の割当て:</div>
           <div className="space-y-1">
             {attackers.map((attacker) => {
@@ -256,11 +308,17 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
             })}
           </div>
         </div>
+      </div>
 
+      {/* 決定ボタンのみを下部固定 (スマホ・タブレットでもアタッカー一覧を隠さず常時アクセス確保) */}
+      <div
+        data-testid="block-assignment-sticky-confirm"
+        className="sticky bottom-0 z-10 bg-white/95 backdrop-blur-sm pt-1.5 pb-0.5 border-t border-zinc-200"
+      >
         <button
           disabled={exactPatternRef === null}
           onClick={handleSubmit}
-          className={`w-full py-2.5 px-4 rounded font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 font-mono ${
+          className={`w-full py-2 px-4 rounded font-bold text-xs transition shadow-sm flex items-center justify-center gap-2 font-mono ${
             exactPatternRef !== null
               ? "bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white cursor-pointer font-black"
               : "bg-zinc-100 text-zinc-400 border border-zinc-200 cursor-not-allowed"
@@ -268,14 +326,6 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
         >
           <span>この割当てで決定</span>
         </button>
-
-        {/* ショートカット操作ガイド */}
-        <div className="pt-1.5 border-t border-zinc-200 text-[9px] text-zinc-500 font-mono flex items-center justify-between">
-          <span>
-            SHORTCUT: <strong className="text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">Enter</strong> = この割当てで決定
-          </span>
-          <span className="text-zinc-400">BlackPoker Core Battle</span>
-        </div>
       </div>
     </div>
   );

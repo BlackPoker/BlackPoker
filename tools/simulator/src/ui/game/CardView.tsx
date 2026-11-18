@@ -56,7 +56,7 @@ export const CardView: React.FC<CardViewProps> = ({
     return (
       <div
         onClick={onClick}
-        className={`inline-flex flex-col items-center justify-center rounded border border-zinc-900 bg-zinc-900 text-zinc-300 shadow-sm font-mono font-bold select-none ${sizeClasses} ${className}`}
+        className={`inline-flex shrink-0 flex-col items-center justify-center rounded border border-zinc-900 bg-zinc-900 text-zinc-300 shadow-sm font-mono font-bold select-none ${sizeClasses} ${className}`}
         title="裏向きカード"
         aria-label="裏向きカード"
       >
@@ -74,7 +74,7 @@ export const CardView: React.FC<CardViewProps> = ({
   return (
     <div
       onClick={onClick}
-      className={`inline-flex items-center justify-center ${
+      className={`inline-flex shrink-0 items-center justify-center ${
         isExplicitDesktop
           ? "flex-col justify-between p-1"
           : isExplicitCompact

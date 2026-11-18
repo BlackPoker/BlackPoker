@@ -49,18 +49,20 @@ export const MobileBottomSheet: React.FC<MobileBottomSheetProps> = ({
 
       {/* 2. Bottom Sheet 本体（collapsed 時でもマウントを維持し、translate-y で退避） */}
       <div
+        data-testid="mobile-bottom-sheet"
         className={`fixed bottom-0 left-0 right-0 z-50 lg:hidden flex flex-col justify-end transition-transform duration-300 ease-out ${
           isVisible ? "translate-y-0" : "translate-y-full pointer-events-none"
         }`}
       >
         <div
-          className={`w-full bg-white rounded-t-xl border-t-2 border-zinc-300 shadow-2xl flex flex-col ${heightClass}`}
+          data-testid="mobile-bottom-sheet-panel"
+          className={`w-full md:max-w-3xl md:mx-auto bg-white rounded-t-xl border-t-2 md:border-x border-zinc-300 shadow-2xl flex flex-col ${heightClass}`}
         >
           {/* ヘッダーツールバー */}
           <div className="flex items-center justify-between px-3 py-2 border-b border-zinc-200 shrink-0 bg-zinc-50 rounded-t-xl">
             <div className="flex items-center gap-1.5">
               <span className="w-2 h-2 rounded-full bg-zinc-950 animate-pulse" />
-              <h3 className="text-xs font-bold text-zinc-950 font-serif tracking-wide truncate max-w-[160px] sm:max-w-xs">
+              <h3 className="text-xs font-bold text-zinc-950 font-serif tracking-wide truncate max-w-[160px] sm:max-w-xs md:max-w-md">
                 {title || "行動の選択"}
               </h3>
             </div>

@@ -1,0 +1,95 @@
+{
+  "workId": "BP-SIM-PLAYTEST-RESPONSIVE-UI-PHASE3-EVIDENCE",
+  "branch": "BlackPoker/issue551-core-flow",
+  "baseCommit": "34c6834f956c0622612ddb3aa00d006c6063d39c",
+  "measuredAt": "2026-11-19T03:55:00.000Z",
+  "tabletComparison": {
+    "tabletLandscape_1024x768": {
+      "layoutStructure": "2-pane (Left Board 7/12 = 584.7px, Right Decision/Log 5/12 = 415.3px)",
+      "header": { "w": 1024, "h": 48, "overflowPx": 0 },
+      "statusBar": { "w": 576.7, "h": 62, "singleLineBadges": true },
+      "topBoard": { "w": 576.7, "h": 317, "bulwarkAboveSoldier": true },
+      "stagePanel": { "w": 576.7, "h": 37 },
+      "bottomBoard": { "w": 576.7, "h": 390, "soldierAboveBulwark": true },
+      "decisionPanel": { "w": 415.3, "h": 520.8, "stickyHeaderVisible": true, "stickyFooterConfirmVisible": true },
+      "logDebugContainer": { "w": 415.3, "h": 177.2, "tabbed": true }
+    },
+    "tabletPortrait_820x1180": {
+      "layoutStructure": "1-pane Board + Expanded Bottom Dock (md:max-w-3xl = 768px, single-row 65px height) + Centered BottomSheet (md:max-w-3xl = 768px)",
+      "header": { "w": 820, "h": 48, "overflowPx": 0 },
+      "statusBar": { "w": 812, "h": 65.5 },
+      "topBoard": { "w": 812, "h": 148, "bulwarkAboveSoldier": true },
+      "stagePanel": { "w": 812, "h": 60 },
+      "bottomBoard": { "w": 812, "h": 224.5, "soldierAboveBulwark": true },
+      "bottomHand": { "y": 507.5, "h": 49.5, "bottomY": 557 },
+      "mobileDecisionDock": { "y": 1115, "w": 820, "h": 65, "innerWidthPx": 768, "beforeInnerWidthPx": 448, "doesNotObstructBottomHand": true, "clearanceAboveDockPx": 558 },
+      "mobileBottomSheet": { "panelWidthPx": 768, "handStripWidthPx": 746, "preservesSelectionAndScrollOnToggle": true }
+    }
+  },
+  "smartphoneRegression": {
+    "390x844": {
+      "header": { "w": 390, "h": 57, "overflowPx": 0 },
+      "statusBar": { "w": 382, "h": 92 },
+      "topBoard": { "w": 382, "h": 171.25 },
+      "stagePanel": { "w": 382, "h": 91.5 },
+      "bottomBoard": { "w": 382, "h": 224.5 },
+      "bottomHand": { "y": 597.75, "w": 372, "h": 49.5, "bottomY": 647.25 },
+      "mobileDecisionDock": { "y": 747, "w": 390, "h": 97, "innerWidthPx": 374, "doesNotObstructBottomHand": true },
+      "mobileBottomSheet": { "w": 390, "h": 464.19, "handStripWidthPx": 370 }
+    },
+    "360x800": {
+      "header": { "w": 360, "h": 57, "overflowPx": 0 },
+      "statusBar": { "w": 352, "h": 118.5 },
+      "topBoard": { "w": 352, "h": 171.25 },
+      "stagePanel": { "w": 352, "h": 91.5 },
+      "bottomBoard": { "w": 352, "h": 224.5 },
+      "bottomHand": { "y": 624.25, "w": 342, "h": 49.5, "bottomY": 673.75 },
+      "mobileDecisionDock": { "y": 703, "w": 360, "h": 97, "innerWidthPx": 344, "doesNotObstructBottomHand": true },
+      "mobileBottomSheet": { "w": 360, "h": 440, "handStripWidthPx": 340 }
+    },
+    "verifiedFlows": {
+      "humanVsAi": "PASS",
+      "humanVsHumanPassAndPlaySecrecy": "PASS",
+      "actionRequest": "PASS",
+      "effectResolutionAttackerSelection": "PASS",
+      "effectResolutionBlockerAssignment": "PASS",
+      "zoneTopSelection": "PASS",
+      "stageAndFocusDisplay": "PASS",
+      "handDisplayAndCardSelection": "PASS",
+      "undoOperation": "PASS"
+    }
+  },
+  "breakpointBoundaryVerification": {
+    "767x1024_to_768x1024": {
+      "767x1024_dockInnerWidthPx": 448,
+      "767x1024_dockHeightPx": 97,
+      "768x1024_dockInnerWidthPx": 752,
+      "768x1024_dockHeightPx": 65,
+      "uiDisappearanceOrOverlap": false
+    },
+    "1023x768_to_1024x768": {
+      "1023x768_mode": "1-pane + Tablet Dock (768px inner width) + BottomSheet",
+      "1024x768_mode": "2-pane (Left Board 584.7px + Right Decision/Log 415.3px)",
+      "selectionStatePreservedAcrossResize": true,
+      "confirmButtonsPreservedAcrossResize": true,
+      "uiDisappearanceOrOverlap": false
+    },
+    "1279x800_to_1280x800": {
+      "1279x800_leftPaneWidthPx": 733.4,
+      "1279x800_rightPaneWidthPx": 521.6,
+      "1280x800_leftPaneWidthPx": 734,
+      "1280x800_rightPaneWidthPx": 522,
+      "uiDisappearanceOrOverlap": false
+    }
+  },
+  "complexBattleVerification": {
+    "boardUnitTapTargetSelection": true,
+    "bottomSheetTogglePreservesSelectionAndScroll": true,
+    "chargeAndDriveMixedBoardNoOverlap": true,
+    "multipleAttackersAndMultipleBlockers": true,
+    "multipleStageRequestsLifoDisplay": true,
+    "highDensityCardsAndUnitsShrinkZeroHorizontalScroll": true,
+    "zoneTopSelectionAfterDamageJudge": true,
+    "undoRestorationVerified": true
+  }
+}
