@@ -35,6 +35,11 @@ export interface MobileHeaderMenuProps {
   readonly shareNotice?: { readonly type: "success" | "error" | "warning" | "info"; readonly message: string } | null;
   readonly onDownloadDiagnostic?: () => void;
   readonly isDiagnosticAvailable?: boolean;
+  readonly isScenarioMatch?: boolean;
+  readonly showDebug?: boolean;
+  readonly onToggleDebug?: (val: boolean) => void;
+  readonly onOpenFeedback?: () => void;
+  readonly feedbackCount?: number;
   readonly onOpenReplayVerify?: () => void;
   readonly onOpenReplayViewer?: () => void;
   readonly onOpenScenarioBuilder?: () => void;
@@ -67,6 +72,11 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   shareNotice,
   onDownloadDiagnostic,
   isDiagnosticAvailable = true,
+  isScenarioMatch = false,
+  showDebug = false,
+  onToggleDebug,
+  onOpenFeedback,
+  feedbackCount = 0,
   onOpenReplayVerify,
   onOpenReplayViewer,
   onOpenScenarioBuilder,
@@ -80,15 +90,19 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   const buildRef = (import.meta as any).env?.VITE_BUILD_REF || "";
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 lg:hidden animate-fade-in">
-      <div className="w-full max-w-sm bg-white rounded-xl border border-zinc-300 shadow-2xl p-4 flex flex-col gap-3 font-sans max-h-[90vh] overflow-y-auto">
+    <div
+      data-testid="playtest-settings-menu-modal"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-fade-in"
+    >
+      <div className="w-full max-w-sm sm:max-w-md bg-white rounded-xl border border-zinc-300 shadow-2xl p-4 flex flex-col gap-3 font-sans max-h-[90vh] overflow-y-auto">
         {/* ヘッダー */}
         <div className="flex items-center justify-between border-b border-zinc-200 pb-2">
           <h3 className="text-sm font-bold text-zinc-950 font-serif">
-            メニュー (Menu)
+            設定・メニュー (Settings &amp; Menu)
           </h3>
           <button
             onClick={onClose}
+            aria-label="メニューを閉じる"
             className="w-8 h-8 flex items-center justify-center rounded-full bg-zinc-100 hover:bg-zinc-200 text-zinc-700 text-sm font-mono transition"
           >
             ✕
@@ -121,14 +135,14 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </div>
         )}
 
-        {/* Seed 設定 (未対戦時 & Official 環境のみ表示) */}
-        {activeMatchSeed === undefined && showSeedInput && (
+        {/* Seed 設定 (Official 環境で表示: 未対戦時・対戦中ともに次戦用Seedを設定可能) */}
+        {showSeedInput && (
           <div className="flex flex-col gap-1.5 p-2.5 rounded bg-zinc-50 border border-zinc-200">
             <label
               className="text-[11px] font-mono font-bold text-zinc-600 cursor-help"
               title="初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。"
             >
-              対戦SEED (Match Seed):
+              {activeMatchSeed !== undefined ? "次回対戦SEED (Next Match Seed):" : "対戦SEED (Match Seed):"}
             </label>
             <div className="flex flex-col gap-1.5 text-xs font-mono">
               <label className="flex items-center gap-2 cursor-pointer select-none">
@@ -244,6 +258,38 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </label>
         )}
 
+        {/* 右ペイン Debug パネル常設トグル (Desktop用ハンドラ提供時) */}
+        {onToggleDebug && (
+          <label className="flex items-center justify-between p-2 rounded bg-zinc-50 border border-zinc-200 text-xs font-bold text-zinc-800 cursor-pointer min-h-[44px]">
+            <span>Debug パネル表示 (Debug ON/OFF)</span>
+            <input
+              type="checkbox"
+              checked={showDebug}
+              onChange={(e) => onToggleDebug(e.target.checked)}
+              className="w-5 h-5 rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
+            />
+          </label>
+        )}
+
+        {/* AI 違和感を記録ボタン (Human vs AI 対戦中) */}
+        {onOpenFeedback && (
+          <button
+            onClick={() => {
+              onClose();
+              onOpenFeedback();
+            }}
+            title="AI行動の違和感を記録・共有します"
+            className="w-full py-2.5 px-3 rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-900 font-bold text-xs font-mono transition flex items-center justify-center gap-2 min-h-[44px]"
+          >
+            <span>🤔 違和感を記録</span>
+            {feedbackCount > 0 && (
+              <span className="bg-blue-600 text-white px-1.5 py-0.5 rounded-full text-[10px]">
+                {feedbackCount}
+              </span>
+            )}
+          </button>
+        )}
+
         {/* 開始条件を共有ボタン */}
         {onCopyShareUrl && (
           <button
@@ -257,7 +303,7 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </button>
         )}
 
-        {/* 診断データ保存ボタン (モバイルメニュー内) */}
+        {/* 診断データ保存ボタン */}
         {onDownloadDiagnostic && (
           <button
             onClick={() => {
@@ -278,15 +324,20 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </button>
         )}
 
-        {/* Replay検証ボタン (モバイルメニュー内) */}
+        {/* Replay検証ボタン */}
         {onOpenReplayVerify && (
           <button
             onClick={() => {
               onClose();
               onOpenReplayVerify();
             }}
-            className="w-full py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold text-xs font-mono transition flex flex-col items-center justify-center gap-0.5 min-h-[44px]"
-            title="Diagnostic JSON を読み込み、決定論的再シミュレーションを検証します"
+            disabled={Boolean(isScenarioMatch)}
+            className="w-full py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-900 font-bold text-xs font-mono transition flex flex-col items-center justify-center gap-0.5 min-h-[44px]"
+            title={
+              isScenarioMatch
+                ? "Scenarioから開始した対戦のReplay検証は現在未対応です"
+                : "Diagnostic JSON を読み込み、決定論的再シミュレーションを検証します"
+            }
           >
             <div className="flex items-center gap-1.5">
               <span>🔍</span>
@@ -298,7 +349,7 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </button>
         )}
 
-        {/* Scenario Builder ボタン (モバイルメニュー内) */}
+        {/* Scenario Builder ボタン */}
         {onOpenScenarioBuilder && (
           <button
             onClick={() => {
@@ -317,15 +368,22 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
           </button>
         )}
 
-        {/* Replay Viewer ボタン (モバイルメニュー内) */}
+        {/* Replay Viewer ボタン */}
         {onOpenReplayViewer && (
           <button
             onClick={() => {
               onClose();
               onOpenReplayViewer();
             }}
-            className="w-full py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold text-xs font-mono transition flex flex-col items-center justify-center gap-0.5 min-h-[44px]"
-            title={activeMatchSeed !== undefined ? "現在の対戦をリプレイ" : "Diagnostic JSON を読み込み、盤面を1Decisionずつ再生・確認します"}
+            disabled={Boolean(isScenarioMatch)}
+            className="w-full py-2 px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed text-zinc-900 font-bold text-xs font-mono transition flex flex-col items-center justify-center gap-0.5 min-h-[44px]"
+            title={
+              isScenarioMatch
+                ? "Scenarioから開始した対戦のReplayは現在未対応です"
+                : activeMatchSeed !== undefined
+                ? "現在の対戦をリプレイ"
+                : "Diagnostic JSON を読み込み、盤面を1Decisionずつ再生・確認します"
+            }
           >
             <div className="flex items-center gap-1.5">
               <span>▶</span>

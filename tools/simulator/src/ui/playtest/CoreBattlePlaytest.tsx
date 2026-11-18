@@ -1799,11 +1799,14 @@ export const CoreBattlePlaytest: React.FC = () => {
         onSkip={skipFeedbackFlash}
       />
 
-      {/* 画面ヘッダー */}
-      <header className="flex items-center justify-between px-3 py-1.5 bg-white border-b border-zinc-200 shadow-sm sticky top-0 z-30">
-        <div className="flex items-center gap-2 sm:gap-3">
+      {/* 画面ヘッダー (全解像度対応・1行スリム常設バー + 統合設定メニュー導線) */}
+      <header
+        data-testid="playtest-top-header"
+        className="flex items-center justify-between gap-2 px-3 py-1.5 bg-white border-b border-zinc-200 shadow-sm sticky top-0 z-30 min-h-[48px]"
+      >
+        <div className="flex items-center gap-2 sm:gap-2.5 min-w-0 flex-1">
           {/* ロゴ + ブランドタイトル */}
-          <div className="flex items-center gap-1.5 sm:gap-2">
+          <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
             <img
               src={logoUrl}
               alt="BlackPoker Logo"
@@ -1822,216 +1825,68 @@ export const CoreBattlePlaytest: React.FC = () => {
             </div>
           </div>
 
-          <div className="h-4 w-px bg-zinc-300 mx-1 hidden lg:block" />
+          <div className="h-4 w-px bg-zinc-300 mx-0.5 hidden md:block shrink-0" />
 
-          {/* バッジ群 (Desktop用) */}
-          <div className="hidden lg:flex items-center gap-1.5 font-mono">
+          {/* バッジ群 */}
+          <div className="hidden md:flex items-center gap-1.5 font-mono shrink-0">
             <span className="px-1.5 py-0.2 text-[9px] font-black rounded bg-zinc-950 text-white uppercase tracking-wider">
               PLAYTEST
             </span>
-            <span className="px-1.5 py-0.2 text-[9px] font-bold rounded bg-zinc-100 border border-zinc-300 text-zinc-700">
-              PREVIEW
-            </span>
-            <span className="text-[9px] text-zinc-400 font-mono hidden lg:inline">
+            <span className="text-[9px] text-zinc-400 font-mono hidden xl:inline">
               {(import.meta as any).env?.VITE_BUILD_SHA ? String((import.meta as any).env.VITE_BUILD_SHA).slice(0, 7) : "local"}
               {(import.meta as any).env?.VITE_BUILD_REF ? ` (${(import.meta as any).env.VITE_BUILD_REF})` : ""}
             </span>
           </div>
 
-          {/* Environment Selector & Seed (Desktop用・Catalog由来動的列挙) */}
-          <div className="hidden lg:flex items-center gap-1.5 ml-1 font-mono">
-            <span className="text-[9px] font-bold text-zinc-400">Env:</span>
-            <select
-              value={selectedEnvironmentId}
-              onChange={(e) => handleSelectEnvironment(e.target.value)}
-              className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
-            >
-              {environmentOptions.map((opt) => (
-                <option key={opt.id} value={opt.id}>
-                  {opt.name}
-                </option>
-              ))}
-            </select>
-
+          {/* 現在の環境・モード・Seed サマリピル (クリックで設定・メニューを開く) */}
+          <button
+            type="button"
+            onClick={() => setIsMobileMenuOpen(true)}
+            data-testid="header-context-summary"
+            data-environment-id={activeMatch?.environmentId || selectedEnvironmentId}
+            title="クリックして対戦環境・モード・Seed設定を開く"
+            className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 font-mono text-[11px] min-w-0 max-w-[300px] lg:max-w-[420px] xl:max-w-[540px] cursor-pointer transition"
+          >
+            <span className="text-[9px] font-bold text-zinc-400 shrink-0">Env:</span>
+            <span className="font-bold text-zinc-900 truncate">
+              {activeMatch?.environmentName ||
+                environmentOptions.find((opt) => opt.id === selectedEnvironmentId)?.name ||
+                selectedEnvironmentId}
+            </span>
+            <span className="text-zinc-300 shrink-0 hidden lg:inline">|</span>
+            <span className="text-[10px] font-bold text-zinc-600 shrink-0 hidden lg:inline">
+              {(activeMatch ? activeMatchMode : pendingMatchMode) === "humanVsAi" ? "Human vs AI" : "Human vs Human"}
+            </span>
             {activeMatch ? (
-              <div className="flex items-center gap-1 ml-1">
-                <span className="text-[9px] font-bold text-zinc-400">Seed:</span>
-                <span className="text-[11px] font-mono font-bold text-zinc-900 bg-zinc-100 px-1.5 py-0.5 rounded border border-zinc-200">
-                  {activeMatch.seed}
-                </span>
-              </div>
+              <span className="text-[10px] font-bold text-zinc-900 bg-white px-1.5 py-0.2 rounded border border-zinc-200 shrink-0">
+                {`Seed: ${activeMatch.seed}`}
+              </span>
             ) : (
               isOfficialEnvironment(selectedEnvironmentId) && (
-                seedMode === "auto" ? (
-                  <div className="flex items-center gap-1 ml-1">
-                    <span className="text-[9px] font-bold text-zinc-400">次回Seed:</span>
-                    <span
-                      className="text-[11px] font-mono font-bold text-zinc-700 bg-zinc-50 px-1.5 py-0.5 rounded border border-zinc-200"
-                      title="対戦開始時に自動適用される次回Seedです"
-                    >
-                      {pendingAutoSeed}
-                    </span>
-                  </div>
-                ) : (
-                  <>
-                    <span
-                      className="text-[9px] font-bold text-zinc-400 ml-1 cursor-help"
-                      title="初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。"
-                    >
-                      対戦SEED:
-                    </span>
-                    <input
-                      type="text"
-                      inputMode="numeric"
-                      pattern="[0-9]*"
-                      value={seedInput}
-                      onChange={(e) => setSeedInput(e.target.value)}
-                      className="w-16 text-[11px] font-mono font-bold py-0.5 px-1 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none text-right"
-                      placeholder="42"
-                      title="初期状態再現用の乱数シードです。同じ環境・Seedで同一の初期配置・山札順を再現できます。"
-                    />
-                  </>
-                )
+                <span className="text-[10px] font-bold text-zinc-700 bg-white px-1.5 py-0.2 rounded border border-zinc-200 shrink-0">
+                  {seedMode === "auto" ? `次回Seed: ${pendingAutoSeed}` : `Seed: ${seedInput}`}
+                </span>
               )
             )}
-
-            {/* 対戦モード & AI 設定 (PC用) */}
-            <span className="text-[9px] font-bold text-zinc-400 ml-1.5">Mode:</span>
-            <select
-              value={pendingMatchMode}
-              onChange={(e) => handleSelectMatchMode(e.target.value as PlaytestMatchMode)}
-              className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
-            >
-              <option value="humanVsHuman">Human vs Human</option>
-              <option value="humanVsAi">Human vs AI</option>
-            </select>
-
-            {pendingMatchMode === "humanVsAi" && (
-              <>
-                <span className="text-[9px] font-bold text-zinc-400 ml-1">AI:</span>
-                <select
-                  value={pendingPolicyId}
-                  onChange={(e) => setPendingPolicyId(e.target.value as PlaytestPolicyId)}
-                  className="text-[11px] font-bold py-0.5 px-1.5 rounded border border-zinc-300 bg-white text-zinc-900 focus:ring-1 focus:ring-zinc-950 focus:outline-none cursor-pointer"
-                >
-                  {PLAYTEST_POLICY_OPTIONS.map((opt) => {
-                    const currentRegId = extractRegulationId(selectedEnvironmentId);
-                    const isSupported =
-                      !opt.supportedRegulationIds ||
-                      (currentRegId !== null && opt.supportedRegulationIds.includes(currentRegId));
-                    const isDisabled =
-                      (opt.requiresSeed && !isOfficialEnvironment(selectedEnvironmentId)) || !isSupported;
-
-                    let suffix = "";
-                    if (opt.requiresSeed && !isOfficialEnvironment(selectedEnvironmentId)) {
-                      suffix = " (Official専用)";
-                    } else if (!isSupported && opt.supportedRegulationIds) {
-                      suffix = ` (${opt.supportedRegulationIds.join(", ")}専用)`;
-                    }
-
-                    return (
-                      <option key={opt.id} value={opt.id} disabled={isDisabled}>
-                        {opt.label}{suffix}
-                      </option>
-                    );
-                  })}
-                </select>
-              </>
-            )}
-
-            {/* 開始条件を共有 (Settings / Match Info エリアに配置) */}
-            <button
-              onClick={handleCopyShareUrl}
-              title="現在の盤面ではなく、この対戦を開始した設定・初期盤面を共有します"
-              className="ml-2 px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1 cursor-pointer"
-            >
-              開始条件を共有
-            </button>
-          </div>
+          </button>
         </div>
 
-        {/* コントロールボタン群 (Desktop用) */}
-        <div className="hidden lg:flex items-center gap-2 font-mono">
-          {pendingMatchMode === "humanVsHuman" && (
-            <label className="flex items-center gap-1 text-[11px] font-bold text-zinc-600 hover:text-zinc-950 cursor-pointer select-none">
-              <input
-                type="checkbox"
-                checked={enablePassAndPlay}
-                onChange={(e) => setEnablePassAndPlay(e.target.checked)}
-                className="rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
-              />
-              Pass-and-Play
-            </label>
-          )}
-
+        {/* 右側常設アクションボタン群 (全画面サイズで横溢れしない厳選項目) */}
+        <div className="flex items-center gap-1.5 sm:gap-2 font-mono shrink-0">
           <button
-            onClick={() => setShowDebug(!showDebug)}
-            className={`px-2 py-0.5 text-[11px] font-bold rounded border transition ${
-              showDebug
-                ? "bg-zinc-950 text-white border-zinc-950"
-                : "bg-white text-zinc-700 border-zinc-300 hover:text-zinc-950 hover:border-zinc-500"
-            }`}
+            type="button"
+            onClick={handleCopyShareUrl}
+            title="現在の盤面ではなく、この対戦を開始した設定・初期盤面を共有します"
+            className="hidden md:flex px-2.5 py-1 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition items-center gap-1 cursor-pointer"
           >
-            {showDebug ? "Debug ON" : "Debug"}
-          </button>
-
-          <button
-            onClick={handleDownloadDiagnostic}
-            disabled={!isDiagnosticAvailable}
-            title="診断データを保存します。※非公開情報を含みます（手札・Life等）"
-            className={`px-2 py-0.5 text-[11px] font-bold rounded border shadow-sm transition flex items-center gap-1 ${
-              isDiagnosticAvailable
-                ? "bg-white text-zinc-700 border-zinc-300 hover:text-zinc-950 hover:border-zinc-500 cursor-pointer"
-                : "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-60"
-            }`}
-          >
-            診断データ保存
-          </button>
-
-          <button
-            onClick={() => setIsScenarioBuilderOpen(true)}
-            title="初期盤面設定を開いて初期盤面を作成・読み込みます"
-            className="px-2 py-0.5 text-[11px] font-bold rounded border border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 shadow-sm transition flex items-center gap-1 cursor-pointer"
-          >
-            初期盤面設定
-          </button>
-
-          <button
-            onClick={() => setIsReplayVerifyModalOpen(true)}
-            disabled={Boolean(activeMatch?.isScenario)}
-            title={activeMatch?.isScenario ? "Scenarioから開始した対戦のReplay検証は現在未対応です" : "Diagnostic JSON を読み込み、決定論的再シミュレーションを検証します"}
-            className={`px-2 py-0.5 text-[11px] font-bold rounded border shadow-sm transition flex items-center gap-1 ${
-              activeMatch?.isScenario
-                ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-60"
-                : "border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 cursor-pointer"
-            }`}
-          >
-            Replay検証
-          </button>
-
-          <button
-            onClick={() => handleOpenCurrentReplay()}
-            disabled={Boolean(activeMatch?.isScenario)}
-            title={
-              activeMatch?.isScenario
-                ? "Scenarioから開始した対戦のReplayは現在未対応です"
-                : activeMatch
-                ? "現在の対戦をリプレイ"
-                : "Diagnostic JSON を読み込んでリプレイ"
-            }
-            className={`px-2 py-0.5 text-[11px] font-bold rounded border shadow-sm transition flex items-center gap-1 ${
-              activeMatch?.isScenario
-                ? "bg-zinc-100 text-zinc-400 border-zinc-200 cursor-not-allowed opacity-60"
-                : "border-zinc-300 bg-white text-zinc-700 hover:text-zinc-950 hover:border-zinc-500 cursor-pointer"
-            }`}
-          >
-            Replay Viewer
+            <span>開始条件を共有</span>
           </button>
 
           {activeMatch && activeMatchMode === "humanVsAi" && (
             <button
+              type="button"
               onClick={() => setIsFeedbackModalOpen(true)}
-              className="px-2 py-0.5 text-[11px] font-bold rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-900 shadow-sm transition flex items-center gap-1 cursor-pointer"
+              className="hidden sm:flex px-2.5 py-1 text-[11px] font-bold rounded border border-blue-300 bg-blue-50 hover:bg-blue-100 text-blue-900 shadow-sm transition items-center gap-1 cursor-pointer"
               title="AI行動の違和感を記録・共有します"
             >
               <span>🤔 違和感を記録</span>
@@ -2044,21 +1899,28 @@ export const CoreBattlePlaytest: React.FC = () => {
           )}
 
           <button
+            type="button"
             onClick={() => startNewGame()}
-            className="px-2.5 py-0.5 text-[11px] font-bold rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white border border-zinc-800 shadow-sm transition"
+            className="hidden sm:inline-flex items-center justify-center px-2.5 py-1 text-[11px] font-bold rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white border border-zinc-800 shadow-sm transition cursor-pointer"
           >
             新しい対戦
           </button>
-        </div>
 
-        {/* Mobile メニューボタン (⋯) */}
-        <div className="lg:hidden flex items-center gap-1">
+          {/* 統合設定・メニューボタン (Desktop / Tablet / Mobile 共通常設) */}
           <button
+            type="button"
             onClick={() => setIsMobileMenuOpen(true)}
-            className="w-8 h-8 flex items-center justify-center rounded-lg border border-zinc-300 bg-white hover:bg-zinc-100 active:bg-zinc-200 text-zinc-950 text-base font-bold shadow-sm transition min-h-[44px] min-w-[44px]"
-            title="メニューを開く"
+            data-testid="header-settings-menu-button"
+            aria-label="設定・メニューを開く"
+            title={
+              activeMatch?.isScenario
+                ? "設定・メニューを開く (※Scenarioから開始した対戦のReplayは現在未対応です)"
+                : "設定・メニューを開く"
+            }
+            className="min-h-[44px] min-w-[44px] sm:min-h-0 sm:min-w-0 px-2.5 py-1 rounded-lg sm:rounded border border-zinc-300 bg-white hover:bg-zinc-100 active:bg-zinc-200 text-zinc-950 text-xs font-bold shadow-sm transition flex items-center justify-center gap-1 cursor-pointer"
           >
-            ⋯
+            <span className="sm:hidden text-base leading-none">⋯</span>
+            <span className="hidden sm:inline text-[11px]">⚙️ 設定・メニュー</span>
           </button>
         </div>
       </header>
@@ -2419,7 +2281,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         </MobileBottomSheet>
       )}
 
-      {/* 3. Mobile ヘッダーメニュー */}
+      {/* 3. 統合設定・ヘッダーメニュー (Desktop / Tablet / Mobile 共通) */}
       <MobileHeaderMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
@@ -2447,15 +2309,24 @@ export const CoreBattlePlaytest: React.FC = () => {
         shareNotice={shareNotice}
         onDownloadDiagnostic={handleDownloadDiagnostic}
         isDiagnosticAvailable={isDiagnosticAvailable}
+        isScenarioMatch={Boolean(activeMatch?.isScenario)}
+        showDebug={showDebug}
+        onToggleDebug={setShowDebug}
+        onOpenFeedback={
+          activeMatch && activeMatchMode === "humanVsAi"
+            ? () => setIsFeedbackModalOpen(true)
+            : undefined
+        }
+        feedbackCount={feedbacks.length}
         onOpenReplayVerify={() => setIsReplayVerifyModalOpen(true)}
         onOpenReplayViewer={() => handleOpenCurrentReplay()}
         onOpenScenarioBuilder={() => setIsScenarioBuilderOpen(true)}
       />
 
 
-      {/* 4. Mobile 対戦ログモーダル */}
+      {/* 4. 対戦ログモーダル */}
       {showMobileLogModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 lg:hidden animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 animate-fade-in">
           <div className="w-full max-w-lg bg-white rounded-xl border border-zinc-300 shadow-2xl p-3 flex flex-col max-h-[85vh] min-h-0">
             <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2 shrink-0">
               <h3 className="text-sm font-bold text-zinc-950 font-serif">対戦ログ (Game Log)</h3>
@@ -2473,9 +2344,9 @@ export const CoreBattlePlaytest: React.FC = () => {
         </div>
       )}
 
-      {/* 5. Mobile デバッグモーダル */}
+      {/* 5. デバッグモーダル */}
       {showMobileDebugModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 lg:hidden animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 animate-fade-in">
           <div className="w-full max-w-lg bg-white rounded-xl border border-zinc-300 shadow-2xl p-3 flex flex-col max-h-[90vh]">
             <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
               <h3 className="text-sm font-bold text-zinc-950 font-serif">デバッグパネル (Debug Panel)</h3>
