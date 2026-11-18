@@ -115,6 +115,7 @@ function makeBulwark(
 function createBlockDecisionTestState(opts: {
   attackers: any[];
   blockersField: any[];
+  blockersTrumps?: any[];
   selfLifeCount?: number;
   oppLifeCount?: number;
 }): {
@@ -122,88 +123,71 @@ function createBlockDecisionTestState(opts: {
   attackers: any[];
   candidateBlockers: any[];
 } {
-  const selfLifeCards = Array.from(
-    { length: opts.selfLifeCount ?? 15 },
-    (_, i) => makeCard(`self-life-${i}`, (i % 13) + 1, "H")
+  const selfLifeCount = opts.selfLifeCount ?? 15;
+  const oppLifeCount = opts.oppLifeCount ?? 15;
+
+  const selfLifeCards = Array.from({ length: selfLifeCount }, (_, i) =>
+    makeCard(`life-a-${i}`, (i % 10) + 1)
   );
-  const oppLifeCards = Array.from(
-    { length: opts.oppLifeCount ?? 15 },
-    (_, i) => makeCard(`opp-life-${i}`, (i % 13) + 1, "D")
+  const oppLifeCards = Array.from({ length: oppLifeCount }, (_, i) =>
+    makeCard(`life-b-${i}`, (i % 10) + 1)
   );
+
+  const attackers = opts.attackers.map((u) => ({
+    ...u,
+    battle: u.battle ?? {
+      role: "attacker" as const,
+      targetPlayerKey: "playerA" as const,
+    },
+  }));
 
   const state: any = {
-    stateVersion: 10,
-    turnCount: 2,
-    turnPlayer: "playerB",
+    gameEnd: false,
+    deck: [],
+    turnCount: 3,
+    turnPlayerKey: "playerB",
+    chancePlayerKey: "playerA",
+    focusPlayerKey: "playerA",
+    phaseKey: "mainPhase",
+    activeActionId: "action.attack",
+    stage: { requests: [], nextSequence: 1 },
     players: {
       playerA: {
-        playerId: "playerA",
-        name: "Player A (Defender / AI)",
+        name: "Player A",
+        hand: [],
+        field: opts.blockersField,
+        trumps: opts.blockersTrumps ?? [],
+        fog: [],
+        grave: [],
         life: selfLifeCards,
-        hand: [],
-        field: [...opts.blockersField],
-        trumps: [],
-        grave: [],
-      },
+        pack: [],
+        rareCards: [],
+        openedPack: false,
+      } as any,
       playerB: {
-        playerId: "playerB",
-        name: "Player B (Attacker)",
-        life: oppLifeCards,
+        name: "Player B",
         hand: [],
-        field: [...opts.attackers],
+        field: attackers,
         trumps: [],
+        fog: [],
         grave: [],
-      },
-    },
-    stage: {
-      requests: [
-        {
-          id: "req-attack-1",
-          actionId: "action.attack",
-          controller: "playerB",
-          definitionOwner: "playerB",
-          status: "resolving",
-          stepIndex: 1,
-        },
-      ],
-    },
-    requestBuffer: {
-      requests: [
-        {
-          id: "req-block-1",
-          actionId: "action.block",
-          controller: "playerA",
-          definitionOwner: "playerA",
-          status: "resolving",
-          stepIndex: 0,
-        },
-      ],
-      history: [],
+        life: oppLifeCards,
+        pack: [],
+        rareCards: [],
+        openedPack: false,
+      } as any,
     },
   };
 
-  return {
-    state,
-    attackers: opts.attackers,
-    candidateBlockers: opts.blockersField,
-  };
+  const candidateBlockers = [
+    ...opts.blockersField,
+    ...(opts.blockersTrumps ?? []),
+  ];
+
+  return { state, attackers, candidateBlockers };
 }
 
-const MOCK_BLOCK_REQUEST: any = {
-  id: "req-block-mock",
-  actionId: "action.block",
-  controller: "playerA",
-  definitionOwner: "playerA",
-  status: "resolving",
-  stepIndex: 0,
-  action: {
-    id: "action.block",
-    name: "ブロック",
-    type: "basic",
-    request: { trigger: "triggered", controller: "nonTurnPlayer" },
-    effect: [{ selectBlockAssignments: { id: "blocks", relation: "self" } }],
-  },
-};
+const MOCK_BLOCK_REQUEST: any = { id: "req-block", actionId: "action.block" };
 
 function resolveChosenAssignments(
   request: Readonly<DecisionRequest>,
@@ -372,12 +356,18 @@ describe("Work: Gen 9 実戦品質改善 ― ブロック判断と兵士温存�
       expect(passScore.finalScore).toBeGreaterThan(blockScore.finalScore);
       expect(blockScore.tacticalAdjustment).toBeLessThanOrEqual(-0.12);
 
-      // 対比: 旧バージョン v7.2b では犬死ブロックを選んでいたことを確認 (再現性)
+      // 対比: 旧バージョン v7.2b では犬死ブロックを選んでいたことを確認 (再現性と改善の証明)
       const evalV72b = policyV72b.evaluatePatterns(req);
       const choiceV72b = policyV72b.choose(req).selectedPatternRef;
       const assignV72b = resolveChosenAssignments(req, choiceV72b);
 
+      // 旧 v7.2b では犬死ブロック (u-blk-2) を選択していた
+      expect(choiceV72b).toBe(1);
+      expect(assignV72b[0].selectedUnitIds).toEqual(["u-blk-2"]);
+      expect(evalV72b.scoredPatterns[1].tacticalAdjustment).toBeCloseTo(-0.05, 2);
+
       evidence.results["1.2-unfavorable-block-avoidance"] = {
+        status: "PASS",
         v72cChosenUnitIds: assignV72c[0].selectedUnitIds,
         v73cChosenUnitIds: assignV73c[0].selectedUnitIds,
         v72cPassFinalScore: passScore.finalScore,
@@ -398,19 +388,8 @@ describe("Work: Gen 9 実戦品質改善 ― ブロック判断と兵士温存�
           final: p.finalScore,
           reason: p.reason,
         })),
-      };
-
-      // v72b のスコア内訳を確認
-      expect(evalV72b.scoredPatterns[1].tacticalAdjustment).toBeCloseTo(-0.05, 2);
-
-      evidence.results["1.2-unfavorable-block-avoidance"] = {
-        status: "PASS",
-        v72cChosenUnitIds: assignV72c[0].selectedUnitIds,
-        v73cChosenUnitIds: assignV73c[0].selectedUnitIds,
-        v72cPassFinalScore: passScore.finalScore,
-        v72cBlockFinalScore: blockScore.finalScore,
-        v72cBlockTacticalAdj: blockScore.tacticalAdjustment,
-        oldV72bChosenUnitIds: assignV72b[0].selectedUnitIds,
+        explanation:
+          "同一DecisionRequestにおいて、旧v7.2bはBase(0.1378)+Tactical(-0.05)=Final(0.0878) > Pass(0.0459)となり犬死ブロック(u-blk-2)を選択していたのに対し、新v7.2cはTactical(-0.12)によりFinal(0.0178) < Pass(0.0459)となり合理的なスルー([])への転換に成功した。",
       };
       evidence.summary.totalTests++;
       evidence.summary.passedTests++;
@@ -734,7 +713,7 @@ describe("Work: Gen 9 実戦品質改善 ― ブロック判断と兵士温存�
             {
               playerId: "p2",
               name: "Player B",
-              lifeCount: opts.oppLife ?? 15,
+              ...(opts.oppLife !== undefined ? { lifeCount: opts.oppLife } : {}),
               bulwarks: [],
               field: oppUnits,
               isViewer: false,
@@ -785,27 +764,86 @@ describe("Work: Gen 9 実戦品質改善 ― ブロック判断と兵士温存�
       evidence.summary.passedTests++;
     });
 
-    // 2.2 全軍アタックが合理的な局面 A (確定リーサル)
-    it("2.2 確定リーサル局面では守備を残さず全軍アタックを選択すること", () => {
+    // 2.2 確定リーサルの厳密な判定検証 (Work P0-2)
+    it("2.2A 相手に合法なブロッカー(チャージ兵士)がいる場合、合計サイズがライフ以上でも確定リーサルとしないこと", () => {
       const myS1 = makeSoldier("my-s1", 5, "charge");
       const myS2 = makeSoldier("my-s2", 5, "charge");
-      const oppS = makeSoldier("opp-s", 3, "charge");
+      const oppS = makeSoldier("opp-s", 3, "charge"); // ブロック可能兵士が存在
 
       const req = createAttackerSelectionRequest({
         mySoldiers: [myS1, myS2], // 合計10点
         oppSoldiers: [oppS],
         myBulwarks: [],
-        oppLife: 8, // 確定リーサル (10 >= 8)
+        oppLife: 8, // 合計10 >= 8 だが相手にブロッカーあり
       });
 
       const choiceV72c = policyV72c.choose(req).selectedPatternRef;
       const choiceV73c = policyV73c.choose(req).selectedPatternRef;
 
-      // 確定リーサルのため、全軍アタック (パターン 3) を選択！
+      // ブロッカーが存在するため確定リーサルとはならず、反撃脅威もあるため温存 (パターン 1 または 2) を選択
+      expect(choiceV72c).not.toBe(3);
+      expect(choiceV73c).not.toBe(3);
+      expect([1, 2]).toContain(choiceV72c);
+      expect([1, 2]).toContain(choiceV73c);
+
+      evidence.results["2.2A-blocker-prevents-certain-lethal"] = {
+        status: "PASS",
+        v72cChosenPatternRef: choiceV72c,
+        v73cChosenPatternRef: choiceV73c,
+      };
+      evidence.summary.totalTests++;
+      evidence.summary.passedTests++;
+    });
+
+    it("2.2B 相手にブロッカーがおらず公開確定ライフに対して致死量の場合、確定リーサルとして全軍アタックを選択すること", () => {
+      const myS1 = makeSoldier("my-s1", 5, "charge");
+      const myS2 = makeSoldier("my-s2", 5, "charge");
+
+      const req = createAttackerSelectionRequest({
+        mySoldiers: [myS1, myS2], // 合計10点
+        oppSoldiers: [], // ブロッカーなし！
+        myBulwarks: [],
+        oppLife: 8, // 確定公開ライフ 8枚 (10 >= 8 で確実に勝利)
+      });
+
+      const choiceV72c = policyV72c.choose(req).selectedPatternRef;
+      const choiceV73c = policyV73c.choose(req).selectedPatternRef;
+
+      // ブロッカーがおらず確定リーサルのため、全軍アタック (パターン 3) を選択！
       expect(choiceV72c).toBe(3);
       expect(choiceV73c).toBe(3);
 
-      evidence.results["2.2-all-out-attack-lethal"] = {
+      evidence.results["2.2B-unblocked-certain-lethal-all-out"] = {
+        status: "PASS",
+        v72cChosenPatternRef: choiceV72c,
+        v73cChosenPatternRef: choiceV73c,
+      };
+      evidence.summary.totalTests++;
+      evidence.summary.passedTests++;
+    });
+
+    it("2.2C 相手ライフが10以上で非公開の場合、推測で確定扱いせず確定リーサルとしないこと", () => {
+      const myS1 = makeSoldier("my-s1", 5, "charge");
+      const myS2 = makeSoldier("my-s2", 5, "charge");
+      const oppDriveS = makeSoldier("opp-s-drive", 3, "drive"); // ブロッカーではないがドライブ兵士あり
+
+      const req = createAttackerSelectionRequest({
+        mySoldiers: [myS1, myS2], // 合計10点
+        oppSoldiers: [oppDriveS],
+        myBulwarks: [],
+        oppLife: undefined, // 相手ライフ10以上で非公開！
+      });
+
+      const choiceV72c = policyV72c.choose(req).selectedPatternRef;
+      const choiceV73c = policyV73c.choose(req).selectedPatternRef;
+
+      // 相手ライフが非公開のため確定リーサルボーナスはつかず、温存 (パターン 1 または 2) を選択
+      expect(choiceV72c).not.toBe(3);
+      expect(choiceV73c).not.toBe(3);
+      expect([1, 2]).toContain(choiceV72c);
+      expect([1, 2]).toContain(choiceV73c);
+
+      evidence.results["2.2C-hidden-life-not-treated-as-certain-lethal"] = {
         status: "PASS",
         v72cChosenPatternRef: choiceV72c,
         v73cChosenPatternRef: choiceV73c,
@@ -844,15 +882,15 @@ describe("Work: Gen 9 実戦品質改善 ― ブロック判断と兵士温存�
       evidence.summary.passedTests++;
     });
 
-    // 2.4 全軍アタックが合理的な局面 C (相手陣地にチャージ兵士がいない)
-    it("2.4 相手陣地にチャージ兵士がいない(反撃の脅威がない)局面では全軍アタックを選択すること", () => {
+    // 2.4 相手ドライブ兵士の反撃リスク検証 (Work P0-3)
+    it("2.4A 相手陣地にドライブ兵士がいる場合、次ターンにチャージされて反撃されるため温存を選択すること", () => {
       const myS1 = makeSoldier("my-s1", 5, "charge");
       const myS2 = makeSoldier("my-s2", 4, "charge");
-      const oppDriveSoldier = makeSoldier("opp-s-drive", 6, "drive"); // 疲労状態
+      const oppDriveSoldier = makeSoldier("opp-s-drive", 6, "drive"); // ドライブ状態だが次ターンにチャージされる！
 
       const req = createAttackerSelectionRequest({
         mySoldiers: [myS1, myS2],
-        oppSoldiers: [oppDriveSoldier], // チャージ兵士なし
+        oppSoldiers: [oppDriveSoldier],
         myBulwarks: [],
         oppLife: 15,
       });
@@ -860,10 +898,40 @@ describe("Work: Gen 9 実戦品質改善 ― ブロック判断と兵士温存�
       const choiceV72c = policyV72c.choose(req).selectedPatternRef;
       const choiceV73c = policyV73c.choose(req).selectedPatternRef;
 
+      // ドライブ兵士の反撃脅威を認識し、全軍アタック (3) ではなく温存 (1 または 2) を選択！
+      expect(choiceV72c).not.toBe(3);
+      expect(choiceV73c).not.toBe(3);
+      expect([1, 2]).toContain(choiceV72c);
+      expect([1, 2]).toContain(choiceV73c);
+
+      evidence.results["2.4A-opp-drive-soldier-treated-as-threat"] = {
+        status: "PASS",
+        v72cChosenPatternRef: choiceV72c,
+        v73cChosenPatternRef: choiceV73c,
+      };
+      evidence.summary.totalTests++;
+      evidence.summary.passedTests++;
+    });
+
+    it("2.4B 相手陣地に兵士が0体(更地)の局面では確実に反撃能力がないため全軍アタックを選択すること", () => {
+      const myS1 = makeSoldier("my-s1", 5, "charge");
+      const myS2 = makeSoldier("my-s2", 4, "charge");
+
+      const req = createAttackerSelectionRequest({
+        mySoldiers: [myS1, myS2],
+        oppSoldiers: [], // 相手兵士0体 (更地)
+        myBulwarks: [],
+        oppLife: 15,
+      });
+
+      const choiceV72c = policyV72c.choose(req).selectedPatternRef;
+      const choiceV73c = policyV73c.choose(req).selectedPatternRef;
+
+      // 相手に反撃兵士が確実に存在しないため、全軍アタック (パターン 3) を選択！
       expect(choiceV72c).toBe(3);
       expect(choiceV73c).toBe(3);
 
-      evidence.results["2.4-all-out-attack-harmless-opp"] = {
+      evidence.results["2.4B-harmless-opp-all-out-attack"] = {
         status: "PASS",
         v72cChosenPatternRef: choiceV72c,
         v73cChosenPatternRef: choiceV73c,

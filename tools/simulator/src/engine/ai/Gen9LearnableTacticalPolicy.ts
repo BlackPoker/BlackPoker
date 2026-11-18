@@ -1602,19 +1602,37 @@ export function evaluateAttackerSelectionTactics(
   );
   const hasChargeBulwark = myChargeBulwarks.length > 0;
 
-  // 相手陣地のチャージ兵士 (返しのターンにアタッカーとなり得る脅威)
-  const oppChargeSoldiers = (oppView?.field ?? []).filter(
-    (u) => u.state === "charge" && u.kind !== "bulwark" && u.componentId !== "character.bulwark" && getUnitSize(u) > 0
+  // 相手陣地で次ターンに反撃アタッカーとなり得る兵士 (チャージ兵士 + ドライブ兵士)
+  // ※ 相手ターン開始時のチャージ処理 (action.charge) によりドライブ状態の兵士もチャージ状態に復帰して攻撃可能となる (Work P0-3)
+  const oppPotentialAttackers = (oppView?.field ?? []).filter(
+    (u) =>
+      (u.state === "charge" || u.state === "drive") &&
+      u.kind !== "bulwark" &&
+      u.componentId !== "character.bulwark" &&
+      u.kind !== "防壁" &&
+      getUnitSize(u) > 0
   );
-  const hasOppThreat = oppChargeSoldiers.length > 0;
+  const hasOppThreat = oppPotentialAttackers.length > 0;
 
-  // 相手ライフとリーサル判定
+  // 相手フィールドのブロック可能ユニット (チャージ状態の兵士・防壁) (Work P0-2)
+  const oppBlockers = (oppView?.field ?? []).filter(
+    (u) =>
+      u.state === "charge" &&
+      (u.kind === "防壁" ||
+        u.componentId === "character.bulwark" ||
+        getUnitSize(u) > 0)
+  );
+  const oppHasNoBlockers = oppBlockers.length === 0;
+
+  // 相手ライフと確定リーサル判定 (Work P0-2)
+  // - oppView.lifeCount が数値 (9枚以下) のときのみ、正確な公開ライフ値として扱う (10以上は非公開で未確定)
+  // - 相手にブロッカーが1体でも存在する場合、合法なブロック割り当てにより阻止される可能性があるため確定リーサルとしない
   const attackPower = myChargeSoldiers
     .filter((u) => selectedAttackerIds.includes(u.unitId))
     .reduce((sum, u) => sum + getUnitSize(u), 0);
   const oppLife = oppView?.lifeCount;
   const isCertainOppLife = typeof oppLife === "number";
-  const isGuaranteedLethal = isCertainOppLife && attackPower >= oppLife;
+  const isGuaranteedLethal = oppHasNoBlockers && isCertainOppLife && attackPower >= oppLife;
 
   // -------------------------------------------------------------------------
   // 全軍アタックが合理的な局面 (温存不要)
@@ -1651,7 +1669,7 @@ export function evaluateAttackerSelectionTactics(
     // 無防備全軍アタックペナルティ: Gen 8 DNA のサイズ加点 (約 +0.05〜+0.08) を相殺
     return {
       adjustment: -0.15,
-      reason: `All-out attack leaves board defenseless penalty (-0.15): remainingChargeSoldiers=0, oppThreatCount=${oppChargeSoldiers.length}`,
+      reason: `All-out attack leaves board defenseless penalty (-0.15): remainingChargeSoldiers=0, oppThreatCount=${oppPotentialAttackers.length}`,
     };
   }
 

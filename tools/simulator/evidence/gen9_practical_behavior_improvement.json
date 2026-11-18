@@ -1,6 +1,6 @@
 {
   "workId": "BP-SIM-AI-GEN9-PRACTICAL-BEHAVIOR-IMPROVEMENT",
-  "timestamp": "2026-11-18T12:00:20.136Z",
+  "timestamp": "2026-11-18T12:27:18.928Z",
   "results": {
     "1.1-favorable-soldier-block": {
       "status": "PASS",
@@ -15,10 +15,43 @@
       "status": "PASS",
       "v72cChosenUnitIds": [],
       "v73cChosenUnitIds": [],
-      "v72cPassFinalScore": 0.10911677791869258,
-      "v72cBlockFinalScore": 0.009563505696109198,
+      "v72cPassFinalScore": 0.04592725908723655,
+      "v72cBlockFinalScore": 0.017750909626461836,
       "v72cBlockTacticalAdj": -0.12,
-      "oldV72bChosenUnitIds": []
+      "oldV72bChosenUnitIds": [
+        "u-blk-2"
+      ],
+      "oldV72bScores": [
+        {
+          "ref": 0,
+          "base": 0.04592725908723655,
+          "tactical": 0,
+          "final": 0.04592725908723655
+        },
+        {
+          "ref": 1,
+          "base": 0.13775090962646183,
+          "tactical": -0.05,
+          "final": 0.08775090962646183,
+          "reason": "t14_unfavorable_block(-0.25: sumBlkSize=2<atkSize=5, count=1)"
+        }
+      ],
+      "v72cScores": [
+        {
+          "ref": 0,
+          "base": 0.04592725908723655,
+          "tactical": 0,
+          "final": 0.04592725908723655
+        },
+        {
+          "ref": 1,
+          "base": 0.13775090962646183,
+          "tactical": -0.12,
+          "final": 0.017750909626461836,
+          "reason": "t14_unfavorable_block(-0.60: sumBlkSize=2<atkSize=5, count=1)"
+        }
+      ],
+      "explanation": "同一DecisionRequestにおいて、旧v7.2bはBase(0.1378)+Tactical(-0.05)=Final(0.0878) > Pass(0.0459)となり犬死ブロック(u-blk-2)を選択していたのに対し、新v7.2cはTactical(-0.12)によりFinal(0.0178) < Pass(0.0459)となり合理的なスルー([])への転換に成功した。"
     },
     "1.3-lethal-avoidance-block": {
       "status": "PASS",
@@ -60,17 +93,32 @@
       "v72cAllOutFinalScore": -0.12745744172138992,
       "v72cReserveFinalScore": 0.0786166845418931
     },
-    "2.2-all-out-attack-lethal": {
+    "2.2A-blocker-prevents-certain-lethal": {
+      "status": "PASS",
+      "v72cChosenPatternRef": 1,
+      "v73cChosenPatternRef": 1
+    },
+    "2.2B-unblocked-certain-lethal-all-out": {
       "status": "PASS",
       "v72cChosenPatternRef": 3,
       "v73cChosenPatternRef": 3
+    },
+    "2.2C-hidden-life-not-treated-as-certain-lethal": {
+      "status": "PASS",
+      "v72cChosenPatternRef": 1,
+      "v73cChosenPatternRef": 1
     },
     "2.3-all-out-attack-with-bulwark": {
       "status": "PASS",
       "v72cChosenPatternRef": 3,
       "v73cChosenPatternRef": 3
     },
-    "2.4-all-out-attack-harmless-opp": {
+    "2.4A-opp-drive-soldier-treated-as-threat": {
+      "status": "PASS",
+      "v72cChosenPatternRef": 1,
+      "v73cChosenPatternRef": 1
+    },
+    "2.4B-harmless-opp-all-out-attack": {
       "status": "PASS",
       "v72cChosenPatternRef": 3,
       "v73cChosenPatternRef": 3
@@ -109,7 +157,7 @@
     }
   },
   "summary": {
-    "totalTests": 12,
-    "passedTests": 12
+    "totalTests": 15,
+    "passedTests": 15
   }
 }
