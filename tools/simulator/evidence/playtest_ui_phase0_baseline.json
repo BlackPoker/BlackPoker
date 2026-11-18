@@ -1,0 +1,293 @@
+{
+  "workId": "BP-SIM-PLAYTEST-RESPONSIVE-UI-PHASE0-BASELINE",
+  "branch": "BlackPoker/issue551-core-flow",
+  "baseCommit": "e0cebaf7afa38aa8783c29ce2ef8fc98f136ed60",
+  "measuredAt": "2026-11-19T01:28:00.000Z",
+  "targetResolutions": [
+    {
+      "resolution": "1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "category": "desktop",
+      "subCategory": "desktopStandard",
+      "beforeMeasurement": {
+        "headerRequiredWidthPx": 1990,
+        "headerOverflowPx": 70,
+        "headerHeightPx": 52,
+        "headerStatus": "OVERFLOW_AT_FULL_OPTIONS",
+        "leftPaneTotalHeightPx": 1200,
+        "leftPaneVerticalOverflowPx": 120,
+        "rightPaneTotalHeightPx": 860,
+        "rightPaneWithDebugHeightPx": 1084,
+        "requiresWholePageVerticalScroll": true
+      },
+      "afterPhase1Target": {
+        "headerRequiredWidthPx": 1044,
+        "headerOverflowPx": 0,
+        "headerHeightPx": 48,
+        "headerSpareMarginPx": 876,
+        "headerStatus": "SINGLE_LINE_OK"
+      },
+      "afterPhase2SeparateRowsTarget": {
+        "leftPaneTotalHeight4RowsPx": 864,
+        "leftPaneTotalHeight3RowsPx": 760,
+        "leftPaneVerticalOverflowPx": 0,
+        "requiresWholePageVerticalScroll": false,
+        "paneScrollMode": "INDEPENDENT_PANE_SCROLL_NO_OVERFLOW"
+      }
+    },
+    {
+      "resolution": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "category": "desktop",
+      "subCategory": "desktopStandard",
+      "beforeMeasurement": {
+        "headerRequiredWidthPx": 1990,
+        "headerOverflowPx": 550,
+        "headerHeightPx": 84,
+        "headerStatus": "MULTI_LINE_COLLISION",
+        "leftPaneTotalHeightPx": 1200,
+        "leftPaneVerticalOverflowPx": 300,
+        "rightPaneTotalHeightPx": 860,
+        "rightPaneWithDebugHeightPx": 1084,
+        "requiresWholePageVerticalScroll": true
+      },
+      "afterPhase1Target": {
+        "headerRequiredWidthPx": 1044,
+        "headerOverflowPx": 0,
+        "headerHeightPx": 48,
+        "headerSpareMarginPx": 396,
+        "headerStatus": "SINGLE_LINE_OK"
+      },
+      "afterPhase2SeparateRowsTarget": {
+        "leftPaneTotalHeight4RowsPx": 864,
+        "leftPaneTotalHeight3RowsPx": 760,
+        "leftPaneVerticalOverflowPx": 0,
+        "requiresWholePageVerticalScroll": false,
+        "paneScrollMode": "INDEPENDENT_PANE_SCROLL_NO_OVERFLOW"
+      }
+    },
+    {
+      "resolution": "1366x768",
+      "width": 1366,
+      "height": 768,
+      "category": "desktop",
+      "subCategory": "desktopLowHeight",
+      "beforeMeasurement": {
+        "headerRequiredWidthPx": 1990,
+        "headerOverflowPx": 624,
+        "headerHeightPx": 84,
+        "headerStatus": "MULTI_LINE_COLLISION",
+        "leftPaneTotalHeightPx": 1200,
+        "leftPaneVerticalOverflowPx": 432,
+        "rightPaneTotalHeightPx": 860,
+        "rightPaneWithDebugHeightPx": 1084,
+        "requiresWholePageVerticalScroll": true
+      },
+      "afterPhase1Target": {
+        "headerRequiredWidthPx": 1044,
+        "headerOverflowPx": 0,
+        "headerHeightPx": 48,
+        "headerSpareMarginPx": 322,
+        "headerStatus": "SINGLE_LINE_OK"
+      },
+      "afterPhase2SeparateRowsTarget": {
+        "leftPaneTotalHeight4RowsPx": 864,
+        "leftPaneTotalHeight3RowsPx": 740,
+        "leftPaneVerticalOverflowPx": 0,
+        "requiresWholePageVerticalScroll": false,
+        "paneScrollMode": "INDEPENDENT_PANE_AND_FIELD_SCROLL"
+      }
+    },
+    {
+      "resolution": "1024x768",
+      "width": 1024,
+      "height": 768,
+      "category": "tablet",
+      "subCategory": "tabletLandscape",
+      "beforeMeasurement": {
+        "headerRequiredWidthPx": 1990,
+        "headerOverflowPx": 966,
+        "headerHeightPx": 112,
+        "headerStatus": "SEVERE_OVERFLOW_AND_WRAP",
+        "leftPaneTotalHeightPx": 1236,
+        "leftPaneVerticalOverflowPx": 468,
+        "rightPaneTotalHeightPx": 880,
+        "requiresWholePageVerticalScroll": true
+      },
+      "afterPhase1Target": {
+        "headerRequiredWidthPx": 884,
+        "headerOverflowPx": 0,
+        "headerHeightPx": 48,
+        "headerSpareMarginPx": 140,
+        "headerStatus": "SINGLE_LINE_OK"
+      },
+      "afterPhase2SeparateRowsTarget": {
+        "leftPaneTotalHeight4RowsPx": 864,
+        "leftPaneTotalHeight3RowsPx": 740,
+        "requiresWholePageVerticalScroll": false,
+        "paneScrollMode": "INDEPENDENT_PANE_SCROLL"
+      }
+    },
+    {
+      "resolution": "820x1180",
+      "width": 820,
+      "height": 1180,
+      "category": "tablet",
+      "subCategory": "tabletPortrait",
+      "beforeMeasurement": {
+        "headerRequiredWidthPx": 220,
+        "headerOverflowPx": 0,
+        "headerHeightPx": 52,
+        "headerStatus": "MOBILE_MENU_BUTTON_ONLY",
+        "boardTotalHeightPx": 720,
+        "dockMaxWidthPx": 448,
+        "requiresWholePageVerticalScroll": false
+      },
+      "afterPhase1Target": {
+        "headerRequiredWidthPx": 514,
+        "headerOverflowPx": 0,
+        "headerHeightPx": 48,
+        "headerSpareMarginPx": 306,
+        "headerStatus": "SINGLE_LINE_WITH_QUICK_ACTIONS_OK"
+      }
+    },
+    {
+      "resolution": "390x844",
+      "width": 390,
+      "height": 844,
+      "category": "mobile",
+      "subCategory": "smartphoneStandard",
+      "beforeMeasurement": {
+        "headerRequiredWidthPx": 189,
+        "headerOverflowPx": 0,
+        "headerHeightPx": 52,
+        "headerStatus": "SINGLE_LINE_OK",
+        "boardTotalHeightPx": 680,
+        "dockHeightPx": 92
+      },
+      "afterPhase1Target": {
+        "headerRequiredWidthPx": 189,
+        "headerOverflowPx": 0,
+        "headerHeightPx": 48,
+        "headerSpareMarginPx": 201,
+        "headerStatus": "SINGLE_LINE_OK"
+      }
+    },
+    {
+      "resolution": "360x800",
+      "width": 360,
+      "height": 800,
+      "category": "mobile",
+      "subCategory": "smartphoneCompact",
+      "beforeMeasurement": {
+        "headerRequiredWidthPx": 189,
+        "headerOverflowPx": 0,
+        "headerHeightPx": 52,
+        "headerStatus": "SINGLE_LINE_OK",
+        "boardTotalHeightPx": 680,
+        "dockHeightPx": 92
+      },
+      "afterPhase1Target": {
+        "headerRequiredWidthPx": 189,
+        "headerOverflowPx": 0,
+        "headerHeightPx": 48,
+        "headerSpareMarginPx": 171,
+        "headerStatus": "SINGLE_LINE_OK"
+      }
+    }
+  ],
+  "leftPaneHeightBreakdownDesktop": {
+    "currentBaselinePx": {
+      "header": 48,
+      "mainContainerPaddingAndGaps": 22,
+      "gameStatusBar": 68,
+      "topPlayerBoard": {
+        "summaryHeader": 38,
+        "playerZoneStrip": 32,
+        "handRow": 86,
+        "soldierRowWithDriveRotation": 168,
+        "bulwarkRow": 156,
+        "boardPaddingAndBorders": 18,
+        "subtotal": 498
+      },
+      "stagePanelEmpty": 66,
+      "stagePanelActive2Requests": 145,
+      "bottomPlayerBoard": {
+        "summaryHeader": 38,
+        "playerZoneStrip": 32,
+        "bulwarkRow": 156,
+        "soldierRowWithDriveRotation": 168,
+        "handRow": 86,
+        "boardPaddingAndBorders": 18,
+        "subtotal": 498
+      },
+      "totalWithEmptyStage": 1200,
+      "totalWithActiveStage": 1279
+    },
+    "layoutComparison": {
+      "option1_separateRowsMaintained_APPROVED": {
+        "description": "兵士列・防壁列の別列（縦並び）を維持し、5段階の優先施策で高さを削減する承認案",
+        "preservesPhysicalCardLayout": true,
+        "implementedInPhase2": true,
+        "reductionsPx": {
+          "step1_mergeHeaderAndZoneStrip": 64,
+          "step2_removeRedundantLabelsAndMargins": 108,
+          "step3_optimizeDriveRotationMarginAndOpponentHand": 132,
+          "step4_compactStagePanel": 32,
+          "totalReductionPx": 336
+        },
+        "resultingHeight4UnitRowsPx": 864,
+        "resultingHeight3UnitRowsPx": 760,
+        "fits1920x1080WithoutPageScroll": true,
+        "fits1440x900WithoutPageScroll": true,
+        "fits1366x768WithStep5IndependentScroll": true,
+        "visualFidelityScore": "HIGH (実カード配置の前衛=兵士・後衛=防壁と完全一致)"
+      },
+      "option2_twoColumnsSideBySide_REFERENCE_ONLY": {
+        "description": "兵士列と防壁列を左右2カラムに並べる参考比較案（※視覚的一致を損なうため実装しない）",
+        "preservesPhysicalCardLayout": false,
+        "implementedInPhase2": false,
+        "reductionsPx": {
+          "step1_to_step4_baseReduction": 336,
+          "additional2ColumnVerticalReduction": 190,
+          "totalReductionPx": 526
+        },
+        "resultingHeight4UnitRowsPx": 674,
+        "drawbacks": [
+          "実際のBlackPokerにおける前衛（兵士列）・後衛（防壁列）の縦方向の位置関係と視覚的に不一致となる",
+          "兵士4体以上と防壁3体以上が同時展開された際に左右各カラムの横幅が狭まり、横スクロールが頻発する"
+        ],
+        "visualFidelityScore": "LOW (実カード配置との乖離あり・不採用)"
+      }
+    }
+  },
+  "typographyAudit": {
+    "totalFixedPxOccurrencesInUi": 307,
+    "breakdown": {
+      "text-[10px]": 115,
+      "text-[11px]": 92,
+      "text-[9px]": 51,
+      "text-[9.5px]": 11,
+      "text-[8px]": 10,
+      "text-[7.5px]": 4,
+      "text-[13px]": 3,
+      "text-[12.5px]": 3,
+      "text-[16px]": 3,
+      "text-[10.5px]": 3,
+      "text-[14px]": 3,
+      "otherFixedPx": 9
+    }
+  },
+  "testBaseline": {
+    "testFilesTotal": 254,
+    "testFilesPassed": 254,
+    "testsTotal": 3686,
+    "testsPassed": 3686,
+    "testsFailed": 0,
+    "testsSkipped": 0,
+    "buildPassed": true,
+    "playableCheckPassed": true
+  }
+}
