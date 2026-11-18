@@ -257,8 +257,14 @@ export const CoreBattlePlaytest: React.FC = () => {
   const [pendingPlayerKey, setPendingPlayerKey] = useState<string>("p1");
   const lastActivePlayerRef = useRef<string>("p1");
 
-  // デスクトップ用デバッグ表示
+  // デスクトップ用デバッグ表示および右ペイン下部タブ ("log" | "debug")
   const [showDebug, setShowDebug] = useState(false);
+  const [rightPaneTab, setRightPaneTab] = useState<"log" | "debug">("log");
+
+  const handleToggleDebug = useCallback((next: boolean) => {
+    setShowDebug(next);
+    setRightPaneTab(next ? "debug" : "log");
+  }, []);
 
   // モバイル用 UI 状態 (collapsed / half / expanded)
   const [sheetMode, setSheetMode] = useState<SheetMode>("collapsed");
@@ -1791,7 +1797,12 @@ export const CoreBattlePlaytest: React.FC = () => {
   ) : null;
 
   return (
-    <div className="flex flex-col min-h-screen bg-[#f7f7f8] text-zinc-950 font-sans selection:bg-zinc-950 selection:text-white">
+    <div
+      data-testid="playtest-root-container"
+      className={`flex flex-col min-h-screen ${
+        activeMatch ? "lg:h-screen lg:overflow-hidden" : ""
+      } bg-[#f7f7f8] text-zinc-950 font-sans selection:bg-zinc-950 selection:text-white`}
+    >
       {/* Action Feedback Flash (トップフロート通知) */}
       <ActionFeedbackFlash
         item={feedbackFlashItem}
@@ -1987,10 +1998,16 @@ export const CoreBattlePlaytest: React.FC = () => {
           />
         </main>
       ) : (
-        /* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) */
-        <main className="flex-1 p-1 lg:p-2 max-w-[1440px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-1 lg:gap-2 pb-24 lg:pb-2">
-          {/* 左ペイン: 盤面（Player B / Stage / Player A） */}
-          <div className="lg:col-span-7 flex flex-col gap-1 lg:gap-1.5">
+        /* 2ペインメインエリア: 左 7/12 (盤面), 右 5/12 (操作/ログ) - 1920px環境を有効活用する max-w-[1840px] & 左右独立スクロール */
+        <main
+          data-testid="playtest-active-main"
+          className="flex-1 min-h-0 p-1 lg:p-2 max-w-[1840px] mx-auto w-full grid grid-cols-1 lg:grid-cols-12 gap-1 lg:gap-2 pb-24 lg:pb-2"
+        >
+          {/* 左ペイン: 盤面（Player B / Stage / Player A） - デスクトップ独立スクロール */}
+          <div
+            data-testid="playtest-left-pane"
+            className="lg:col-span-7 flex flex-col gap-1 lg:gap-1.5 lg:h-full lg:min-h-0 lg:overflow-y-auto lg:pr-0.5"
+          >
             {/* セットアップ通知バナー (対戦中のみ) */}
             {setupNotice && (
               <div className={`p-3 rounded border font-mono ${
@@ -2164,11 +2181,14 @@ export const CoreBattlePlaytest: React.FC = () => {
             )}
           </div>
 
-        {/* 右ペイン: PC用 操作パネル / 対戦ログ */}
-        <div className="hidden lg:flex lg:col-span-5 flex-col gap-1.5 sticky top-12 max-h-[calc(100vh-3.5rem)]">
+        {/* 右ペイン: PC用 操作パネル / 対戦ログ・デバッグ統合タブ - デスクトップ独立スクロール */}
+        <div
+          data-testid="playtest-right-pane"
+          className="hidden lg:flex lg:col-span-5 flex-col gap-1.5 lg:h-full lg:min-h-0 lg:overflow-y-auto"
+        >
           {/* AI 違和感フィードバックバー (Human vs AI 時) */}
           {activeMatchMode === "humanVsAi" && (
-            <div className="flex items-center justify-between p-2 bg-blue-50 border border-blue-200 rounded text-xs font-mono">
+            <div className="flex items-center justify-between px-2.5 py-1.5 bg-blue-50 border border-blue-200 rounded text-xs font-mono shrink-0">
               <div className="flex items-center gap-1.5 font-bold text-blue-900">
                 <span>🤖</span>
                 <span>AI評価 (Human vs AI):</span>
@@ -2176,7 +2196,7 @@ export const CoreBattlePlaytest: React.FC = () => {
               <button
                 type="button"
                 onClick={() => setIsFeedbackModalOpen(true)}
-                className="px-2.5 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold transition flex items-center gap-1.5 shadow-sm text-[11px] cursor-pointer"
+                className="px-2 py-0.5 bg-blue-600 hover:bg-blue-700 text-white rounded font-bold transition flex items-center gap-1.5 shadow-sm text-[11px] cursor-pointer"
               >
                 <span>🤔 違和感を記録</span>
                 {feedbacks.length > 0 && (
@@ -2191,43 +2211,90 @@ export const CoreBattlePlaytest: React.FC = () => {
           {/* 判断要求パネル (Decision Panel) */}
           {isDesktop && (
             isHumanTurnWaiting ? (
-              <div className="shrink-0">{decisionPanelContent}</div>
+              <div
+                data-testid="desktop-decision-panel-slot"
+                className="shrink-0 min-h-0 flex flex-col"
+              >
+                {decisionPanelContent}
+              </div>
             ) : isAiProcessing ? (
-              <div className="p-3 bg-white rounded border border-zinc-200 text-center text-xs font-mono shadow-sm">
+              <div className="p-2.5 bg-white rounded border border-zinc-200 text-center text-xs font-mono shadow-sm shrink-0">
                 <span className="font-bold text-zinc-800 animate-pulse">AI 操作中…</span>
                 <span className="text-zinc-500 ml-2">自動思考しています</span>
               </div>
             ) : (
-              <div className="p-3 bg-white rounded border border-zinc-200 text-center text-xs text-zinc-500 font-mono shadow-sm">
+              <div className="p-2.5 bg-white rounded border border-zinc-200 text-center text-xs text-zinc-500 font-mono shadow-sm shrink-0">
                 現在待機中の判断要求はありません
               </div>
             )
           )}
 
-          {/* 対戦ログ (Game Log) */}
-          <div className="flex-1 min-h-[200px] overflow-hidden flex flex-col">
-            <GameLog logs={logs} />
-          </div>
-
-          {/* Raw Debug パネル */}
-          {showDebug && (
-            <div className="h-56 shrink-0">
-              {activeMatch ? (
-                <DebugPanel
-                  state={gameState}
-                  currentDecisionRequest={currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined}
-                  rulePackage={activeMatch.rulePackage}
-                  logs={logs}
-                  traces={traces}
-                  matchLog={sessionRef.current?.getMatchLog()}
-                />
-              ) : (
-                <div className="h-full flex items-center justify-center bg-zinc-100 rounded border border-zinc-300 text-xs font-mono text-zinc-500">
-                  進行中の対戦はありません (Active Match なし)
-                </div>
+          {/* 対戦ログ (Game Log) / デバッグ (DebugPanel) タブ切替コンテナ */}
+          <div
+            data-testid="desktop-log-debug-container"
+            className="flex-1 min-h-[150px] overflow-hidden flex flex-col rounded border border-zinc-200 bg-white shadow-sm"
+          >
+            <div
+              data-testid="desktop-log-debug-tabs"
+              className="flex items-center justify-between px-2 py-1 bg-zinc-100 border-b border-zinc-200 font-mono text-[10px] shrink-0"
+            >
+              <div className="flex items-center gap-1">
+                <button
+                  type="button"
+                  data-testid="desktop-tab-log"
+                  onClick={() => setRightPaneTab("log")}
+                  className={`px-2 py-0.5 rounded font-bold transition cursor-pointer ${
+                    rightPaneTab === "log" || !showDebug
+                      ? "bg-zinc-950 text-white shadow-sm"
+                      : "bg-white text-zinc-600 hover:text-zinc-950 border border-zinc-300"
+                  }`}
+                >
+                  {`📜 対戦ログ (${logs.length})`}
+                </button>
+                <button
+                  type="button"
+                  data-testid="desktop-tab-debug"
+                  onClick={() => {
+                    if (!showDebug) setShowDebug(true);
+                    setRightPaneTab("debug");
+                  }}
+                  className={`px-2 py-0.5 rounded font-bold transition cursor-pointer ${
+                    showDebug && rightPaneTab === "debug"
+                      ? "bg-zinc-950 text-white shadow-sm"
+                      : "bg-white text-zinc-600 hover:text-zinc-950 border border-zinc-300"
+                  }`}
+                >
+                  🛠️ デバッグ (Debug)
+                </button>
+              </div>
+              {showDebug && (
+                <span className="text-[9px] text-zinc-500 font-bold">
+                  Debug Mode ON
+                </span>
               )}
             </div>
-          )}
+
+            <div className="flex-1 min-h-0 overflow-hidden flex flex-col">
+              {showDebug && rightPaneTab === "debug" ? (
+                activeMatch ? (
+                  <DebugPanel
+                    state={gameState}
+                    currentDecisionRequest={currentStep?.type === "WAITING_FOR_DECISION" ? currentStep.request : undefined}
+                    rulePackage={activeMatch.rulePackage}
+                    logs={logs}
+                    traces={traces}
+                    matchLog={sessionRef.current?.getMatchLog()}
+                  />
+                ) : (
+                  <div className="h-full flex items-center justify-center bg-zinc-100 text-xs font-mono text-zinc-500">
+                    進行中の対戦はありません (Active Match なし)
+                  </div>
+                )
+              ) : (
+                <GameLog logs={logs} />
+              )}
+            </div>
+          </div>
         </div>
       </main>
       )}
@@ -2311,7 +2378,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         isDiagnosticAvailable={isDiagnosticAvailable}
         isScenarioMatch={Boolean(activeMatch?.isScenario)}
         showDebug={showDebug}
-        onToggleDebug={setShowDebug}
+        onToggleDebug={handleToggleDebug}
         onOpenFeedback={
           activeMatch && activeMatchMode === "humanVsAi"
             ? () => setIsFeedbackModalOpen(true)

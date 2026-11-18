@@ -39,9 +39,15 @@ export const StagePanel: React.FC<StagePanelProps> = ({
   return (
     <div
       data-testid="stage-panel"
-      className="flex flex-col p-1.5 lg:p-2 rounded border border-zinc-200 bg-white shadow-sm font-sans"
+      className={`flex flex-col p-1.5 lg:p-2 rounded border border-zinc-200 bg-white shadow-sm font-sans ${
+        requests.length === 0 ? "lg:flex-row lg:items-center lg:justify-between lg:py-1.5" : ""
+      }`}
     >
-      <div className="flex items-center justify-between border-b pb-1 lg:pb-1.5 mb-1 border-zinc-200">
+      <div
+        className={`flex items-center justify-between border-b pb-1 lg:pb-1.5 mb-1 border-zinc-200 ${
+          requests.length === 0 ? "lg:border-b-0 lg:pb-0 lg:mb-0" : ""
+        }`}
+      >
         <div className="flex items-center gap-1.5">
           <span className="text-xs font-mono font-black text-zinc-950 tracking-wider">
             STAGE (LIFO)

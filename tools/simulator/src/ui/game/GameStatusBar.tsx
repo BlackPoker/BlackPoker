@@ -97,19 +97,18 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
             </span>
           </div>
         </div>
+      </div>
 
-        <div className="text-[11px] text-zinc-500 font-mono italic">
+      {/* 最新イベントメッセージ + バージョン表示 */}
+      <div className="flex items-center justify-between gap-1.5 px-2 py-0.5 rounded bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-800 font-mono">
+        <div className="flex items-center gap-1.5 min-w-0">
+          <span className="text-[10px] font-bold text-zinc-600 border border-zinc-300 px-1 py-0.2 rounded bg-zinc-100 shrink-0">EVENT</span>
+          <span className="font-sans truncate text-zinc-900">{latestEventMessage || "待機中"}</span>
+        </div>
+        <div className="text-[10px] text-zinc-500 font-mono italic shrink-0 hidden sm:block">
           {stateVersion !== undefined ? `v${stateVersion} | ` : ""}Action Request or PASS
         </div>
       </div>
-
-      {/* 最新イベントメッセージ */}
-      {latestEventMessage && (
-        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-800 font-mono">
-          <span className="text-[10px] font-bold text-zinc-600 border border-zinc-300 px-1 py-0.2 rounded bg-zinc-100">EVENT</span>
-          <span className="font-sans break-all text-zinc-900">{latestEventMessage}</span>
-        </div>
-      )}
     </div>
   );
 

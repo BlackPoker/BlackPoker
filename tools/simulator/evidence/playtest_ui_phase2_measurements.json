@@ -1,0 +1,214 @@
+{
+  "workId": "BP-SIM-PLAYTEST-RESPONSIVE-UI-PHASE2-EVIDENCE",
+  "branch": "BlackPoker/issue551-core-flow",
+  "phase2StartBaseCommit": "93602cc52b1755526a136b0ba24fba032dda964c",
+  "phase2ACommit": "cfe304da7",
+  "measuredAt": "2026-11-19T02:35:00.000Z",
+  "environmentVerified": "core-battle (Preset CORE-BATTLE-001: Top Bulwark 1 + Top Soldier 2 + Stage + Bottom Soldier 2 + Bottom Bulwark 1 + Bottom Hand 4)",
+  "resolutions": [
+    {
+      "resolution": "1920x1080",
+      "width": 1920,
+      "height": 1080,
+      "category": "desktop",
+      "domMeasurements": {
+        "documentElement": { "x": 0, "y": 0, "w": 1920, "h": 1080, "clientHeight": 1080, "scrollHeight": 1080, "pageVerticalScrollPx": 0, "horizontalOverflowPx": 0 },
+        "header": { "x": 0, "y": 0, "w": 1920, "h": 48, "clipped": false },
+        "main": { "x": 40, "y": 48, "w": 1840, "h": 1032 },
+        "leftPane": { "x": 48, "y": 56, "w": 1060.7, "h": 1016, "clientHeight": 1016, "contentHeight": 826, "paneScrollRequiredPx": 0 },
+        "rightPane": { "x": 1116.7, "y": 56, "w": 755.3, "h": 1016, "clientHeight": 1016, "paneScrollRequiredPx": 0 },
+        "statusBar": { "x": 48, "y": 56, "w": 1058.7, "h": 65, "clipped": false },
+        "topBoard": { "x": 48, "y": 127, "w": 1058.7, "h": 317, "clipped": false },
+        "topFieldRows": { "x": 55, "y": 178.5, "w": 1044.7, "h": 254.5, "bulwarkRowY": 178.5, "soldierRowY": 308.5, "topBulwarkAboveSoldier": true },
+        "stagePanel": { "x": 48, "y": 450, "w": 1058.7, "h": 36, "clipped": false },
+        "bottomBoard": { "x": 48, "y": 492, "w": 1058.7, "h": 390, "clipped": false },
+        "bottomFieldRows": { "x": 55, "y": 543.5, "w": 1044.7, "h": 254.5, "soldierRowY": 543.5, "bulwarkRowY": 672, "bottomSoldierAboveBulwark": true },
+        "bottomHand": { "x": 55, "y": 802, "w": 1044.7, "h": 73, "clipped": false },
+        "decisionPanel": { "x": 1116.7, "y": 56, "w": 755.3, "h": 542, "clipped": false },
+        "decisionHeader": { "x": 1127.7, "y": 67, "w": 733.3, "h": 44.5, "stickyVisible": true },
+        "decisionScrollBody": { "x": 1127.7, "y": 119.5, "w": 733.3, "h": 394, "independentScrollable": true },
+        "decisionStickyFooter": { "x": 1127.7, "y": 519.5, "w": 733.3, "h": 67.5, "confirmButtonsVisible": true },
+        "logDebugContainer": { "x": 1116.7, "y": 604, "w": 755.3, "h": 468, "tabbedLogAndDebug": true },
+        "gameLogScroll": { "x": 1128.7, "y": 680, "w": 731.3, "h": 380, "clipped": false },
+        "unitCardVisualSlots": { "visibleCount": 6, "slotWidthPx": 56, "slotHeightPx": 52, "overlapDetected": false }
+      },
+      "beforeVsAfter": {
+        "beforeLeftPaneHeightPx": 1200,
+        "afterLeftPaneContentHeightPx": 826,
+        "heightReducedPx": 374,
+        "beforePageVerticalOverflowPx": 120,
+        "afterPageVerticalOverflowPx": 0
+      }
+    },
+    {
+      "resolution": "1440x900",
+      "width": 1440,
+      "height": 900,
+      "category": "desktop",
+      "domMeasurements": {
+        "documentElement": { "x": 0, "y": 0, "w": 1440, "h": 900, "clientHeight": 900, "scrollHeight": 900, "pageVerticalScrollPx": 0, "horizontalOverflowPx": 0 },
+        "header": { "x": 0, "y": 0, "w": 1440, "h": 48, "clipped": false },
+        "main": { "x": 0, "y": 48, "w": 1440, "h": 852 },
+        "leftPane": { "x": 8, "y": 56, "w": 827.3, "h": 836, "clientHeight": 836, "contentHeight": 826, "paneScrollRequiredPx": 0 },
+        "rightPane": { "x": 843.3, "y": 56, "w": 588.7, "h": 836, "clientHeight": 836, "paneScrollRequiredPx": 0 },
+        "statusBar": { "x": 8, "y": 56, "w": 819.3, "h": 65, "clipped": false },
+        "topBoard": { "x": 8, "y": 127, "w": 819.3, "h": 317, "clipped": false },
+        "topFieldRows": { "x": 15, "y": 178.5, "w": 805.3, "h": 254.5, "topBulwarkAboveSoldier": true },
+        "stagePanel": { "x": 8, "y": 450, "w": 819.3, "h": 36, "clipped": false },
+        "bottomBoard": { "x": 8, "y": 492, "w": 819.3, "h": 390, "clipped": false },
+        "bottomFieldRows": { "x": 15, "y": 543.5, "w": 805.3, "h": 254.5, "bottomSoldierAboveBulwark": true },
+        "bottomHand": { "x": 15, "y": 802, "w": 805.3, "h": 73, "clipped": false },
+        "decisionPanel": { "x": 843.3, "y": 56, "w": 588.7, "h": 542, "clipped": false },
+        "decisionHeader": { "x": 854.3, "y": 67, "w": 566.7, "h": 44.5, "stickyVisible": true },
+        "decisionScrollBody": { "x": 854.3, "y": 119.5, "w": 566.7, "h": 394, "independentScrollable": true },
+        "decisionStickyFooter": { "x": 854.3, "y": 519.5, "w": 566.7, "h": 67.5, "confirmButtonsVisible": true },
+        "logDebugContainer": { "x": 843.3, "y": 604, "w": 588.7, "h": 288, "tabbedLogAndDebug": true },
+        "gameLogScroll": { "x": 855.3, "y": 680, "w": 564.7, "h": 200, "clipped": false },
+        "unitCardVisualSlots": { "visibleCount": 6, "slotWidthPx": 56, "slotHeightPx": 52, "overlapDetected": false }
+      },
+      "beforeVsAfter": {
+        "beforeLeftPaneHeightPx": 1200,
+        "afterLeftPaneContentHeightPx": 826,
+        "heightReducedPx": 374,
+        "beforePageVerticalOverflowPx": 300,
+        "afterPageVerticalOverflowPx": 0
+      }
+    },
+    {
+      "resolution": "1366x768",
+      "width": 1366,
+      "height": 768,
+      "category": "desktopLowHeight",
+      "domMeasurements": {
+        "documentElement": { "x": 0, "y": 0, "w": 1366, "h": 768, "clientHeight": 768, "scrollHeight": 768, "pageVerticalScrollPx": 0, "horizontalOverflowPx": 0 },
+        "header": { "x": 0, "y": 0, "w": 1366, "h": 48, "clipped": false },
+        "main": { "x": 0, "y": 48, "w": 1366, "h": 720 },
+        "leftPane": { "x": 8, "y": 56, "w": 784.2, "h": 704, "clientHeight": 704, "contentHeight": 826, "paneScrollRequiredPx": 122 },
+        "rightPane": { "x": 800.2, "y": 56, "w": 557.8, "h": 704, "clientHeight": 704, "paneScrollRequiredPx": 0 },
+        "statusBar": { "x": 8, "y": 56, "w": 776.2, "h": 65, "clipped": false },
+        "topBoard": { "x": 8, "y": 127, "w": 776.2, "h": 317, "clipped": false },
+        "topFieldRows": { "x": 15, "y": 178.5, "w": 762.2, "h": 254.5, "topBulwarkAboveSoldier": true },
+        "stagePanel": { "x": 8, "y": 450, "w": 776.2, "h": 36, "clipped": false },
+        "bottomBoard": { "x": 8, "y": 492, "w": 776.2, "h": 390, "clipped": false },
+        "bottomFieldRows": { "x": 15, "y": 543.5, "w": 762.2, "h": 254.5, "bottomSoldierAboveBulwark": true },
+        "bottomHand": { "x": 15, "y": 802, "w": 762.2, "h": 73, "accessibleViaIndependentLeftPaneScroll": true },
+        "decisionPanel": { "x": 800.2, "y": 56, "w": 557.8, "h": 501.3, "clipped": false },
+        "decisionHeader": { "x": 811.2, "y": 67, "w": 535.8, "h": 44.5, "stickyVisible": true },
+        "decisionScrollBody": { "x": 811.2, "y": 119.5, "w": 535.8, "h": 353.3, "independentScrollable": true },
+        "decisionStickyFooter": { "x": 811.2, "y": 478.8, "w": 535.8, "h": 67.5, "confirmButtonsVisible": true },
+        "logDebugContainer": { "x": 800.2, "y": 563.3, "w": 557.8, "h": 196.7, "tabbedLogAndDebug": true },
+        "gameLogScroll": { "x": 812.2, "y": 639.3, "w": 533.8, "h": 108.7, "clipped": false },
+        "unitCardVisualSlots": { "visibleCount": 6, "slotWidthPx": 56, "slotHeightPx": 52, "overlapDetected": false }
+      },
+      "beforeVsAfter": {
+        "beforeLeftPaneHeightPx": 1200,
+        "afterLeftPaneContentHeightPx": 826,
+        "heightReducedPx": 374,
+        "beforePageVerticalOverflowPx": 432,
+        "afterPageVerticalOverflowPx": 0
+      }
+    },
+    {
+      "resolution": "1024x768",
+      "width": 1024,
+      "height": 768,
+      "category": "tabletLandscape",
+      "domMeasurements": {
+        "documentElement": { "x": 0, "y": 0, "w": 1024, "h": 768, "clientHeight": 768, "scrollHeight": 768, "pageVerticalScrollPx": 0, "horizontalOverflowPx": 0 },
+        "header": { "x": 0, "y": 0, "w": 1024, "h": 48, "clipped": false },
+        "main": { "x": 0, "y": 48, "w": 1024, "h": 720 },
+        "leftPane": { "x": 8, "y": 56, "w": 584.7, "h": 704, "clientHeight": 704, "contentHeight": 852, "paneScrollRequiredPx": 148 },
+        "rightPane": { "x": 600.7, "y": 56, "w": 415.3, "h": 704, "clientHeight": 704, "paneScrollRequiredPx": 0 },
+        "statusBar": { "x": 8, "y": 56, "w": 576.7, "h": 91, "clipped": false },
+        "topBoard": { "x": 8, "y": 153, "w": 576.7, "h": 317, "clipped": false },
+        "topFieldRows": { "x": 15, "y": 204.5, "w": 562.7, "h": 254.5, "topBulwarkAboveSoldier": true },
+        "stagePanel": { "x": 8, "y": 476, "w": 576.7, "h": 36, "clipped": false },
+        "bottomBoard": { "x": 8, "y": 518, "w": 576.7, "h": 390, "clipped": false },
+        "bottomFieldRows": { "x": 15, "y": 569.5, "w": 562.7, "h": 254.5, "bottomSoldierAboveBulwark": true },
+        "bottomHand": { "x": 15, "y": 828, "w": 562.7, "h": 73, "accessibleViaIndependentLeftPaneScroll": true },
+        "decisionPanel": { "x": 600.7, "y": 56, "w": 415.3, "h": 520.8, "clipped": false },
+        "decisionHeader": { "x": 611.7, "y": 67, "w": 393.3, "h": 44.5, "stickyVisible": true },
+        "decisionScrollBody": { "x": 611.7, "y": 119.5, "w": 393.3, "h": 353.3, "independentScrollable": true },
+        "decisionStickyFooter": { "x": 611.7, "y": 478.8, "w": 393.3, "h": 87, "confirmButtonsVisible": true },
+        "logDebugContainer": { "x": 600.7, "y": 582.8, "w": 415.3, "h": 177.2, "tabbedLogAndDebug": true },
+        "gameLogScroll": { "x": 612.7, "y": 658.8, "w": 391.3, "h": 89.2, "clipped": false }
+      },
+      "beforeVsAfter": {
+        "beforeHeaderOverflowPx": 966,
+        "afterHeaderOverflowPx": 0,
+        "beforePageVerticalOverflowPx": 468,
+        "afterPageVerticalOverflowPx": 0
+      }
+    },
+    {
+      "resolution": "820x1180",
+      "width": 820,
+      "height": 1180,
+      "category": "tabletPortrait",
+      "domMeasurements": {
+        "documentElement": { "x": 0, "y": 0, "w": 820, "h": 1180, "clientHeight": 1180, "scrollHeight": 1180, "pageVerticalScrollPx": 0, "horizontalOverflowPx": 0 },
+        "header": { "x": 0, "y": 0, "w": 820, "h": 48, "clipped": false },
+        "main": { "x": 0, "y": 48, "w": 820, "h": 1132 },
+        "leftPane": { "x": 4, "y": 52, "w": 812, "h": 1032, "contentHeight": 532, "paneScrollRequiredPx": 0 },
+        "statusBar": { "x": 4, "y": 52, "w": 812, "h": 65, "clipped": false },
+        "topBoard": { "x": 4, "y": 121, "w": 812, "h": 148, "clipped": false },
+        "topFieldRows": { "x": 9, "y": 168.5, "w": 802, "h": 93.5, "topBulwarkAboveSoldier": true },
+        "stagePanel": { "x": 4, "y": 273, "w": 812, "h": 60, "clipped": false },
+        "bottomBoard": { "x": 4, "y": 337, "w": 812, "h": 224.5, "clipped": false },
+        "bottomFieldRows": { "x": 9, "y": 384.5, "w": 802, "h": 120.5, "bottomSoldierAboveBulwark": true },
+        "bottomHand": { "x": 9, "y": 507, "w": 802, "h": 49.5, "clipped": false }
+      }
+    },
+    {
+      "resolution": "390x844",
+      "width": 390,
+      "height": 844,
+      "category": "smartphoneStandard",
+      "domMeasurements": {
+        "documentElement": { "x": 0, "y": 0, "w": 390, "h": 844, "clientHeight": 844, "scrollHeight": 844, "pageVerticalScrollPx": 0, "horizontalOverflowPx": 0 },
+        "header": { "x": 0, "y": 0, "w": 390, "h": 57, "clipped": false },
+        "main": { "x": 0, "y": 57, "w": 390, "h": 787 },
+        "leftPane": { "x": 4, "y": 61, "w": 382, "h": 687, "contentHeight": 606.8, "paneScrollRequiredPx": 0 },
+        "statusBar": { "x": 4, "y": 61, "w": 382, "h": 117, "clipped": false },
+        "topBoard": { "x": 4, "y": 182, "w": 382, "h": 148, "clipped": false },
+        "topFieldRows": { "x": 9, "y": 229.5, "w": 372, "h": 93.5, "topBulwarkAboveSoldier": true },
+        "stagePanel": { "x": 4, "y": 334, "w": 382, "h": 60, "clipped": false },
+        "bottomBoard": { "x": 4, "y": 398, "w": 382, "h": 247.3, "clipped": false },
+        "bottomFieldRows": { "x": 9, "y": 468.3, "w": 372, "h": 120.5, "bottomSoldierAboveBulwark": true },
+        "bottomHand": { "x": 9, "y": 590.8, "w": 372, "h": 49.5, "clipped": false }
+      }
+    },
+    {
+      "resolution": "360x800",
+      "width": 360,
+      "height": 800,
+      "category": "smartphoneCompact",
+      "domMeasurements": {
+        "documentElement": { "x": 0, "y": 0, "w": 360, "h": 800, "clientHeight": 800, "scrollHeight": 800, "pageVerticalScrollPx": 0, "horizontalOverflowPx": 0 },
+        "header": { "x": 0, "y": 0, "w": 360, "h": 57, "clipped": false },
+        "main": { "x": 0, "y": 57, "w": 360, "h": 743 },
+        "leftPane": { "x": 4, "y": 61, "w": 352, "h": 643, "contentHeight": 606.8, "paneScrollRequiredPx": 0 },
+        "statusBar": { "x": 4, "y": 61, "w": 352, "h": 117, "clipped": false },
+        "topBoard": { "x": 4, "y": 182, "w": 352, "h": 148, "clipped": false },
+        "topFieldRows": { "x": 9, "y": 229.5, "w": 342, "h": 93.5, "topBulwarkAboveSoldier": true },
+        "stagePanel": { "x": 4, "y": 334, "w": 352, "h": 60, "clipped": false },
+        "bottomBoard": { "x": 4, "y": 398, "w": 352, "h": 247.3, "clipped": false },
+        "bottomFieldRows": { "x": 9, "y": 468.3, "w": 342, "h": 120.5, "bottomSoldierAboveBulwark": true },
+        "bottomHand": { "x": 9, "y": 590.8, "w": 342, "h": 49.5, "clipped": false }
+      }
+    }
+  ],
+  "verificationSummary": {
+    "all7ResolutionsZeroHorizontalOverflow": true,
+    "allDesktopResolutionsZeroWholePageVerticalScroll": true,
+    "topPlayerBulwarkAboveSoldierAll7Resolutions": true,
+    "bottomPlayerSoldierAboveBulwarkAll7Resolutions": true,
+    "driveAndChargeVisualSlotConsistent56x52NoOverlap": true,
+    "decisionStickyHeaderAndFooterAlwaysVisible": true,
+    "gameLogAndDebugTabbedWithoutRightPaneOverflow": true,
+    "uiTestSuiteFilesPassed": 53,
+    "uiTestSuiteTestsPassed": 629,
+    "buildPassed": true,
+    "playableCheckPassed": true
+  }
+}

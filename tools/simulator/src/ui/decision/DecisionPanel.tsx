@@ -843,8 +843,14 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       : "選択肢（盤面をタップまたは下記から選択）:";
 
     return (
-      <div className="rounded border border-zinc-200 bg-white p-2 sm:p-3 text-zinc-950 shadow-sm font-sans">
-        <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
+      <div
+        data-testid="decision-panel"
+        className="flex flex-col max-h-full min-h-0 rounded border border-zinc-200 bg-white p-2 sm:p-2.5 text-zinc-950 shadow-sm font-sans"
+      >
+        <div
+          data-testid="decision-panel-header"
+          className="flex items-center justify-between border-b border-zinc-200 pb-1.5 mb-2 shrink-0"
+        >
           <div>
             <span className="inline-block rounded bg-zinc-950 text-white px-1.5 py-0.2 text-[9px] font-mono font-black uppercase tracking-wider">
               {isZoneTopSelection ? "ZONE TOP SELECTION" : "EFFECT SELECTION"}
@@ -868,97 +874,112 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           )}
         </div>
 
+        <div
+          data-testid="decision-panel-scroll-body"
+          className="flex-1 min-h-0 overflow-y-auto lg:max-h-[46vh] pr-1"
+        >
+          {isBlockAssignment ? (
+            <BlockAssignmentEditor
+              request={request}
+              onSelectPattern={(patternRef) => {
+                if (isSubmittedRef.current) return;
+                isSubmittedRef.current = true;
+                onSubmit({
+                  decisionId: request.decisionId,
+                  stateVersion: request.stateVersion,
+                  selectedPatternRef: patternRef,
+                });
+              }}
+              unitNumberMap={unitNumberMap}
+              onExactPatternRefChange={setSelectedBlockPatternRef}
+            />
+          ) : (
+            <div className="space-y-2">
+              <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
+                {guideLabel}
+              </label>
 
-        {isBlockAssignment ? (
-          <BlockAssignmentEditor
-            request={request}
-            onSelectPattern={(patternRef) => {
-              if (isSubmittedRef.current) return;
-              isSubmittedRef.current = true;
-              onSubmit({
-                decisionId: request.decisionId,
-                stateVersion: request.stateVersion,
-                selectedPatternRef: patternRef,
-              });
-            }}
-            unitNumberMap={unitNumberMap}
-            onExactPatternRefChange={setSelectedBlockPatternRef}
-          />
-        ) : (
-          <div className="space-y-2.5">
-            <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
-              {guideLabel}
-            </label>
-
-            <div className="grid grid-cols-1 gap-1.5 max-h-60 overflow-y-auto pr-1">
-              {humanReadableEffectPatterns.map((hp, idx) => {
-                const isSelected = selectedEffectPatternRef === idx;
-                return (
-                  <button
-                    key={idx}
-                    onClick={() => setSelectedEffectPatternRef(idx)}
-                    className={`rounded border p-2.5 text-left transition flex items-center justify-between ${
-                      isSelected
-                        ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
-                        : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
-                    }`}
-                  >
-                    <div className="flex items-center gap-2 font-mono">
-                      <span
-                        className={`w-4 h-4 rounded-full border flex items-center justify-center text-[9px] ${
-                          isSelected
-                            ? "bg-white border-zinc-900 text-zinc-950 font-black"
-                            : "border-zinc-400 text-transparent"
-                        }`}
-                      >
-                        ✓
-                      </span>
-                      <span className="font-bold text-xs leading-snug">
-                        <RichCardText text={hp.label} />
-                      </span>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {selectedEffectPatternRef !== null && (
-              <div className="pt-2.5 border-t border-zinc-200 mt-2 flex items-center justify-between gap-2">
-                <div className="text-xs text-zinc-600 font-mono truncate">
-                  選択中:{" "}
-                  <span className="font-bold text-zinc-950">
-                    <RichCardText text={humanReadableEffectPatterns[selectedEffectPatternRef]?.label || ""} />
-                  </span>
-                </div>
-                <button
-                  onClick={handleEffectSubmit}
-                  className="py-2 px-4 rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold shadow transition text-xs shrink-0 font-mono"
-                >
-                  決定して解決する
-                </button>
+              <div className="grid grid-cols-1 gap-1.5">
+                {humanReadableEffectPatterns.map((hp, idx) => {
+                  const isSelected = selectedEffectPatternRef === idx;
+                  return (
+                    <button
+                      key={idx}
+                      onClick={() => setSelectedEffectPatternRef(idx)}
+                      className={`rounded border p-2 text-left transition flex items-center justify-between ${
+                        isSelected
+                          ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
+                          : "border-zinc-300 bg-white text-zinc-900 hover:border-zinc-500 hover:bg-zinc-50"
+                      }`}
+                    >
+                      <div className="flex items-center gap-2 font-mono">
+                        <span
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center text-[9px] ${
+                            isSelected
+                              ? "bg-white border-zinc-900 text-zinc-950 font-black"
+                              : "border-zinc-400 text-transparent"
+                          }`}
+                        >
+                          ✓
+                        </span>
+                        <span className="font-bold text-xs leading-snug">
+                          <RichCardText text={hp.label} />
+                        </span>
+                      </div>
+                    </button>
+                  );
+                })}
               </div>
-            )}
-          </div>
-        )}
+            </div>
+          )}
+        </div>
 
-        {/* ショートカット操作ガイド */}
-        <div className="pt-2 border-t border-zinc-200 mt-2 text-[9px] text-zinc-500 font-mono flex items-center justify-between">
-          <span className="flex items-center gap-1.5 flex-wrap">
-            <span>SHORTCUT:</span>
-            <span>
-              <strong className="text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">Enter</strong> = {isBlockAssignment ? "この割当てで決定" : "決定して解決する"}
+        {/* 常時固定フッター: 決定ボタン + ショートカット操作ガイド */}
+        <div
+          data-testid="decision-panel-sticky-footer"
+          className="shrink-0 bg-white pt-1.5 mt-1.5 border-t border-zinc-200"
+        >
+          {!isBlockAssignment && selectedEffectPatternRef !== null && (
+            <div className="pb-1.5 mb-1.5 border-b border-zinc-200 flex items-center justify-between gap-2">
+              <div className="text-xs text-zinc-600 font-mono truncate">
+                選択中:{" "}
+                <span className="font-bold text-zinc-950">
+                  <RichCardText text={humanReadableEffectPatterns[selectedEffectPatternRef]?.label || ""} />
+                </span>
+              </div>
+              <button
+                onClick={handleEffectSubmit}
+                className="py-1.5 px-4 rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold shadow transition text-xs shrink-0 font-mono"
+              >
+                決定して解決する
+              </button>
+            </div>
+          )}
+
+          <div className="text-[9px] text-zinc-500 font-mono flex items-center justify-between">
+            <span className="flex items-center gap-1.5 flex-wrap">
+              <span>SHORTCUT:</span>
+              <span>
+                <strong className="text-zinc-950 bg-zinc-100 px-1 py-0.2 rounded border border-zinc-300">Enter</strong> = {isBlockAssignment ? "この割当てで決定" : "決定して解決する"}
+              </span>
             </span>
-          </span>
-          <span className="text-zinc-400 shrink-0">BlackPoker Core Battle</span>
+            <span className="text-zinc-400 shrink-0">BlackPoker Core Battle</span>
+          </div>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="rounded border border-zinc-200 bg-white p-2 sm:p-3 text-zinc-950 shadow-sm font-sans">
-      {/* ヘッダー */}
-      <div className="flex items-center justify-between border-b border-zinc-200 pb-2 mb-2">
+    <div
+      data-testid="decision-panel"
+      className="flex flex-col max-h-full min-h-0 rounded border border-zinc-200 bg-white p-2 sm:p-2.5 text-zinc-950 shadow-sm font-sans"
+    >
+      {/* ヘッダー (常時上部固定: 1つ戻る / PASS [P]) */}
+      <div
+        data-testid="decision-panel-header"
+        className="flex items-center justify-between border-b border-zinc-200 pb-1.5 mb-2 shrink-0"
+      >
         <div>
           <div className="flex items-center gap-1.5 font-mono">
             <span className="inline-block rounded bg-zinc-100 border border-zinc-300 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider text-zinc-700">
@@ -999,30 +1020,32 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         </div>
       </div>
 
-
-      {/* 選択済みサマリーバナー */}
-      {selectedAction && (
-        <div className="flex flex-wrap items-center gap-2 p-1.5 bg-zinc-50 rounded border border-zinc-200 text-[11px] mb-2.5 font-mono text-zinc-800">
-          <span className="font-bold text-zinc-950">Action: {selectedAction.actionName || selectedAction.actionId}</span>
-          {selectedKey && (
-            <span className="text-zinc-600">
-              | Key: <RichCardText text={selectedKey.displayCodes.join("+")} />
-            </span>
-          )}
-          {selectedCost && (
-            <span className="text-zinc-600">
-              | Cost: <RichCardText text={selectedCost.summary} />
-            </span>
-          )}
-          {selectedTarget && (
-            <span className="text-zinc-600">
-              | Target: <RichCardText text={selectedTarget.displayName} />
-            </span>
-          )}
-        </div>
-      )}
-
-      <div className="space-y-2.5">
+      {/* 判断選択スクロール領域 (1.アクション / 2.キーカード / 3.コスト / 4.対象) */}
+      <div
+        data-testid="decision-panel-scroll-body"
+        className="flex-1 min-h-0 overflow-y-auto lg:max-h-[46vh] pr-1 space-y-2"
+      >
+        {/* 選択済みサマリーバナー */}
+        {selectedAction && (
+          <div className="flex flex-wrap items-center gap-2 p-1.5 bg-zinc-50 rounded border border-zinc-200 text-[11px] font-mono text-zinc-800">
+            <span className="font-bold text-zinc-950">Action: {selectedAction.actionName || selectedAction.actionId}</span>
+            {selectedKey && (
+              <span className="text-zinc-600">
+                | Key: <RichCardText text={selectedKey.displayCodes.join("+")} />
+              </span>
+            )}
+            {selectedCost && (
+              <span className="text-zinc-600">
+                | Cost: <RichCardText text={selectedCost.summary} />
+              </span>
+            )}
+            {selectedTarget && (
+              <span className="text-zinc-600">
+                | Target: <RichCardText text={selectedTarget.displayName} />
+              </span>
+            )}
+          </div>
+        )}
         {/* ステップ1: アクション選択 */}
         <div>
           <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1">
@@ -1293,10 +1316,15 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             </div>
           </div>
         )}
+      </div>
 
-        {/* 決定ボタン (リクエスト / リクエスト＆PASS) */}
+      {/* 常時固定フッター: 決定ボタン (リクエスト / リクエスト＆PASS) + ショートカット操作ガイド */}
+      <div
+        data-testid="decision-panel-sticky-footer"
+        className="shrink-0 bg-white pt-1.5 mt-1.5 border-t border-zinc-200"
+      >
         {finalMatchedPatternIndex !== null && finalMatchedPatternIndex !== -1 && (
-          <div className="pt-2.5 border-t border-zinc-200 flex flex-col sm:flex-row gap-1.5 mt-2">
+          <div className="pb-1.5 mb-1.5 border-b border-zinc-200 flex flex-col sm:flex-row gap-1.5">
             {selectedAction?.speed === "immediate" ? (
               <button
                 onClick={() => handleActionSubmit(false)}
@@ -1324,7 +1352,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         )}
 
         {/* ショートカット操作ガイド */}
-        <div className="pt-1.5 border-t border-zinc-200 text-[9px] text-zinc-500 font-mono flex items-center justify-between">
+        <div className="text-[9px] text-zinc-500 font-mono flex items-center justify-between">
           <span className="flex items-center gap-1.5 flex-wrap">
             <span>SHORTCUT:</span>
             <span>
