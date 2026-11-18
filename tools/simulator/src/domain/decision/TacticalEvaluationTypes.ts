@@ -101,6 +101,22 @@ export interface TacticalCounterOutcome {
 }
 
 /**
+ * プレイヤーが能動的に発動するアクション（攻撃魔法等）に対する戦術評価結果 (Work 5-7B)
+ */
+export interface TacticalProactiveActionOutcome {
+  readonly actionId: string;
+  readonly isGuardedOut: boolean;
+  readonly guardStatus: TacticalConditionStatus;
+  readonly directDamageToOpponent: TacticalValueRange;
+  readonly directDamageToSelf: TacticalValueRange;
+  readonly destroyedOppUnits: readonly UnitView[];
+  readonly movedToLifeOppUnits: readonly UnitView[];
+  readonly isLethalToOpponent: boolean;
+  readonly tacticalAdjustment: number;
+  readonly reasons: readonly string[];
+}
+
+/**
  * DecisionPolicy が戦術判断に使用する抽象評価器インターフェース
  */
 export interface TacticalEvaluator {
@@ -122,4 +138,13 @@ export interface TacticalEvaluator {
     request: Readonly<DecisionRequest>,
     targetReqOutcome: TacticalRequestOutcome
   ): TacticalCounterOutcome;
+
+  /**
+   * プレイヤーが能動的に選択するアクション（攻撃魔法等）を評価 (Work 5-7B)
+   */
+  evaluateProactiveAction?(
+    actionId: string,
+    pattern: Readonly<LegalPattern>,
+    request: Readonly<DecisionRequest>
+  ): TacticalProactiveActionOutcome;
 }

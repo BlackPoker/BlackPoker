@@ -38,6 +38,7 @@ import {
   TacticalEvaluator,
   TacticalRequestOutcome,
   TacticalCounterOutcome,
+  TacticalProactiveActionOutcome,
   TacticalValueRange,
   TacticalConditionStatus,
 } from "../../domain/decision/TacticalEvaluationTypes.js";
@@ -689,6 +690,234 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
   }
 
   /**
+   * プレイヤーが能動的に選択するアクション（攻撃魔法等）を評価 (Work 5-7B)
+   */
+  public evaluateProactiveAction(
+    actionId: string,
+    pattern: Readonly<LegalPattern>,
+    request: Readonly<DecisionRequest>
+  ): TacticalProactiveActionOutcome {
+    const defaultZeroRange = createCertainRange(0);
+    const defaultFailOutcome: TacticalProactiveActionOutcome = {
+      actionId,
+      isGuardedOut: false,
+      guardStatus: "CERTAIN_SATISFIED",
+      directDamageToOpponent: defaultZeroRange,
+      directDamageToSelf: defaultZeroRange,
+      destroyedOppUnits: [],
+      movedToLifeOppUnits: [],
+      isLethalToOpponent: false,
+      tacticalAdjustment: 0,
+      reasons: [],
+    };
+
+    const actionDef = this.actionsMap.get(actionId);
+    if (!actionDef || !actionDef.effect || actionDef.effect.length === 0) {
+      return defaultFailOutcome;
+    }
+
+    const obs = request.observation;
+    const viewerKey = request.playerId;
+    const selfView = obs.players.find((p) => p.playerId === viewerKey);
+    const oppView = obs.players.find((p) => p.playerId !== viewerKey);
+
+    // 1. 対象ユニット・対象プレイヤーの特定
+    let targetUnit: UnitView | undefined;
+    let targetPlayerKey: string | undefined;
+
+    const allUnits = [
+      ...(selfView?.field ?? []),
+      ...(selfView?.trumps ?? []),
+      ...(oppView?.field ?? []),
+      ...(oppView?.trumps ?? []),
+    ];
+
+    if (pattern.targetSelectionRef !== undefined && request.catalog?.targetSelections) {
+      const targetSel = request.catalog.targetSelections[pattern.targetSelectionRef];
+      if (targetSel) {
+        if (targetSel.targetUnitId) {
+          targetUnit = allUnits.find((u) => u.unitId === targetSel.targetUnitId);
+        }
+        if (targetSel.targetPlayerKey) {
+          targetPlayerKey = targetSel.targetPlayerKey;
+        }
+      }
+    }
+
+    if (!targetUnit && pattern.effectSelectionRef !== undefined && request.catalog?.effectSelections) {
+      const effSel = request.catalog.effectSelections[pattern.effectSelectionRef];
+      if (effSel) {
+        if (effSel.targetSelection?.targetUnitId) {
+          targetUnit = allUnits.find((u) => u.unitId === effSel.targetSelection!.targetUnitId);
+        } else if (effSel.selectionType === "unit" && effSel.selectedValues?.[0]) {
+          const uId = effSel.selectedValues[0];
+          targetUnit = allUnits.find((u) => u.unitId === uId);
+        }
+      }
+    }
+
+    // 2. キーカードの特定
+    const keyCards: CardView[] = [];
+    if (pattern.keyCardSelectionRef !== undefined && request.catalog?.cardSelections) {
+      const cardSel = request.catalog.cardSelections[pattern.keyCardSelectionRef];
+      const cardIds = cardSel?.cardIds ?? [];
+      const selfHand = selfView?.handCards ?? [];
+
+      for (let i = 0; i < cardIds.length; i++) {
+        const id = cardIds[i];
+        const found = selfHand.find(
+          (c) => c.visibility === "KNOWN" && ((c as any).cardInstanceId === id || (c as any).cardId === id)
+        );
+        if (found) {
+          keyCards.push(found);
+        } else if (cardSel.displayCodes?.[i]) {
+          // フォールバック: 表示コードから KnownCardView を復元
+          const code = cardSel.displayCodes[i];
+          const suitChar = code[0]?.toLowerCase();
+          const rankStr = code.slice(1);
+          let suit = "spade";
+          if (suitChar === "s") suit = "spade";
+          else if (suitChar === "d") suit = "diamond";
+          else if (suitChar === "h") suit = "heart";
+          else if (suitChar === "c") suit = "club";
+          const val = rankToValue(rankStr);
+          keyCards.push({
+            visibility: "KNOWN",
+            cardInstanceId: id,
+            suit,
+            rank: rankStr,
+            value: val,
+            faceUp: true,
+            code,
+          });
+        }
+      }
+    }
+
+    // 3. コンテキストの構築
+    const context: TacticalExprContext = {
+      viewerPlayerId: viewerKey,
+      pattern,
+      catalog: request.catalog,
+      observation: obs,
+      selfView,
+      oppView,
+      targetUnit,
+      targetPlayerKey: targetPlayerKey ?? (targetUnit ? undefined : oppView?.playerId),
+      keyCards,
+    };
+
+    let directDamageToSelf = createCertainRange(0);
+    let directDamageToOpponent = createCertainRange(0);
+    const destroyedOppUnits: UnitView[] = [];
+    const movedToLifeOppUnits: UnitView[] = [];
+    let guardStatus: TacticalConditionStatus = "CERTAIN_SATISFIED";
+    let isGuardedOut = false;
+    const reasons: string[] = [];
+
+    // 4. DSL コマンド順次評価
+    for (const cmd of actionDef.effect) {
+      const outcome = this.evaluateEffectCommand(cmd, context);
+
+      if (outcome.guardStatus === "CERTAIN_UNSATISFIED") {
+        guardStatus = "CERTAIN_UNSATISFIED";
+        isGuardedOut = true;
+        reasons.push("Guard condition unsatisfied");
+        break;
+      }
+
+      if (outcome.guardStatus === "UNCERTAIN" && guardStatus !== "UNKNOWN") {
+        guardStatus = "UNCERTAIN";
+      } else if (outcome.guardStatus === "UNKNOWN") {
+        guardStatus = "UNKNOWN";
+      }
+
+      directDamageToSelf = this.addRanges(directDamageToSelf, outcome.damageToSelf);
+      directDamageToOpponent = this.addRanges(directDamageToOpponent, outcome.damageToOpponent);
+
+      if (outcome.destroyedUnit) {
+        const isSelf = (selfView?.field ?? []).some((u) => u.unitId === outcome.destroyedUnit?.unitId);
+        if (!isSelf && !destroyedOppUnits.some((u) => u.unitId === outcome.destroyedUnit?.unitId)) {
+          destroyedOppUnits.push(outcome.destroyedUnit);
+        }
+      }
+
+      if (outcome.movedToLifeUnit) {
+        const isSelf = (selfView?.field ?? []).some((u) => u.unitId === outcome.movedToLifeUnit?.unitId);
+        if (!isSelf && !movedToLifeOppUnits.some((u) => u.unitId === outcome.movedToLifeUnit?.unitId)) {
+          movedToLifeOppUnits.push(outcome.movedToLifeUnit);
+        }
+      }
+
+      if (outcome.reason) {
+        reasons.push(outcome.reason);
+      }
+    }
+
+    // 5. ガード条件確定不発の場合: 戦術加点は 0
+    if (isGuardedOut) {
+      return {
+        actionId,
+        isGuardedOut: true,
+        guardStatus: "CERTAIN_UNSATISFIED",
+        directDamageToOpponent: defaultZeroRange,
+        directDamageToSelf: defaultZeroRange,
+        destroyedOppUnits: [],
+        movedToLifeOppUnits: [],
+        isLethalToOpponent: false,
+        tacticalAdjustment: 0,
+        reasons,
+      };
+    }
+
+    // 6. 相手ライフと致死判定
+    let oppLife = 15;
+    if (typeof oppView?.lifeCount === "number") {
+      oppLife = oppView.lifeCount;
+    } else if (oppView?.lifeDisplay) {
+      const match = oppView.lifeDisplay.match(/\d+/);
+      if (match) oppLife = parseInt(match[0], 10);
+    }
+
+    const isLethalToOpponent = directDamageToOpponent.min >= oppLife && oppLife > 0;
+    let tacticalAdjustment = 0;
+
+    if (isLethalToOpponent) {
+      tacticalAdjustment += 2.5;
+      reasons.push(`Lethal damage to opponent (+2.5): dmg=${directDamageToOpponent.min} >= oppLife=${oppLife}`);
+    } else if (directDamageToOpponent.expected > 0) {
+      const dmgBonus = Math.min(0.60, 0.04 * directDamageToOpponent.expected);
+      tacticalAdjustment += dmgBonus;
+      reasons.push(`Direct damage to opponent (+${dmgBonus.toFixed(2)}): dmg=${directDamageToOpponent.expected}`);
+    }
+
+    for (const u of destroyedOppUnits) {
+      const size = u.currentSize ?? 1;
+      const removalBonus = Math.min(0.50, 0.04 * size);
+      tacticalAdjustment += removalBonus;
+      reasons.push(`Destroyed opponent unit ${u.unitId} (size=${size}) (+${removalBonus.toFixed(2)})`);
+    }
+
+    for (const u of movedToLifeOppUnits) {
+      tacticalAdjustment -= 0.05;
+      reasons.push(`Unit ${u.unitId} moved to opponent life (-0.05)`);
+    }
+
+    return {
+      actionId,
+      isGuardedOut: false,
+      guardStatus,
+      directDamageToOpponent,
+      directDamageToSelf,
+      destroyedOppUnits,
+      movedToLifeOppUnits,
+      isLethalToOpponent,
+      tacticalAdjustment,
+      reasons,
+    };
+  }
+
+  /**
    * cancelRequest コマンドへの到達性を判定
    */
   private checkCancelReachable(
@@ -735,6 +964,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
     damageToOpponent: TacticalValueRange;
     lifeGainToSelf: TacticalValueRange;
     destroyedUnit?: UnitView;
+    movedToLifeUnit?: UnitView;
     guardStatus: TacticalConditionStatus;
     isCertain: boolean;
     hasUnknown: boolean;
@@ -843,13 +1073,17 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
         };
       }
 
+      // 相手兵士が相手ライフに乗る場合: フィールドから除去され、相手ライフに移動する
       return {
         damageToSelf: zeroRange,
         damageToOpponent: zeroRange,
         lifeGainToSelf: zeroRange,
+        destroyedUnit: context.targetUnit,
+        movedToLifeUnit: context.targetUnit,
         guardStatus: "CERTAIN_SATISFIED",
         isCertain: true,
         hasUnknown: false,
+        reason: context.targetUnit ? `moveUnitCardsToZoneTop: unit ${context.targetUnit.unitId} moved to opponent life` : undefined,
       };
     }
 

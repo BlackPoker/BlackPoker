@@ -393,6 +393,24 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     }
 
     // =========================================================================
+    // 戦術評価 B-1: 能動アクション（攻撃魔法・除去・直接ダメージ等）の汎用評価 (Work 5-7B)
+    // =========================================================================
+    if (
+      act &&
+      act.actionId !== "action.attack" &&
+      act.actionId !== "action.end" &&
+      this.tacticalEvaluator?.evaluateProactiveAction
+    ) {
+      const proactiveOutcome = this.tacticalEvaluator.evaluateProactiveAction(act.actionId, pattern, request);
+      if (proactiveOutcome.tacticalAdjustment !== 0) {
+        adjustment += proactiveOutcome.tacticalAdjustment;
+        for (const r of proactiveOutcome.reasons) {
+          reasons.push(r);
+        }
+      }
+    }
+
+    // =========================================================================
     // 戦術評価 B-2: 通常ブロック割り当ての戦術評価 (Work 5-4A: ストリーミングと共通化)
     // =========================================================================
     if (this.encoderVersion !== "v7.0-legacy-block-stream-only") {
@@ -456,7 +474,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     );
 
     if (myAttackers.length === 0) {
-      return { adjustment: 0 };
+      return { adjustment: -0.50, reason: "Empty attacker attack penalty (-0.50)" };
     }
 
     const totalAtk = myAttackers.reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
@@ -504,7 +522,8 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
 
     // 自軍の全アタッカーが相手のどのブロッカーよりも小さく、一方的に討ち取られる場合 (完全犬死)
     if (maxMyAtk < minOppBlk) {
-      const penalty = Math.min(0.35, 0.1 + 0.04 * (minOppBlk - maxMyAtk));
+      const lostSizeSum = myAttackers.reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
+      const penalty = 0.50 + Math.min(0.20, 0.05 * lostSizeSum);
       return {
         adjustment: -penalty,
         reason: `Suicide attack penalty (-${penalty.toFixed(2)}): maxMyAtk=${maxMyAtk} < minOppBlk=${minOppBlk}`,

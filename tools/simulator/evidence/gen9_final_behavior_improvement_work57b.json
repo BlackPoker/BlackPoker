@@ -1,0 +1,79 @@
+{
+  "workId": "BP-SIM-AI-GEN9-WORK57B-FINAL-BEHAVIOR-IMPROVEMENT",
+  "timestamp": "2026-11-18T03:53:36.203Z",
+  "results": {
+    "BP-AI-14-size1-suicide-avoided": {
+      "scenario": "BP-AI-14 自軍サイズ1エース vs 相手サイズ6 (完全犬死アタック回避)",
+      "choiceV72": "action.setBulwark",
+      "choiceV73": "action.setBulwark",
+      "attackScoreV72": -0.11856711082695404,
+      "endScoreV72": 0.06148073707807318,
+      "attackScoreV73": -0.11856711082695404,
+      "endScoreV73": 0.06148073707807318,
+      "status": "PASS"
+    },
+    "size2-suicide-avoided": {
+      "scenario": "自軍サイズ2一般兵 vs 相手サイズ6 (サイズ2犬死アタック回避)",
+      "choiceV72": "action.setBulwark",
+      "choiceV73": "action.setBulwark",
+      "status": "PASS"
+    },
+    "empty-attacker-attack-avoided": {
+      "scenario": "空集合アタック回避 (アタッカー0体でエンド選択)",
+      "choiceV72": "action.end",
+      "choiceV73": "action.end",
+      "status": "PASS"
+    },
+    "favorable-trade-allowed": {
+      "scenario": "有効戦闘・相打ち可能 (自軍サイズ6 vs 相手サイズ6)",
+      "attackTacticalAdjustment": 0.05,
+      "status": "PASS"
+    },
+    "BP-AI-09-lethal-executed": {
+      "scenario": "BP-AI-09 致死局面 (♠K=13点 vs 相手Life10大型兵士)",
+      "choiceV72": "action.deathLance",
+      "choiceV73": "action.deathLance",
+      "dlTacticalAdjustmentV72": 2.85,
+      "dlFinalScoreV72": 2.368992788031681,
+      "endFinalScoreV72": -0.15370970839798015,
+      "dlFinalScoreV73": 2.368992788031681,
+      "endFinalScoreV73": -0.15370970839798015,
+      "status": "PASS"
+    },
+    "BP-AI-09-non-lethal-removal-executed": {
+      "scenario": "BP-AI-09 非致死局面 (相手Life15大型兵士除去+13ダメージ)",
+      "choiceV72": "action.deathLance",
+      "choiceV73": "action.deathLance",
+      "dlTacticalAdjustmentV72": 2.85,
+      "dlFinalScoreV72": 2.368992788031681,
+      "endFinalScoreV72": -0.15370970839798015,
+      "status": "PASS"
+    },
+    "BP-AI-09-guarded-out-wasted-spell-avoided": {
+      "scenario": "BP-AI-09 ガード条件不発局面 (10 % 3 != 0 無駄撃ち回避)",
+      "choiceV72": "action.setBulwark",
+      "choiceV73": "action.setBulwark",
+      "dlTacticalAdjustmentV72": 0,
+      "dlFinalScoreV72": -0.5288635656399174,
+      "endFinalScoreV72": -0.19794073880438012,
+      "status": "PASS"
+    },
+    "generic-throwing-tactical-evaluation": {
+      "scenario": "投擲アクションの汎用戦術評価",
+      "throwingPatternFound": false,
+      "status": "PASS"
+    },
+    "regression-block-defense-preserved": {
+      "scenario": "致死攻撃に対する防御ブロック維持",
+      "status": "PASS"
+    }
+  },
+  "summary": {
+    "totalScenarios": 9,
+    "passedScenarios": 9,
+    "suicideAttacksPrevented": 2,
+    "lethalSpellsExecuted": 1,
+    "removalSpellsExecuted": 1,
+    "wastedSpellsPrevented": 1
+  }
+}

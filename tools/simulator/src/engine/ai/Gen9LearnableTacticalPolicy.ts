@@ -1074,6 +1074,7 @@ export interface TacticalPatternEncodingResult {
   readonly invalidCardReferenceIds?: readonly string[];
   readonly invalidUnitReferenceIds?: readonly string[];
   readonly invalidCostPaymentRefs?: readonly number[];
+  readonly proactiveAdjustment?: number;
 }
 
 /**
@@ -1200,7 +1201,10 @@ export function encodeTacticalPatternFeatures(
       (u) => u.state === "charge" && u.kind !== "bulwark" && (u.currentSize ?? 0) > 0
     );
 
-    if (myAttackers.length > 0) {
+    if (myAttackers.length === 0) {
+      features[13] = 0.50 / 0.35; // 空集合アタックへのベースバイアス相殺ペナルティ (-0.50)
+      reasons.push("Empty attacker attack penalty (-0.50)");
+    } else {
       const totalAtk = myAttackers.reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
 
       if (activeBlockers.length === 0) {
@@ -1233,7 +1237,8 @@ export function encodeTacticalPatternFeatures(
           features[12] = 1.0; // t12_attack_favorable_or_equal_trade
           reasons.push(`t12_attack_favorable_or_equal_trade=1.0 (maxMyAtk=${maxMyAtk}>=minOppBlk=${minOppBlk})`);
         } else {
-          const penalty = Math.min(0.35, 0.1 + 0.04 * (minOppBlk - maxMyAtk));
+          const lostSizeSum = myAttackers.reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
+          const penalty = 0.50 + Math.min(0.20, 0.05 * lostSizeSum);
           features[13] = penalty / 0.35; // t13_attack_suicide_scaled (R4 weight -0.35 で -penalty を再現)
           reasons.push(`t13_attack_suicide_scaled=${features[13].toFixed(2)}`);
         }
@@ -1413,12 +1418,32 @@ export function encodeTacticalPatternFeatures(
     }
   }
 
+  // ===========================================================================
+  // カテゴリ 8: 能動アクション（攻撃魔法・除去・直接ダメージ等）の汎用評価 (Work 5-7B)
+  // ===========================================================================
+  let proactiveAdjustment = 0;
+  if (
+    act &&
+    act.actionId !== "action.attack" &&
+    act.actionId !== "action.end" &&
+    tacticalEvaluator?.evaluateProactiveAction
+  ) {
+    const proactiveOutcome = tacticalEvaluator.evaluateProactiveAction(act.actionId, pattern, request);
+    if (proactiveOutcome.tacticalAdjustment !== 0) {
+      proactiveAdjustment = proactiveOutcome.tacticalAdjustment;
+      for (const r of proactiveOutcome.reasons) {
+        reasons.push(r);
+      }
+    }
+  }
+
   return {
     features,
     reasons,
     invalidCardReferenceIds: activeCostCtx?.invalidCardReferenceIds,
     invalidUnitReferenceIds: activeCostCtx?.invalidUnitReferenceIds,
     invalidCostPaymentRefs: activeCostCtx?.invalidCostPaymentRefs,
+    proactiveAdjustment,
   };
 }
 
@@ -1800,7 +1825,7 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
       const sp = baseScored[i];
       const pat = patterns[sp.patternRef];
 
-      const { features, reasons } = encodeTacticalPatternFeatures(
+      const { features, reasons, proactiveAdjustment = 0 } = encodeTacticalPatternFeatures(
         request,
         pat,
         this.tacticalEvaluator,
@@ -1810,19 +1835,25 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
         precomputedCostContext
       );
       const breakdown = computeCategoryBreakdown(sp.score, features, weights);
+      const finalTacticalAdjustment = breakdown.totalTacticalScore + proactiveAdjustment;
+      const finalScore = sp.score + finalTacticalAdjustment;
 
       details.push({
         patternRef: sp.patternRef,
         baseScore: sp.score,
-        tacticalAdjustment: breakdown.totalTacticalScore,
-        finalScore: breakdown.finalScore,
+        tacticalAdjustment: finalTacticalAdjustment,
+        finalScore: finalScore,
         tacticalFeatures: Array.from(features),
-        categoryBreakdown: breakdown,
+        categoryBreakdown: {
+          ...breakdown,
+          totalTacticalScore: finalTacticalAdjustment,
+          finalScore: finalScore,
+        },
         reason: reasons.length > 0 ? reasons.join("; ") : undefined,
       });
 
-      if (breakdown.finalScore > bestScore) {
-        bestScore = breakdown.finalScore;
+      if (finalScore > bestScore) {
+        bestScore = finalScore;
         bestPatternRef = sp.patternRef;
       }
     }
