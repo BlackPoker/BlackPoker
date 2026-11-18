@@ -499,6 +499,18 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     // ケース 1: 相手ブロッカー不在
     // -------------------------------------------------------------------------
     if (activeBlockers.length === 0) {
+      if (this.behaviorVersion === "improved") {
+        // 改善版: 相手ライフが確定公開 (9枚以下) のときのみ確定リーサルと判定
+        const isCertainOppLife = typeof oppView?.lifeCount === "number";
+        if (isCertainOppLife && totalAtk >= oppView!.lifeCount!) {
+          return {
+            adjustment: 2.0,
+            reason: `Lethal unblocked attack bonus (+2.0): totalAtk=${totalAtk} >= oppLife=${oppView!.lifeCount}`,
+          };
+        }
+        return { adjustment: 0.2, reason: `Unblocked attack bonus (+0.2)` };
+      }
+      // legacy 挙動
       if (totalAtk >= oppLife) {
         return { adjustment: 2.0, reason: `Lethal unblocked attack bonus (+2.0): totalAtk=${totalAtk} >= oppLife=${oppLife}` };
       }
@@ -514,6 +526,21 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
       // 相手が最大サイズのアタッカーをすべてブロックしたと仮定した際の最小突破ダメージ
       const minBreakthrough = sortedAttackers.slice(0, unblockedCount).reduce((sum, u) => sum + getUnitSize(u), 0);
 
+      if (this.behaviorVersion === "improved") {
+        // 改善版: 相手ライフが確定公開 (9枚以下) のときのみ確定リーサルと判定
+        const isCertainOppLife = typeof oppView?.lifeCount === "number";
+        if (isCertainOppLife && minBreakthrough >= oppView!.lifeCount!) {
+          return {
+            adjustment: 2.5,
+            reason: `Guaranteed lethal attack bonus (+2.5): minBreakthrough=${minBreakthrough} >= oppLife=${oppView!.lifeCount}`,
+          };
+        }
+        return {
+          adjustment: 0.25,
+          reason: `Numerical advantage attack bonus (+0.25): myAtkCount=${myAttackers.length} > oppBlkCount=${activeBlockers.length}`,
+        };
+      }
+      // legacy 挙動
       if (minBreakthrough >= oppLife) {
         return { adjustment: 2.5, reason: `Guaranteed lethal attack bonus (+2.5): minBreakthrough=${minBreakthrough} >= oppLife=${oppLife}` };
       }

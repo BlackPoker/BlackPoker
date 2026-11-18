@@ -1,6 +1,6 @@
 {
   "workId": "BP-SIM-AI-GEN9-WORK57B-R1-FINAL-ACCEPTANCE",
-  "timestamp": "2026-11-18T06:39:11.443Z",
+  "timestamp": "2026-11-18T07:03:04.293Z",
   "results": {
     "BP-AI-14-size1-suicide-avoided": {
       "scenario": "BP-AI-14 自軍サイズ1エース vs 相手サイズ6 (完全犬死アタック回避)",
@@ -27,6 +27,13 @@
     "favorable-trade-allowed": {
       "scenario": "有効戦闘・相打ち可能 (自軍サイズ6 vs 相手サイズ6)",
       "attackTacticalAdjustment": 0.05,
+      "status": "PASS"
+    },
+    "normal-attack-hidden-life-guarded": {
+      "scenario": "通常アタックにおける非公開ライフ確定リーサル防止 & 公開ライフ確定リーサル維持",
+      "v72bHiddenAdjustment": 0.2,
+      "legacyV72HiddenAdjustment": 2,
+      "v72bPublicLethalAdjustment": 2,
       "status": "PASS"
     },
     "BP-AI-09-lethal-executed": {
@@ -85,13 +92,13 @@
     }
   },
   "summary": {
-    "totalScenarios": 11,
-    "passedScenarios": 11,
+    "totalScenarios": 12,
+    "passedScenarios": 12,
     "suicideAttacksPrevented": 2,
     "lethalSpellsExecuted": 2,
     "removalSpellsExecuted": 1,
     "wastedSpellsPrevented": 1,
     "throwingVerified": 1,
-    "hiddenLifeGuarded": 1
+    "hiddenLifeGuarded": 2
   }
 }

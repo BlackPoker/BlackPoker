@@ -766,7 +766,7 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
       for (let i = 0; i < cardIds.length; i++) {
         const id = cardIds[i];
         const found = selfHand.find(
-          (c) => c.visibility === "KNOWN" && ((c as any).cardInstanceId === id || (c as any).cardId === id)
+          (c) => (c as any).cardInstanceId === id || (c as any).cardId === id
         );
         if (found) {
           keyCards.push(found);
@@ -792,6 +792,8 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
           });
         }
       }
+    } else if ((request as any).keyCards) {
+      keyCards.push(...(request as any).keyCards);
     }
 
     // 3. コンテキストの構築

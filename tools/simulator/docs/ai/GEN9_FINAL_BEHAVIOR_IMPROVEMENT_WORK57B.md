@@ -12,8 +12,8 @@
   - **Gen 9 v7.3b (完成版):** 24次元戦術・コスト評価＋行動改善版AI (`Gen9LearnableTacticalPolicy`, `behaviorVersion: "improved"`)
   - **過去互換AI (保護):** `gen9-r4-v72` / `gen9-cost-preview-v73` (`behaviorVersion: "legacy"`)
 - **エビデンスファイル:** `tools/simulator/evidence/gen9_final_behavior_improvement_work57b.json`
-- **エビデンスSHA-256:** `D39E1A04B46751E72A60D30C62BA02E92BA38F2E8F8221E6367BB5AE2BE4D568`
-- **検証テストスイート:** `tools/simulator/src/tests/ai/gen9FinalBehaviorImprovement.test.ts` (15テスト全件PASS)
+- **エビデンスSHA-256:** `F84A0D8433E6061A3D79160CC489D80464CBC3CE64E41856ED87347D5368A1B8`
+- **検証テストスイート:** `tools/simulator/src/tests/ai/gen9FinalBehaviorImprovement.test.ts` (16テスト全件PASS)
 
 ---
 
@@ -47,6 +47,10 @@ Work 5-7Bの独立レビューにおいて、以下の重要課題が判明し�
   - `oppView.lifeCount` が数値（9枚以下）のときのみ `isCertainOppLife = true` として正確な枚数を扱う。
   - `oppView.lifeCount === undefined`（10枚以上）のときは `isCertainOppLife = false` とし、確定リーサル加点（`+2.5`）を禁止。
   - 非公開ライフ時は、通常の直接ダメージ加点（`dmg * 0.04`、最大 `+0.60`）のみを適用。
+- **通常アタックの非公開ライフ誤判定解消 (補足修正):**
+  - `Gen9TacticalPrototypePolicy` および `Gen9LearnableTacticalPolicy` において、`oppView?.lifeCount ?? 15` によるリーサル評価を修正。
+  - 相手ライフが「10以上」（非公開）のときは 15 枚確定とみなさず、確定リーサル加点（+2.0 / +2.5）を付与しない。不確実な攻撃機会（未ブロック攻撃 +0.2 / 数的優位 +0.25）として扱い、両 Policy で判断を統一。
+  - 相手公開ライフ（9枚以下）での確定リーサルや、Legacy Policy の既存動作（`behaviorVersion: "legacy"`）は完全に維持。
 
 ### 3.2 相手ライフトップへのカード移動の考慮 (P0)
 - `GenericTacticalEvaluator` において、`moveUnitCardsToZoneTop` 等で相手ライフトップへ移動する兵士のカード枚数（複数カード構成の場合は `u.cards.length`、フォールバック `1`）を集計：
@@ -94,6 +98,7 @@ Work 5-7Bの独立レビューにおいて、以下の重要課題が判明し�
 | 2.2 | 犬死回避 (サイズ2) | 自軍サイズ2 vs 相手サイズ6: 犬死アタック回避、防壁セット選択 | **PASS** |
 | 2.3 | 空集合アタック回避 | アタッカー0体 (疲労): 空アタック回避、エンド選択 | **PASS** |
 | 2.4 | 有効戦闘の正常許容 | 自軍サイズ6 vs 相手サイズ6 (相打ち): アタック加点 (+0.05) 維持 | **PASS** |
+| 2.5 | 通常アタック非公開ライフ防止 | 相手Life非公開 (10以上) での確定リーサル誤判定防止 (+0.2)、公開Lifeでのリーサル維持 (+2.0) | **PASS** |
 | 3.1 | BP-AI-09 公開ライフ8致死局面 | 相手公開Life 8 + 移動1枚 = 有効9枚に対し、死の槍 ♠K=13点で確定リーサル (+2.5) 発動 | **PASS** |
 | 3.2 | BP-AI-09 非公開ライフ15局面 | 相手実Life 15 (非公開 10以上): 確定リーサルと誤認せず、除去+ダメージ (+0.87) で死の槍選択 | **PASS** |
 | 3.3 | 複数カード移動による致死変化 | 相手公開Life 9 + 5枚構成兵士 = 有効14枚に対し、13点では確定リーサル不成立を実証 | **PASS** |
@@ -112,7 +117,7 @@ Work 5-7Bの独立レビューにおいて、以下の重要課題が判明し�
 - **比較レポート (`npm run compare:rules-vnext`):** 正常生成
 - **新YAMLシナリオランナー (`npm run scenario:rules-vnext`):** 8シナリオ **全件成功**
 - **エビデンスファイル:** `tools/simulator/evidence/gen9_final_behavior_improvement_work57b.json`
-- **エビデンスSHA-256:** `D39E1A04B46751E72A60D30C62BA02E92BA38F2E8F8221E6367BB5AE2BE4D568`
+- **エビデンスSHA-256:** `F84A0D8433E6061A3D79160CC489D80464CBC3CE64E41856ED87347D5368A1B8`
 
 ---
 

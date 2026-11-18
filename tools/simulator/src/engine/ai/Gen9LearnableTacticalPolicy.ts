@@ -1213,12 +1213,25 @@ export function encodeTacticalPatternFeatures(
       const totalAtk = myAttackers.reduce((sum, u) => sum + getUnitSize(u), 0);
 
       if (activeBlockers.length === 0) {
-        if (totalAtk >= oppLife) {
-          features[18] = 1.0; // t18_attack_unblocked_lethal
-          reasons.push(`t18_attack_unblocked_lethal=1.0 (totalAtk=${totalAtk}>=oppLife=${oppLife})`);
+        if (behaviorVersion === "improved") {
+          // 改善版: 相手ライフが確定公開 (9枚以下) のときのみ確定リーサルと判定
+          const isCertainOppLife = typeof oppView?.lifeCount === "number";
+          if (isCertainOppLife && totalAtk >= oppView!.lifeCount!) {
+            features[18] = 1.0; // t18_attack_unblocked_lethal
+            reasons.push(`t18_attack_unblocked_lethal=1.0 (totalAtk=${totalAtk}>=oppLife=${oppView!.lifeCount})`);
+          } else {
+            features[10] = 1.0; // t10_attack_unblocked_nonlethal
+            reasons.push(`t10_attack_unblocked_nonlethal=1.0`);
+          }
         } else {
-          features[10] = 1.0; // t10_attack_unblocked_nonlethal
-          reasons.push(`t10_attack_unblocked_nonlethal=1.0`);
+          // legacy 挙動
+          if (totalAtk >= oppLife) {
+            features[18] = 1.0; // t18_attack_unblocked_lethal
+            reasons.push(`t18_attack_unblocked_lethal=1.0 (totalAtk=${totalAtk}>=oppLife=${oppLife})`);
+          } else {
+            features[10] = 1.0; // t10_attack_unblocked_nonlethal
+            reasons.push(`t10_attack_unblocked_nonlethal=1.0`);
+          }
         }
       } else if (myAttackers.length > activeBlockers.length) {
         const sortedAttackers = [...myAttackers].sort((a, b) => getUnitSize(a) - getUnitSize(b));
@@ -1227,12 +1240,25 @@ export function encodeTacticalPatternFeatures(
           .slice(0, unblockedCount)
           .reduce((sum, u) => sum + getUnitSize(u), 0);
 
-        if (minBreakthrough >= oppLife) {
-          features[19] = 1.0; // t19_attack_breakthrough_lethal
-          reasons.push(`t19_attack_breakthrough_lethal=1.0 (minBreak=${minBreakthrough}>=oppLife=${oppLife})`);
+        if (behaviorVersion === "improved") {
+          // 改善版: 相手ライフが確定公開 (9枚以下) のときのみ確定リーサルと判定
+          const isCertainOppLife = typeof oppView?.lifeCount === "number";
+          if (isCertainOppLife && minBreakthrough >= oppView!.lifeCount!) {
+            features[19] = 1.0; // t19_attack_breakthrough_lethal
+            reasons.push(`t19_attack_breakthrough_lethal=1.0 (minBreak=${minBreakthrough}>=oppLife=${oppView!.lifeCount})`);
+          } else {
+            features[11] = 1.0; // t11_attack_numerical_advantage
+            reasons.push(`t11_attack_numerical_advantage=1.0 (${myAttackers.length}>${activeBlockers.length})`);
+          }
         } else {
-          features[11] = 1.0; // t11_attack_numerical_advantage
-          reasons.push(`t11_attack_numerical_advantage=1.0 (${myAttackers.length}>${activeBlockers.length})`);
+          // legacy 挙動
+          if (minBreakthrough >= oppLife) {
+            features[19] = 1.0; // t19_attack_breakthrough_lethal
+            reasons.push(`t19_attack_breakthrough_lethal=1.0 (minBreak=${minBreakthrough}>=oppLife=${oppLife})`);
+          } else {
+            features[11] = 1.0; // t11_attack_numerical_advantage
+            reasons.push(`t11_attack_numerical_advantage=1.0 (${myAttackers.length}>${activeBlockers.length})`);
+          }
         }
       } else {
         const maxMyAtk = myAttackers.reduce((max, u) => Math.max(max, getUnitSize(u)), 0);

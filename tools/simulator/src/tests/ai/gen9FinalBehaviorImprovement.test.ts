@@ -49,6 +49,7 @@ import { Gen9LearnableTacticalPolicy } from "../../engine/ai/Gen9LearnableTactic
 import { LegalPatternGenerator } from "../../engine/decision/LegalPatternGenerator.js";
 import { buildFieldUnitFromComponent } from "../../engine/rules/commandHandlers.js";
 import { PlayerKey } from "../../domain/decision/DecisionSource.js";
+import { DecisionRequest } from "../../domain/decision/DecisionRequest.js";
 import { GenericTacticalEvaluator, CoreAlignedExpressionEvaluator } from "../../engine/rules/GenericTacticalEvaluator.js";
 import { OfficialRegulationMatchSetup } from "../../engine/regulation/OfficialRegulationMatchSetup.js";
 import { GameSession } from "../../engine/session/GameSession.js";
@@ -386,6 +387,76 @@ describe("Work 5-7B R1: Gen 9 AI 完成判定の最終修正検証", () => {
       work57bEvidence.summary.totalScenarios++;
       work57bEvidence.summary.passedScenarios++;
     });
+
+    it("2.5 通常アタックにおける非公開ライフ (10以上) の確定リーサル誤判定防止検証", () => {
+      // 相手ライフが 15 枚 (非公開: lifeCount === undefined, lifeDisplay === '10以上')
+      // 自軍に攻撃力 16 の大型兵士 1 体、相手ブロッカー不在。
+      // totalAtk = 16 >= 15 だが、相手ライフは非公開 (10以上) のため、
+      // 改善版 AI (v72b, v73b) は確定リーサル (+2.0) ではなく、未ブロック攻撃加点 (+0.2) を付与すること。
+      // 一方、レガシー AI (v72, v73) は従来のフォールバック 15 により確定リーサル (+2.0) を付与すること。
+      const bigCard: StandardCard = { id: "c-s-16", suit: "S", rank: "10", value: 16, faceUp: true };
+      const myBigSoldier = createSoldierUnit("u-p1-16", "p1", bigCard, 16, rulePackage);
+
+      // 非公開ライフ 15 局面
+      const stateHidden15 = createNormalizedGameState({
+        p1Field: [myBigSoldier],
+        p1LifeCount: 15,
+        p2Field: [], // 相手ブロッカー不在
+        p2LifeCount: 15, // Observation では lifeDisplay: "10以上", lifeCount: undefined
+      });
+
+      const decisionHidden = LegalPatternGenerator.generateActionRequestDecision(stateHidden15, "p1", rulePackage);
+      const reqHidden = decisionHidden.request;
+
+      const attackIdxHidden = reqHidden.patterns.findIndex(
+        (p) => reqHidden.catalog.actions[p.actionSelectionRef!]?.actionId === "action.attack"
+      );
+      expect(attackIdxHidden).toBeGreaterThanOrEqual(0);
+
+      // 改善版 v72b / v73b の評価
+      const evalV72b = policyV72b.evaluatePatterns(reqHidden);
+      const scoreV72b = evalV72b.scoredPatterns.find((p) => p.patternRef === attackIdxHidden)!;
+      // 確定リーサル (+2.0) ではなく、不確実な未ブロック攻撃加点 (+0.2) であること
+      expect(scoreV72b.tacticalAdjustment).toBeCloseTo(0.2, 2);
+
+      // レガシー v72 の評価 (後方互換性: oppLife = 15 と仮定して +2.0 を付与)
+      const evalLegacyV72 = policyLegacyV72.evaluatePatterns(reqHidden);
+      const scoreLegacyV72 = evalLegacyV72.scoredPatterns.find((p) => p.patternRef === attackIdxHidden)!;
+      expect(scoreLegacyV72.tacticalAdjustment).toBeCloseTo(2.0, 2);
+
+      // 公開ライフ 8 局面 (自軍攻撃力 10 >= 相手ライフ 8)
+      const normalCard: StandardCard = { id: "c-s-10", suit: "S", rank: "10", value: 10, faceUp: true };
+      const myNormalSoldier = createSoldierUnit("u-p1-10", "p1", normalCard, 10, rulePackage);
+      const statePublic8 = createNormalizedGameState({
+        p1Field: [myNormalSoldier],
+        p1LifeCount: 15,
+        p2Field: [], // 相手ブロッカー不在
+        p2LifeCount: 8, // 公開ライフ 8
+      });
+
+      const decisionPublic = LegalPatternGenerator.generateActionRequestDecision(statePublic8, "p1", rulePackage);
+      const reqPublic = decisionPublic.request;
+      const attackIdxPublic = reqPublic.patterns.findIndex(
+        (p) => reqPublic.catalog.actions[p.actionSelectionRef!]?.actionId === "action.attack"
+      );
+      expect(attackIdxPublic).toBeGreaterThanOrEqual(0);
+
+      const evalPublicV72b = policyV72b.evaluatePatterns(reqPublic);
+      const scorePublicV72b = evalPublicV72b.scoredPatterns.find((p) => p.patternRef === attackIdxPublic)!;
+      // 公開ライフ 8 に対する 10 点攻撃は確定リーサル (+2.0)
+      expect(scorePublicV72b.tacticalAdjustment).toBeCloseTo(2.0, 2);
+
+      work57bEvidence.results["normal-attack-hidden-life-guarded"] = {
+        scenario: "通常アタックにおける非公開ライフ確定リーサル防止 & 公開ライフ確定リーサル維持",
+        v72bHiddenAdjustment: scoreV72b.tacticalAdjustment,
+        legacyV72HiddenAdjustment: scoreLegacyV72.tacticalAdjustment,
+        v72bPublicLethalAdjustment: scorePublicV72b.tacticalAdjustment,
+        status: "PASS",
+      };
+      work57bEvidence.summary.totalScenarios++;
+      work57bEvidence.summary.passedScenarios++;
+      work57bEvidence.summary.hiddenLifeGuarded++;
+    });
   });
 
   // ===========================================================================
@@ -652,7 +723,7 @@ describe("Work 5-7B R1: Gen 9 AI 完成判定の最終修正検証", () => {
     });
 
     it("3.5 ガード条件が UNCERTAIN / UNKNOWN の場合に確定リーサル加点 (+2.5) を禁止する検証", () => {
-      // CoreAlignedExpressionEvaluator のガード状態評価を検証
+      // 1. CoreAlignedExpressionEvaluator のガード状態評価を検証
       // 非公開カードに依存するガード式: UNCERTAIN
       const uncertainStatus = CoreAlignedExpressionEvaluator.evaluateCondition(
         "target.size % keyCards.diamond.rankValue == 0",
@@ -674,6 +745,75 @@ describe("Work 5-7B R1: Gen 9 AI 完成判定の最終修正検証", () => {
         }
       );
       expect(unknownStatus).toBe("UNKNOWN");
+
+      // 2. GenericTacticalEvaluator による実際の戦術評価における確定リーサル加点 (+2.5) 禁止の検証
+      const evaluator = new GenericTacticalEvaluator(rulePackage);
+
+      const mockRequestUncertain: any = {
+        decisionId: "req-test-uncertain",
+        protocolVersion: "1.0",
+        matchId: "m1",
+        stateVersion: 1,
+        playerId: "p1",
+        legalActions: ["action.testUncertain", "action.testUnknown"],
+        keyCards: [{ visibility: "HIDDEN" } as any],
+        patterns: [
+          { patternId: "p-unc", kind: "ACTION", actionSelectionRef: 0 },
+          { patternId: "p-unk", kind: "ACTION", actionSelectionRef: 1 },
+        ],
+        catalog: {
+          actions: [
+            { actionId: "action.testUncertain" } as any,
+            { actionId: "action.testUnknown" } as any,
+          ],
+        },
+        observation: {
+          players: [
+            { playerId: "p1", handCards: [], field: [], trumps: [], lifeCount: 15, lifeDisplay: "15" },
+            { playerId: "p2", handCards: [], field: [], trumps: [], lifeCount: 5, lifeDisplay: "5" },
+          ],
+        },
+      };
+
+      // actionsMap に UNCERTAIN ガード条件のカスタムアクションを追加して評価
+      (evaluator as any).actionsMap.set("action.testUncertain", {
+        actionId: "action.testUncertain",
+        timing: "instant",
+        effect: [
+          { guardCondition: { condition: "key.rankValue > 5" } },
+          { dealDamage: { target: "opponent", amount: 10 } },
+        ],
+      });
+
+      const outcomeUncertain = evaluator.evaluateProactiveAction(
+        "action.testUncertain",
+        mockRequestUncertain.patterns[0],
+        mockRequestUncertain
+      );
+      // ガード条件が UNCERTAIN のため確定リーサルにならず (+2.5 禁止)、isLethalToOpponent === false
+      expect(outcomeUncertain.guardStatus).toBe("UNCERTAIN");
+      expect(outcomeUncertain.isLethalToOpponent).toBe(false);
+      expect(outcomeUncertain.tacticalAdjustment).toBeLessThan(2.5);
+
+      // actionsMap に UNKNOWN ガード条件のカスタムアクションを追加して評価
+      (evaluator as any).actionsMap.set("action.testUnknown", {
+        actionId: "action.testUnknown",
+        timing: "instant",
+        effect: [
+          { guardCondition: { condition: "unknown_func() == 0" } },
+          { dealDamage: { target: "opponent", amount: 10 } },
+        ],
+      });
+
+      const outcomeUnknown = evaluator.evaluateProactiveAction(
+        "action.testUnknown",
+        mockRequestUncertain.patterns[1],
+        mockRequestUncertain
+      );
+      // ガード条件が UNKNOWN のため確定リーサルにならず (+2.5 禁止)、isLethalToOpponent === false
+      expect(outcomeUnknown.guardStatus).toBe("UNKNOWN");
+      expect(outcomeUnknown.isLethalToOpponent).toBe(false);
+      expect(outcomeUnknown.tacticalAdjustment).toBeLessThan(2.5);
     });
 
     it("3.6 投擲 (action.throwing) の汎用ダメージ評価検証 (P0 投擲回帰テスト修正)", () => {
@@ -852,6 +992,10 @@ describe("Work 5-7B R1: Gen 9 AI 完成判定の最終修正検証", () => {
       const session = new GameSession(setupOutcome.state, rulePackage, { matchSeed: 12345 });
       const simResult = SimulationRunner.run(session, { p1, p2 }, { maxDecisions: 150 });
 
+      // 完走保証: completed が真であり、正常な勝敗が確定していることを検証
+      expect(simResult.completed).toBe(true);
+      expect(simResult.winner).toBeDefined();
+      expect(["p1", "p2"]).toContain(simResult.winner);
       expect(simResult.totalDecisions).toBeGreaterThan(0);
       expect(simResult.turnCount).toBeGreaterThanOrEqual(1);
 
