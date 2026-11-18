@@ -1,0 +1,408 @@
+{
+  "workId": "BP-SIM-AI-GEN9-WORK57A-R2-FINAL-VALIDATION",
+  "timestamp": "2026-11-18T02:57:58.935Z",
+  "results": {
+    "BP-AI-09-lethal": {
+      "scenario": "BP-AI-09 致死局面 (相手Life10, ♠K=13点, 相手手札0)",
+      "dlPatternIndex": 1,
+      "endPatternIndex": 2,
+      "choiceV72": 0,
+      "choiceV73": 0,
+      "chosenActionV72": "action.attack",
+      "chosenActionV73": "action.attack",
+      "v72Scores": [
+        {
+          "ref": 0,
+          "actionId": "action.attack",
+          "base": 0.3046128121153903,
+          "tactical": 0,
+          "final": 0.3046128121153903
+        },
+        {
+          "ref": 1,
+          "actionId": "action.deathLance",
+          "base": -0.48100721196831936,
+          "tactical": 0,
+          "final": -0.48100721196831936
+        },
+        {
+          "ref": 2,
+          "actionId": "action.end",
+          "base": -0.15370970839798015,
+          "tactical": 0,
+          "final": -0.15370970839798015
+        },
+        {
+          "ref": 3,
+          "actionId": "action.setBulwark",
+          "base": 0.07999989154877418,
+          "tactical": 0,
+          "final": 0.07999989154877418
+        },
+        {
+          "ref": 4,
+          "actionId": "action.summonAce",
+          "base": 0.2611867053580268,
+          "tactical": 0,
+          "final": 0.2611867053580268
+        },
+        {
+          "ref": 5,
+          "actionId": "action.twist",
+          "base": -0.6113611762130372,
+          "tactical": 0,
+          "final": -0.6113611762130372
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "actionId": "action.attack",
+          "base": 0.3046128121153903,
+          "tactical": 0,
+          "final": 0.3046128121153903,
+          "tacticalFeatures": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "ref": 1,
+          "actionId": "action.deathLance",
+          "base": -0.48100721196831936,
+          "tactical": 0,
+          "final": -0.48100721196831936,
+          "tacticalFeatures": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "ref": 2,
+          "actionId": "action.end",
+          "base": -0.15370970839798015,
+          "tactical": 0,
+          "final": -0.15370970839798015,
+          "tacticalFeatures": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "ref": 3,
+          "actionId": "action.setBulwark",
+          "base": 0.07999989154877418,
+          "tactical": -0.05,
+          "final": 0.02999989154877418,
+          "tacticalFeatures": [
+            0,
+            0,
+            0,
+            0.1
+          ],
+          "reason": "t23_cost_life_fraction=0.100 (pay=1, life=10)"
+        },
+        {
+          "ref": 4,
+          "actionId": "action.summonAce",
+          "base": 0.2611867053580268,
+          "tactical": -0.05,
+          "final": 0.2111867053580268,
+          "tacticalFeatures": [
+            0,
+            0,
+            0,
+            0.1
+          ],
+          "reason": "t23_cost_life_fraction=0.100 (pay=1, life=10)"
+        },
+        {
+          "ref": 5,
+          "actionId": "action.twist",
+          "base": -0.6113611762130372,
+          "tactical": -0.2826086956521739,
+          "final": -0.8939698718652112,
+          "tacticalFeatures": [
+            0.5652173913043478,
+            0,
+            0,
+            0
+          ],
+          "reason": "t20_cost_discard_value_sum=0.565 (sum=13)"
+        }
+      ]
+    },
+    "BP-AI-09-non-lethal": {
+      "scenario": "BP-AI-09 非致死局面 (相手Life15, ♠K=13点, 相手手札0)",
+      "choiceV72": 0,
+      "choiceV73": 0,
+      "chosenActionV72": "action.attack",
+      "chosenActionV73": "action.attack",
+      "v72Scores": [
+        {
+          "ref": 0,
+          "actionId": "action.attack",
+          "base": 0.3046128121153903,
+          "tactical": 0,
+          "final": 0.3046128121153903
+        },
+        {
+          "ref": 1,
+          "actionId": "action.deathLance",
+          "base": -0.48100721196831936,
+          "tactical": 0,
+          "final": -0.48100721196831936
+        },
+        {
+          "ref": 2,
+          "actionId": "action.end",
+          "base": -0.15370970839798015,
+          "tactical": 0,
+          "final": -0.15370970839798015
+        },
+        {
+          "ref": 3,
+          "actionId": "action.setBulwark",
+          "base": 0.07999989154877418,
+          "tactical": 0,
+          "final": 0.07999989154877418
+        },
+        {
+          "ref": 4,
+          "actionId": "action.summonAce",
+          "base": 0.2611867053580268,
+          "tactical": 0,
+          "final": 0.2611867053580268
+        },
+        {
+          "ref": 5,
+          "actionId": "action.twist",
+          "base": -0.6113611762130372,
+          "tactical": 0,
+          "final": -0.6113611762130372
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "actionId": "action.attack",
+          "base": 0.3046128121153903,
+          "tactical": 0,
+          "final": 0.3046128121153903
+        },
+        {
+          "ref": 1,
+          "actionId": "action.deathLance",
+          "base": -0.48100721196831936,
+          "tactical": 0,
+          "final": -0.48100721196831936
+        },
+        {
+          "ref": 2,
+          "actionId": "action.end",
+          "base": -0.15370970839798015,
+          "tactical": 0,
+          "final": -0.15370970839798015
+        },
+        {
+          "ref": 3,
+          "actionId": "action.setBulwark",
+          "base": 0.07999989154877418,
+          "tactical": -0.05,
+          "final": 0.02999989154877418
+        },
+        {
+          "ref": 4,
+          "actionId": "action.summonAce",
+          "base": 0.2611867053580268,
+          "tactical": -0.05,
+          "final": 0.2111867053580268
+        },
+        {
+          "ref": 5,
+          "actionId": "action.twist",
+          "base": -0.6113611762130372,
+          "tactical": -0.2826086956521739,
+          "final": -0.8939698718652112
+        }
+      ]
+    },
+    "BP-AI-14-core": {
+      "scenario": "BP-AI-14 Core生成 (自軍サイズ1 vs 相手サイズ6, 相手Life15)",
+      "attackPatternIndex": 0,
+      "endPatternIndex": 1,
+      "bulwarkPatternIndex": 2,
+      "choiceV72": 2,
+      "choiceV73": 0,
+      "chosenActionV72": "action.setBulwark",
+      "chosenActionV73": "action.attack",
+      "statusV72": "PASS",
+      "statusV73": "FAIL",
+      "finding": "v7.2では自滅ペナルティ(-0.30)により防壁(0.1673)が選ばれ自滅回避されるが、v7.3ではライフコストペナルティ(-0.05)で防壁が0.1173に低下し、自滅アタック(0.1314 > end 0.0615)が最高スコアとなり自滅してしまう真の課題を特定。",
+      "v72Scores": [
+        {
+          "ref": 0,
+          "actionId": "action.attack",
+          "base": 0.431432889173046,
+          "tactical": -0.30000000000000004,
+          "final": 0.13143288917304596,
+          "reason": "Suicide attack penalty (-0.30): maxMyAtk=1 < minOppBlk=6"
+        },
+        {
+          "ref": 1,
+          "actionId": "action.end",
+          "base": 0.06148073707807318,
+          "tactical": 0,
+          "final": 0.06148073707807318
+        },
+        {
+          "ref": 2,
+          "actionId": "action.setBulwark",
+          "base": 0.1672629457296148,
+          "tactical": 0,
+          "final": 0.1672629457296148
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "actionId": "action.attack",
+          "base": 0.431432889173046,
+          "tactical": -0.30000000000000004,
+          "final": 0.13143288917304596,
+          "reason": "t13_attack_suicide_scaled=0.86"
+        },
+        {
+          "ref": 1,
+          "actionId": "action.end",
+          "base": 0.06148073707807318,
+          "tactical": 0,
+          "final": 0.06148073707807318
+        },
+        {
+          "ref": 2,
+          "actionId": "action.setBulwark",
+          "base": 0.1672629457296148,
+          "tactical": -0.05,
+          "final": 0.1172629457296148,
+          "reason": "t23_cost_life_fraction=0.100 (pay=1, life=10)"
+        }
+      ]
+    },
+    "v73-cost-multicandidate": {
+      "scenario": "複数手札カードによる防壁追加/手札召喚",
+      "patternCount": 5,
+      "v72Scores": [
+        {
+          "ref": 0,
+          "actionId": "action.addBulwark",
+          "base": -0.3746979929054819,
+          "tactical": 0,
+          "final": -0.3746979929054819
+        },
+        {
+          "ref": 1,
+          "actionId": "action.attack",
+          "base": 0.18201363464664183,
+          "tactical": 0,
+          "final": 0.18201363464664183
+        },
+        {
+          "ref": 2,
+          "actionId": "action.end",
+          "base": -0.06312988016696446,
+          "tactical": 0,
+          "final": -0.06312988016696446
+        },
+        {
+          "ref": 3,
+          "actionId": "action.handeth",
+          "base": -0.48766453807785315,
+          "tactical": 0,
+          "final": -0.48766453807785315
+        },
+        {
+          "ref": 4,
+          "actionId": "action.setBulwark",
+          "base": -0.15134957588200798,
+          "tactical": 0,
+          "final": -0.15134957588200798
+        }
+      ],
+      "v73Scores": [
+        {
+          "ref": 0,
+          "actionId": "action.addBulwark",
+          "base": -0.3746979929054819,
+          "tactical": 0,
+          "final": -0.3746979929054819,
+          "tacticalFeatures": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "ref": 1,
+          "actionId": "action.attack",
+          "base": 0.18201363464664183,
+          "tactical": 0,
+          "final": 0.18201363464664183,
+          "tacticalFeatures": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "ref": 2,
+          "actionId": "action.end",
+          "base": -0.06312988016696446,
+          "tactical": 0,
+          "final": -0.06312988016696446,
+          "tacticalFeatures": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "ref": 3,
+          "actionId": "action.handeth",
+          "base": -0.48766453807785315,
+          "tactical": 0,
+          "final": -0.48766453807785315,
+          "tacticalFeatures": [
+            0,
+            0,
+            0,
+            0
+          ]
+        },
+        {
+          "ref": 4,
+          "actionId": "action.setBulwark",
+          "base": -0.15134957588200798,
+          "tactical": -0.05,
+          "final": -0.20134957588200797,
+          "tacticalFeatures": [
+            0,
+            0,
+            0,
+            0.1
+          ],
+          "reason": "t23_cost_life_fraction=0.100 (pay=1, life=10)"
+        }
+      ]
+    }
+  }
+}
