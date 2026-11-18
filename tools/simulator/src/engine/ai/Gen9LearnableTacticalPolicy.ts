@@ -28,7 +28,7 @@ import { LegalPattern } from "../../domain/decision/LegalPattern.js";
 import { UnitAssignment } from "../../domain/decision/DecisionCatalog.js";
 import { UnitView, PlayerObservationView, KnownCardView, CardView, RequestView } from "../../domain/decision/PlayerObservation.js";
 import { TacticalEvaluator, TacticalRequestOutcome } from "../../domain/decision/TacticalEvaluationTypes.js";
-import { Gen9TacticalPrototypePolicy } from "./Gen9TacticalPrototypePolicy.js";
+import { Gen9TacticalPrototypePolicy, Gen9BehaviorVersion } from "./Gen9TacticalPrototypePolicy.js";
 
 export const TACTICAL_FEATURE_SCHEMA_VERSION = 7;
 
@@ -1087,7 +1087,8 @@ export function encodeTacticalPatternFeatures(
   encoderVersion: TacticalFeatureEncoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
   precomputedBlockContext?: BlockTacticalEvaluationContext,
   precomputedHasCounter?: boolean,
-  precomputedCostContext?: TacticalCostEvaluationContext
+  precomputedCostContext?: TacticalCostEvaluationContext,
+  behaviorVersion: Gen9BehaviorVersion = "legacy"
 ): TacticalPatternEncodingResult {
   const features = new Float64Array(TACTICAL_FEATURE_DIMENSION);
   const reasons: string[] = [];
@@ -1194,18 +1195,22 @@ export function encodeTacticalPatternFeatures(
     const oppTrumps = oppView?.trumps ?? [];
     const oppLife = oppView?.lifeCount ?? 15;
 
+    const getUnitSize = (u: any): number => u.currentSize ?? u.size ?? 0;
+
     const activeBlockers = [...oppUnits, ...oppTrumps].filter(
-      (u) => u.state === "charge" && (u.currentSize ?? 0) > 0
+      (u) => u.state === "charge" && getUnitSize(u) > 0
     );
     const myAttackers = (selfView?.field ?? []).filter(
-      (u) => u.state === "charge" && u.kind !== "bulwark" && (u.currentSize ?? 0) > 0
+      (u) => u.state === "charge" && u.kind !== "bulwark" && getUnitSize(u) > 0
     );
 
     if (myAttackers.length === 0) {
-      features[13] = 0.50 / 0.35; // 空集合アタックへのベースバイアス相殺ペナルティ (-0.50)
-      reasons.push("Empty attacker attack penalty (-0.50)");
+      if (behaviorVersion === "improved") {
+        features[13] = 0.50 / 0.35; // 空集合アタックへのベースバイアス相殺ペナルティ (-0.50)
+        reasons.push("Empty attacker attack penalty (-0.50)");
+      }
     } else {
-      const totalAtk = myAttackers.reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
+      const totalAtk = myAttackers.reduce((sum, u) => sum + getUnitSize(u), 0);
 
       if (activeBlockers.length === 0) {
         if (totalAtk >= oppLife) {
@@ -1216,11 +1221,11 @@ export function encodeTacticalPatternFeatures(
           reasons.push(`t10_attack_unblocked_nonlethal=1.0`);
         }
       } else if (myAttackers.length > activeBlockers.length) {
-        const sortedAttackers = [...myAttackers].sort((a, b) => (a.currentSize ?? 0) - (b.currentSize ?? 0));
+        const sortedAttackers = [...myAttackers].sort((a, b) => getUnitSize(a) - getUnitSize(b));
         const unblockedCount = myAttackers.length - activeBlockers.length;
         const minBreakthrough = sortedAttackers
           .slice(0, unblockedCount)
-          .reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
+          .reduce((sum, u) => sum + getUnitSize(u), 0);
 
         if (minBreakthrough >= oppLife) {
           features[19] = 1.0; // t19_attack_breakthrough_lethal
@@ -1230,17 +1235,24 @@ export function encodeTacticalPatternFeatures(
           reasons.push(`t11_attack_numerical_advantage=1.0 (${myAttackers.length}>${activeBlockers.length})`);
         }
       } else {
-        const maxMyAtk = myAttackers.reduce((max, u) => Math.max(max, u.currentSize ?? 0), 0);
-        const minOppBlk = activeBlockers.reduce((min, u) => Math.min(min, u.currentSize ?? 0), Infinity);
+        const maxMyAtk = myAttackers.reduce((max, u) => Math.max(max, getUnitSize(u)), 0);
+        const minOppBlk = activeBlockers.reduce((min, u) => Math.min(min, getUnitSize(u)), Infinity);
 
         if (maxMyAtk >= minOppBlk) {
           features[12] = 1.0; // t12_attack_favorable_or_equal_trade
           reasons.push(`t12_attack_favorable_or_equal_trade=1.0 (maxMyAtk=${maxMyAtk}>=minOppBlk=${minOppBlk})`);
         } else {
-          const lostSizeSum = myAttackers.reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
-          const penalty = 0.50 + Math.min(0.20, 0.05 * lostSizeSum);
-          features[13] = penalty / 0.35; // t13_attack_suicide_scaled (R4 weight -0.35 で -penalty を再現)
-          reasons.push(`t13_attack_suicide_scaled=${features[13].toFixed(2)}`);
+          if (behaviorVersion === "improved") {
+            const lostSizeSum = myAttackers.reduce((sum, u) => sum + getUnitSize(u), 0);
+            const penalty = 0.50 + Math.min(0.20, 0.05 * lostSizeSum);
+            features[13] = penalty / 0.35; // t13_attack_suicide_scaled (R4 weight -0.35 で -penalty を再現)
+            reasons.push(`t13_attack_suicide_scaled=${features[13].toFixed(2)}`);
+          } else {
+            // legacy 挙動 (Work 5-5B / 5-7A): 最大 -0.35
+            const penalty = Math.min(0.35, 0.1 + 0.04 * (minOppBlk - maxMyAtk));
+            features[13] = penalty / 0.35;
+            reasons.push(`t13_attack_suicide_scaled=${features[13].toFixed(2)}`);
+          }
         }
       }
     }
@@ -1423,6 +1435,7 @@ export function encodeTacticalPatternFeatures(
   // ===========================================================================
   let proactiveAdjustment = 0;
   if (
+    behaviorVersion === "improved" &&
     act &&
     act.actionId !== "action.attack" &&
     act.actionId !== "action.end" &&
@@ -1553,12 +1566,14 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
   private readonly genome: Gen9TacticalGenome;
   private readonly tacticalEvaluator?: TacticalEvaluator;
   private readonly encoderVersion: TacticalFeatureEncoderVersion;
+  private readonly behaviorVersion: Gen9BehaviorVersion;
 
   constructor(
     genomeOrDNA: Readonly<Gen9TacticalGenome> | Readonly<DecisionDNA>,
     name?: string,
     evaluator?: TacticalEvaluator,
-    encoderVersionOverride?: TacticalFeatureEncoderVersion
+    encoderVersionOverride?: TacticalFeatureEncoderVersion,
+    behaviorVersion: Gen9BehaviorVersion = "legacy"
   ) {
     if ("tacticalSchemaVersion" in genomeOrDNA) {
       DecisionDNACodec.validate(genomeOrDNA.baseDNA);
@@ -1589,6 +1604,7 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
       this.genome.metadata?.encoderVersion ??
       TACTICAL_FEATURE_ENCODER_VERSION_CURRENT;
 
+    this.behaviorVersion = behaviorVersion;
     this.tacticalEvaluator = evaluator ?? Gen9TacticalPrototypePolicy.getDefaultEvaluator();
 
     this.descriptor = {
@@ -1600,11 +1616,16 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
         featureSchemaVersion: this.genome.baseDNA.featureSchemaVersion,
         tacticalSchemaVersion: this.genome.tacticalSchemaVersion,
         tacticalFeatureEncoderVersion: this.encoderVersion,
+        gen9BehaviorVersion: this.behaviorVersion,
         scoringModel: "linear_interaction_v6_plus_learnable_tactical_v7",
         dnaId: this.genome.metadata?.id ?? this.genome.baseDNA.metadata?.id,
         dnaName: this.genome.metadata?.name ?? this.genome.baseDNA.metadata?.name,
       },
     };
+  }
+
+  public getBehaviorVersion(): Gen9BehaviorVersion {
+    return this.behaviorVersion;
   }
 
   public getGenome(): Gen9TacticalGenome {
@@ -1832,7 +1853,8 @@ export class Gen9LearnableTacticalPolicy implements DecisionPolicy {
         this.encoderVersion,
         blockContext,
         precomputedHasCounter,
-        precomputedCostContext
+        precomputedCostContext,
+        this.behaviorVersion
       );
       const breakdown = computeCategoryBreakdown(sp.score, features, weights);
       const finalTacticalAdjustment = breakdown.totalTacticalScore + proactiveAdjustment;

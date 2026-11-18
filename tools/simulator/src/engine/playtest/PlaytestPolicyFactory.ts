@@ -26,6 +26,8 @@ import { PlaytestPolicyId, PlaytestSeatControllers } from "./PlaytestSeatControl
 
 export const GEN9_R4_V72_SUPPORTED_REGULATION_ID = "standard-pack";
 export const GEN9_COST_PREVIEW_V73_SUPPORTED_REGULATION_ID = "standard-pack";
+export const GEN9_R4_V72B_SUPPORTED_REGULATION_ID = "standard-pack";
+export const GEN9_COST_V73B_SUPPORTED_REGULATION_ID = "standard-pack";
 
 /**
  * Playtest UI 用 AI Policy ファクトリ。
@@ -113,7 +115,8 @@ export class PlaytestPolicyFactory {
           dna,
           "Gen 9 R4 — 戦術AI",
           evaluator,
-          TACTICAL_FEATURE_ENCODER_VERSION_V72
+          TACTICAL_FEATURE_ENCODER_VERSION_V72,
+          "legacy"
         );
       }
 
@@ -135,7 +138,48 @@ export class PlaytestPolicyFactory {
           genome,
           "Gen 9 v7.3 — コスト評価AI（実験版）",
           evaluator,
-          TACTICAL_FEATURE_ENCODER_VERSION_V73
+          TACTICAL_FEATURE_ENCODER_VERSION_V73,
+          "legacy"
+        );
+      }
+
+      case "gen9-r4-v72b": {
+        if (regulationId !== GEN9_R4_V72B_SUPPORTED_REGULATION_ID) {
+          throw new Error(
+            `Gen 9 R4 戦術AI (v7.2b 完成版) は公式レギュレーション ${GEN9_R4_V72B_SUPPORTED_REGULATION_ID} 専用です (現在の環境: ${regulationId ?? "undefined"})`
+          );
+        }
+        const dna = loadAndValidateGen8ChampionCandidateDNA();
+        const evaluator = rulePackage ? new GenericTacticalEvaluator(rulePackage) : undefined;
+        return new Gen9TacticalPrototypePolicy(
+          dna,
+          "Gen 9 R4 — 戦術AI (v7.2b 完成版)",
+          evaluator,
+          TACTICAL_FEATURE_ENCODER_VERSION_V72,
+          "improved"
+        );
+      }
+
+      case "gen9-cost-v73b": {
+        if (regulationId !== GEN9_COST_V73B_SUPPORTED_REGULATION_ID) {
+          throw new Error(
+            `Gen 9 v7.3b コスト評価AI (完成版) は公式レギュレーション ${GEN9_COST_V73B_SUPPORTED_REGULATION_ID} 専用です (現在の環境: ${regulationId ?? "undefined"})`
+          );
+        }
+        const dna = loadAndValidateGen8ChampionCandidateDNA();
+        const weights = [...R4_PRESET_TACTICAL_WEIGHTS];
+        weights[20] = COST_DIAGNOSTIC_WEIGHTS[0];
+        weights[21] = COST_DIAGNOSTIC_WEIGHTS[1];
+        weights[22] = COST_DIAGNOSTIC_WEIGHTS[2];
+        weights[23] = COST_DIAGNOSTIC_WEIGHTS[3];
+        const genome = fromV6DNA(dna, weights);
+        const evaluator = rulePackage ? new GenericTacticalEvaluator(rulePackage) : undefined;
+        return new Gen9LearnableTacticalPolicy(
+          genome,
+          "Gen 9 v7.3b — コスト評価AI (完成版)",
+          evaluator,
+          TACTICAL_FEATURE_ENCODER_VERSION_V73,
+          "improved"
         );
       }
 

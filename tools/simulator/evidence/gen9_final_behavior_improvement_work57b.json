@@ -1,27 +1,27 @@
 {
-  "workId": "BP-SIM-AI-GEN9-WORK57B-FINAL-BEHAVIOR-IMPROVEMENT",
-  "timestamp": "2026-11-18T03:53:36.203Z",
+  "workId": "BP-SIM-AI-GEN9-WORK57B-R1-FINAL-ACCEPTANCE",
+  "timestamp": "2026-11-18T06:39:11.443Z",
   "results": {
     "BP-AI-14-size1-suicide-avoided": {
       "scenario": "BP-AI-14 自軍サイズ1エース vs 相手サイズ6 (完全犬死アタック回避)",
-      "choiceV72": "action.setBulwark",
-      "choiceV73": "action.setBulwark",
-      "attackScoreV72": -0.11856711082695404,
-      "endScoreV72": 0.06148073707807318,
-      "attackScoreV73": -0.11856711082695404,
-      "endScoreV73": 0.06148073707807318,
+      "choiceV72b": "action.setBulwark",
+      "choiceV73b": "action.setBulwark",
+      "attackScoreV72b": -0.11856711082695404,
+      "endScoreV72b": 0.06148073707807318,
+      "attackScoreV73b": -0.11856711082695404,
+      "endScoreV73b": 0.06148073707807318,
       "status": "PASS"
     },
     "size2-suicide-avoided": {
       "scenario": "自軍サイズ2一般兵 vs 相手サイズ6 (サイズ2犬死アタック回避)",
-      "choiceV72": "action.setBulwark",
-      "choiceV73": "action.setBulwark",
+      "choiceV72b": "action.setBulwark",
+      "choiceV73b": "action.setBulwark",
       "status": "PASS"
     },
     "empty-attacker-attack-avoided": {
       "scenario": "空集合アタック回避 (アタッカー0体でエンド選択)",
-      "choiceV72": "action.end",
-      "choiceV73": "action.end",
+      "choiceV72b": "action.end",
+      "choiceV73b": "action.end",
       "status": "PASS"
     },
     "favorable-trade-allowed": {
@@ -30,50 +30,68 @@
       "status": "PASS"
     },
     "BP-AI-09-lethal-executed": {
-      "scenario": "BP-AI-09 致死局面 (♠K=13点 vs 相手Life10大型兵士)",
-      "choiceV72": "action.deathLance",
-      "choiceV73": "action.deathLance",
-      "dlTacticalAdjustmentV72": 2.85,
-      "dlFinalScoreV72": 2.368992788031681,
-      "endFinalScoreV72": -0.15370970839798015,
-      "dlFinalScoreV73": 2.368992788031681,
-      "endFinalScoreV73": -0.15370970839798015,
+      "scenario": "BP-AI-09 公開ライフ8致死局面 (♠K=13点 vs 相手Life8+移動1枚=有効9枚)",
+      "choiceV72b": "action.deathLance",
+      "choiceV73b": "action.deathLance",
+      "dlTacticalAdjustmentV72b": 2.85,
+      "dlFinalScoreV72b": 2.0987403097775137,
+      "endFinalScoreV72b": -0.33600332479880496,
+      "dlFinalScoreV73b": 2.0987403097775137,
+      "endFinalScoreV73b": -0.33600332479880496,
       "status": "PASS"
     },
     "BP-AI-09-non-lethal-removal-executed": {
-      "scenario": "BP-AI-09 非致死局面 (相手Life15大型兵士除去+13ダメージ)",
-      "choiceV72": "action.deathLance",
-      "choiceV73": "action.deathLance",
-      "dlTacticalAdjustmentV72": 2.85,
-      "dlFinalScoreV72": 2.368992788031681,
-      "endFinalScoreV72": -0.15370970839798015,
+      "scenario": "BP-AI-09 非公開ライフ15局面 (相手Life15大型兵士除去+13ダメージ、非公開ライフ保護)",
+      "choiceV72b": "action.deathLance",
+      "choiceV73b": "action.deathLance",
+      "dlTacticalAdjustmentV72b": 0.87,
+      "dlFinalScoreV72b": 0.38899278803168064,
+      "endFinalScoreV72b": -0.15370970839798015,
+      "status": "PASS"
+    },
+    "added-cards-prevent-lethal": {
+      "scenario": "相手ライフトップへの複数カード移動による致死条件変化 (9+5=14枚 > 13点)",
+      "dlTacticalAdjustmentV72b": 0.77,
       "status": "PASS"
     },
     "BP-AI-09-guarded-out-wasted-spell-avoided": {
       "scenario": "BP-AI-09 ガード条件不発局面 (10 % 3 != 0 無駄撃ち回避)",
-      "choiceV72": "action.setBulwark",
-      "choiceV73": "action.setBulwark",
-      "dlTacticalAdjustmentV72": 0,
-      "dlFinalScoreV72": -0.5288635656399174,
-      "endFinalScoreV72": -0.19794073880438012,
+      "choiceV72b": "action.setBulwark",
+      "choiceV73b": "action.setBulwark",
+      "dlTacticalAdjustmentV72b": 0,
+      "dlFinalScoreV72b": -0.5288635656399174,
+      "endFinalScoreV72b": -0.19794073880438012,
       "status": "PASS"
     },
     "generic-throwing-tactical-evaluation": {
-      "scenario": "投擲アクションの汎用戦術評価",
-      "throwingPatternFound": false,
+      "scenario": "投擲アクションの汎用戦術評価 (公開Life8確定致死 & 非公開Life15通常加点)",
+      "throwingPatternFound": true,
+      "lethalChoiceV72b": "action.throwing",
+      "lethalTacticalAdjustment": 2.5,
+      "nonLethalTacticalAdjustment": 0.4,
       "status": "PASS"
     },
     "regression-block-defense-preserved": {
       "scenario": "致死攻撃に対する防御ブロック維持",
       "status": "PASS"
+    },
+    "standard-pack-headless-simulation": {
+      "scenario": "Standard+Pack ヘッドレス対戦 (gen9-r4-v72b vs gen9-cost-v73b)",
+      "totalDecisions": 25,
+      "turnCount": 1,
+      "completed": true,
+      "winner": "p1",
+      "status": "PASS"
     }
   },
   "summary": {
-    "totalScenarios": 9,
-    "passedScenarios": 9,
+    "totalScenarios": 11,
+    "passedScenarios": 11,
     "suicideAttacksPrevented": 2,
-    "lethalSpellsExecuted": 1,
+    "lethalSpellsExecuted": 2,
     "removalSpellsExecuted": 1,
-    "wastedSpellsPrevented": 1
+    "wastedSpellsPrevented": 1,
+    "throwingVerified": 1,
+    "hiddenLifeGuarded": 1
   }
 }

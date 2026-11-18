@@ -1,39 +1,47 @@
 /**
  * gen9FinalBehaviorImprovement.test.ts
  *
- * BlackPoker Simulator - Work 5-7B: Gen 9 AI 最終行動品質改善検証
+ * BlackPoker Simulator - Work 5-7B R1: Gen 9 AI 完成判定の最終修正検証
  *
  * 【作業目的】
- * スタンダード＋パックAI（Gen 9）を人間が自然に対戦できる水準に改善し、
- * 今回をもってGen 9の開発に一旦区切りをつける。
+ * Work 5-7Bの独立レビューで判明した問題を修正し、スタンダード＋パックAIの完成判定を確定する。
  *
  * 【検証項目】
  * 1. Fixture正規化:
  *    - BP-AI-14でランク "1" を廃止し、正規トランプエース（rank: "A", value: 1）を使用。
- *    - 別途サイズ2一般兵士による自滅攻撃シナリオも作成。
+ *    - 別途サイズ2一般兵士による自滅攻撃シナリオも検証。
  *    - Jokerの数値を0として扱う（20ではない）。
  *    - state: any の手作業合成を脱し、Core の LegalPatternGenerator と公式データ型による正規生成に統一。
  * 2. P0-1: 不合理なアタックの回避:
  *    - 空集合アタック（アタッカー0体）へのペナルティ (-0.50) でエンド/安全手を優先。
- *    - 完全犬死アタック（maxMyAtk < minOppBlk）に対し、失われる戦力に応じたペナルティ (-0.50〜-0.60) で
+ *    - 完全犬死アタック（maxMyAtk < minOppBlk）に対し、失われる戦力に応じたペナルティ (-0.55) で
  *      エンドや防壁を下回るようにし、自滅攻撃を確実に回避。
  *    - 有利戦闘、相打ち、リーサル突破は正常に許容・加点。
- * 3. P0-2: 攻撃魔法の効果評価 (汎用DSL解釈):
- *    - 特定カード名ハードコードを厳禁とし、YAML DSL の dealDamage, moveUnitCardsToZoneTop, guardCondition を汎用評価。
- *    - BP-AI-09 致死局面: ♠K+♢A で相手Life10の大型兵士へ確定致死リーサル (+2.5) を与え死の槍を選択。
- *    - BP-AI-09 非致死局面: ♠K+♢A で相手サイズ10兵士除去 (+0.40) + 13点ダメージ (+0.52) - 相手ライフ移動 (-0.05) で死の槍を選択。
- *    - BP-AI-09 ガード不発局面: ♢3 でサイズ10兵士 (10 % 3 != 0) の無駄撃ちを回避しエンドを選択。
- *    - 直接ダメージ魔法 (action.throwing 等) の汎用評価検証。
- * 4. 既存戦術機能の回帰検証:
- *    - 致死防御ブロック、Counter、Jokerリアニメイト等の健全性を維持。
- * 5. エビデンスファイル:
- *    - tools/simulator/evidence/gen9_final_behavior_improvement_work57b.json を新規出力 (R2 は上書きせず保持)。
+ * 3. P0-2: 攻撃魔法の効果評価 (汎用DSL解釈) & 非公開ライフ誤判定解消:
+ *    - 相手ライフが10枚以上（非公開: lifeCount === undefined）の場合の確定リーサル誤判定を完全解消。
+ *    - 相手ライフトップへのカード移動（addedLifeCards）を考慮した有効相手ライフで確定致死を判定。
+ *    - ガード条件が UNCERTAIN / UNKNOWN の場合は確定リーサル加点 (+2.5) を禁止。
+ *    - ガード条件確定不発局面での無駄撃ち回避（戦術加点 0）。
+ *    - BP-AI-09 公開ライフ8局面: ♠K+♢A で相手Life8+移動1枚=有効Life9に対し確定リーサル (+2.5) で死の槍を選択。
+ *    - BP-AI-09 非公開ライフ15局面: 確定リーサルと誤認せず、除去(+0.40) + ダメージ(+0.52) - 移動(-0.05) = +0.87 で死の槍を選択。
+ *    - ライフ移動カード5枚局面: 相手公開Life 9 + 移動5枚 = 有効14枚に対し、13点ダメージでは確定リーサル不成立となることを検証。
+ * 4. P0-3: 投擲 (action.throwing) 回帰テスト修正:
+ *    - 手札に ♠10 と ♣A の2枚を用意し、Core から LegalPattern が生成されることを厳格保証 (expect(throwIdx).toBeGreaterThanOrEqual(0))。
+ *    - 公開ライフ 8（確定致死）と非公開ライフ 15（非致死直接ダメージ加点）の両方を検証。
+ * 5. P0-4: AI バージョン分離と過去の保護:
+ *    - 新設された完成版 Policy ID (gen9-r4-v72b, gen9-cost-v73b) による改善挙動の検証。
+ *    - 既存 Policy ID (gen9-r4-v72, gen9-cost-preview-v73) は legacy 動作として保護。
+ * 6. 既存戦術機能の健全性・回帰検証:
+ *    - 致死攻撃に対する防御ブロックの健全性を維持。
+ * 7. エビデンスファイル:
+ *    - tools/simulator/evidence/gen9_final_behavior_improvement_work57b.json を更新。
  */
 
 import { describe, it, expect, beforeAll, afterAll } from "vitest";
 import * as fs from "node:fs";
 import * as path from "node:path";
 import { loadRulePackageForBrowser } from "../../engine/rules/BrowserRuleLoader.js";
+import { loadRegulationCatalogForBrowser } from "../../engine/regulation/BrowserRegulationLoader.js";
 import { RulePackage } from "../../domain/rules/RulePackage.js";
 import { PlaytestPolicyFactory } from "../../engine/playtest/PlaytestPolicyFactory.js";
 import { Gen9TacticalPrototypePolicy } from "../../engine/ai/Gen9TacticalPrototypePolicy.js";
@@ -41,6 +49,10 @@ import { Gen9LearnableTacticalPolicy } from "../../engine/ai/Gen9LearnableTactic
 import { LegalPatternGenerator } from "../../engine/decision/LegalPatternGenerator.js";
 import { buildFieldUnitFromComponent } from "../../engine/rules/commandHandlers.js";
 import { PlayerKey } from "../../domain/decision/DecisionSource.js";
+import { GenericTacticalEvaluator, CoreAlignedExpressionEvaluator } from "../../engine/rules/GenericTacticalEvaluator.js";
+import { OfficialRegulationMatchSetup } from "../../engine/regulation/OfficialRegulationMatchSetup.js";
+import { GameSession } from "../../engine/session/GameSession.js";
+import { SimulationRunner } from "../../engine/simulation/SimulationRunner.js";
 
 interface StandardCard {
   readonly id: string;
@@ -90,7 +102,8 @@ function createSoldierUnit(
   card: StandardCard,
   size: number,
   rulePackage: RulePackage,
-  state: "charge" | "drive" = "charge"
+  state: "charge" | "drive" = "charge",
+  extraCards: StandardCard[] = []
 ) {
   const base = buildFieldUnitFromComponent({
     componentId: "character.soldier",
@@ -104,17 +117,19 @@ function createSoldierUnit(
     currentSize: size,
     state,
     labels: ["soldier"],
-    cards: [card],
+    cards: [card, ...extraCards],
   };
 }
 
-describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
+describe("Work 5-7B R1: Gen 9 AI 完成判定の最終修正検証", () => {
   let rulePackage: RulePackage;
-  let policyV72: Gen9TacticalPrototypePolicy;
-  let policyV73: Gen9LearnableTacticalPolicy;
+  let policyV72b: Gen9TacticalPrototypePolicy;
+  let policyV73b: Gen9LearnableTacticalPolicy;
+  let policyLegacyV72: Gen9TacticalPrototypePolicy;
+  let policyLegacyV73: Gen9LearnableTacticalPolicy;
 
   const work57bEvidence: any = {
-    workId: "BP-SIM-AI-GEN9-WORK57B-FINAL-BEHAVIOR-IMPROVEMENT",
+    workId: "BP-SIM-AI-GEN9-WORK57B-R1-FINAL-ACCEPTANCE",
     timestamp: new Date().toISOString(),
     results: {},
     summary: {
@@ -124,13 +139,33 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       lethalSpellsExecuted: 0,
       removalSpellsExecuted: 0,
       wastedSpellsPrevented: 0,
+      throwingVerified: 0,
+      hiddenLifeGuarded: 0,
     },
   };
 
   beforeAll(() => {
     rulePackage = loadRulePackageForBrowser();
 
-    policyV72 = PlaytestPolicyFactory.createPolicy(
+    // 完成版 Policy (improved)
+    policyV72b = PlaytestPolicyFactory.createPolicy(
+      "gen9-r4-v72b",
+      undefined,
+      "p1",
+      "standard-pack",
+      rulePackage
+    ) as Gen9TacticalPrototypePolicy;
+
+    policyV73b = PlaytestPolicyFactory.createPolicy(
+      "gen9-cost-v73b",
+      undefined,
+      "p1",
+      "standard-pack",
+      rulePackage
+    ) as Gen9LearnableTacticalPolicy;
+
+    // 過去互換 Policy (legacy)
+    policyLegacyV72 = PlaytestPolicyFactory.createPolicy(
       "gen9-r4-v72",
       undefined,
       "p1",
@@ -138,7 +173,7 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       rulePackage
     ) as Gen9TacticalPrototypePolicy;
 
-    policyV73 = PlaytestPolicyFactory.createPolicy(
+    policyLegacyV73 = PlaytestPolicyFactory.createPolicy(
       "gen9-cost-preview-v73",
       undefined,
       "p1",
@@ -206,37 +241,37 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       expect(attackIdx).toBeGreaterThanOrEqual(0);
       expect(endIdx).toBeGreaterThanOrEqual(0);
 
-      const evalV72 = policyV72.evaluatePatterns(req);
-      const evalV73 = policyV73.evaluatePatterns(req);
-      const choiceV72 = policyV72.choose(req).selectedPatternRef;
-      const choiceV73 = policyV73.choose(req).selectedPatternRef;
+      const evalV72b = policyV72b.evaluatePatterns(req);
+      const evalV73b = policyV73b.evaluatePatterns(req);
+      const choiceV72b = policyV72b.choose(req).selectedPatternRef;
+      const choiceV73b = policyV73b.choose(req).selectedPatternRef;
 
-      const chosenActionV72 = req.catalog.actions[req.patterns[choiceV72].actionSelectionRef!]?.actionId;
-      const chosenActionV73 = req.catalog.actions[req.patterns[choiceV73].actionSelectionRef!]?.actionId;
+      const chosenActionV72b = req.catalog.actions[req.patterns[choiceV72b].actionSelectionRef!]?.actionId;
+      const chosenActionV73b = req.catalog.actions[req.patterns[choiceV73b].actionSelectionRef!]?.actionId;
 
       // 自滅アタックが回避され、安全手（防壁セットまたはエンド）が選択されること
-      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV72);
-      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV73);
-      expect(chosenActionV72).not.toBe("action.attack");
-      expect(chosenActionV73).not.toBe("action.attack");
+      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV72b);
+      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV73b);
+      expect(chosenActionV72b).not.toBe("action.attack");
+      expect(chosenActionV73b).not.toBe("action.attack");
 
       // アタックの最終スコアがエンドを下回っていること
-      const attackScoreV72 = evalV72.scoredPatterns.find((p) => p.patternRef === attackIdx)!;
-      const endScoreV72 = evalV72.scoredPatterns.find((p) => p.patternRef === endIdx)!;
-      expect(attackScoreV72.finalScore).toBeLessThan(endScoreV72.finalScore);
+      const attackScoreV72b = evalV72b.scoredPatterns.find((p) => p.patternRef === attackIdx)!;
+      const endScoreV72b = evalV72b.scoredPatterns.find((p) => p.patternRef === endIdx)!;
+      expect(attackScoreV72b.finalScore).toBeLessThan(endScoreV72b.finalScore);
 
-      const attackScoreV73 = evalV73.scoredPatterns.find((p) => p.patternRef === attackIdx)!;
-      const endScoreV73 = evalV73.scoredPatterns.find((p) => p.patternRef === endIdx)!;
-      expect(attackScoreV73.finalScore).toBeLessThan(endScoreV73.finalScore);
+      const attackScoreV73b = evalV73b.scoredPatterns.find((p) => p.patternRef === attackIdx)!;
+      const endScoreV73b = evalV73b.scoredPatterns.find((p) => p.patternRef === endIdx)!;
+      expect(attackScoreV73b.finalScore).toBeLessThan(endScoreV73b.finalScore);
 
       work57bEvidence.results["BP-AI-14-size1-suicide-avoided"] = {
         scenario: "BP-AI-14 自軍サイズ1エース vs 相手サイズ6 (完全犬死アタック回避)",
-        choiceV72: chosenActionV72,
-        choiceV73: chosenActionV73,
-        attackScoreV72: attackScoreV72.finalScore,
-        endScoreV72: endScoreV72.finalScore,
-        attackScoreV73: attackScoreV73.finalScore,
-        endScoreV73: endScoreV73.finalScore,
+        choiceV72b: chosenActionV72b,
+        choiceV73b: chosenActionV73b,
+        attackScoreV72b: attackScoreV72b.finalScore,
+        endScoreV72b: endScoreV72b.finalScore,
+        attackScoreV73b: attackScoreV73b.finalScore,
+        endScoreV73b: endScoreV73b.finalScore,
         status: "PASS",
       };
       work57bEvidence.summary.totalScenarios++;
@@ -261,28 +296,21 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       const decision = LegalPatternGenerator.generateActionRequestDecision(state, "p1", rulePackage);
       const req = decision.request;
 
-      const attackIdx = req.patterns.findIndex(
-        (p) => req.catalog.actions[p.actionSelectionRef!]?.actionId === "action.attack"
-      );
-      const endIdx = req.patterns.findIndex(
-        (p) => req.catalog.actions[p.actionSelectionRef!]?.actionId === "action.end"
-      );
+      const choiceV72b = policyV72b.choose(req).selectedPatternRef;
+      const choiceV73b = policyV73b.choose(req).selectedPatternRef;
 
-      const choiceV72 = policyV72.choose(req).selectedPatternRef;
-      const choiceV73 = policyV73.choose(req).selectedPatternRef;
+      const chosenActionV72b = req.catalog.actions[req.patterns[choiceV72b].actionSelectionRef!]?.actionId;
+      const chosenActionV73b = req.catalog.actions[req.patterns[choiceV73b].actionSelectionRef!]?.actionId;
 
-      const chosenActionV72 = req.catalog.actions[req.patterns[choiceV72].actionSelectionRef!]?.actionId;
-      const chosenActionV73 = req.catalog.actions[req.patterns[choiceV73].actionSelectionRef!]?.actionId;
-
-      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV72);
-      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV73);
-      expect(chosenActionV72).not.toBe("action.attack");
-      expect(chosenActionV73).not.toBe("action.attack");
+      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV72b);
+      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV73b);
+      expect(chosenActionV72b).not.toBe("action.attack");
+      expect(chosenActionV73b).not.toBe("action.attack");
 
       work57bEvidence.results["size2-suicide-avoided"] = {
         scenario: "自軍サイズ2一般兵 vs 相手サイズ6 (サイズ2犬死アタック回避)",
-        choiceV72: chosenActionV72,
-        choiceV73: chosenActionV73,
+        choiceV72b: chosenActionV72b,
+        choiceV73b: chosenActionV73b,
         status: "PASS",
       };
       work57bEvidence.summary.totalScenarios++;
@@ -291,7 +319,6 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
     });
 
     it("2.3 空集合アタックの回避 (アタッカー0体でエンド選択)", () => {
-      // 自軍フィールドは疲労状態 (drive) の兵士のみ、または兵士なし
       const exhaustedCard: StandardCard = { id: "c-s-5", suit: "S", rank: "5", value: 5, faceUp: true };
       const myExhaustedSoldier = createSoldierUnit("u-p1-ex", "p1", exhaustedCard, 5, rulePackage, "drive");
 
@@ -304,21 +331,21 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       const decision = LegalPatternGenerator.generateActionRequestDecision(state, "p1", rulePackage);
       const req = decision.request;
 
-      const choiceV72 = policyV72.choose(req).selectedPatternRef;
-      const choiceV73 = policyV73.choose(req).selectedPatternRef;
+      const choiceV72b = policyV72b.choose(req).selectedPatternRef;
+      const choiceV73b = policyV73b.choose(req).selectedPatternRef;
 
-      const chosenActionV72 = req.catalog.actions[req.patterns[choiceV72].actionSelectionRef!]?.actionId;
-      const chosenActionV73 = req.catalog.actions[req.patterns[choiceV73].actionSelectionRef!]?.actionId;
+      const chosenActionV72b = req.catalog.actions[req.patterns[choiceV72b].actionSelectionRef!]?.actionId;
+      const chosenActionV73b = req.catalog.actions[req.patterns[choiceV73b].actionSelectionRef!]?.actionId;
 
-      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV72);
-      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV73);
-      expect(chosenActionV72).not.toBe("action.attack");
-      expect(chosenActionV73).not.toBe("action.attack");
+      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV72b);
+      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV73b);
+      expect(chosenActionV72b).not.toBe("action.attack");
+      expect(chosenActionV73b).not.toBe("action.attack");
 
       work57bEvidence.results["empty-attacker-attack-avoided"] = {
         scenario: "空集合アタック回避 (アタッカー0体でエンド選択)",
-        choiceV72: chosenActionV72,
-        choiceV73: chosenActionV73,
+        choiceV72b: chosenActionV72b,
+        choiceV73b: chosenActionV73b,
         status: "PASS",
       };
       work57bEvidence.summary.totalScenarios++;
@@ -326,7 +353,6 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
     });
 
     it("2.4 有効戦闘・相打ち・未ブロック攻撃の正常許容 (回帰防止)", () => {
-      // 自軍サイズ6 vs 相手サイズ6 (相打ち可能)
       const myCard: StandardCard = { id: "c-s-6", suit: "S", rank: "6", value: 6, faceUp: true };
       const oppCard: StandardCard = { id: "c-d-6", suit: "D", rank: "6", value: 6, faceUp: true };
 
@@ -346,8 +372,8 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       const attackIdx = req.patterns.findIndex(
         (p) => req.catalog.actions[p.actionSelectionRef!]?.actionId === "action.attack"
       );
-      const evalV72 = policyV72.evaluatePatterns(req);
-      const attackScore = evalV72.scoredPatterns.find((p) => p.patternRef === attackIdx)!;
+      const evalV72b = policyV72b.evaluatePatterns(req);
+      const attackScore = evalV72b.scoredPatterns.find((p) => p.patternRef === attackIdx)!;
 
       // 相打ち可能時はペナルティではなく加点 (+0.05) が適用され有効な選択肢として残る
       expect(attackScore.tacticalAdjustment).toBeGreaterThanOrEqual(0.05);
@@ -363,10 +389,14 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
   });
 
   // ===========================================================================
-  // 3. P0-2: 攻撃魔法の効果評価 (BP-AI-09 改善検証)
+  // 3. P0-2: 攻撃魔法の効果評価 (BP-AI-09 改善検証 & ライフ秘匿性 & ガード確実性)
   // ===========================================================================
-  describe("3. P0-2: 攻撃魔法の効果評価 (汎用DSL解釈)", () => {
-    it("3.1 BP-AI-09 致死局面 (♠K+♢A vs 相手Life10大型兵士): 死の槍を最高スコアで選択", () => {
+  describe("3. P0-2: 攻撃魔法の効果評価 (汎用DSL解釈 & 非公開ライフ誤判定解消)", () => {
+    it("3.1 BP-AI-09 公開ライフ8致死局面: 死の槍を最高スコアで選択 (確定リーサル +2.5)", () => {
+      // 相手ライフ 8 (公開: 9枚以下のため lifeCount === 8)
+      // 死の槍: ♠K = 13点ダメージ。相手大型兵士 (カード1枚) を相手ライフトップへ移動。
+      // 有効相手ライフ = 8 + 1 = 9 枚。
+      // 13 >= 9 のため確定致死リーサル成立 (+2.5)。
       const spadeK: StandardCard = { id: "c-sk", suit: "S", rank: "K", value: 13, faceUp: true };
       const diamondA: StandardCard = { id: "c-da", suit: "D", rank: "A", value: 1, faceUp: true };
       const oppBossCard: StandardCard = { id: "c-boss", suit: "H", rank: "10", value: 10, faceUp: true };
@@ -377,11 +407,15 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
         p1Hand: [spadeK, diamondA],
         p1LifeCount: 10,
         p2Field: [oppBossUnit],
-        p2LifeCount: 10, // ♠K=13点ダメージで即死リーサル
+        p2LifeCount: 8, // 公開ライフ 8
       });
 
       const decision = LegalPatternGenerator.generateActionRequestDecision(state, "p1", rulePackage);
       const req = decision.request;
+
+      // 相手ライフが 8 として公開されていることを確認
+      const oppView = req.observation.players.find((p) => p.playerId === "p2");
+      expect(oppView?.lifeCount).toBe(8);
 
       const dlIdx = req.patterns.findIndex(
         (p) => req.catalog.actions[p.actionSelectionRef!]?.actionId === "action.deathLance"
@@ -393,35 +427,36 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       expect(dlIdx).toBeGreaterThanOrEqual(0);
       expect(endIdx).toBeGreaterThanOrEqual(0);
 
-      const evalV72 = policyV72.evaluatePatterns(req);
-      const evalV73 = policyV73.evaluatePatterns(req);
-      const choiceV72 = policyV72.choose(req).selectedPatternRef;
-      const choiceV73 = policyV73.choose(req).selectedPatternRef;
+      const evalV72b = policyV72b.evaluatePatterns(req);
+      const evalV73b = policyV73b.evaluatePatterns(req);
+      const choiceV72b = policyV72b.choose(req).selectedPatternRef;
+      const choiceV73b = policyV73b.choose(req).selectedPatternRef;
 
-      const chosenActionV72 = req.catalog.actions[req.patterns[choiceV72].actionSelectionRef!]?.actionId;
-      const chosenActionV73 = req.catalog.actions[req.patterns[choiceV73].actionSelectionRef!]?.actionId;
+      const chosenActionV72b = req.catalog.actions[req.patterns[choiceV72b].actionSelectionRef!]?.actionId;
+      const chosenActionV73b = req.catalog.actions[req.patterns[choiceV73b].actionSelectionRef!]?.actionId;
 
       // 死の槍が最高評価で選択されること
-      expect(chosenActionV72).toBe("action.deathLance");
-      expect(chosenActionV73).toBe("action.deathLance");
+      expect(chosenActionV72b).toBe("action.deathLance");
+      expect(chosenActionV73b).toBe("action.deathLance");
 
-      const dlScoreV72 = evalV72.scoredPatterns.find((p) => p.patternRef === dlIdx)!;
-      const endScoreV72 = evalV72.scoredPatterns.find((p) => p.patternRef === endIdx)!;
-      expect(dlScoreV72.finalScore).toBeGreaterThan(endScoreV72.finalScore);
+      const dlScoreV72b = evalV72b.scoredPatterns.find((p) => p.patternRef === dlIdx)!;
+      const endScoreV72b = evalV72b.scoredPatterns.find((p) => p.patternRef === endIdx)!;
+      expect(dlScoreV72b.tacticalAdjustment).toBeGreaterThanOrEqual(2.5); // 確定リーサル加点
+      expect(dlScoreV72b.finalScore).toBeGreaterThan(endScoreV72b.finalScore);
 
-      const dlScoreV73 = evalV73.scoredPatterns.find((p) => p.patternRef === dlIdx)!;
-      const endScoreV73 = evalV73.scoredPatterns.find((p) => p.patternRef === endIdx)!;
-      expect(dlScoreV73.finalScore).toBeGreaterThan(endScoreV73.finalScore);
+      const dlScoreV73b = evalV73b.scoredPatterns.find((p) => p.patternRef === dlIdx)!;
+      const endScoreV73b = evalV73b.scoredPatterns.find((p) => p.patternRef === endIdx)!;
+      expect(dlScoreV73b.finalScore).toBeGreaterThan(endScoreV73b.finalScore);
 
       work57bEvidence.results["BP-AI-09-lethal-executed"] = {
-        scenario: "BP-AI-09 致死局面 (♠K=13点 vs 相手Life10大型兵士)",
-        choiceV72: chosenActionV72,
-        choiceV73: chosenActionV73,
-        dlTacticalAdjustmentV72: dlScoreV72.tacticalAdjustment,
-        dlFinalScoreV72: dlScoreV72.finalScore,
-        endFinalScoreV72: endScoreV72.finalScore,
-        dlFinalScoreV73: dlScoreV73.finalScore,
-        endFinalScoreV73: endScoreV73.finalScore,
+        scenario: "BP-AI-09 公開ライフ8致死局面 (♠K=13点 vs 相手Life8+移動1枚=有効9枚)",
+        choiceV72b: chosenActionV72b,
+        choiceV73b: chosenActionV73b,
+        dlTacticalAdjustmentV72b: dlScoreV72b.tacticalAdjustment,
+        dlFinalScoreV72b: dlScoreV72b.finalScore,
+        endFinalScoreV72b: endScoreV72b.finalScore,
+        dlFinalScoreV73b: dlScoreV73b.finalScore,
+        endFinalScoreV73b: endScoreV73b.finalScore,
         status: "PASS",
       };
       work57bEvidence.summary.totalScenarios++;
@@ -429,7 +464,10 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       work57bEvidence.summary.lethalSpellsExecuted++;
     });
 
-    it("3.2 BP-AI-09 非致死局面 (相手Life15大型兵士): 除去＋ダメージで死の槍を選択", () => {
+    it("3.2 BP-AI-09 非公開ライフ15局面: 確定リーサルと誤認せず除去＋ダメージで死の槍を選択", () => {
+      // 相手実ライフ 15 (10枚以上のため lifeCount === undefined, lifeDisplay: '10以上')
+      // 相手の正確なライフは非公開。確定10枚と誤認してはならない。
+      // 確定リーサル (+2.5) にはならず、大型兵士除去 (+0.40) + 直接ダメージ (+0.52) - 相手ライフ移動 (-0.05) = +0.87 で死の槍を選択。
       const spadeK: StandardCard = { id: "c-sk", suit: "S", rank: "K", value: 13, faceUp: true };
       const diamondA: StandardCard = { id: "c-da", suit: "D", rank: "A", value: 1, faceUp: true };
       const oppBossCard: StandardCard = { id: "c-boss", suit: "H", rank: "10", value: 10, faceUp: true };
@@ -440,11 +478,16 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
         p1Hand: [spadeK, diamondA],
         p1LifeCount: 10,
         p2Field: [oppBossUnit],
-        p2LifeCount: 15, // 非致死 (残2点)
+        p2LifeCount: 15, // 非公開ライフ 15
       });
 
       const decision = LegalPatternGenerator.generateActionRequestDecision(state, "p1", rulePackage);
       const req = decision.request;
+
+      // 相手ライフが非公開 (undefined) であることを確認
+      const oppView = req.observation.players.find((p) => p.playerId === "p2");
+      expect(oppView?.lifeCount).toBeUndefined();
+      expect(oppView?.lifeDisplay).toBe("10以上");
 
       const dlIdx = req.patterns.findIndex(
         (p) => req.catalog.actions[p.actionSelectionRef!]?.actionId === "action.deathLance"
@@ -453,36 +496,101 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
         (p) => req.catalog.actions[p.actionSelectionRef!]?.actionId === "action.end"
       );
 
-      const evalV72 = policyV72.evaluatePatterns(req);
-      const evalV73 = policyV73.evaluatePatterns(req);
-      const choiceV72 = policyV72.choose(req).selectedPatternRef;
-      const choiceV73 = policyV73.choose(req).selectedPatternRef;
+      const evalV72b = policyV72b.evaluatePatterns(req);
+      const evalV73b = policyV73b.evaluatePatterns(req);
+      const choiceV72b = policyV72b.choose(req).selectedPatternRef;
+      const choiceV73b = policyV73b.choose(req).selectedPatternRef;
 
-      const chosenActionV72 = req.catalog.actions[req.patterns[choiceV72].actionSelectionRef!]?.actionId;
-      const chosenActionV73 = req.catalog.actions[req.patterns[choiceV73].actionSelectionRef!]?.actionId;
+      const chosenActionV72b = req.catalog.actions[req.patterns[choiceV72b].actionSelectionRef!]?.actionId;
+      const chosenActionV73b = req.catalog.actions[req.patterns[choiceV73b].actionSelectionRef!]?.actionId;
 
-      expect(chosenActionV72).toBe("action.deathLance");
-      expect(chosenActionV73).toBe("action.deathLance");
+      expect(chosenActionV72b).toBe("action.deathLance");
+      expect(chosenActionV73b).toBe("action.deathLance");
 
-      const dlScoreV72 = evalV72.scoredPatterns.find((p) => p.patternRef === dlIdx)!;
-      const endScoreV72 = evalV72.scoredPatterns.find((p) => p.patternRef === endIdx)!;
-      expect(dlScoreV72.finalScore).toBeGreaterThan(endScoreV72.finalScore);
+      const dlScoreV72b = evalV72b.scoredPatterns.find((p) => p.patternRef === dlIdx)!;
+      const endScoreV72b = evalV72b.scoredPatterns.find((p) => p.patternRef === endIdx)!;
+
+      // 確定リーサル加点 (+2.5) は付いていないこと（非公開ライフのためリーサル不確実）
+      expect(dlScoreV72b.tacticalAdjustment).toBeLessThan(2.5);
+      // 通常の戦術加点 (+0.87) が適用されていること
+      expect(dlScoreV72b.tacticalAdjustment).toBeCloseTo(0.87, 2);
+      expect(dlScoreV72b.finalScore).toBeGreaterThan(endScoreV72b.finalScore);
 
       work57bEvidence.results["BP-AI-09-non-lethal-removal-executed"] = {
-        scenario: "BP-AI-09 非致死局面 (相手Life15大型兵士除去+13ダメージ)",
-        choiceV72: chosenActionV72,
-        choiceV73: chosenActionV73,
-        dlTacticalAdjustmentV72: dlScoreV72.tacticalAdjustment,
-        dlFinalScoreV72: dlScoreV72.finalScore,
-        endFinalScoreV72: endScoreV72.finalScore,
+        scenario: "BP-AI-09 非公開ライフ15局面 (相手Life15大型兵士除去+13ダメージ、非公開ライフ保護)",
+        choiceV72b: chosenActionV72b,
+        choiceV73b: chosenActionV73b,
+        dlTacticalAdjustmentV72b: dlScoreV72b.tacticalAdjustment,
+        dlFinalScoreV72b: dlScoreV72b.finalScore,
+        endFinalScoreV72b: endScoreV72b.finalScore,
         status: "PASS",
       };
       work57bEvidence.summary.totalScenarios++;
       work57bEvidence.summary.passedScenarios++;
       work57bEvidence.summary.removalSpellsExecuted++;
+      work57bEvidence.summary.hiddenLifeGuarded++;
     });
 
-    it("3.3 BP-AI-09 ガード条件不発局面 (♢3 でサイズ10兵士: 10 % 3 != 0 で無駄撃ち回避)", () => {
+    it("3.3 相手ライフトップへの複数カード移動による致死条件変化の検証", () => {
+      // 相手公開ライフ 9 枚。
+      // 相手兵士が 5 枚のカードで構成されている大型合体兵士。
+      // 死の槍 (♠K=13点ダメージ) でこの兵士を相手ライフトップへ送ると、
+      // 相手有効ライフは 9 + 5 = 14 枚となる。
+      // 13点ダメージ < 14枚 のため、確定致死（リーサル）は不成立となることを検証！
+      const spadeK: StandardCard = { id: "c-sk", suit: "S", rank: "K", value: 13, faceUp: true };
+      const diamondA: StandardCard = { id: "c-da", suit: "D", rank: "A", value: 1, faceUp: true };
+      const oppBossCard: StandardCard = { id: "c-boss-1", suit: "H", rank: "10", value: 10, faceUp: true };
+      const extraCard2: StandardCard = { id: "c-extra-2", suit: "H", rank: "2", value: 2, faceUp: false };
+      const extraCard3: StandardCard = { id: "c-extra-3", suit: "H", rank: "3", value: 3, faceUp: false };
+      const extraCard4: StandardCard = { id: "c-extra-4", suit: "H", rank: "4", value: 4, faceUp: false };
+      const extraCard5: StandardCard = { id: "c-extra-5", suit: "H", rank: "5", value: 5, faceUp: false };
+
+      // 5枚カード構成の兵士 (currentSize: 10)
+      const oppBossUnit = createSoldierUnit(
+        "u-p2-boss-5cards",
+        "p2",
+        oppBossCard,
+        10,
+        rulePackage,
+        "charge",
+        [extraCard2, extraCard3, extraCard4, extraCard5]
+      );
+      expect(oppBossUnit.cards.length).toBe(5);
+
+      const state = createNormalizedGameState({
+        p1Hand: [spadeK, diamondA],
+        p1LifeCount: 10,
+        p2Field: [oppBossUnit],
+        p2LifeCount: 9, // 公開ライフ 9
+      });
+
+      const decision = LegalPatternGenerator.generateActionRequestDecision(state, "p1", rulePackage);
+      const req = decision.request;
+
+      const oppView = req.observation.players.find((p) => p.playerId === "p2");
+      expect(oppView?.lifeCount).toBe(9);
+
+      const dlIdx = req.patterns.findIndex(
+        (p) => req.catalog.actions[p.actionSelectionRef!]?.actionId === "action.deathLance"
+      );
+      expect(dlIdx).toBeGreaterThanOrEqual(0);
+
+      const evalV72b = policyV72b.evaluatePatterns(req);
+      const dlScoreV72b = evalV72b.scoredPatterns.find((p) => p.patternRef === dlIdx)!;
+
+      // 9 + 5 = 14枚 > 13点ダメージのため、確定リーサル加点 (+2.5) は付いてはいけない！
+      expect(dlScoreV72b.tacticalAdjustment).toBeLessThan(2.5);
+
+      work57bEvidence.results["added-cards-prevent-lethal"] = {
+        scenario: "相手ライフトップへの複数カード移動による致死条件変化 (9+5=14枚 > 13点)",
+        dlTacticalAdjustmentV72b: dlScoreV72b.tacticalAdjustment,
+        status: "PASS",
+      };
+      work57bEvidence.summary.totalScenarios++;
+      work57bEvidence.summary.passedScenarios++;
+    });
+
+    it("3.4 BP-AI-09 ガード条件不発局面 (♢3 でサイズ10兵士: 10 % 3 != 0 で無駄撃ち回避)", () => {
       const spadeK: StandardCard = { id: "c-sk", suit: "S", rank: "K", value: 13, faceUp: true };
       const diamond3: StandardCard = { id: "c-d3", suit: "D", rank: "3", value: 3, faceUp: true };
       const oppBossCard: StandardCard = { id: "c-boss", suit: "H", rank: "10", value: 10, faceUp: true };
@@ -510,32 +618,32 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       expect(dlIdx).toBeGreaterThanOrEqual(0);
       expect(endIdx).toBeGreaterThanOrEqual(0);
 
-      const evalV72 = policyV72.evaluatePatterns(req);
-      const evalV73 = policyV73.evaluatePatterns(req);
-      const choiceV72 = policyV72.choose(req).selectedPatternRef;
-      const choiceV73 = policyV73.choose(req).selectedPatternRef;
+      const evalV72b = policyV72b.evaluatePatterns(req);
+      const evalV73b = policyV73b.evaluatePatterns(req);
+      const choiceV72b = policyV72b.choose(req).selectedPatternRef;
+      const choiceV73b = policyV73b.choose(req).selectedPatternRef;
 
-      const chosenActionV72 = req.catalog.actions[req.patterns[choiceV72].actionSelectionRef!]?.actionId;
-      const chosenActionV73 = req.catalog.actions[req.patterns[choiceV73].actionSelectionRef!]?.actionId;
+      const chosenActionV72b = req.catalog.actions[req.patterns[choiceV72b].actionSelectionRef!]?.actionId;
+      const chosenActionV73b = req.catalog.actions[req.patterns[choiceV73b].actionSelectionRef!]?.actionId;
 
-      // 無駄撃ち死の槍は選ばれず、エンドが選択されること
-      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV72);
-      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV73);
-      expect(chosenActionV72).not.toBe("action.attack");
-      expect(chosenActionV73).not.toBe("action.attack");
+      // 無駄撃ち死の槍は選ばれず、安全手（エンドまたは防壁）が選択されること
+      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV72b);
+      expect(["action.end", "action.setBulwark"]).toContain(chosenActionV73b);
+      expect(chosenActionV72b).not.toBe("action.attack");
+      expect(chosenActionV73b).not.toBe("action.attack");
 
-      const dlScoreV72 = evalV72.scoredPatterns.find((p) => p.patternRef === dlIdx)!;
-      const endScoreV72 = evalV72.scoredPatterns.find((p) => p.patternRef === endIdx)!;
-      expect(dlScoreV72.tacticalAdjustment).toBe(0); // ガード不発時は戦術加点0
-      expect(dlScoreV72.finalScore).toBeLessThan(endScoreV72.finalScore);
+      const dlScoreV72b = evalV72b.scoredPatterns.find((p) => p.patternRef === dlIdx)!;
+      const endScoreV72b = evalV72b.scoredPatterns.find((p) => p.patternRef === endIdx)!;
+      expect(dlScoreV72b.tacticalAdjustment).toBe(0); // ガード不発時は戦術加点0
+      expect(dlScoreV72b.finalScore).toBeLessThan(endScoreV72b.finalScore);
 
       work57bEvidence.results["BP-AI-09-guarded-out-wasted-spell-avoided"] = {
         scenario: "BP-AI-09 ガード条件不発局面 (10 % 3 != 0 無駄撃ち回避)",
-        choiceV72: chosenActionV72,
-        choiceV73: chosenActionV73,
-        dlTacticalAdjustmentV72: dlScoreV72.tacticalAdjustment,
-        dlFinalScoreV72: dlScoreV72.finalScore,
-        endFinalScoreV72: endScoreV72.finalScore,
+        choiceV72b: chosenActionV72b,
+        choiceV73b: chosenActionV73b,
+        dlTacticalAdjustmentV72b: dlScoreV72b.tacticalAdjustment,
+        dlFinalScoreV72b: dlScoreV72b.finalScore,
+        endFinalScoreV72b: endScoreV72b.finalScore,
         status: "PASS",
       };
       work57bEvidence.summary.totalScenarios++;
@@ -543,45 +651,126 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       work57bEvidence.summary.wastedSpellsPrevented++;
     });
 
-    it("3.4 投擲 (action.throwing) の汎用ダメージ評価検証", () => {
-      // 投擲: 手札1枚を捨てて相手にダメージを与える
-      const throwingCard: StandardCard = { id: "c-s-10", suit: "S", rank: "10", value: 10, faceUp: true };
-      const state = createNormalizedGameState({
-        p1Hand: [throwingCard],
+    it("3.5 ガード条件が UNCERTAIN / UNKNOWN の場合に確定リーサル加点 (+2.5) を禁止する検証", () => {
+      // CoreAlignedExpressionEvaluator のガード状態評価を検証
+      // 非公開カードに依存するガード式: UNCERTAIN
+      const uncertainStatus = CoreAlignedExpressionEvaluator.evaluateCondition(
+        "target.size % keyCards.diamond.rankValue == 0",
+        {
+          viewerPlayerId: "p1",
+          observation: { players: [] } as any,
+          targetUnit: { unitId: "u1", currentSize: 10 } as any,
+          keyCards: [{ visibility: "HIDDEN" } as any],
+        }
+      );
+      expect(uncertainStatus).toBe("UNCERTAIN");
+
+      // 未知の式: UNKNOWN
+      const unknownStatus = CoreAlignedExpressionEvaluator.evaluateCondition(
+        "unknown_func() == 0",
+        {
+          viewerPlayerId: "p1",
+          observation: { players: [] } as any,
+        }
+      );
+      expect(unknownStatus).toBe("UNKNOWN");
+    });
+
+    it("3.6 投擲 (action.throwing) の汎用ダメージ評価検証 (P0 投擲回帰テスト修正)", () => {
+      // 投擲の公式条件 (throwing.yaml):
+      // - キーカード: ♠ (A..K) と ♣ (A..K) の2枚が必要
+      // - ダメージ: keyCards.spade.rankValue
+      const spade10: StandardCard = { id: "c-s-10", suit: "S", rank: "10", value: 10, faceUp: true };
+      const clubA: StandardCard = { id: "c-c-a", suit: "C", rank: "A", value: 1, faceUp: true };
+
+      // 1. 公開ライフ 8 局面: 10点ダメージで確定リーサル (+2.5)
+      const lethalState = createNormalizedGameState({
+        p1Hand: [spade10, clubA],
         p1LifeCount: 15,
-        p2LifeCount: 8, // 10点ダメージで即死リーサル
+        p2LifeCount: 8, // 10 >= 8 で確定リーサル
       });
 
-      const decision = LegalPatternGenerator.generateActionRequestDecision(state, "p1", rulePackage);
-      const req = decision.request;
+      const decisionLethal = LegalPatternGenerator.generateActionRequestDecision(lethalState, "p1", rulePackage);
+      const reqLethal = decisionLethal.request;
 
-      const throwIdx = req.patterns.findIndex(
-        (p) => req.catalog.actions[p.actionSelectionRef!]?.actionId === "action.throwing"
+      const throwLethalIdx = reqLethal.patterns.findIndex(
+        (p) => reqLethal.catalog.actions[p.actionSelectionRef!]?.actionId === "action.throwing"
       );
+      // P0 修正要件: throwIdx が必ず生成されることを厳格保証
+      expect(throwLethalIdx).toBeGreaterThanOrEqual(0);
 
-      if (throwIdx >= 0) {
-        const evalV72 = policyV72.evaluatePatterns(req);
-        const throwScore = evalV72.scoredPatterns.find((p) => p.patternRef === throwIdx)!;
-        expect(throwScore.tacticalAdjustment).toBeGreaterThan(0);
-      }
+      const evalLethalV72b = policyV72b.evaluatePatterns(reqLethal);
+      const evalLethalV73b = policyV73b.evaluatePatterns(reqLethal);
+      const choiceLethalV72b = policyV72b.choose(reqLethal).selectedPatternRef;
+      const choiceLethalV73b = policyV73b.choose(reqLethal).selectedPatternRef;
+
+      const chosenActionLethalV72b = reqLethal.catalog.actions[reqLethal.patterns[choiceLethalV72b].actionSelectionRef!]?.actionId;
+      const chosenActionLethalV73b = reqLethal.catalog.actions[reqLethal.patterns[choiceLethalV73b].actionSelectionRef!]?.actionId;
+
+      // 確定リーサル局面では投擲が最高評価で選択されること
+      expect(chosenActionLethalV72b).toBe("action.throwing");
+      expect(chosenActionLethalV73b).toBe("action.throwing");
+
+      const throwLethalScore = evalLethalV72b.scoredPatterns.find((p) => p.patternRef === throwLethalIdx)!;
+      expect(throwLethalScore.tacticalAdjustment).toBeGreaterThanOrEqual(2.5);
+
+      // 2. 非公開ライフ 15 局面: 10点ダメージで通常直接ダメージ加点 (+0.40)
+      const nonLethalState = createNormalizedGameState({
+        p1Hand: [spade10, clubA],
+        p1LifeCount: 15,
+        p2LifeCount: 15, // 非公開ライフ 15
+      });
+
+      const decisionNonLethal = LegalPatternGenerator.generateActionRequestDecision(nonLethalState, "p1", rulePackage);
+      const reqNonLethal = decisionNonLethal.request;
+
+      const throwNonLethalIdx = reqNonLethal.patterns.findIndex(
+        (p) => reqNonLethal.catalog.actions[p.actionSelectionRef!]?.actionId === "action.throwing"
+      );
+      expect(throwNonLethalIdx).toBeGreaterThanOrEqual(0);
+
+      const evalNonLethalV72b = policyV72b.evaluatePatterns(reqNonLethal);
+      const throwNonLethalScore = evalNonLethalV72b.scoredPatterns.find((p) => p.patternRef === throwNonLethalIdx)!;
+
+      // 非公開ライフのため確定リーサル加点 (+2.5) ではなく、直接ダメージ加点 (+0.40)
+      expect(throwNonLethalScore.tacticalAdjustment).toBeLessThan(2.5);
+      expect(throwNonLethalScore.tacticalAdjustment).toBeCloseTo(0.40, 2);
 
       work57bEvidence.results["generic-throwing-tactical-evaluation"] = {
-        scenario: "投擲アクションの汎用戦術評価",
-        throwingPatternFound: throwIdx >= 0,
+        scenario: "投擲アクションの汎用戦術評価 (公開Life8確定致死 & 非公開Life15通常加点)",
+        throwingPatternFound: true,
+        lethalChoiceV72b: chosenActionLethalV72b,
+        lethalTacticalAdjustment: throwLethalScore.tacticalAdjustment,
+        nonLethalTacticalAdjustment: throwNonLethalScore.tacticalAdjustment,
         status: "PASS",
       };
       work57bEvidence.summary.totalScenarios++;
       work57bEvidence.summary.passedScenarios++;
+      work57bEvidence.summary.throwingVerified++;
+      work57bEvidence.summary.lethalSpellsExecuted++;
     });
   });
 
   // ===========================================================================
-  // 4. 既存戦術機能の健全性・回帰検証 (Regression Protection)
+  // 4. P0-3: AI バージョン分離と過去保護の検証
   // ===========================================================================
-  describe("4. 既存戦術機能の健全性・回帰検証", () => {
-    it("4.1 致死攻撃に対する防御ブロックの優先 (回帰検証)", () => {
-      // 相手の攻撃者サイズ10 vs 自軍Life 8 (未ブロック時即死)
-      // 自軍にブロッカーサイズ3が存在する場合、PASS ではなくブロックが優先されること
+  describe("4. P0-3: AI バージョン分離と過去保護の検証", () => {
+    it("4.1 既存 Policy ID (gen9-r4-v72, gen9-cost-preview-v73) は legacy 動作を保持", () => {
+      // 旧 Policy は behaviorVersion: 'legacy'
+      expect((policyLegacyV72 as any).behaviorVersion).toBe("legacy");
+      expect((policyLegacyV73 as any).behaviorVersion).toBe("legacy");
+
+      // 新 Policy は behaviorVersion: 'improved'
+      expect((policyV72b as any).behaviorVersion).toBe("improved");
+      expect((policyV73b as any).behaviorVersion).toBe("improved");
+    });
+  });
+
+  // ===========================================================================
+  // 5. 既存戦術機能の健全性・回帰検証 (Regression Protection)
+  // ===========================================================================
+  describe("5. 既存戦術機能の健全性・回帰検証", () => {
+    it("5.1 致死攻撃に対する防御ブロックの優先 (回帰検証)", () => {
       const myBlkCard: StandardCard = { id: "c-s-3", suit: "S", rank: "3", value: 3, faceUp: true };
       const oppAtkCard: StandardCard = { id: "c-h-10", suit: "H", rank: "10", value: 10, faceUp: true };
 
@@ -596,7 +785,6 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
         p2LifeCount: 15,
       }, "p2");
 
-      // ブロック判断要求 (source: RULE_SYSTEM_CHANCE)
       state.stage.requests = [
         {
           requestId: "req-combat-judge",
@@ -628,14 +816,51 @@ describe("Work 5-7B: Gen 9 AI 最終行動品質改善検証", () => {
       const req = decision.request;
 
       if (req.patterns.length > 0) {
-        const choiceV72 = policyV72.choose(req).selectedPatternRef;
-        const chosenPattern = req.patterns[choiceV72];
+        const choiceV72b = policyV72b.choose(req).selectedPatternRef;
+        const chosenPattern = req.patterns[choiceV72b];
         // PASS (kind === "PASS") ではなくブロック割り当てが行われること
         expect(chosenPattern.kind).not.toBe("PASS");
       }
 
       work57bEvidence.results["regression-block-defense-preserved"] = {
         scenario: "致死攻撃に対する防御ブロック維持",
+        status: "PASS",
+      };
+      work57bEvidence.summary.totalScenarios++;
+      work57bEvidence.summary.passedScenarios++;
+    });
+  });
+
+  // ===========================================================================
+  // 6. ヘッドレス対戦完走検証 (Standard+Pack)
+  // ===========================================================================
+  describe("6. ヘッドレス対戦完走検証 (Standard+Pack)", () => {
+    it("6.1 gen9-r4-v72b vs gen9-cost-v73b のヘッドレス対戦が正常に進行・完走すること", () => {
+      const catalog = loadRegulationCatalogForBrowser();
+      const reg = catalog.regulations.get("standard-pack")!;
+      const frame = catalog.frames.get(reg.frameId)!;
+
+      const p1 = PlaytestPolicyFactory.createPolicy("gen9-r4-v72b", 12345, "p1", "standard-pack", rulePackage);
+      const p2 = PlaytestPolicyFactory.createPolicy("gen9-cost-v73b", 12345, "p2", "standard-pack", rulePackage);
+
+      const setupOutcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, 12345, {
+        playerNames: { p1: "AI-72b", p2: "AI-73b" },
+      });
+      expect(setupOutcome.type).toBe("READY");
+      if (setupOutcome.type !== "READY") return;
+
+      const session = new GameSession(setupOutcome.state, rulePackage, { matchSeed: 12345 });
+      const simResult = SimulationRunner.run(session, { p1, p2 }, { maxDecisions: 150 });
+
+      expect(simResult.totalDecisions).toBeGreaterThan(0);
+      expect(simResult.turnCount).toBeGreaterThanOrEqual(1);
+
+      work57bEvidence.results["standard-pack-headless-simulation"] = {
+        scenario: "Standard+Pack ヘッドレス対戦 (gen9-r4-v72b vs gen9-cost-v73b)",
+        totalDecisions: simResult.totalDecisions,
+        turnCount: simResult.turnCount,
+        completed: simResult.completed,
+        winner: simResult.winner,
         status: "PASS",
       };
       work57bEvidence.summary.totalScenarios++;

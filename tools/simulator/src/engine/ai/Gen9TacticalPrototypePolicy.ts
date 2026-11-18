@@ -56,11 +56,14 @@ export interface TacticalEvaluationResult {
   readonly bestPatternRef: number;
 }
 
+export type Gen9BehaviorVersion = "legacy" | "improved";
+
 export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
   public readonly descriptor: PolicyDescriptor;
   private readonly dna: DecisionDNA;
   private readonly tacticalEvaluator?: TacticalEvaluator;
   private readonly encoderVersion: TacticalFeatureEncoderVersion;
+  private readonly behaviorVersion: Gen9BehaviorVersion;
   private static defaultEvaluator?: TacticalEvaluator;
 
   /**
@@ -81,12 +84,14 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     dna: Readonly<DecisionDNA>,
     name?: string,
     evaluator?: TacticalEvaluator,
-    encoderVersion: TacticalFeatureEncoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT
+    encoderVersion: TacticalFeatureEncoderVersion = TACTICAL_FEATURE_ENCODER_VERSION_CURRENT,
+    behaviorVersion: Gen9BehaviorVersion = "legacy"
   ) {
     DecisionDNACodec.validate(dna);
     this.dna = DecisionDNACodec.clone(dna);
     this.tacticalEvaluator = evaluator ?? Gen9TacticalPrototypePolicy.defaultEvaluator;
     this.encoderVersion = encoderVersion;
+    this.behaviorVersion = behaviorVersion;
 
     this.descriptor = {
       kind: "genome",
@@ -96,11 +101,16 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
         dnaFormatVersion: this.dna.dnaFormatVersion,
         featureSchemaVersion: this.dna.featureSchemaVersion,
         tacticalFeatureEncoderVersion: this.encoderVersion,
+        gen9BehaviorVersion: this.behaviorVersion,
         scoringModel: "linear_interaction_plus_tactical_v2",
         dnaId: this.dna.metadata?.id,
         dnaName: this.dna.metadata?.name,
       },
     };
+  }
+
+  public getBehaviorVersion(): Gen9BehaviorVersion {
+    return this.behaviorVersion;
   }
 
   public getEncoderVersion(): TacticalFeatureEncoderVersion {
@@ -396,6 +406,7 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     // 戦術評価 B-1: 能動アクション（攻撃魔法・除去・直接ダメージ等）の汎用評価 (Work 5-7B)
     // =========================================================================
     if (
+      this.behaviorVersion === "improved" &&
       act &&
       act.actionId !== "action.attack" &&
       act.actionId !== "action.end" &&
@@ -463,21 +474,26 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     const oppTrumps = oppView?.trumps ?? [];
     const oppLife = oppView?.lifeCount ?? 15;
 
+    const getUnitSize = (u: any): number => u.currentSize ?? u.size ?? 0;
+
     // 相手の起立状態のブロッカー (兵士, 英雄, 防壁)
     const activeBlockers = [...oppUnits, ...oppTrumps].filter(
-      (u) => u.state === "charge" && (u.currentSize ?? 0) > 0
+      (u) => u.state === "charge" && getUnitSize(u) > 0
     );
 
     // 自軍の攻撃可能な兵士
     const myAttackers = (selfView?.field ?? []).filter(
-      (u) => u.state === "charge" && u.kind !== "bulwark" && (u.currentSize ?? 0) > 0
+      (u) => u.state === "charge" && u.kind !== "bulwark" && getUnitSize(u) > 0
     );
 
     if (myAttackers.length === 0) {
-      return { adjustment: -0.50, reason: "Empty attacker attack penalty (-0.50)" };
+      if (this.behaviorVersion === "improved") {
+        return { adjustment: -0.50, reason: "Empty attacker attack penalty (-0.50)" };
+      }
+      return { adjustment: 0 };
     }
 
-    const totalAtk = myAttackers.reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
+    const totalAtk = myAttackers.reduce((sum, u) => sum + getUnitSize(u), 0);
 
     // -------------------------------------------------------------------------
     // ケース 1: 相手ブロッカー不在
@@ -493,10 +509,10 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     // ケース 2: アタッカー数 > ブロッカー数 (数的優位・未ブロック突破)
     // -------------------------------------------------------------------------
     if (myAttackers.length > activeBlockers.length) {
-      const sortedAttackers = [...myAttackers].sort((a, b) => (a.currentSize ?? 0) - (b.currentSize ?? 0));
+      const sortedAttackers = [...myAttackers].sort((a, b) => getUnitSize(a) - getUnitSize(b));
       const unblockedCount = myAttackers.length - activeBlockers.length;
       // 相手が最大サイズのアタッカーをすべてブロックしたと仮定した際の最小突破ダメージ
-      const minBreakthrough = sortedAttackers.slice(0, unblockedCount).reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
+      const minBreakthrough = sortedAttackers.slice(0, unblockedCount).reduce((sum, u) => sum + getUnitSize(u), 0);
 
       if (minBreakthrough >= oppLife) {
         return { adjustment: 2.5, reason: `Guaranteed lethal attack bonus (+2.5): minBreakthrough=${minBreakthrough} >= oppLife=${oppLife}` };
@@ -511,9 +527,9 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
     // -------------------------------------------------------------------------
     // ケース 3: アタッカー数 <= ブロッカー数 (トレード可能性の評価)
     // -------------------------------------------------------------------------
-    const maxMyAtk = myAttackers.reduce((max, u) => Math.max(max, u.currentSize ?? 0), 0);
-    const minOppBlk = activeBlockers.reduce((min, u) => Math.min(min, u.currentSize ?? 0), Infinity);
-    const maxOppBlk = activeBlockers.reduce((max, u) => Math.max(max, u.currentSize ?? 0), 0);
+    const maxMyAtk = myAttackers.reduce((max, u) => Math.max(max, getUnitSize(u)), 0);
+    const minOppBlk = activeBlockers.reduce((min, u) => Math.min(min, getUnitSize(u)), Infinity);
+    const maxOppBlk = activeBlockers.reduce((max, u) => Math.max(max, getUnitSize(u)), 0);
 
     // 相手の最小ブロッカーを倒せる・相討ちできるアタッカーが存在する場合: 有効な戦闘
     if (maxMyAtk >= minOppBlk) {
@@ -522,8 +538,16 @@ export class Gen9TacticalPrototypePolicy implements DecisionPolicy {
 
     // 自軍の全アタッカーが相手のどのブロッカーよりも小さく、一方的に討ち取られる場合 (完全犬死)
     if (maxMyAtk < minOppBlk) {
-      const lostSizeSum = myAttackers.reduce((sum, u) => sum + (u.currentSize ?? 0), 0);
-      const penalty = 0.50 + Math.min(0.20, 0.05 * lostSizeSum);
+      if (this.behaviorVersion === "improved") {
+        const lostSizeSum = myAttackers.reduce((sum, u) => sum + getUnitSize(u), 0);
+        const penalty = 0.50 + Math.min(0.20, 0.05 * lostSizeSum);
+        return {
+          adjustment: -penalty,
+          reason: `Suicide attack penalty (-${penalty.toFixed(2)}): maxMyAtk=${maxMyAtk} < minOppBlk=${minOppBlk}`,
+        };
+      }
+      // legacy 挙動 (Work 5-4B / 5-7A): 最大 -0.35
+      const penalty = Math.min(0.35, 0.1 + 0.04 * (minOppBlk - maxMyAtk));
       return {
         adjustment: -penalty,
         reason: `Suicide attack penalty (-${penalty.toFixed(2)}): maxMyAtk=${maxMyAtk} < minOppBlk=${minOppBlk}`,

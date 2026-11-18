@@ -870,37 +870,62 @@ export class GenericTacticalEvaluator implements TacticalEvaluator {
       };
     }
 
-    // 6. 相手ライフと致死判定
-    let oppLife = 15;
-    if (typeof oppView?.lifeCount === "number") {
-      oppLife = oppView.lifeCount;
-    } else if (oppView?.lifeDisplay) {
-      const match = oppView.lifeDisplay.match(/\d+/);
-      if (match) oppLife = parseInt(match[0], 10);
-    }
+    // 6. 相手ライフトップへのカード移動枚数の集計
+    const addedLifeCards = movedToLifeOppUnits.reduce((sum, u) => {
+      const count = u.cards && u.cards.length > 0 ? u.cards.length : 1;
+      return sum + count;
+    }, 0);
 
-    const isLethalToOpponent = directDamageToOpponent.min >= oppLife && oppLife > 0;
+    // 7. 相手ライフと確定致死判定 (非公開ライフの確定扱い完全禁止)
+    // - oppView.lifeCount が数値 (9枚以下) のときのみ、正確な公開ライフ値として扱う
+    // - 10枚以上 (lifeCount === undefined) のときは正確な枚数は非公開であり、確定リーサルとは判定しない
+    const isCertainOppLife = typeof oppView?.lifeCount === "number";
+    const effectiveOppLife = isCertainOppLife ? (oppView!.lifeCount! + addedLifeCards) : undefined;
+
+    // 確定致死の条件:
+    // 1. ガード条件が確定成立 (CERTAIN_SATISFIED)
+    // 2. ダメージ量が確定 (isCertain)
+    // 3. 相手ライフが確定公開 (isCertainOppLife)
+    // 4. ダメージ量 >= 有効相手ライフ (カード移動後)
+    const isLethalToOpponent =
+      guardStatus === "CERTAIN_SATISFIED" &&
+      directDamageToOpponent.isCertain &&
+      isCertainOppLife &&
+      effectiveOppLife !== undefined &&
+      effectiveOppLife > 0 &&
+      directDamageToOpponent.min >= effectiveOppLife;
+
     let tacticalAdjustment = 0;
 
     if (isLethalToOpponent) {
       tacticalAdjustment += 2.5;
-      reasons.push(`Lethal damage to opponent (+2.5): dmg=${directDamageToOpponent.min} >= oppLife=${oppLife}`);
+      reasons.push(
+        `Lethal damage to opponent (+2.5): dmg=${directDamageToOpponent.min} >= effectiveOppLife=${effectiveOppLife} (base=${oppView!.lifeCount}, addedCards=${addedLifeCards})`
+      );
     } else if (directDamageToOpponent.expected > 0) {
-      const dmgBonus = Math.min(0.60, 0.04 * directDamageToOpponent.expected);
+      // 非致死、またはライフ非公開・不確実の場合の直接ダメージ評価
+      const dmgFactor = guardStatus === "UNCERTAIN" ? 0.02 : 0.04;
+      const dmgBonus = Math.min(0.60, dmgFactor * directDamageToOpponent.expected);
       tacticalAdjustment += dmgBonus;
-      reasons.push(`Direct damage to opponent (+${dmgBonus.toFixed(2)}): dmg=${directDamageToOpponent.expected}`);
+      reasons.push(
+        `Direct damage to opponent (+${dmgBonus.toFixed(2)}): dmg=${directDamageToOpponent.expected}${
+          guardStatus === "UNCERTAIN" ? " (uncertain guard condition)" : ""
+        }`
+      );
     }
 
     for (const u of destroyedOppUnits) {
-      const size = u.currentSize ?? 1;
+      const size = u.currentSize ?? (u as any).size ?? 1;
       const removalBonus = Math.min(0.50, 0.04 * size);
       tacticalAdjustment += removalBonus;
       reasons.push(`Destroyed opponent unit ${u.unitId} (size=${size}) (+${removalBonus.toFixed(2)})`);
     }
 
     for (const u of movedToLifeOppUnits) {
-      tacticalAdjustment -= 0.05;
-      reasons.push(`Unit ${u.unitId} moved to opponent life (-0.05)`);
+      const cardsCount = u.cards && u.cards.length > 0 ? u.cards.length : 1;
+      const penalty = 0.05 * cardsCount;
+      tacticalAdjustment -= penalty;
+      reasons.push(`Unit ${u.unitId} moved to opponent life (+${cardsCount} cards) (-${penalty.toFixed(2)})`);
     }
 
     return {

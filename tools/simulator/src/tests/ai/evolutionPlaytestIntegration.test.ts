@@ -386,7 +386,7 @@ describe("Evolution Playtest Integration Tests (BP-SIM-AI-EVOLUTION-PLAYTEST-V1)
   describe("Section 8D: Regression & Diagnostics / Share URL Verification", () => {
     it("PLAYTEST_POLICY_OPTIONS に Evolution g1 Best が追加され、既存 5 ポリシーが変更されていないこと", () => {
       const options = PLAYTEST_POLICY_OPTIONS;
-      expect(options.length).toBe(9);
+      expect(options.length).toBe(11);
 
       const ids = options.map((o) => o.id);
       expect(ids).toEqual([
@@ -399,6 +399,8 @@ describe("Evolution Playtest Integration Tests (BP-SIM-AI-EVOLUTION-PLAYTEST-V1)
         "gen8-champion-candidate",
         "gen9-r4-v72",
         "gen9-cost-preview-v73",
+        "gen9-r4-v72b",
+        "gen9-cost-v73b",
       ]);
 
       const evoOpt = options.find((o) => o.id === "evolution-g1-best");

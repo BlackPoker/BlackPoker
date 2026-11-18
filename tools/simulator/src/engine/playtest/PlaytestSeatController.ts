@@ -19,7 +19,9 @@ export type PlaytestPolicyId =
   | "evolution-g1-best"
   | "gen8-champion-candidate"
   | "gen9-r4-v72"
-  | "gen9-cost-preview-v73";
+  | "gen9-cost-preview-v73"
+  | "gen9-r4-v72b"
+  | "gen9-cost-v73b";
 
 /**
  * UI表示用メタデータ
@@ -119,6 +121,32 @@ export const PLAYTEST_POLICY_OPTIONS: readonly PlaytestPolicyOption[] = [
       dnaSchema: "v7.3",
       humanPerformance: "未検証",
       disclaimer: "※固定診断重みを使用した実験版であり、学習済みの最適重みではありません。最強AIと誤認しないでください。",
+    },
+  },
+  {
+    id: "gen9-r4-v72b",
+    label: "Gen 9 R4 — 戦術AI (v7.2b 完成版)",
+    description: "自滅攻撃の回避、能動攻撃魔法の評価を追加したGen9完成版戦術AI。人間との自然な対戦向けに調整されています。",
+    supportedRegulationIds: ["standard-pack"],
+    evolutionDetails: {
+      generation: "Gen 9 R4 (v7.2b 完成版)",
+      baselineRecord: "犬死攻撃完全回避・直接攻撃魔法評価対応",
+      dnaSchema: "v7.2b",
+      humanPerformance: "Playtest推奨",
+      disclaimer: "※Work 5-7B/R1で行動品質を改善した完成版AIです。",
+    },
+  },
+  {
+    id: "gen9-cost-v73b",
+    label: "Gen 9 v7.3b — コスト評価AI (完成版)",
+    description: "コスト支払い評価に加え、自滅攻撃回避・攻撃魔法評価を統合した24次元完成版AI。",
+    supportedRegulationIds: ["standard-pack"],
+    evolutionDetails: {
+      generation: "Gen 9 v7.3b (完成版)",
+      baselineRecord: "コスト支払い特徴量93.55%識別 + 犬死攻撃回避",
+      dnaSchema: "v7.3b",
+      humanPerformance: "Playtest推奨",
+      disclaimer: "※コスト支払い特徴量と最新の行動品質改善を統合した実験・完成版です。",
     },
   },
 ];
