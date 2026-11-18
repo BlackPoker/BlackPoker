@@ -37,8 +37,11 @@ export const StagePanel: React.FC<StagePanelProps> = ({
   const reversedRequests = requests.slice().reverse();
 
   return (
-    <div className="flex flex-col p-1.5 lg:p-2 rounded border border-zinc-200 bg-white shadow-sm font-sans">
-      <div className="flex items-center justify-between border-b pb-1 lg:pb-1.5 mb-1 lg:mb-1.5 border-zinc-200">
+    <div
+      data-testid="stage-panel"
+      className="flex flex-col p-1.5 lg:p-2 rounded border border-zinc-200 bg-white shadow-sm font-sans"
+    >
+      <div className="flex items-center justify-between border-b pb-1 lg:pb-1.5 mb-1 border-zinc-200">
         <div className="flex items-center gap-1.5">
           <span className="text-xs font-mono font-black text-zinc-950 tracking-wider">
             STAGE (LIFO)
@@ -63,11 +66,17 @@ export const StagePanel: React.FC<StagePanelProps> = ({
       </div>
 
       {requests.length === 0 ? (
-        <div className="flex items-center justify-center py-2 text-xs text-zinc-400 font-mono">
+        <div
+          data-testid="stage-panel-empty"
+          className="flex items-center justify-center py-0.5 text-xs text-zinc-400 font-mono"
+        >
           ステージは空です (全員PASSで次の処理へ)
         </div>
       ) : (
-        <div className="flex flex-col gap-1.5">
+        <div
+          data-testid="stage-panel-requests"
+          className="flex flex-col gap-1 max-h-28 xl:max-h-36 overflow-y-auto pr-0.5"
+        >
           {reversedRequests.map((req, revIdx) => {
             const origIdx = requests.length - 1 - revIdx;
             const { isTop, label: stageBadgeLabel } = getStageRequestDisplayIndex(
@@ -109,7 +118,7 @@ export const StagePanel: React.FC<StagePanelProps> = ({
             return (
               <div
                 key={req.id || revIdx}
-                className={`flex flex-col p-1.5 sm:p-2 rounded border transition-all ${
+                className={`flex flex-col p-1 sm:p-1.5 rounded border transition-all ${
                   isHiddenOnMobile ? "hidden lg:flex" : "flex"
                 } ${borderAndBgClass}`}
               >

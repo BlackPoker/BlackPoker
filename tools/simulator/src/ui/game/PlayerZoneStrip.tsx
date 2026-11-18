@@ -39,8 +39,8 @@ export const PlayerZoneStrip: React.FC<PlayerZoneStripProps> = ({
             disabled={item.disabled}
             className={`flex items-center gap-1 px-1.5 lg:px-2 py-0 lg:py-0.5 rounded border transition shrink-0 select-none ${
               isClickable
-                ? "bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200 active:bg-zinc-300 cursor-pointer min-h-[24px] lg:min-h-[30px]"
-                : "bg-zinc-50 border-zinc-200 text-zinc-600 min-h-[24px] lg:min-h-[30px]"
+                ? "bg-zinc-100 border-zinc-300 text-zinc-800 hover:bg-zinc-200 active:bg-zinc-300 cursor-pointer min-h-[22px] lg:min-h-[24px]"
+                : "bg-zinc-50 border-zinc-200 text-zinc-600 min-h-[22px] lg:min-h-[24px]"
             }`}
           >
             <span className="font-bold text-zinc-600">{item.label}</span>

@@ -145,8 +145,8 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
   // 兵士列 (センター寄せ / 多数時は左端見切れなくスクロール可能)
   const soldierRow = soldierUnits.length > 0 ? (
-    <div className="flex flex-col gap-0.5">
-      <div className="text-[9px] font-mono font-bold text-zinc-500 hidden lg:flex items-center justify-end">
+    <div data-testid="player-board-soldier-row" className="relative flex flex-col">
+      <div className="text-[9px] font-mono font-bold text-zinc-500 hidden lg:flex items-center justify-end lg:absolute lg:top-0.5 lg:right-2 lg:z-10 pointer-events-none bg-zinc-50/90 px-1 rounded leading-none">
         <span>{`兵士 (${soldierUnits.length}体)`}</span>
       </div>
       <div className="p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 rounded bg-zinc-50 border border-zinc-200 overflow-x-auto no-scrollbar">
@@ -160,8 +160,8 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   // 防壁列 (外側・センター寄せ / ライフ側から ①, ②... / 多数時は左端見切れなくスクロール可能)
   // 画面表示を左→右で見ると [③] [②] [①] となり ① がライフ側(右端)
   const bulwarkRow = bulwarkUnits.length > 0 ? (
-    <div className="flex flex-col gap-0.5">
-      <div className="text-[9px] font-mono font-bold text-zinc-500 hidden lg:flex items-center justify-end">
+    <div data-testid="player-board-bulwark-row" className="relative flex flex-col">
+      <div className="text-[9px] font-mono font-bold text-zinc-500 hidden lg:flex items-center justify-end lg:absolute lg:top-0.5 lg:right-2 lg:z-10 pointer-events-none bg-zinc-50/90 px-1 rounded leading-none">
         <span>{`防壁 (${bulwarkUnits.length}体・ライフ側 →)`}</span>
       </div>
       <div className="p-0.5 pt-0.5 lg:p-1 lg:pt-3.5 rounded bg-zinc-50 border border-zinc-200 overflow-x-auto no-scrollbar">
@@ -174,7 +174,8 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
   return (
     <div
-      className={`flex flex-col p-1 lg:p-2 rounded border transition-all ${
+      data-testid={`player-board-${playerKey}`}
+      className={`flex flex-col p-1 lg:p-1.5 rounded border transition-all ${
         isChancePlayer
           ? "bg-white border-zinc-950 shadow-md ring-2 ring-zinc-950"
           : isTurnPlayer
@@ -182,8 +183,11 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
           : "bg-white border-zinc-200"
       }`}
     >
-      {/* 1. プレイヤーサマリーヘッダー (PlayerSummary) */}
-      <div className="flex flex-wrap items-center justify-between border-b pb-1 lg:pb-1.5 mb-1 lg:mb-1.5 border-zinc-200 gap-1">
+      {/* 1. プレイヤーサマリーヘッダー & ZoneStrip 統合バー (PlayerSummary + ZoneStrip) */}
+      <div
+        data-testid="player-board-header"
+        className="flex flex-wrap items-center justify-between border-b pb-1 mb-1 border-zinc-200 gap-1"
+      >
         <div className="flex items-center gap-1.5">
           <span className="text-[12.5px] lg:text-xs font-bold text-zinc-950 tracking-wide">
             {name}
@@ -208,22 +212,21 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
           )}
         </div>
 
-        {/* ライフ & 手札サマリー */}
-        <div className="flex items-center gap-1.5 font-mono">
-          <div className="flex items-center gap-1 bg-zinc-100 px-1.5 lg:px-2 py-0 lg:py-0.5 rounded border border-zinc-300 text-zinc-950 min-h-[22px] lg:min-h-[26px]">
+        {/* Zone Strip (Fog, 墓地, PACK, RARE) + ライフ & 手札サマリー */}
+        <div className="flex flex-wrap items-center gap-1.5 font-mono ml-auto">
+          <PlayerZoneStrip items={zoneItems} className="!py-0 !mb-0" />
+
+          <div className="flex items-center gap-1 bg-zinc-100 px-1.5 lg:px-2 py-0 lg:py-0.5 rounded border border-zinc-300 text-zinc-950 min-h-[22px] lg:min-h-[24px]">
             <span className="text-[10.5px] lg:text-[10px] font-bold text-zinc-500">LIFE:</span>
             <span className="text-[12.5px] lg:text-xs font-black text-zinc-950">{lifeDisplay}</span>
           </div>
 
-          <div className="flex items-center gap-1 bg-zinc-100 px-1.5 lg:px-2 py-0 lg:py-0.5 rounded border border-zinc-300 text-zinc-950 min-h-[22px] lg:min-h-[26px]">
+          <div className="flex items-center gap-1 bg-zinc-100 px-1.5 lg:px-2 py-0 lg:py-0.5 rounded border border-zinc-300 text-zinc-950 min-h-[22px] lg:min-h-[24px]">
             <span className="text-[10.5px] lg:text-[10px] font-bold text-zinc-500">HAND:</span>
             <span className="text-[12.5px] lg:text-xs font-black text-zinc-950">{handCount}</span>
           </div>
         </div>
       </div>
-
-      {/* 2. Zone Strip (Fog, 墓地, 将来の拡張Zone) */}
-      <PlayerZoneStrip items={zoneItems} className="mb-1 lg:mb-1.5" />
 
       {/* Fog 詳細モーダル (公開情報) */}
       {showFogModal && (
@@ -326,14 +329,14 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
       )}
 
       {/* 3. フィールド (Units) - 兵士列 / 防壁列の分離 */}
-      <div className="mb-1 lg:mb-1.5">
-        <div className="text-[9.5px] lg:text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 flex items-center justify-between">
+      <div className="mb-0.5 lg:mb-1" data-testid="player-board-field-section">
+        <div className="text-[9.5px] lg:text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 leading-none flex items-center justify-between">
           <span>FIELD (ユニット: {fieldUnits.length}体)</span>
         </div>
 
-        <div className="flex flex-col gap-1 lg:gap-1.5">
+        <div className="flex flex-col gap-1" data-testid={`player-board-field-rows-${position}`}>
           {fieldUnits.length === 0 ? (
-            <div className="flex items-center justify-center w-full text-xs text-zinc-400 italic py-2 rounded bg-zinc-50 border border-zinc-200">
+            <div className="flex items-center justify-center w-full text-xs text-zinc-400 italic py-1.5 rounded bg-zinc-50 border border-zinc-200">
               ユニットなし
             </div>
           ) : position === "top" ? (
@@ -354,12 +357,12 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
 
       {/* 4. 手札 (Hand) - 自分手札のみカード内容表示 (相手手札はHeader HANDカウントのみ表示) */}
       {isViewer && (
-        <div>
-          <div className="text-[9.5px] lg:text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 flex items-center justify-between">
+        <div data-testid="player-board-hand-section">
+          <div className="text-[9.5px] lg:text-[9px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-0.5 leading-none flex items-center justify-between">
             <span>HAND (手札: {handCount}枚)</span>
           </div>
 
-          <div className="flex gap-1 lg:gap-1.5 min-h-[36px] lg:min-h-[60px] p-1 lg:p-1.5 rounded bg-zinc-50 border border-zinc-200 items-center overflow-x-auto no-scrollbar">
+          <div className="flex gap-1 lg:gap-1.5 min-h-[36px] lg:min-h-[54px] p-1 rounded bg-zinc-50 border border-zinc-200 items-center overflow-x-auto no-scrollbar">
             {handCards.length > 0 ? (
               handCards.map((card: any, idx: number) => (
                 <CardView

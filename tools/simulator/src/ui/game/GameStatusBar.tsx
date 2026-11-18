@@ -33,13 +33,16 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
     : undefined;
 
   return (
-    <div className="flex flex-col gap-1.5 p-2 bg-white rounded border border-zinc-200 shadow-sm">
+    <div
+      data-testid="game-status-bar"
+      className="flex flex-col gap-1 p-1.5 bg-white rounded border border-zinc-200 shadow-sm"
+    >
       {/* 主要ステータスバッジ群 */}
-      <div className="flex flex-wrap items-center justify-between gap-2">
-        <div className="flex flex-wrap items-center gap-1.5 font-mono">
+      <div className="flex flex-wrap items-center justify-between gap-1.5">
+        <div className="flex flex-wrap items-center gap-1 font-mono">
           {/* 環境バッジ */}
           {environmentName && (
-            <div className="flex items-center gap-1 px-2 py-1 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
+            <div className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">環境:</span>
               <span className="text-xs font-bold text-zinc-950 font-mono">
                 {environmentName}
@@ -50,7 +53,7 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
           {/* Seed バッジ */}
           {matchSeed !== undefined && (
             <div
-              className="flex items-center gap-1 px-2 py-1 rounded bg-zinc-100 border border-zinc-300 shadow-sm cursor-help"
+              className="flex items-center gap-1 px-1.5 py-0.5 rounded bg-zinc-100 border border-zinc-300 shadow-sm cursor-help"
               title="初期山札シャッフルおよび初期配置を決定論的に再現するシードです（AI DNAとは異なります）。"
             >
               <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">対戦SEED:</span>
@@ -60,7 +63,7 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
             </div>
           )}
           {/* ターン数バッジ */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
             <span className="text-[10px] text-zinc-500 font-bold uppercase tracking-wider">TURN</span>
             <span className="text-xs font-black text-zinc-950 font-mono">
               {turnCount || 1}
@@ -68,7 +71,7 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
           </div>
 
           {/* ターンプレイヤーバッジ */}
-          <div className="flex items-center gap-1 px-2.5 py-1 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
+          <div className="flex items-center gap-1 px-2 py-0.5 rounded bg-zinc-100 border border-zinc-300 shadow-sm">
             <span className="text-[10px] text-zinc-500 font-bold">手番:</span>
             <span className="text-xs font-bold text-zinc-900">
               {turnPlayerName}
@@ -79,7 +82,7 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
           </div>
 
           {/* チャンスプレイヤーバッジ (最重要・反転黒地白文字で強調) */}
-          <div className="flex items-center gap-1.5 px-3 py-1 rounded bg-zinc-950 text-white shadow-sm font-bold">
+          <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded bg-zinc-950 text-white shadow-sm font-bold">
             <span className="text-[10px] font-black uppercase tracking-wider">CHANCE:</span>
             <span className="text-xs font-black">
               {chancePlayerName} ({chancePlayer.toUpperCase()})
@@ -87,7 +90,7 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
           </div>
 
           {/* フォーカスプレイヤーバッジ (白背景・太めの黒枠・黒文字でCHANCE/手番と明確に区別) */}
-          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border-2 border-zinc-950 text-zinc-950 shadow-sm font-bold">
+          <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-white border-2 border-zinc-950 text-zinc-950 shadow-sm font-bold">
             <span className="text-[10px] font-black uppercase tracking-wider text-zinc-700">FOCUS:</span>
             <span className="text-xs font-black">
               {focusPlayer ? `${focusPlayerName} (${focusPlayer.toUpperCase()})` : "未設定"}
@@ -102,7 +105,7 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
 
       {/* 最新イベントメッセージ */}
       {latestEventMessage && (
-        <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-800 font-mono">
+        <div className="flex items-center gap-1.5 px-2 py-0.5 rounded bg-zinc-50 border border-zinc-200 text-[11px] text-zinc-800 font-mono">
           <span className="text-[10px] font-bold text-zinc-600 border border-zinc-300 px-1 py-0.2 rounded bg-zinc-100">EVENT</span>
           <span className="font-sans break-all text-zinc-900">{latestEventMessage}</span>
         </div>

@@ -92,7 +92,8 @@ export const UnitCard: React.FC<UnitCardProps> = ({
     <div
       onClick={handleClick}
       title={`Debug ID: ${unit.unitId}`}
-      className={`relative flex flex-col items-center p-1 lg:p-1.5 rounded border transition-all select-none min-w-[76px] lg:min-w-[104px] ${
+      data-testid={`unit-card-${unit.unitId}`}
+      className={`relative flex flex-col items-center p-1 rounded border transition-all select-none min-w-[76px] lg:min-w-[96px] ${
         isClickable
           ? "cursor-pointer hover:border-zinc-950 hover:scale-[1.02] active:scale-[0.98]"
           : "cursor-pointer lg:cursor-default"
@@ -136,7 +137,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
       {/* ===================== DESKTOP 表示 (lg:以上) ===================== */}
       <div className="hidden lg:flex flex-col items-center w-full">
         {/* ユニット種別 & 状態バッジ */}
-        <div className="flex items-center justify-between w-full mb-1 gap-1">
+        <div className="flex items-center justify-between w-full mb-0.5 gap-1">
           {isBulwark ? (
             <div className="flex items-center gap-1">
               <span
@@ -166,7 +167,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
         {/* バトルロールマーカー */}
         {battleRole === "attacker" && (
-          <div className="w-full bg-zinc-950 text-white text-[9px] font-mono font-black text-center py-0.5 rounded mb-1 shadow-sm flex items-center justify-center gap-1 border border-zinc-950">
+          <div className="w-full bg-zinc-950 text-white text-[9px] font-mono font-black text-center py-0.5 rounded mb-0.5 shadow-sm flex items-center justify-center gap-1 border border-zinc-950">
             <span>ATTACK 攻撃中</span>
             {battleDisplayInfo?.blockedByHumanLabels && battleDisplayInfo.blockedByHumanLabels.length > 0 && (
               <span className="bg-white text-zinc-950 px-1 rounded text-[8px] font-mono font-bold">
@@ -176,7 +177,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           </div>
         )}
         {battleRole === "blocker" && (
-          <div className="w-full bg-zinc-100 text-zinc-950 text-[9px] font-mono font-black text-center py-0.5 rounded mb-1 shadow-sm flex items-center justify-center gap-1 border border-zinc-400">
+          <div className="w-full bg-zinc-100 text-zinc-950 text-[9px] font-mono font-black text-center py-0.5 rounded mb-0.5 shadow-sm flex items-center justify-center gap-1 border border-zinc-400">
             <span>BLOCK 防御中</span>
             {battleDisplayInfo?.targetHumanLabel && (
               <span className="bg-zinc-950 text-white px-1 rounded text-[8px] font-mono font-bold">
@@ -186,10 +187,11 @@ export const UnitCard: React.FC<UnitCardProps> = ({
           </div>
         )}
 
-        {/* カード本体表示 (DRIVE時は横向き rotate-90 & scale-95) */}
+        {/* カード本体表示 (CHARGE/DRIVE共通スロット: 56px×50px、DRIVE時はrotate-90 & scale-90で上下膨張・重なりを防止) */}
         <div
-          className={`flex flex-col items-center justify-center transition-transform duration-200 ${
-            isDrive ? "rotate-90 scale-95 my-3" : "my-1"
+          data-testid="unit-card-visual-slot"
+          className={`flex flex-col items-center justify-center w-[56px] min-h-[50px] transition-transform duration-200 ${
+            isDrive ? "rotate-90 scale-90 my-0" : "my-0"
           }`}
         >
           <MultiCardUnitStack
@@ -243,7 +245,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
         )}
 
         {/* 下部情報表示: 兵士にはSIZE、防壁には防壁数字を表示 */}
-        <div className="mt-1 pt-1 border-t border-zinc-200 w-full flex items-center justify-between text-[11px] font-mono">
+        <div className="mt-0.5 pt-0.5 border-t border-zinc-200 w-full flex items-center justify-between text-[11px] font-mono leading-none">
           {isBulwark ? (
             <>
               <span className="text-zinc-500 text-[10px] font-bold">防壁数字:</span>
