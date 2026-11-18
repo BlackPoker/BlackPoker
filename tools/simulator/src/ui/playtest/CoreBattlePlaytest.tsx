@@ -49,6 +49,7 @@ import { MobileVisibleHandStrip } from "../decision/MobileVisibleHandStrip";
 import { MobileBottomSheet, SheetMode } from "../game/MobileBottomSheet";
 import { MobileHeaderMenu } from "../game/MobileHeaderMenu";
 import { useIsDesktop } from "../hooks/useMediaQuery";
+import { usePlaytestUserPreferences } from "../preferences/PlaytestUserPreferences";
 import { PlaytestSeedMode, generateAutoSeed, generateNextAutoSeed } from "./PlaytestSeed";
 import { PlayerObservationPresenter } from "../game/PlayerObservationPresenter";
 import { BattleRelationPresenter } from "../game/BattleRelationPresenter";
@@ -147,6 +148,11 @@ export function buildUndoReconstructParams(
 
 export const CoreBattlePlaytest: React.FC = () => {
   const isDesktop = useIsDesktop();
+  const {
+    preferences: userPreferences,
+    updatePreferences: updateUserPreferences,
+    resetToDefault: resetUserPreferencesToDefault,
+  } = usePlaytestUserPreferences();
   const [fullRulePackage] = useState(() => loadRulePackageForBrowser());
   const [catalog] = useState(() => loadRegulationCatalogForBrowser());
   const environmentOptions = useMemo(() => getAvailableEnvironments(catalog), [catalog]);
