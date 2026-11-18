@@ -1,0 +1,284 @@
+{
+  "bp_ai_14_without": {
+    "scoredPatterns": [
+      {
+        "patternRef": 0,
+        "baseScore": 0.15497931793853117,
+        "tacticalAdjustment": 0,
+        "finalScore": 0.15497931793853117
+      },
+      {
+        "patternRef": 1,
+        "baseScore": -0.06907519698420879,
+        "tacticalAdjustment": 0,
+        "finalScore": -0.06907519698420879
+      }
+    ],
+    "bestPatternRef": 0
+  },
+  "bp_ai_14_with": {
+    "scoredPatterns": [
+      {
+        "patternRef": 0,
+        "baseScore": 0.13817635070292497,
+        "tacticalAdjustment": -0.30000000000000004,
+        "finalScore": -0.16182364929707507,
+        "reason": "Suicide attack penalty (-0.30): maxMyAtk=1 < minOppBlk=6"
+      },
+      {
+        "patternRef": 1,
+        "baseScore": -0.13667927857263215,
+        "tacticalAdjustment": 0,
+        "finalScore": -0.13667927857263215
+      }
+    ],
+    "bestPatternRef": 1
+  },
+  "policyV73_weights": [
+    -2.5,
+    -0.8,
+    -0.35,
+    -1.8,
+    -0.5,
+    -0.25,
+    2.2,
+    1.8,
+    1,
+    0.2,
+    0.2,
+    0.25,
+    0.05,
+    -0.35,
+    0.2,
+    -2.5,
+    -0.5,
+    0.1,
+    2,
+    2.5,
+    -0.5,
+    -1,
+    -0.5,
+    -0.5
+  ],
+  "bp_ai_09_v72": {
+    "scoredPatterns": [
+      {
+        "patternRef": 0,
+        "baseScore": -0.5315506142391747,
+        "tacticalAdjustment": 0,
+        "finalScore": -0.5315506142391747
+      },
+      {
+        "patternRef": 1,
+        "baseScore": -0.15139073147362483,
+        "tacticalAdjustment": 0,
+        "finalScore": -0.15139073147362483
+      }
+    ],
+    "bestPatternRef": 1
+  },
+  "bp_ai_09_v73": {
+    "scoredPatterns": [
+      {
+        "patternRef": 0,
+        "baseScore": -0.5315506142391747,
+        "tacticalAdjustment": 0,
+        "finalScore": -0.5315506142391747,
+        "tacticalFeatures": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "categoryBreakdown": {
+          "baseDNAScore": -0.5315506142391747,
+          "CERTAIN_DAMAGE": 0,
+          "ESTIMATED_DAMAGE": 0,
+          "COUNTER_PREVENTION": 0,
+          "COMBAT_OUTCOME": 0,
+          "SURVIVAL": 0,
+          "LETHAL_OPPORTUNITY": 0,
+          "RESOURCE_COST": 0,
+          "totalTacticalScore": 0,
+          "finalScore": -0.5315506142391747
+        }
+      },
+      {
+        "patternRef": 1,
+        "baseScore": -0.15139073147362483,
+        "tacticalAdjustment": 0,
+        "finalScore": -0.15139073147362483,
+        "tacticalFeatures": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "categoryBreakdown": {
+          "baseDNAScore": -0.15139073147362483,
+          "CERTAIN_DAMAGE": 0,
+          "ESTIMATED_DAMAGE": 0,
+          "COUNTER_PREVENTION": 0,
+          "COMBAT_OUTCOME": 0,
+          "SURVIVAL": 0,
+          "LETHAL_OPPORTUNITY": 0,
+          "RESOURCE_COST": 0,
+          "totalTacticalScore": 0,
+          "finalScore": -0.15139073147362483
+        }
+      }
+    ],
+    "bestPatternRef": 1
+  },
+  "valid_cards_v72": {
+    "scoredPatterns": [
+      {
+        "patternRef": 0,
+        "baseScore": -0.6062146561173843,
+        "tacticalAdjustment": 0,
+        "finalScore": -0.6062146561173843
+      },
+      {
+        "patternRef": 1,
+        "baseScore": -0.1407097640675434,
+        "tacticalAdjustment": 0,
+        "finalScore": -0.1407097640675434
+      }
+    ],
+    "bestPatternRef": 1
+  },
+  "valid_cards_v73": {
+    "scoredPatterns": [
+      {
+        "patternRef": 0,
+        "baseScore": -0.6062146561173843,
+        "tacticalAdjustment": -0.25,
+        "finalScore": -0.8562146561173843,
+        "tacticalFeatures": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0.5,
+          0,
+          0,
+          0
+        ],
+        "categoryBreakdown": {
+          "baseDNAScore": -0.6062146561173843,
+          "CERTAIN_DAMAGE": 0,
+          "ESTIMATED_DAMAGE": 0,
+          "COUNTER_PREVENTION": 0,
+          "COMBAT_OUTCOME": 0,
+          "SURVIVAL": 0,
+          "LETHAL_OPPORTUNITY": 0,
+          "RESOURCE_COST": -0.25,
+          "totalTacticalScore": -0.25,
+          "finalScore": -0.8562146561173843
+        },
+        "reason": "t20_cost_discard_value_sum=0.500 (sum=10)"
+      },
+      {
+        "patternRef": 1,
+        "baseScore": -0.1407097640675434,
+        "tacticalAdjustment": 0,
+        "finalScore": -0.1407097640675434,
+        "tacticalFeatures": [
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0,
+          0
+        ],
+        "categoryBreakdown": {
+          "baseDNAScore": -0.1407097640675434,
+          "CERTAIN_DAMAGE": 0,
+          "ESTIMATED_DAMAGE": 0,
+          "COUNTER_PREVENTION": 0,
+          "COMBAT_OUTCOME": 0,
+          "SURVIVAL": 0,
+          "LETHAL_OPPORTUNITY": 0,
+          "RESOURCE_COST": 0,
+          "totalTacticalScore": 0,
+          "finalScore": -0.1407097640675434
+        }
+      }
+    ],
+    "bestPatternRef": 1
+  }
+}
