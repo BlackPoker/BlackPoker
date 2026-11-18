@@ -168,6 +168,7 @@ describe("BP-SIM-PRO-RAREPACK-POLISH-2: Mobile UI & PlayerBoard Readability", ()
       isViewer: true,
       isTurnPlayer: true,
       isChancePlayer: true,
+      isFocusPlayer: true,
       lifeDisplay: "15",
       handCount: 3,
       handCards: mockCards,

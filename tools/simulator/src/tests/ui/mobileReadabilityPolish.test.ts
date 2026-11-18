@@ -77,6 +77,7 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
       name: "Player 2",
       isTurnPlayer: false,
       isChancePlayer: false,
+      isFocusPlayer: false,
       isViewer: false,
       canViewFullGrave: false, // 相手視点 (非公開)
       lifeDisplay: "3/3",
@@ -350,6 +351,7 @@ describe("UI Phase 3.4: Mobile Readability Polish Tests", () => {
         name: "Player 1",
         isTurnPlayer: true,
         isChancePlayer: false,
+        isFocusPlayer: false,
         isViewer: true,
         canViewFullGrave: true,
         lifeDisplay: "3/3",

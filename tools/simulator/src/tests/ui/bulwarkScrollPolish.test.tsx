@@ -32,6 +32,7 @@ describe("BP-SIM-PRO-RAREPACK-POLISH-3: Bulwark Horizontal Scroll Left-Clipping 
     isViewer: true,
     isTurnPlayer: false,
     isChancePlayer: false,
+    isFocusPlayer: false,
     lifeDisplay: "15",
     handCount: 3,
     handCards: [],

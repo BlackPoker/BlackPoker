@@ -2203,6 +2203,7 @@ export const CoreBattlePlaytest: React.FC = () => {
                 stateVersion={gameState.stateVersion ?? gameState.version}
                 turnPlayer={gameState.turnPlayer}
                 chancePlayer={gameState.chancePlayer}
+                focusPlayer={gameState.focusPlayer}
                 turnCount={gameState.turnCount}
                 players={gameState.players}
                 latestEventMessage={latestEventMessage}

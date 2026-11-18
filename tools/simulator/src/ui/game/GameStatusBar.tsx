@@ -3,6 +3,7 @@ import React from "react";
 export interface GameStatusBarProps {
   turnPlayer: string;
   chancePlayer: string;
+  focusPlayer?: string;
   turnCount: number;
   players: any;
   latestEventMessage?: string;
@@ -14,6 +15,7 @@ export interface GameStatusBarProps {
 export const GameStatusBar: React.FC<GameStatusBarProps> = ({
   turnPlayer,
   chancePlayer,
+  focusPlayer,
   turnCount,
   players = {},
   latestEventMessage,
@@ -26,6 +28,9 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
     chancePlayer === "system"
       ? "Rule System"
       : players[chancePlayer]?.name || (chancePlayer === "p1" ? "Player A" : "Player B");
+  const focusPlayerName = focusPlayer
+    ? players[focusPlayer]?.name || (focusPlayer === "p1" ? "Player A" : focusPlayer === "p2" ? "Player B" : focusPlayer)
+    : undefined;
 
   return (
     <div className="flex flex-col gap-1.5 p-2 bg-white rounded border border-zinc-200 shadow-sm">
@@ -78,6 +83,14 @@ export const GameStatusBar: React.FC<GameStatusBarProps> = ({
             <span className="text-[10px] font-black uppercase tracking-wider">CHANCE:</span>
             <span className="text-xs font-black">
               {chancePlayerName} ({chancePlayer.toUpperCase()})
+            </span>
+          </div>
+
+          {/* フォーカスプレイヤーバッジ (白背景・太めの黒枠・黒文字でCHANCE/手番と明確に区別) */}
+          <div className="flex items-center gap-1.5 px-2.5 py-1 rounded bg-white border-2 border-zinc-950 text-zinc-950 shadow-sm font-bold">
+            <span className="text-[10px] font-black uppercase tracking-wider text-zinc-700">FOCUS:</span>
+            <span className="text-xs font-black">
+              {focusPlayer ? `${focusPlayerName} (${focusPlayer.toUpperCase()})` : "未設定"}
             </span>
           </div>
         </div>

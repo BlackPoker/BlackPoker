@@ -41,6 +41,7 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
   const name = viewModel.name;
   const isTurnPlayer = viewModel.isTurnPlayer;
   const isChancePlayer = viewModel.isChancePlayer;
+  const isFocusPlayer = viewModel.isFocusPlayer;
   const lifeDisplay = viewModel.lifeDisplay;
   const handCards = viewModel.handCards || [];
   const handCount = viewModel.handCount;
@@ -198,6 +199,11 @@ export const PlayerBoard: React.FC<PlayerBoardProps> = ({
           {isChancePlayer && (
             <span className="text-[9.5px] lg:text-[9px] font-mono font-black px-1.5 py-0.2 rounded bg-zinc-950 text-white shadow-sm">
               CHANCE
+            </span>
+          )}
+          {isFocusPlayer && (
+            <span className="text-[9.5px] lg:text-[9px] font-mono font-black px-1.5 py-0.2 rounded bg-white text-zinc-950 border-2 border-zinc-950 shadow-sm">
+              FOCUS
             </span>
           )}
         </div>

@@ -8,6 +8,7 @@ export interface PlayerBoardViewModel {
   readonly isViewer: boolean;
   readonly isTurnPlayer: boolean;
   readonly isChancePlayer: boolean;
+  readonly isFocusPlayer: boolean;
   // Life 表示（自分: "15", 相手: 10以上なら "10以上", 9以下なら "9"）
   readonly lifeDisplay: string;
   readonly lifeCount?: number;
@@ -48,6 +49,7 @@ export class PlayerObservationPresenter {
 
     const isTurnPlayer = effectiveObservation?.turnPlayerId === playerKey;
     const isChancePlayer = effectiveObservation?.chancePlayerId === playerKey;
+    const isFocusPlayer = effectiveObservation?.focusPlayerId === playerKey;
 
     // Observation 内のプレイヤー情報を取得
     const obsPlayer: PlayerObservationView | undefined = effectiveObservation?.players?.find(
@@ -61,6 +63,7 @@ export class PlayerObservationPresenter {
         isViewer: playerKey === viewerPlayerId,
         isTurnPlayer,
         isChancePlayer,
+        isFocusPlayer,
         lifeDisplay: "0",
         lifeCount: undefined,
         handCount: 0,
@@ -83,6 +86,7 @@ export class PlayerObservationPresenter {
       isViewer: obsPlayer.isViewer,
       isTurnPlayer,
       isChancePlayer,
+      isFocusPlayer,
       lifeDisplay: obsPlayer.lifeDisplay,
       lifeCount: obsPlayer.lifeCount,
       handCount: obsPlayer.handCount,
