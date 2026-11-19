@@ -2406,6 +2406,9 @@ export const CoreBattlePlaytest: React.FC = () => {
         onOpenReplayVerify={() => setIsReplayVerifyModalOpen(true)}
         onOpenReplayViewer={() => handleOpenCurrentReplay()}
         onOpenScenarioBuilder={() => setIsScenarioBuilderOpen(true)}
+        fontScale={userPreferences.fontScale}
+        onSelectFontScale={(scale) => updateUserPreferences({ fontScale: scale })}
+        onResetFontScale={resetUserPreferencesToDefault}
       />
 
 

@@ -7,6 +7,7 @@ import {
 } from "../../engine/playtest/PlaytestSeatController";
 
 import { PlaytestSeedMode } from "../playtest/PlaytestSeed";
+import { FontScalePercentage } from "../preferences/PlaytestUserPreferences";
 
 export interface MobileHeaderMenuProps {
   readonly isOpen: boolean;
@@ -43,6 +44,9 @@ export interface MobileHeaderMenuProps {
   readonly onOpenReplayVerify?: () => void;
   readonly onOpenReplayViewer?: () => void;
   readonly onOpenScenarioBuilder?: () => void;
+  readonly fontScale?: FontScalePercentage;
+  readonly onSelectFontScale?: (scale: FontScalePercentage) => void;
+  readonly onResetFontScale?: () => void;
 }
 
 export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
@@ -80,6 +84,9 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   onOpenReplayVerify,
   onOpenReplayViewer,
   onOpenScenarioBuilder,
+  fontScale = "100%",
+  onSelectFontScale,
+  onResetFontScale,
 }) => {
 
   if (!isOpen) return null;
@@ -269,6 +276,60 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
               className="w-5 h-5 rounded border-zinc-300 text-zinc-950 focus:ring-zinc-950"
             />
           </label>
+        )}
+
+        {/* 表示設定 (文字サイズスケーリング) */}
+        {onSelectFontScale && (
+          <div className="flex flex-col gap-1.5 p-2.5 rounded-lg bg-zinc-50 border border-zinc-200">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-bold text-zinc-950 flex items-center gap-1 font-mono">
+                <span>🔤</span>
+                <span>表示設定 (文字サイズ)</span>
+              </span>
+              <div className="flex items-center gap-1">
+                <span className="text-[10px] font-mono px-1.5 py-0.5 rounded bg-zinc-200 text-zinc-800 font-bold">
+                  現在: {fontScale || "100%"}
+                </span>
+                {fontScale && fontScale !== "100%" && onResetFontScale && (
+                  <button
+                    type="button"
+                    onClick={onResetFontScale}
+                    className="text-[10px] text-zinc-600 hover:text-zinc-950 underline cursor-pointer ml-1"
+                    title="標準サイズ (100%) に戻す"
+                  >
+                    標準に戻す
+                  </button>
+                )}
+              </div>
+            </div>
+
+            <div className="grid grid-cols-4 gap-1.5 mt-1 font-mono">
+              {(["100%", "115%", "130%", "150%"] as const).map((scale) => {
+                const isSelected = (fontScale || "100%") === scale;
+                return (
+                  <button
+                    key={scale}
+                    type="button"
+                    onClick={() => onSelectFontScale(scale)}
+                    data-testid={`font-scale-button-${scale}`}
+                    className={`min-h-[36px] py-1 px-1.5 rounded text-xs font-bold transition flex flex-col items-center justify-center gap-0.5 border cursor-pointer ${
+                      isSelected
+                        ? "bg-zinc-950 text-white border-zinc-950 shadow-sm ring-1 ring-zinc-950 font-black"
+                        : "bg-white text-zinc-800 border-zinc-300 hover:bg-zinc-100"
+                    }`}
+                  >
+                    <span>{scale}</span>
+                    <span className="text-[9px] opacity-75 font-normal">
+                      {scale === "100%" ? "標準" : scale === "115%" ? "中" : scale === "130%" ? "大" : "特大"}
+                    </span>
+                  </button>
+                );
+              })}
+            </div>
+            <div className="text-[9.5px] text-zinc-500 font-mono mt-0.5">
+              ※ 選択すると即時反映され、次回以降も自動で保存・復元されます。
+            </div>
+          </div>
         )}
 
         {/* AI 違和感を記録ボタン (Human vs AI 対戦中) */}

@@ -41,6 +41,49 @@
   }
 }
 
+/* Playtest Responsive Font Scaling via --bp-font-scale (Safe Container-Scoped) */
+[data-testid="playtest-root-container"] .text-xs,
+[data-testid="playtest-settings-menu-modal"] .text-xs,
+[data-testid="mobile-bottom-sheet"] .text-xs,
+[data-testid="mobile-decision-dock"] .text-xs {
+  font-size: calc(0.75rem * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-sm,
+[data-testid="playtest-settings-menu-modal"] .text-sm,
+[data-testid="mobile-bottom-sheet"] .text-sm,
+[data-testid="mobile-decision-dock"] .text-sm {
+  font-size: calc(0.875rem * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-base,
+[data-testid="playtest-settings-menu-modal"] .text-base {
+  font-size: calc(1rem * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[9\.5px\],
+[data-testid="mobile-bottom-sheet"] .text-\[9\.5px\] {
+  font-size: calc(9.5px * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[10px\],
+[data-testid="playtest-settings-menu-modal"] .text-\[10px\],
+[data-testid="mobile-bottom-sheet"] .text-\[10px\],
+[data-testid="mobile-decision-dock"] .text-\[10px\] {
+  font-size: calc(10px * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[10\.5px\],
+[data-testid="mobile-bottom-sheet"] .text-\[10\.5px\] {
+  font-size: calc(10.5px * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[11px\],
+[data-testid="mobile-bottom-sheet"] .text-\[11px\],
+[data-testid="mobile-decision-dock"] .text-\[11px\] {
+  font-size: calc(11px * var(--bp-font-scale, 1));
+}
+
 /* BlackPoker Title Typography */
 .bp-brand-title {
   font-family: "Times New Roman", Times, serif;

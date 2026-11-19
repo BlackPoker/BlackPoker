@@ -1,0 +1,94 @@
+{
+  "workId": "BP-SIM-PLAYTEST-RESPONSIVE-UI-PHASE4-EVIDENCE",
+  "branch": "BlackPoker/issue551-core-flow",
+  "baseCommit": "255b68a337238bd82dd541560376640a1fd7979c",
+  "measuredAt": "2026-11-19T09:27:00.000Z",
+  "summary": {
+    "totalCombinations": 28,
+    "passedHorizontalOverflowCheck": 28,
+    "passedControlsReachabilityCheck": 28,
+    "passedVerticalScrollFallbackAt130And150": true,
+    "breakpoint1023To1024DraftPreserved": true,
+    "measuredFontScaling": {
+      "scale100Percent": 1.0,
+      "scale115Percent": 1.15,
+      "scale130Percent": 1.3,
+      "scale150Percent": 1.5,
+      "measuredConfirmLabelWidthGrowth": "+50.0% (84px -> 126px, exact 1.5x)",
+      "measuredHeaderTitleGrowth": "+45.9% width (86.4px -> 126px), +50.0% height (16px -> 24px)",
+      "measuredH2HeadingGrowth": "+47.0% width (131.2px -> 192.9px)"
+    },
+    "mobileBadgeClearance": {
+      "badgeRightEdgePx": 126.25,
+      "nameLabelLeftEdgePx": 128.0,
+      "overlapDetected": false
+    }
+  },
+  "typographyScalingVerification": {
+    "desktop_1920x1080": {
+      "100%": {
+        "htmlStyle": "--bp-font-scale: 1;",
+        "headerTitleBox": { "x": 44, "y": 10.5, "width": 86.375, "height": 16 },
+        "decisionH2Box": { "x": 1127.65625, "y": 84.5, "width": 131.1875, "height": 20 },
+        "statusBarBox": { "x": 48, "y": 56, "width": 1058.65625, "height": 65 },
+        "decisionPanelBox": { "x": 1116.65625, "y": 56, "width": 755.34375, "height": 592.5 },
+        "scrollActionBtnBox": { "x": 1127.65625, "y": 180, "width": 361.671875, "height": 49.5 },
+        "stickyConfirmBtnBox": { "x": 1127.65625, "y": 573, "width": 364.671875, "height": 38 },
+        "stickyConfirmLabelSpanBox": { "x": 1267.984375, "y": 582, "width": 84, "height": 20 }
+      },
+      "150%": {
+        "htmlStyle": "--bp-font-scale: 1.5;",
+        "headerTitleBox": { "x": 44, "y": 6.5, "width": 126, "height": 24 },
+        "decisionH2Box": { "x": 1127.65625, "y": 84.5, "width": 192.890625, "height": 20 },
+        "statusBarBox": { "x": 48, "y": 56, "width": 1058.65625, "height": 79.25 },
+        "decisionPanelBox": { "x": 1116.65625, "y": 56, "width": 755.34375, "height": 616.25 },
+        "scrollActionBtnBox": { "x": 1127.65625, "y": 192.75, "width": 361.671875, "height": 49.5 },
+        "stickyConfirmBtnBox": { "x": 1127.65625, "y": 596.75, "width": 364.671875, "height": 38 },
+        "stickyConfirmLabelSpanBox": { "x": 1246.984375, "y": 605.75, "width": 126, "height": 20 }
+      }
+    },
+    "mobile_390x844": {
+      "150%": {
+        "htmlStyle": "--bp-font-scale: 1.5;",
+        "bodyBox": { "x": 0, "y": 0, "width": 384, "height": 863.375 },
+        "soldierP1_1_cardBox": { "x": 115, "y": 574.375, "width": 76, "height": 58.375 },
+        "soldierP1_1_badgeBox": { "x": 118, "y": 573.375, "width": 8.25, "height": 22.5 },
+        "soldierP1_1_nameBox": { "x": 128, "y": 579.375, "width": 42.75, "height": 21.375 },
+        "overlapDetected": false
+      }
+    }
+  },
+  "combinations": [
+    { "resolution": "1920x1080", "fontScale": "100%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 1920, "h": 48 }, "statusBar": { "w": 1058.7, "h": 65 }, "leftPane": { "w": 1060.7, "h": 1016 }, "rightPane": { "w": 755.3, "h": 1016 }, "decisionPanel": { "w": 755.3, "h": 583 }, "decisionStickyFooter": { "w": 733.3, "h": 71.5 } } },
+    { "resolution": "1440x900", "fontScale": "100%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 1440, "h": 48 }, "statusBar": { "w": 819.3, "h": 65 }, "leftPane": { "w": 827.3, "h": 836 }, "rightPane": { "w": 588.7, "h": 836 }, "decisionPanel": { "w": 588.7, "h": 566 }, "decisionStickyFooter": { "w": 566.7, "h": 71.5 } } },
+    { "resolution": "1366x768", "fontScale": "100%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 1366, "h": 48 }, "statusBar": { "w": 776.2, "h": 65 }, "leftPane": { "w": 784.2, "h": 704 }, "rightPane": { "w": 557.8, "h": 704 }, "decisionPanel": { "w": 557.8, "h": 505.3 }, "decisionStickyFooter": { "w": 535.8, "h": 71.5 } } },
+    { "resolution": "1024x768", "fontScale": "100%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 1024, "h": 48 }, "statusBar": { "w": 576.7, "h": 90.5 }, "leftPane": { "w": 584.7, "h": 704 }, "rightPane": { "w": 415.3, "h": 704 }, "decisionPanel": { "w": 415.3, "h": 524.8 }, "decisionStickyFooter": { "w": 393.3, "h": 91 } } },
+    { "resolution": "820x1180", "fontScale": "100%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 820, "h": 48 }, "statusBar": { "w": 812, "h": 64.8 }, "leftPane": { "w": 812, "h": 1032 }, "mobileDock": { "w": 820, "h": 65 }, "decisionPanel": { "w": 746, "h": 526 }, "decisionStickyFooter": { "w": 724, "h": 71.5 } } },
+    { "resolution": "390x844", "fontScale": "100%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 390, "h": 57 }, "statusBar": { "w": 382, "h": 90.5 }, "leftPane": { "w": 382, "h": 687 }, "mobileDock": { "w": 390, "h": 97 }, "decisionPanel": { "w": 370, "h": 341.2 }, "decisionStickyFooter": { "w": 352, "h": 150.5 } } },
+    { "resolution": "360x800", "fontScale": "100%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 360, "h": 57 }, "statusBar": { "w": 352, "h": 90.5 }, "leftPane": { "w": 352, "h": 643 }, "mobileDock": { "w": 360, "h": 97 }, "decisionPanel": { "w": 340, "h": 317 }, "decisionStickyFooter": { "w": 322, "h": 150.5 } } },
+
+    { "resolution": "1920x1080", "fontScale": "115%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 1920, "h": 48 }, "statusBar": { "w": 1058.7, "h": 65 }, "leftPane": { "w": 1060.7, "h": 1016 }, "rightPane": { "w": 755.3, "h": 1016 }, "decisionPanel": { "w": 755.3, "h": 583 }, "decisionStickyFooter": { "w": 733.3, "h": 71.5 } } },
+    { "resolution": "1440x900", "fontScale": "115%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 1440, "h": 48 }, "statusBar": { "w": 819.3, "h": 65 }, "leftPane": { "w": 827.3, "h": 836 }, "rightPane": { "w": 588.7, "h": 836 }, "decisionPanel": { "w": 588.7, "h": 566 }, "decisionStickyFooter": { "w": 566.7, "h": 71.5 } } },
+    { "resolution": "1366x768", "fontScale": "115%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 1366, "h": 48 }, "statusBar": { "w": 776.2, "h": 65 }, "leftPane": { "w": 784.2, "h": 704 }, "rightPane": { "w": 557.8, "h": 704 }, "decisionPanel": { "w": 557.8, "h": 505.3 }, "decisionStickyFooter": { "w": 535.8, "h": 71.5 } } },
+    { "resolution": "1024x768", "fontScale": "115%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 1024, "h": 48 }, "statusBar": { "w": 576.7, "h": 90.5 }, "leftPane": { "w": 584.7, "h": 704 }, "rightPane": { "w": 415.3, "h": 704 }, "decisionPanel": { "w": 415.3, "h": 524.8 }, "decisionStickyFooter": { "w": 393.3, "h": 91 } } },
+    { "resolution": "820x1180", "fontScale": "115%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 820, "h": 48 }, "statusBar": { "w": 812, "h": 64.8 }, "leftPane": { "w": 812, "h": 1032 }, "mobileDock": { "w": 820, "h": 65 }, "decisionPanel": { "w": 746, "h": 526 }, "decisionStickyFooter": { "w": 724, "h": 71.5 } } },
+    { "resolution": "390x844", "fontScale": "115%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 390, "h": 57 }, "statusBar": { "w": 382, "h": 90.5 }, "leftPane": { "w": 382, "h": 687 }, "mobileDock": { "w": 390, "h": 97 }, "decisionPanel": { "w": 370, "h": 341.2 }, "decisionStickyFooter": { "w": 352, "h": 150.5 } } },
+    { "resolution": "360x800", "fontScale": "115%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 360, "h": 57 }, "statusBar": { "w": 352, "h": 90.5 }, "leftPane": { "w": 352, "h": 643 }, "mobileDock": { "w": 360, "h": 97 }, "decisionPanel": { "w": 340, "h": 317 }, "decisionStickyFooter": { "w": 322, "h": 150.5 } } },
+
+    { "resolution": "1920x1080", "fontScale": "130%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 1920, "h": 48 }, "statusBar": { "w": 1058.7, "h": 65 }, "leftPane": { "w": 1060.7, "h": 1016 }, "rightPane": { "w": 755.3, "h": 1016 }, "decisionPanel": { "w": 755.3, "h": 583 }, "decisionStickyFooter": { "w": 733.3, "h": 71.5 } } },
+    { "resolution": "1440x900", "fontScale": "130%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": true, "boxes": { "header": { "w": 1434, "h": 48 }, "statusBar": { "w": 821.8, "h": 65 }, "leftPane": { "w": 823.8, "h": 899.3 }, "rightPane": { "w": 586.2, "h": 899.3 }, "decisionPanel": { "w": 586.2, "h": 566 }, "decisionStickyFooter": { "w": 564.2, "h": 71.5 } } },
+    { "resolution": "1366x768", "fontScale": "130%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": true, "boxes": { "header": { "w": 1360, "h": 48 }, "statusBar": { "w": 778.7, "h": 65 }, "leftPane": { "w": 780.7, "h": 899.3 }, "rightPane": { "w": 555.3, "h": 899.3 }, "decisionPanel": { "w": 555.3, "h": 505.3 }, "decisionStickyFooter": { "w": 533.3, "h": 71.5 } } },
+    { "resolution": "1024x768", "fontScale": "130%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": true, "boxes": { "header": { "w": 1018, "h": 48 }, "statusBar": { "w": 579.2, "h": 90.5 }, "leftPane": { "w": 581.2, "h": 924.8 }, "rightPane": { "w": 412.8, "h": 924.8 }, "decisionPanel": { "w": 412.8, "h": 524.8 }, "decisionStickyFooter": { "w": 390.8, "h": 91 } } },
+    { "resolution": "820x1180", "fontScale": "130%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 820, "h": 48 }, "statusBar": { "w": 812, "h": 64.8 }, "leftPane": { "w": 812, "h": 1032 }, "mobileDock": { "w": 820, "h": 65 }, "decisionPanel": { "w": 746, "h": 526 }, "decisionStickyFooter": { "w": 724, "h": 71.5 } } },
+    { "resolution": "390x844", "fontScale": "130%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 390, "h": 57 }, "statusBar": { "w": 382, "h": 90.5 }, "leftPane": { "w": 382, "h": 687 }, "mobileDock": { "w": 390, "h": 97 }, "decisionPanel": { "w": 370, "h": 341.2 }, "decisionStickyFooter": { "w": 352, "h": 150.5 } } },
+    { "resolution": "360x800", "fontScale": "130%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 360, "h": 57 }, "statusBar": { "w": 352, "h": 90.5 }, "leftPane": { "w": 352, "h": 643 }, "mobileDock": { "w": 360, "h": 97 }, "decisionPanel": { "w": 340, "h": 317 }, "decisionStickyFooter": { "w": 322, "h": 150.5 } } },
+
+    { "resolution": "1920x1080", "fontScale": "150%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 1920, "h": 48 }, "statusBar": { "w": 1058.7, "h": 79.3 }, "leftPane": { "w": 1060.7, "h": 1016 }, "rightPane": { "w": 755.3, "h": 1016 }, "decisionPanel": { "w": 755.3, "h": 616.3 }, "decisionStickyFooter": { "w": 733.3, "h": 71.5 } } },
+    { "resolution": "1440x900", "fontScale": "150%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": true, "boxes": { "header": { "w": 1434, "h": 48 }, "statusBar": { "w": 821.8, "h": 79.3 }, "leftPane": { "w": 823.8, "h": 963.3 }, "rightPane": { "w": 586.2, "h": 963.3 }, "decisionPanel": { "w": 586.2, "h": 599.3 }, "decisionStickyFooter": { "w": 564.2, "h": 71.5 } } },
+    { "resolution": "1366x768", "fontScale": "150%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": true, "boxes": { "header": { "w": 1360, "h": 48 }, "statusBar": { "w": 778.7, "h": 79.3 }, "leftPane": { "w": 780.7, "h": 963.3 }, "rightPane": { "w": 555.3, "h": 963.3 }, "decisionPanel": { "w": 555.3, "h": 538.6 }, "decisionStickyFooter": { "w": 533.3, "h": 71.5 } } },
+    { "resolution": "1024x768", "fontScale": "150%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": true, "boxes": { "header": { "w": 1018, "h": 48 }, "statusBar": { "w": 579.2, "h": 98.5 }, "leftPane": { "w": 581.2, "h": 988.8 }, "rightPane": { "w": 412.8, "h": 988.8 }, "decisionPanel": { "w": 412.8, "h": 558.1 }, "decisionStickyFooter": { "w": 390.8, "h": 91 } } },
+    { "resolution": "820x1180", "fontScale": "150%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 820, "h": 48 }, "statusBar": { "w": 812, "h": 72.8 }, "leftPane": { "w": 812, "h": 1032 }, "mobileDock": { "w": 820, "h": 65 }, "decisionPanel": { "w": 746, "h": 556 }, "decisionStickyFooter": { "w": 724, "h": 71.5 } } },
+    { "resolution": "390x844", "fontScale": "150%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 390, "h": 57 }, "statusBar": { "w": 382, "h": 98.5 }, "leftPane": { "w": 382, "h": 687 }, "mobileDock": { "w": 390, "h": 97 }, "decisionPanel": { "w": 370, "h": 365.2 }, "decisionStickyFooter": { "w": 352, "h": 150.5 } } },
+    { "resolution": "360x800", "fontScale": "150%", "horizontalOk": true, "controlsOk": true, "verticalOverflowFallback": false, "boxes": { "header": { "w": 360, "h": 57 }, "statusBar": { "w": 352, "h": 98.5 }, "leftPane": { "w": 352, "h": 643 }, "mobileDock": { "w": 360, "h": 97 }, "decisionPanel": { "w": 340, "h": 341 }, "decisionStickyFooter": { "w": 322, "h": 150.5 } } }
+  ]
+}

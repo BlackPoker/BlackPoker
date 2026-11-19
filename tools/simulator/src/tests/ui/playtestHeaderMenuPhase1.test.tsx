@@ -208,4 +208,62 @@ describe("Playtest UI Redesign Phase 1: Header Simplification & Unified Settings
     });
     expect(renderer.root.findByType(MobileHeaderMenu).props.showDebug).toBe(true);
   });
+
+  it("6. 設定メニューに文字サイズ変更（表示設定）が表示され、4段階の選択とリセットができること", () => {
+    const onSelectFontScale = vi.fn();
+    const onResetFontScale = vi.fn();
+
+    let renderer!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      renderer = TestRenderer.create(
+        <MobileHeaderMenu
+          isOpen={true}
+          onClose={() => {}}
+          selectedEnvironmentId="core-battle"
+          onSelectEnvironment={() => {}}
+          environmentOptions={[]}
+          showSeedInput={false}
+          matchMode="humanVsHuman"
+          onSelectMatchMode={() => {}}
+          policyId="playtestConservative"
+          onSelectPolicyId={() => {}}
+          isOfficialEnvironment={false}
+          enablePassAndPlay={false}
+          onTogglePassAndPlay={() => {}}
+          onOpenLogModal={() => {}}
+          onOpenDebugModal={() => {}}
+          onResetGame={() => {}}
+          fontScale="115%"
+          onSelectFontScale={onSelectFontScale}
+          onResetFontScale={onResetFontScale}
+        />
+      );
+    });
+
+    // 4段階のボタン（100%, 115%, 130%, 150%）が存在すること
+    const btn100 = renderer.root.findByProps({ "data-testid": "font-scale-button-100%" });
+    const btn115 = renderer.root.findByProps({ "data-testid": "font-scale-button-115%" });
+    const btn130 = renderer.root.findByProps({ "data-testid": "font-scale-button-130%" });
+    const btn150 = renderer.root.findByProps({ "data-testid": "font-scale-button-150%" });
+
+    expect(btn100).toBeDefined();
+    expect(btn115).toBeDefined();
+    expect(btn130).toBeDefined();
+    expect(btn150).toBeDefined();
+
+    // 130% をクリックした際に onSelectFontScale("130%") が呼ばれること
+    act(() => {
+      btn130.props.onClick();
+    });
+    expect(onSelectFontScale).toHaveBeenCalledWith("130%");
+
+    // 標準に戻すボタンをクリックした際に onResetFontScale が呼ばれること
+    const allButtons = renderer.root.findAllByType("button");
+    const resetBtn = allButtons.find((b) => extractText(b).includes("標準に戻す"));
+    expect(resetBtn).toBeDefined();
+    act(() => {
+      resetBtn?.props.onClick();
+    });
+    expect(onResetFontScale).toHaveBeenCalled();
+  });
 });

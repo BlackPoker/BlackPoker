@@ -265,7 +265,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
       </div>
 
       {/* ===================== COMPACT 要約表示 (lg:未満) ===================== */}
-      <div className="flex lg:hidden flex-col w-full justify-between gap-0.5">
+      <div className={`flex lg:hidden flex-col w-full justify-between gap-0.5 ${selectionMarker ? "pl-2" : ""}`}>
         {/* 1行目: 識別子 + 状態(↑/→) */}
         <div className="flex items-center justify-between w-full gap-0.5">
           {isBulwark ? (
