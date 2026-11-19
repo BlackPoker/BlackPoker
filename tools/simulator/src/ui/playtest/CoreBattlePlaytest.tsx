@@ -75,6 +75,8 @@ import {
   createDecisionTranscriptEntry,
   createAutomatedDecisionTranscriptEntries,
 } from "./PlaytestDecisionTranscript";
+import { selectAutoGraveTopCandidate } from "../../engine/playtest/GraveTopAutoSelector";
+import { formatCardDisplay } from "../../engine/rules/cardUtils";
 import { PlaytestFeedbackModal } from "./PlaytestFeedbackModal";
 import type { PlaytestHumanFeedbackEntryV1 } from "./PlaytestFeedbackTypes";
 import {
@@ -209,6 +211,11 @@ export const CoreBattlePlaytest: React.FC = () => {
   // Decision Transcript 管理 (単調増加 seq と受理された意思決定ログ)
   const decisionSeqRef = useRef<number>(1);
   const decisionTranscriptRef = useRef<PlaytestDecisionTranscriptEntryV1[]>([]);
+
+  // 墓地TOP自動選択の実行制御用 ref
+  const autoGraveTopSubmittingRef = useRef<boolean>(false);
+  const autoGraveTopConsecutiveCountRef = useRef<number>(0);
+  const lastAutoGraveTopDecisionIdRef = useRef<string | null>(null);
 
   // セットアップ結果通知（VALIDATION_ERROR | RULE_UNSPECIFIED | TERMINAL | TECHNICAL_ERROR）
   const [setupNotice, setSetupNotice] = useState<SetupNotice | null>(null);
@@ -369,6 +376,9 @@ export const CoreBattlePlaytest: React.FC = () => {
     activeChallengeRef.current = null;
     decisionSeqRef.current = 1;
     decisionTranscriptRef.current = [];
+    autoGraveTopSubmittingRef.current = false;
+    autoGraveTopConsecutiveCountRef.current = 0;
+    lastAutoGraveTopDecisionIdRef.current = null;
     setSelectedUnitIds([]);
     setLastBoardUnitClick(null);
     decisionDraftStateRef.current = null;
@@ -1031,9 +1041,12 @@ export const CoreBattlePlaytest: React.FC = () => {
     [unitSelectionMarkers]
   );
 
-  // 共通 Decision 提出パイプライン (Human提出 -> 状態反映 -> 次がAIなら自動連鎖進行)
+  // 共通 Decision 提出パイプライン (Human/AutoGraveTop提出 -> 状態反映 -> 次がAIなら自動連鎖進行)
   const handleDecisionSubmit = useCallback(
-    async (response: DecisionResponse, options?: { autoPass?: boolean }) => {
+    async (
+      response: DecisionResponse,
+      options?: { autoPass?: boolean; actor?: "human" | "autoGraveTop"; cardName?: string }
+    ) => {
       const session = sessionRef.current;
       if (!session) return;
 
@@ -1045,16 +1058,25 @@ export const CoreBattlePlaytest: React.FC = () => {
       // モバイル Bottom Sheet を最小化
       setSheetMode("collapsed");
 
-      // 1. Human の判断を提出
+      const actorType = options?.actor ?? "human";
+
+      // 1. Human / AutoGraveTop の判断を提出
       let prevState = JSON.parse(JSON.stringify(session.state));
       const selectedPattern =
         currentStep?.type === "WAITING_FOR_DECISION"
           ? currentStep.request.patterns[response.selectedPatternRef]
           : undefined;
-      const category = selectedPattern?.kind === "PASS" ? "PASS" : "DECISION_SUBMIT";
+      const category =
+        actorType === "autoGraveTop"
+          ? "AUTO_GRAVE_TOP"
+          : selectedPattern?.kind === "PASS"
+          ? "PASS"
+          : "DECISION_SUBMIT";
       addTrace(
         category,
-        `判断送信 (Pattern #${response.selectedPatternRef}: ${selectedPattern?.patternId || ""})`,
+        actorType === "autoGraveTop"
+          ? `墓地TOP自動選択送信 (Pattern #${response.selectedPatternRef}: カード ${options?.cardName || ""})`
+          : `判断送信 (Pattern #${response.selectedPatternRef}: ${selectedPattern?.patternId || ""})`,
         prevState
       );
 
@@ -1063,10 +1085,10 @@ export const CoreBattlePlaytest: React.FC = () => {
       let nextState = JSON.parse(JSON.stringify(session.state));
       const newCanonicalEvents = session.logRecorder.getMatchLog().events.slice(prevLogEventCount);
 
-      // 受理された Human 意思決定を記録
+      // 受理された意思決定を記録
       if (currentStep?.type === "WAITING_FOR_DECISION") {
         const entry = createDecisionTranscriptEntry(decisionSeqRef.current++, {
-          actor: "human",
+          actor: actorType,
           playerId: currentStep.request.playerId as "p1" | "p2",
           decisionId: response.decisionId,
           stateVersion: response.stateVersion,
@@ -1077,6 +1099,12 @@ export const CoreBattlePlaytest: React.FC = () => {
 
       // 選択状態をリセット
       setSelectedUnitIds([]);
+
+      // 墓地TOP自動選択時のアクションログ出力
+      if (actorType === "autoGraveTop") {
+        const cardDisplay = options?.cardName ? ` [${options.cardName}]` : "";
+        addLog(`[AUTO_GRAVE_TOP] 墓地TOPにカード${cardDisplay} を自動選択しました`, "action", nextState);
+      }
 
       // State 遷移からイベントログを自動生成・蓄積 (Human vs AI では閲覧者視点で非公開情報秘匿)
       const viewer = activeMatchMode === "humanVsAi" ? activeHumanSeat : undefined;
@@ -1438,6 +1466,9 @@ export const CoreBattlePlaytest: React.FC = () => {
     setSelectedUnitIds([]);
     setUnitSelectionMarkers(new Map());
     setHighlightedRequestId(null);
+    autoGraveTopSubmittingRef.current = false;
+    autoGraveTopConsecutiveCountRef.current = 0;
+    lastAutoGraveTopDecisionIdRef.current = null;
     resetFeedbackFlash();
     setIsAiProcessing(false);
     setRuntimeNotice(null);
@@ -1499,6 +1530,79 @@ export const CoreBattlePlaytest: React.FC = () => {
   const handlePassAndPlayReady = useCallback(() => {
     setIsPassAndPlayWaiting(false);
   }, []);
+
+  // 墓地TOPの自動選択 (userPreferences.graveTopSelectionMode === "auto")
+  useEffect(() => {
+    if (!activeMatch) {
+      autoGraveTopConsecutiveCountRef.current = 0;
+      lastAutoGraveTopDecisionIdRef.current = null;
+      return;
+    }
+    if (userPreferences.graveTopSelectionMode !== "auto") return;
+    if (currentStep?.type !== "WAITING_FOR_DECISION") {
+      autoGraveTopConsecutiveCountRef.current = 0;
+      return;
+    }
+    if (currentStep.request.source?.type !== "ZONE_TOP_SELECTION") {
+      autoGraveTopConsecutiveCountRef.current = 0;
+      return;
+    }
+    if (isAiProcessing) return;
+
+    // 二重送信・同一リクエストの重複処理防止
+    if (autoGraveTopSubmittingRef.current) return;
+    if (lastAutoGraveTopDecisionIdRef.current === currentStep.request.decisionId) return;
+
+    // 人間プレイヤーの席か確認
+    const reqPlayerId = currentStep.request.playerId;
+    const isHuman =
+      activeMatchMode === "humanVsHuman"
+        ? true
+        : isHumanSeat(activeSeatControllers, reqPlayerId);
+
+    if (!isHuman) return;
+
+    // 連続実行回数ガード (最大10回などのフェイルセーフ)
+    if (autoGraveTopConsecutiveCountRef.current >= 10) {
+      console.warn("AutoGraveTop: 連続実行回数上限(10回)に達したため自動選択を中断しました。");
+      return;
+    }
+
+    autoGraveTopSubmittingRef.current = true;
+    lastAutoGraveTopDecisionIdRef.current = currentStep.request.decisionId;
+    autoGraveTopConsecutiveCountRef.current += 1;
+
+    try {
+      const autoResult = selectAutoGraveTopCandidate({
+        request: currentStep.request,
+        matchSeed: activeMatch.seed,
+        stateVersion: currentStep.request.stateVersion,
+      });
+
+      const response: DecisionResponse = {
+        decisionId: currentStep.request.decisionId,
+        stateVersion: currentStep.request.stateVersion,
+        selectedPatternRef: autoResult.selectedPatternRef,
+      };
+
+      const cardName = formatCardDisplay(autoResult.selectedCardId) || autoResult.selectedCardId;
+
+      handleDecisionSubmit(response, { actor: "autoGraveTop", cardName }).finally(() => {
+        autoGraveTopSubmittingRef.current = false;
+      });
+    } catch (err: any) {
+      autoGraveTopSubmittingRef.current = false;
+      console.error("AutoGraveTop 実行エラー:", err);
+    }
+  }, [
+    currentStep,
+    userPreferences.graveTopSelectionMode,
+    activeMatch,
+    activeMatchMode,
+    activeSeatControllers,
+    isAiProcessing,
+    handleDecisionSubmit,
+  ]);
 
 
   // 診断データ一括保存 (Playtest Diagnostic Bundle v1 - Scenario 起点対戦は未対応のため不可)
@@ -2409,6 +2513,8 @@ export const CoreBattlePlaytest: React.FC = () => {
         fontScale={userPreferences.fontScale}
         onSelectFontScale={(scale) => updateUserPreferences({ fontScale: scale })}
         onResetFontScale={() => updateUserPreferences({ fontScale: "100%" })}
+        graveTopSelectionMode={userPreferences.graveTopSelectionMode}
+        onSelectGraveTopSelectionMode={(mode) => updateUserPreferences({ graveTopSelectionMode: mode })}
       />
 
 

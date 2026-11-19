@@ -6,7 +6,7 @@ import { AutomatedDecisionRecord } from "../../engine/playtest/HumanVsPolicyCont
  */
 export interface PlaytestDecisionTranscriptEntryV1 {
   readonly seq: number;
-  readonly actor: "human" | "policy" | "autoPass";
+  readonly actor: "human" | "policy" | "autoPass" | "autoGraveTop";
   readonly playerId: "p1" | "p2";
   readonly decisionId: string;
   readonly stateVersion: number;
@@ -29,7 +29,7 @@ export interface PlaytestDecisionTranscriptEntryV1 {
 export function createDecisionTranscriptEntry(
   seq: number,
   params: {
-    actor: "human" | "policy" | "autoPass";
+    actor: "human" | "policy" | "autoPass" | "autoGraveTop";
     playerId: "p1" | "p2";
     decisionId: string;
     stateVersion: number;

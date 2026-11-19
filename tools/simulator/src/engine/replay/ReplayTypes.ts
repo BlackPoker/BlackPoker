@@ -9,7 +9,7 @@ import type { CardOccurrenceSelection } from "../regulation/SimulatorDeckProfile
 
 export type ReplayDecisionEntryV1 = {
   seq: number;
-  actor: "human" | "policy" | "autoPass";
+  actor: "human" | "policy" | "autoPass" | "autoGraveTop";
   playerId: "p1" | "p2";
   response: {
     decisionId: string;

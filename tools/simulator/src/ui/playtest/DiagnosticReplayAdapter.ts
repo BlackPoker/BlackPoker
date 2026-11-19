@@ -134,7 +134,7 @@ export function createReplayPlanFromDiagnosticBundleV1(
       };
     }
 
-    if (entry.actor !== "human" && entry.actor !== "policy" && entry.actor !== "autoPass") {
+    if (entry.actor !== "human" && entry.actor !== "policy" && entry.actor !== "autoPass" && entry.actor !== "autoGraveTop") {
       return {
         type: "INCOMPATIBLE",
         code: "INVALID_TRANSCRIPT",

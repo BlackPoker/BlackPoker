@@ -39,7 +39,7 @@ export interface PlaytestHumanFeedbackEntryV1 {
   readonly aiDnaDigest?: string;
 
   /** コンテキスト情報 */
-  readonly actor: "policy" | "autoPass";
+  readonly actor: "policy" | "autoPass" | "autoGraveTop";
   readonly playerId: "p1" | "p2";
 }
 
@@ -61,7 +61,7 @@ export interface PlaytestPublicFeedbackEntryV2 {
   readonly aiDnaDigest?: string;
 
   /** コンテキスト情報 */
-  readonly actor: "policy" | "autoPass";
+  readonly actor: "policy" | "autoPass" | "autoGraveTop";
   readonly playerId: "p1" | "p2";
 }
 
