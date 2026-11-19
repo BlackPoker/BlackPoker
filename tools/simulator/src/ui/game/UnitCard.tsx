@@ -115,7 +115,7 @@ export const UnitCard: React.FC<UnitCardProps> = ({
       {selectionMarker && (
         <div className="absolute -top-1.5 -left-1 lg:-top-2 lg:-left-2 z-20">
           <span
-            className={`flex items-center justify-center px-1 min-w-[18px] h-4 lg:min-w-[22px] lg:h-5 rounded-full text-[10px] lg:text-xs font-mono font-black shadow-md border-2 ${
+            className={`flex items-center justify-center px-1 min-w-[18px] min-h-[16px] lg:min-w-[22px] lg:min-h-[20px] py-0.5 rounded-full text-[10px] lg:text-xs font-mono font-black shadow-md border-2 ${
               selectionMarker.isSelected
                 ? "bg-zinc-950 text-white border-white ring-1 ring-zinc-950"
                 : "bg-white text-zinc-950 border-zinc-700"

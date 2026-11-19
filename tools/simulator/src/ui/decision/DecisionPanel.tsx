@@ -1538,7 +1538,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             {selectedAction?.speed === "immediate" ? (
               <button
                 onClick={() => handleActionSubmit(false)}
-                className="w-full py-1.5 sm:py-2 px-3 sm:px-4 rounded bg-zinc-950 hover:bg-zinc-800 text-white font-bold transition text-xs shadow-sm flex items-center justify-center gap-1 font-mono"
+                className="w-full min-h-[36px] py-1.5 sm:py-2 px-3 sm:px-4 rounded bg-zinc-950 hover:bg-zinc-800 text-white font-bold transition text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1 font-mono leading-snug"
               >
                 <span>リクエスト</span>
               </button>
@@ -1546,13 +1546,13 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               <>
                 <button
                   onClick={() => handleActionSubmit(false)}
-                  className="flex-1 py-1.5 sm:py-2 px-2.5 sm:px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold transition text-xs shadow-sm flex items-center justify-center gap-1 font-mono"
+                  className="flex-1 min-h-[36px] py-1.5 sm:py-2 px-2.5 sm:px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold transition text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1 font-mono leading-snug"
                 >
                   <span>リクエストのみ</span>
                 </button>
                 <button
                   onClick={() => handleActionSubmit(true)}
-                  className="flex-1 py-1.5 sm:py-2 px-2.5 sm:px-3 rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold transition text-xs shadow-sm flex items-center justify-center gap-1 font-mono"
+                  className="flex-1 min-h-[36px] py-1.5 sm:py-2 px-2.5 sm:px-3 rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold transition text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1 font-mono leading-snug"
                 >
                   <span>リクエスト＆PASS (推奨)</span>
                 </button>

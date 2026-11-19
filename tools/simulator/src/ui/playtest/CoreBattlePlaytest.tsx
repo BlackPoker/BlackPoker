@@ -1811,11 +1811,14 @@ export const CoreBattlePlaytest: React.FC = () => {
     </div>
   ) : null;
 
+  const isFontEnlarged = userPreferences.fontScale === "130%" || userPreferences.fontScale === "150%";
+  const lockDesktopHeight = Boolean(activeMatch) && !isFontEnlarged;
+
   return (
     <div
       data-testid="playtest-root-container"
       className={`flex flex-col min-h-screen ${
-        activeMatch ? "lg:h-screen lg:overflow-hidden" : ""
+        lockDesktopHeight ? "lg:h-screen lg:overflow-hidden" : "min-h-[100dvh] overflow-y-auto"
       } bg-[#f7f7f8] text-zinc-950 font-sans selection:bg-zinc-950 selection:text-white`}
     >
       {/* Action Feedback Flash (トップフロート通知) */}

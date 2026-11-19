@@ -3,9 +3,41 @@
 @tailwind utilities;
 
 @layer base {
+  :root {
+    --bp-font-scale: 1;
+  }
+
   body {
     @apply bg-white text-zinc-950 font-sans antialiased selection:bg-zinc-950 selection:text-white;
     color-scheme: light;
+  }
+}
+
+/* Playtest Typography Scaling Tokens */
+@layer utilities {
+  .bp-scale-text-nano {
+    font-size: calc(9.5px * var(--bp-font-scale, 1));
+    line-height: 1.2;
+  }
+  .bp-scale-text-micro {
+    font-size: calc(10.5px * var(--bp-font-scale, 1));
+    line-height: 1.25;
+  }
+  .bp-scale-text-caption {
+    font-size: calc(11.5px * var(--bp-font-scale, 1));
+    line-height: 1.3;
+  }
+  .bp-scale-text-body-sm {
+    font-size: calc(12.5px * var(--bp-font-scale, 1));
+    line-height: 1.35;
+  }
+  .bp-scale-text-body {
+    font-size: calc(14px * var(--bp-font-scale, 1));
+    line-height: 1.4;
+  }
+  .bp-scale-text-heading {
+    font-size: calc(16px * var(--bp-font-scale, 1));
+    line-height: 1.4;
   }
 }
 

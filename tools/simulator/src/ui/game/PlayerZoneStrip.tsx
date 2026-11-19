@@ -50,7 +50,7 @@ export const PlayerZoneStrip: React.FC<PlayerZoneStripProps> = ({
               </span>
             )}
             {item.badge && (
-              <span className="px-1 py-0.2 rounded bg-zinc-200 text-zinc-800 text-[9.5px] lg:text-[9px] font-bold inline-flex items-center gap-0.5">
+              <span className="px-1 py-0.5 rounded bg-zinc-200 text-zinc-800 text-[9.5px] lg:text-[9px] font-bold inline-flex items-center gap-0.5 leading-snug">
                 {item.badge}
               </span>
             )}
