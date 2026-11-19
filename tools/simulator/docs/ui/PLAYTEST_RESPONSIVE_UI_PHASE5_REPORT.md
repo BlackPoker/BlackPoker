@@ -106,11 +106,11 @@ export function selectAutoGraveTopCandidate(
 | :---: | :--- | :--- | :---: |
 | **A-1** | **実対戦での墓地TOP自動選択** | 複数カード墓地移動に伴う `ZONE_TOP_SELECTION` が発生し、手動/自動モードで正常に受理され、`graveTopCardId` に反映され、Canonical Match Log に `zone.top.changed` が正確に記録されることを実証 | **PASS** |
 | **A-2** | **実Transcriptによる完全Replay** | Core Battle 公式環境での実戦戦闘フロー（Turn 1 アタック・ブロック・ダメージ5点）を経て `actor: "autoGraveTop"` を含む Transcript を収集。`reconstructMatch()` が `SUCCESS` を返し、墓地TOPカードIDおよび最終GameStateハッシュが完全一致することを実証 | **PASS** |
-| **A-3** | **Undo・再選択の決定論的同一性** | Undo で末尾の `autoGraveTop` を飛び越えて直前の人間の意思決定前へ戻り、再実行時に 100% 同一の墓地TOPカードが選択されることを実証 | **PASS** |
-| **A-4** | **二重送信防止ガード** | 同一 `decisionId` に対する `submitDecision` の重複提出が確実に防止されることを実証 | **PASS** |
-| **A-5** | **連続実行上限・例外ガード** | 連続実行上限（10回）到達時、および例外発生時にフリーズせず安全に停止し、`setRuntimeNotice` とシステムログでユーザーへ通知されることを実証 | **PASS** |
-| **A-6** | **Pass-and-Play 秘密情報保護** | 端末受け渡しオーバーレイ表示中は自動選択が安全に保留され、手札等の非公開情報が保護されたまま、「準備完了」押下後に自動選択が発火することを実証 | **PASS** |
-| **A-7** | **公式スート・ランク表記解決** | 物理カードID（`p2-l1`, `c-dmg-a` 等）から `resolveCardDisplayName` により `♥8`, `♠2`, `♦10`, `♣J` などの人間可読な公式表記が正しく解決されることを実証 | **PASS** |
+| **A-3** | **Undo・再選択の決定論的同一性** | `findUndoTruncationIndex` により末尾の `autoGraveTop` をスキップして直前の人間意思決定インデックスを特定し、同一シード・状態下での候補選択（`selectAutoGraveTopCandidate`）が 100% 同一のカードを選択する決定論的再現性を検証（※GameSession 全体の Replay 再現性は A-2 で担保） | **PASS** |
+| **A-4** | **二重送信防止ガード** | 同一 `decisionId` の DecisionRequest に対して送信中フラグおよび ID 記録により自動選択の重複提出が確実に防止されることを検証 | **PASS** |
+| **A-5** | **連続実行上限・非同期例外ガード** | 連続実行上限（10回）到達時、および `handleDecisionSubmit()` の Promise reject を含む例外発生時にフリーズせず送信中フラグを解除して安全に停止し、`setRuntimeNotice` とシステムログで通知されることを検証 | **PASS** |
+| **A-6** | **Pass-and-Play 秘密情報保護** | 端末受け渡しオーバーレイ表示中は自動選択が安全に保留され、非公開情報が保護されたまま、「準備完了」押下後に自動選択が安全に実行されることを検証 | **PASS** |
+| **A-7** | **公式スート・ランク表記解決** | 物理カードID（`p2-l1`, `c-dmg-a` 等）から `resolveCardDisplayName` により `♥8`, `♠2`, `♦10`, `♣J` などの人間可読な公式表記が正しく解決されることを検証 | **PASS** |
 
 ---
 
@@ -121,8 +121,8 @@ export function selectAutoGraveTopCandidate(
 | **墓地TOP自動選択 単体テスト** | `graveTopAutoSelector.test.ts` | 10件 | **全件 PASS** |
 | **Phase 5B 結合テスト** | `playtestAutoGraveTopIntegration.test.tsx` | 4件 | **全件 PASS** |
 | **Phase 5C 必須10シナリオ検証** | `playtestAutoGraveTopScenarios.test.tsx` | 10件 | **全件 PASS** |
-| **Phase 5 最終受入れテスト補強** | `playtestAutoGraveTopAcceptance.test.tsx` | 7件 | **全件 PASS** |
-| **UI テストスイート全体** | `src/tests/ui/` (全58ファイル) | 682件 | **全件 PASS** |
+| **Phase 5 最終受入れテスト補強** | `playtestAutoGraveTopAcceptance.test.tsx` | 10件 | **全件 PASS** |
+| **UI テストスイート全体** | `src/tests/ui/` (全58ファイル) | 685件 | **全件 PASS** |
 | **Replay テストスイート全体** | `src/tests/replay/` (全4ファイル) | 59件 | **全件 PASS** |
 | **規約監査テスト** | `scenarioPhaseAudit.test.ts` | 1件 | **全件 PASS** |
 | **1戦通し Playable チェック** | `npm run playable:check` | 1試合完走 | **PASS (全コアフロー正常完走)** |

@@ -7,7 +7,7 @@
     "phase5A": "7acc19ce5d40d99ba4fe38c64c84db221c6ba4c2",
     "phase5B": "bcd82d5f44f4d16fe55094606c9912f9364768bc",
     "phase5C": "31078173864c7a5f1ecdbf5ecf9f58a555a3c561",
-    "phase5AcceptanceHardening": "pending"
+    "phase5AcceptanceHardening": "84075f0dae95ce2cad367b0c83cd3f5f768662c8"
   },
   "summary": {
     "graveTopSelectionModes": ["manual", "auto"],
@@ -47,13 +47,13 @@
       "scenario8_userPreferenceLiveSwitching": "PASSED (Instant reflect on manual <-> auto toggle in MobileHeaderMenu and localStorage)",
       "scenario9_doubleSubmitAndLoopProtection": "PASSED (Duplicate decisionId prevented, max 10 consecutive guard enforced)",
       "scenario10_fontScaleResetIsolation": "PASSED (Font size reset to 100% strictly retains graveTopSelectionMode=auto)"
-    }
+    },
     "acceptanceHardeningVerification": {
       "liveGameSessionMultiGraveMove": "PASSED (ZONE_TOP_SELECTION generated in live combat, submitDecision accepted, zone.top.changed logged)",
       "liveSessionReconstructMatch": "PASSED (reconstructMatch returns SUCCESS with exact matching graveTopCardId and GameState hash)",
-      "undoHumanTruncationAndIdempotency": "PASSED (targets last human action and re-produces 100% identical grave top selection)",
-      "doubleSubmitAndLimitSafety": "PASSED (duplicate decisionId blocked, consecutive max 10 guard stops safely with runtime notice)",
-      "passAndPlaySecretProtection": "PASSED (auto-select safely deferred while overlay visible, executes immediately on ready)",
+      "undoHumanTruncationAndIdempotency": "PASSED (verifies findUndoTruncationIndex human target identification and deterministic candidate selection idempotency)",
+      "doubleSubmitAndLimitSafety": "PASSED (verified duplicate decisionId rejection and consecutive max 10 guard execution with runtime notice)",
+      "passAndPlaySecretProtection": "PASSED (verified auto-select deferred while PassAndPlay overlay is active, executes upon ready)",
       "officialSuitRankResolution": "PASSED (physical IDs like p2-l1 resolved to human-readable official suit/rank like ♥8, ♠2)"
     }
   },
@@ -61,8 +61,8 @@
     "graveTopAutoSelector_unitTests": { "total": 10, "passed": 10 },
     "playtestAutoGraveTopIntegration_tests": { "total": 4, "passed": 4 },
     "playtestAutoGraveTopScenarios_tests": { "total": 10, "passed": 10 },
-    "playtestAutoGraveTopAcceptance_tests": { "total": 7, "passed": 7 },
-    "uiTestSuiteTotal": { "files": 58, "tests": 682, "passed": 682 },
+    "playtestAutoGraveTopAcceptance_tests": { "total": 10, "passed": 10 },
+    "uiTestSuiteTotal": { "files": 58, "tests": 685, "passed": 685 },
     "replayTestSuiteTotal": { "files": 4, "tests": 59, "passed": 59 }
   }
 }

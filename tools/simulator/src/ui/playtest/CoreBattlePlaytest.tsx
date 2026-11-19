@@ -1609,9 +1609,24 @@ export const CoreBattlePlaytest: React.FC = () => {
         currentStep.request
       );
 
-      handleDecisionSubmit(response, { actor: "autoGraveTop", cardName }).finally(() => {
-        autoGraveTopSubmittingRef.current = false;
-      });
+      handleDecisionSubmit(response, { actor: "autoGraveTop", cardName })
+        .catch((err: any) => {
+          console.error("AutoGraveTop handleDecisionSubmit エラー:", err);
+          addLog(
+            `[AUTO_GRAVE_TOP_ERROR] 墓地TOP自動選択の送信中にエラーが発生しました: ${err?.message || String(err)}`,
+            "system"
+          );
+          setRuntimeNotice({
+            type: "TECHNICAL_ERROR",
+            title: "墓地TOP自動送信エラー",
+            message: `墓地TOPの自動送信中にエラーが発生しました: ${err?.message || String(err)}。手動で操作を行ってください。`,
+            environmentName: activeMatch?.environmentName ?? "Core Battle",
+            seed: activeMatch?.seed,
+          });
+        })
+        .finally(() => {
+          autoGraveTopSubmittingRef.current = false;
+        });
     } catch (err: any) {
       autoGraveTopSubmittingRef.current = false;
       console.error("AutoGraveTop 実行エラー:", err);
