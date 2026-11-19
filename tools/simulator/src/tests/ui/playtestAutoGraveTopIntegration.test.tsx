@@ -143,7 +143,7 @@ describe("Playtest Auto Grave Top Integration (Phase 5B)", () => {
   });
 
   it("4. selectAutoGraveTopCandidate が ZONE_TOP_SELECTION 要求に対して安定した決定論的選択結果を返すこと", () => {
-    const mockRequest: DecisionRequest = {
+    const mockRequest = {
       decisionId: "dec-zone-top-test",
       stateVersion: 10,
       playerId: "p1",
@@ -151,11 +151,11 @@ describe("Playtest Auto Grave Top Integration (Phase 5B)", () => {
         type: "ZONE_TOP_SELECTION",
         reason: "MULTI_CARD_GRAVE_MOVE",
         player: "p1",
-        zone: "GRAVE",
+        zone: "grave",
       },
       patterns: [
-        { kind: "EFFECT_SELECTION", effectSelectionRef: 0 },
-        { kind: "EFFECT_SELECTION", effectSelectionRef: 1 },
+        { patternId: "pat-1", kind: "EFFECT_SELECTION", effectSelectionRef: 0 },
+        { patternId: "pat-2", kind: "EFFECT_SELECTION", effectSelectionRef: 1 },
       ],
       catalog: {
         effectSelections: [
@@ -163,7 +163,7 @@ describe("Playtest Auto Grave Top Integration (Phase 5B)", () => {
           { selectionType: "card", selectedValues: ["c2_sK"] },
         ],
       },
-    };
+    } as unknown as DecisionRequest;
 
     const result1 = selectAutoGraveTopCandidate({
       request: mockRequest,
