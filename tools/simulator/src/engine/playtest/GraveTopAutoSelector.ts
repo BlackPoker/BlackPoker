@@ -1,4 +1,9 @@
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
+import {
+  formatCardDisplay,
+  formatOfficialSuitSymbol,
+  isJokerCard,
+} from "../rules/cardUtils";
 
 /**
  * 墓地TOP選択モードの型定義
@@ -153,4 +158,106 @@ export function selectAutoGraveTopCandidate(
     selectedCardId,
     candidateCardIds: normalizedCandidateIds,
   };
+}
+
+/**
+ * カードオブジェクトまたは文字列表記から公式スート記号（♠, ♥, ♦, ♣）を用いた表示文字列を生成します。
+ */
+function formatWithOfficialSuit(card: any): string {
+  if (!card) return "";
+  if (typeof card === "string") {
+    const trimmed = card.trim();
+    if (trimmed.toLowerCase() === "jk" || trimmed.toLowerCase() === "joker") {
+      return "Joker";
+    }
+    const match = trimmed.match(/^([shdcSHDC♠♡♢♣♥♦])(10|[2-9ajqkAJQK])$/);
+    if (match) {
+      const sym = formatOfficialSuitSymbol(match[1]);
+      const rank = match[2].toUpperCase();
+      return `${sym}${rank}`;
+    }
+    const replaced = trimmed.replace(/♡/g, "♥").replace(/♢/g, "♦");
+    return replaced;
+  }
+  if (card.visibility === "HIDDEN" || (!card.suit && !card.rank)) return "🂠";
+  if (isJokerCard(card)) return "Joker";
+  const symbol = formatOfficialSuitSymbol(card.suit);
+  const rank = card.rank !== undefined ? String(card.rank) : "";
+  return `${symbol}${rank}`;
+}
+
+/**
+ * 物理カードID（"p2-l1", "c-dmg-a" 等）から実際の公開カード情報（スート・ランク）を抽出し、
+ * "♠A" や "♥8" などの人間可読な公式文字列表現を解決するヘルパー関数です。
+ */
+export function resolveCardDisplayName(
+  cardId: string,
+  state?: any,
+  request?: DecisionRequest
+): string {
+  if (!cardId) return "";
+
+  // 1. request.catalog.effectSelections の summary から抽出
+  if (request?.catalog?.effectSelections && request?.patterns) {
+    for (const pat of request.patterns) {
+      if (pat.kind === "EFFECT_SELECTION" && pat.effectSelectionRef !== undefined) {
+        const eff = request.catalog.effectSelections[pat.effectSelectionRef];
+        if (eff?.selectedValues?.includes(cardId) && eff.summary) {
+          const match = eff.summary.match(/\[(.*?)\]/);
+          if (
+            match &&
+            match[1] &&
+            !match[1].startsWith("c-") &&
+            !match[1].startsWith("card-") &&
+            !match[1].startsWith("p1-") &&
+            !match[1].startsWith("p2-")
+          ) {
+            return formatWithOfficialSuit(match[1]);
+          }
+        }
+      }
+    }
+  }
+
+  // 2. state または observation からカード実体を探索
+  const searchRoots = [state, request?.observation];
+  for (const root of searchRoots) {
+    if (!root?.players) continue;
+    for (const pKey of Object.keys(root.players)) {
+      const p = root.players[pKey];
+      if (!p) continue;
+      // grave 内を探索
+      if (Array.isArray(p.grave)) {
+        for (const item of p.grave) {
+          if (item?.id === cardId && (item.suit || item.rank)) {
+            return formatWithOfficialSuit(item);
+          }
+          if (Array.isArray(item?.cards)) {
+            const found = item.cards.find((c: any) => c?.id === cardId);
+            if (found && (found.suit || found.rank)) {
+              return formatWithOfficialSuit(found);
+            }
+          }
+        }
+      }
+      // life, hand も探索
+      for (const zone of ["life", "hand"] as const) {
+        if (Array.isArray(p[zone])) {
+          const found = p[zone].find((c: any) => c?.id === cardId);
+          if (found && (found.suit || found.rank)) {
+            return formatWithOfficialSuit(found);
+          }
+        }
+      }
+    }
+  }
+
+  // 3. 短縮表記 (s10, hA, dK, sA, hK, cJ 等) の直接フォーマット
+  const formatted = formatWithOfficialSuit(cardId);
+  if (formatted && formatted !== cardId) {
+    return formatted;
+  }
+
+  // 4. フォールバック
+  return cardId;
 }

@@ -6,6 +6,7 @@ import { MobileHeaderMenu } from "../../ui/game/MobileHeaderMenu";
 import {
   PLAYTEST_PREFERENCES_STORAGE_KEY,
   DEFAULT_PLAYTEST_USER_PREFERENCES,
+  resetPreferencesInMemoryForTesting,
 } from "../../ui/preferences/PlaytestUserPreferences";
 import {
   selectAutoGraveTopCandidate,
@@ -21,6 +22,7 @@ import { createDecisionTranscriptEntry } from "../../ui/playtest/PlaytestDecisio
 
 describe("Playtest Auto Grave Top 10 Scenarios (Phase 5C Verification)", () => {
   beforeEach(() => {
+    resetPreferencesInMemoryForTesting();
     if (typeof window !== "undefined" && window.localStorage) {
       window.localStorage.clear();
     }

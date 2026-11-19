@@ -75,7 +75,10 @@ import {
   createDecisionTranscriptEntry,
   createAutomatedDecisionTranscriptEntries,
 } from "./PlaytestDecisionTranscript";
-import { selectAutoGraveTopCandidate } from "../../engine/playtest/GraveTopAutoSelector";
+import {
+  selectAutoGraveTopCandidate,
+  resolveCardDisplayName,
+} from "../../engine/playtest/GraveTopAutoSelector";
 import { formatCardDisplay } from "../../engine/rules/cardUtils";
 import { PlaytestFeedbackModal } from "./PlaytestFeedbackModal";
 import type { PlaytestHumanFeedbackEntryV1 } from "./PlaytestFeedbackTypes";
@@ -1549,6 +1552,9 @@ export const CoreBattlePlaytest: React.FC = () => {
     }
     if (isAiProcessing) return;
 
+    // Pass-and-Play 端末受け渡しオーバーレイ表示中は自動選択を保留 (受け渡し後に実行)
+    if (isPassAndPlayWaiting) return;
+
     // 二重送信・同一リクエストの重複処理防止
     if (autoGraveTopSubmittingRef.current) return;
     if (lastAutoGraveTopDecisionIdRef.current === currentStep.request.decisionId) return;
@@ -1565,6 +1571,18 @@ export const CoreBattlePlaytest: React.FC = () => {
     // 連続実行回数ガード (最大10回などのフェイルセーフ)
     if (autoGraveTopConsecutiveCountRef.current >= 10) {
       console.warn("AutoGraveTop: 連続実行回数上限(10回)に達したため自動選択を中断しました。");
+      addLog(
+        "[AUTO_GRAVE_TOP_LIMIT] 墓地TOP自動選択の連続実行上限(10回)に達したため、自動進行を中断しました。",
+        "system"
+      );
+      setRuntimeNotice({
+        type: "TECHNICAL_ERROR",
+        title: "自動選択の上限到達",
+        message:
+          "墓地TOP自動選択の連続実行上限(10回)に達したため、自動進行を中断しました。手動で操作を完了してください。",
+        environmentName: activeMatch?.environmentName ?? "Core Battle",
+        seed: activeMatch?.seed,
+      });
       return;
     }
 
@@ -1585,7 +1603,11 @@ export const CoreBattlePlaytest: React.FC = () => {
         selectedPatternRef: autoResult.selectedPatternRef,
       };
 
-      const cardName = formatCardDisplay(autoResult.selectedCardId) || autoResult.selectedCardId;
+      const cardName = resolveCardDisplayName(
+        autoResult.selectedCardId,
+        sessionRef.current?.state,
+        currentStep.request
+      );
 
       handleDecisionSubmit(response, { actor: "autoGraveTop", cardName }).finally(() => {
         autoGraveTopSubmittingRef.current = false;
@@ -1593,6 +1615,17 @@ export const CoreBattlePlaytest: React.FC = () => {
     } catch (err: any) {
       autoGraveTopSubmittingRef.current = false;
       console.error("AutoGraveTop 実行エラー:", err);
+      addLog(
+        `[AUTO_GRAVE_TOP_ERROR] 墓地TOP自動選択でエラーが発生しました: ${err?.message || String(err)}`,
+        "system"
+      );
+      setRuntimeNotice({
+        type: "TECHNICAL_ERROR",
+        title: "墓地TOP自動選択エラー",
+        message: `墓地TOPの自動選択中にエラーが発生しました: ${err?.message || String(err)}。手動で選択を行ってください。`,
+        environmentName: activeMatch?.environmentName ?? "Core Battle",
+        seed: activeMatch?.seed,
+      });
     }
   }, [
     currentStep,
@@ -1601,6 +1634,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     activeMatchMode,
     activeSeatControllers,
     isAiProcessing,
+    isPassAndPlayWaiting,
     handleDecisionSubmit,
   ]);
 

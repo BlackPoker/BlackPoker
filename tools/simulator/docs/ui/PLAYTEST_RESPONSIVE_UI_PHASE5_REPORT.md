@@ -98,23 +98,39 @@ export function selectAutoGraveTopCandidate(
 
 ---
 
-## 5. テスト実行実績サマリー
+## 5. 最終受入れテスト補強の実績 (`playtestAutoGraveTopAcceptance.test.tsx`)
+
+型・純粋関数・設定値の検証にとどまらず、実際の `GameSession` と UI 進行コンテキストを用いた包括的な受入れテスト（全7項目）を追加・完遂しました。
+
+| # | 検証項目 | 検証内容と実証結果 | 判定 |
+| :---: | :--- | :--- | :---: |
+| **A-1** | **実対戦での墓地TOP自動選択** | 複数カード墓地移動に伴う `ZONE_TOP_SELECTION` が発生し、手動/自動モードで正常に受理され、`graveTopCardId` に反映され、Canonical Match Log に `zone.top.changed` が正確に記録されることを実証 | **PASS** |
+| **A-2** | **実Transcriptによる完全Replay** | Core Battle 公式環境での実戦戦闘フロー（Turn 1 アタック・ブロック・ダメージ5点）を経て `actor: "autoGraveTop"` を含む Transcript を収集。`reconstructMatch()` が `SUCCESS` を返し、墓地TOPカードIDおよび最終GameStateハッシュが完全一致することを実証 | **PASS** |
+| **A-3** | **Undo・再選択の決定論的同一性** | Undo で末尾の `autoGraveTop` を飛び越えて直前の人間の意思決定前へ戻り、再実行時に 100% 同一の墓地TOPカードが選択されることを実証 | **PASS** |
+| **A-4** | **二重送信防止ガード** | 同一 `decisionId` に対する `submitDecision` の重複提出が確実に防止されることを実証 | **PASS** |
+| **A-5** | **連続実行上限・例外ガード** | 連続実行上限（10回）到達時、および例外発生時にフリーズせず安全に停止し、`setRuntimeNotice` とシステムログでユーザーへ通知されることを実証 | **PASS** |
+| **A-6** | **Pass-and-Play 秘密情報保護** | 端末受け渡しオーバーレイ表示中は自動選択が安全に保留され、手札等の非公開情報が保護されたまま、「準備完了」押下後に自動選択が発火することを実証 | **PASS** |
+| **A-7** | **公式スート・ランク表記解決** | 物理カードID（`p2-l1`, `c-dmg-a` 等）から `resolveCardDisplayName` により `♥8`, `♠2`, `♦10`, `♣J` などの人間可読な公式表記が正しく解決されることを実証 | **PASS** |
+
+---
+
+## 6. テスト実行実績サマリー
 
 | テストスイート | ファイル数 / 実行対象 | テスト件数 | 結果 |
 | :--- | :--- | :--- | :--- |
 | **墓地TOP自動選択 単体テスト** | `graveTopAutoSelector.test.ts` | 10件 | **全件 PASS** |
 | **Phase 5B 結合テスト** | `playtestAutoGraveTopIntegration.test.tsx` | 4件 | **全件 PASS** |
 | **Phase 5C 必須10シナリオ検証** | `playtestAutoGraveTopScenarios.test.tsx` | 10件 | **全件 PASS** |
-| **UI テストスイート全体** | `src/tests/ui/` (全57ファイル) | 675件 | **全件 PASS** |
+| **Phase 5 最終受入れテスト補強** | `playtestAutoGraveTopAcceptance.test.tsx` | 7件 | **全件 PASS** |
+| **UI テストスイート全体** | `src/tests/ui/` (全58ファイル) | 682件 | **全件 PASS** |
 | **Replay テストスイート全体** | `src/tests/replay/` (全4ファイル) | 59件 | **全件 PASS** |
 | **規約監査テスト** | `scenarioPhaseAudit.test.ts` | 1件 | **全件 PASS** |
 | **1戦通し Playable チェック** | `npm run playable:check` | 1試合完走 | **PASS (全コアフロー正常完走)** |
 | **TypeScript / Vite ビルド** | `npm run build` | dist 出力 | **PASS (エラーゼロ)** |
-| **GitHub Actions CI** | `test & build simulator` (`44453955755`) | 全ステップ | **SUCCESS** |
 
 ---
 
-## 6. 結論
+## 7. 結論
 
 Phase 0（調査・設計）から開始した「Playtest レスポンシブUI再設計」は、
 - **Phase 1:** 常設ヘッダー整理と全形態対応の統合設定メニュー

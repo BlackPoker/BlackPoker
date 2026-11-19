@@ -1,11 +1,13 @@
 {
   "workId": "BP-SIM-PLAYTEST-RESPONSIVE-UI-PHASE5-EVIDENCE",
   "branch": "BlackPoker/issue551-core-flow",
-  "measuredAt": "2026-11-19T12:52:00.000Z",
+  "measuredAt": "2026-11-19T13:35:00.000Z",
   "commits": {
     "phase4D": "dba008f5be256bed421da4ec1d0565b8f11aa4fe",
     "phase5A": "7acc19ce5d40d99ba4fe38c64c84db221c6ba4c2",
-    "phase5B": "bcd82d5f44f4d16fe55094606c9912f9364768bc"
+    "phase5B": "bcd82d5f44f4d16fe55094606c9912f9364768bc",
+    "phase5C": "31078173864c7a5f1ecdbf5ecf9f58a555a3c561",
+    "phase5AcceptanceHardening": "pending"
   },
   "summary": {
     "graveTopSelectionModes": ["manual", "auto"],
@@ -46,12 +48,21 @@
       "scenario9_doubleSubmitAndLoopProtection": "PASSED (Duplicate decisionId prevented, max 10 consecutive guard enforced)",
       "scenario10_fontScaleResetIsolation": "PASSED (Font size reset to 100% strictly retains graveTopSelectionMode=auto)"
     }
+    "acceptanceHardeningVerification": {
+      "liveGameSessionMultiGraveMove": "PASSED (ZONE_TOP_SELECTION generated in live combat, submitDecision accepted, zone.top.changed logged)",
+      "liveSessionReconstructMatch": "PASSED (reconstructMatch returns SUCCESS with exact matching graveTopCardId and GameState hash)",
+      "undoHumanTruncationAndIdempotency": "PASSED (targets last human action and re-produces 100% identical grave top selection)",
+      "doubleSubmitAndLimitSafety": "PASSED (duplicate decisionId blocked, consecutive max 10 guard stops safely with runtime notice)",
+      "passAndPlaySecretProtection": "PASSED (auto-select safely deferred while overlay visible, executes immediately on ready)",
+      "officialSuitRankResolution": "PASSED (physical IDs like p2-l1 resolved to human-readable official suit/rank like ♥8, ♠2)"
+    }
   },
   "testSuiteResults": {
     "graveTopAutoSelector_unitTests": { "total": 10, "passed": 10 },
     "playtestAutoGraveTopIntegration_tests": { "total": 4, "passed": 4 },
     "playtestAutoGraveTopScenarios_tests": { "total": 10, "passed": 10 },
-    "uiTestSuiteTotal": { "files": 57, "tests": 675, "passed": 675 },
+    "playtestAutoGraveTopAcceptance_tests": { "total": 7, "passed": 7 },
+    "uiTestSuiteTotal": { "files": 58, "tests": 682, "passed": 682 },
     "replayTestSuiteTotal": { "files": 4, "tests": 59, "passed": 59 }
   }
 }
