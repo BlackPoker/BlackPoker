@@ -61,6 +61,28 @@
   font-size: calc(1rem * var(--bp-font-scale, 1));
 }
 
+[data-testid="playtest-root-container"] .text-\[7\.5px\],
+[data-testid="mobile-bottom-sheet"] .text-\[7\.5px\] {
+  font-size: calc(7.5px * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[8px\],
+[data-testid="mobile-bottom-sheet"] .text-\[8px\] {
+  font-size: calc(8px * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[8\.5px\],
+[data-testid="mobile-bottom-sheet"] .text-\[8\.5px\] {
+  font-size: calc(8.5px * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[9px\],
+[data-testid="playtest-settings-menu-modal"] .text-\[9px\],
+[data-testid="mobile-bottom-sheet"] .text-\[9px\],
+[data-testid="mobile-decision-dock"] .text-\[9px\] {
+  font-size: calc(9px * var(--bp-font-scale, 1));
+}
+
 [data-testid="playtest-root-container"] .text-\[9\.5px\],
 [data-testid="mobile-bottom-sheet"] .text-\[9\.5px\] {
   font-size: calc(9.5px * var(--bp-font-scale, 1));
@@ -82,6 +104,26 @@
 [data-testid="mobile-bottom-sheet"] .text-\[11px\],
 [data-testid="mobile-decision-dock"] .text-\[11px\] {
   font-size: calc(11px * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[11\.5px\],
+[data-testid="mobile-bottom-sheet"] .text-\[11\.5px\] {
+  font-size: calc(11.5px * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[12px\],
+[data-testid="mobile-bottom-sheet"] .text-\[12px\] {
+  font-size: calc(12px * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[13px\],
+[data-testid="mobile-bottom-sheet"] .text-\[13px\] {
+  font-size: calc(13px * var(--bp-font-scale, 1));
+}
+
+[data-testid="playtest-root-container"] .text-\[14px\],
+[data-testid="mobile-bottom-sheet"] .text-\[14px\] {
+  font-size: calc(14px * var(--bp-font-scale, 1));
 }
 
 /* BlackPoker Title Typography */

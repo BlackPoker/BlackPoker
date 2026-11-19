@@ -296,6 +296,43 @@ describe("PlaytestUserPreferences (Phase 4A)", () => {
       expect(JSON.parse(raw!).fontScale).toBe("115%");
     });
 
+    it("Phase 4D: 文字サイズのみを 100% にリセットした際に他設定 (graveTopSelectionMode 等) が維持されること", () => {
+      let currentHook!: ReturnType<typeof usePlaytestUserPreferences>;
+      TestRenderer.create(
+        React.createElement(HookConsumer, {
+          onHook: (h) => {
+            currentHook = h;
+          },
+        })
+      );
+
+      // 墓地TOPを auto に、フォントを 130% に設定
+      act(() => {
+        currentHook.updatePreferences({
+          fontScale: "130%",
+          graveTopSelectionMode: "auto",
+        });
+      });
+
+      expect(currentHook.preferences.fontScale).toBe("130%");
+      expect(currentHook.preferences.graveTopSelectionMode).toBe("auto");
+
+      // 文字サイズのみ 100% に戻す (CoreBattlePlaytest の onResetFontScale の挙動)
+      act(() => {
+        currentHook.updatePreferences({ fontScale: "100%" });
+      });
+
+      expect(currentHook.preferences.fontScale).toBe("100%");
+      expect(currentHook.preferences.graveTopSelectionMode).toBe("auto"); // 他設定が保持される
+
+      const raw = mockStorage.getItem(PLAYTEST_PREFERENCES_STORAGE_KEY);
+      expect(JSON.parse(raw!)).toEqual({
+        schemaVersion: 1,
+        fontScale: "100%",
+        graveTopSelectionMode: "auto",
+      });
+    });
+
     it("resetToDefault で 100% にリセットされ、localStorage と DOM に反映されること", () => {
       let currentHook!: ReturnType<typeof usePlaytestUserPreferences>;
       TestRenderer.create(

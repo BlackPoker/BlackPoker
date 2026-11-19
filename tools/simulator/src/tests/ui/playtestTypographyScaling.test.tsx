@@ -140,6 +140,28 @@ describe("PlaytestTypographyScaling (Phase 4B)", () => {
     });
   });
 
+  describe("7. Phase 4D: 文字サイズ底上げと状態ラベル視認性契約", () => {
+    it("UnitCard の状態ラベル (DRIVE/CHARGE) およびユニット名バッジが text-[10px] 以上で描画されること", () => {
+      const mockUnit = {
+        unitId: "u-test-2",
+        kind: "soldier",
+        state: "drive",
+        cards: [{ id: "c-2", suit: "H", rank: "K", value: 13 }],
+      };
+
+      const html = renderToString(
+        React.createElement(UnitCard, {
+          unit: mockUnit,
+        })
+      );
+
+      // デスクトップ表示のユニット名バッジ・DRIVEラベルが text-[10px] 以上
+      expect(html).toContain("text-[10px] font-mono font-bold");
+      expect(html).toContain("DRIVE");
+      expect(html).not.toContain("text-[9px] font-mono font-bold");
+    });
+  });
+
   describe("6. MobileDecisionDock のフォントサイズと min-h-[44px] タッチ領域", () => {
     it("MobileDecisionDock が min-h-[44px] を維持し、主要操作文字が text-xs であること", () => {
       const mockRequest: any = {

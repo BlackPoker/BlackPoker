@@ -149,13 +149,13 @@ export const UnitCard: React.FC<UnitCardProps> = ({
               </span>
             </div>
           ) : (
-            <span className="text-[9px] font-mono font-black px-1.5 py-0.5 rounded flex items-center gap-1 uppercase tracking-wider bg-zinc-100 text-zinc-800 border border-zinc-300">
+            <span className="text-[10px] font-mono font-black px-1.5 py-0.5 rounded flex items-center gap-1 uppercase tracking-wider bg-zinc-100 text-zinc-800 border border-zinc-300">
               <span>{unitDisplayName}</span>
             </span>
           )}
 
           <span
-            className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded border ${
+            className={`text-[10px] font-mono font-bold px-1.5 py-0.2 rounded border ${
               isDrive
                 ? "bg-zinc-100 text-zinc-500 border-zinc-300"
                 : "bg-zinc-950 text-white border-zinc-950 font-black"
@@ -167,20 +167,20 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
         {/* バトルロールマーカー */}
         {battleRole === "attacker" && (
-          <div className="w-full bg-zinc-950 text-white text-[9px] font-mono font-black text-center py-0.5 rounded mb-0.5 shadow-sm flex items-center justify-center gap-1 border border-zinc-950">
+          <div className="w-full bg-zinc-950 text-white text-[10px] font-mono font-black text-center py-0.5 rounded mb-0.5 shadow-sm flex items-center justify-center gap-1 border border-zinc-950">
             <span>ATTACK 攻撃中</span>
             {battleDisplayInfo?.blockedByHumanLabels && battleDisplayInfo.blockedByHumanLabels.length > 0 && (
-              <span className="bg-white text-zinc-950 px-1 rounded text-[8px] font-mono font-bold">
+              <span className="bg-white text-zinc-950 px-1 rounded text-[9px] font-mono font-bold">
                 ← <RichCardText text={battleDisplayInfo.blockedByHumanLabels.join(" ")} />
               </span>
             )}
           </div>
         )}
         {battleRole === "blocker" && (
-          <div className="w-full bg-zinc-100 text-zinc-950 text-[9px] font-mono font-black text-center py-0.5 rounded mb-0.5 shadow-sm flex items-center justify-center gap-1 border border-zinc-400">
+          <div className="w-full bg-zinc-100 text-zinc-950 text-[10px] font-mono font-black text-center py-0.5 rounded mb-0.5 shadow-sm flex items-center justify-center gap-1 border border-zinc-400">
             <span>BLOCK 防御中</span>
             {battleDisplayInfo?.targetHumanLabel && (
-              <span className="bg-zinc-950 text-white px-1 rounded text-[8px] font-mono font-bold">
+              <span className="bg-zinc-950 text-white px-1 rounded text-[9px] font-mono font-bold">
                 → <RichCardText text={battleDisplayInfo.targetHumanLabel} />
               </span>
             )}
@@ -300,14 +300,14 @@ export const UnitCard: React.FC<UnitCardProps> = ({
 
         {/* バトルロール表示 (モバイル) */}
         {battleRole === "attacker" && (
-          <div className="w-full bg-zinc-950 text-white text-[7.5px] font-mono font-black text-center py-0.2 rounded my-0.5">
+          <div className="w-full bg-zinc-950 text-white text-[9px] font-mono font-black text-center py-0.2 rounded my-0.5">
             {battleDisplayInfo?.blockedByHumanLabels && battleDisplayInfo.blockedByHumanLabels.length > 0 ? (
               <span>ATK ← <RichCardText text={battleDisplayInfo.blockedByHumanLabels.join(" ")} /></span>
             ) : "ATK 攻撃中"}
           </div>
         )}
         {battleRole === "blocker" && (
-          <div className="w-full bg-zinc-100 border border-zinc-400 text-zinc-950 text-[7.5px] font-mono font-black text-center py-0.2 rounded my-0.5">
+          <div className="w-full bg-zinc-100 border border-zinc-400 text-zinc-950 text-[9px] font-mono font-black text-center py-0.2 rounded my-0.5">
             {battleDisplayInfo?.targetHumanLabel ? (
               <span>BLK → <RichCardText text={battleDisplayInfo.targetHumanLabel} /></span>
             ) : "BLK 防御中"}

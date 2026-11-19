@@ -1059,7 +1059,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           className="sticky top-0 z-10 bg-white flex items-center justify-between border-b border-zinc-200 pb-1.5 mb-2 shrink-0"
         >
           <div>
-            <span className="inline-block rounded bg-zinc-950 text-white px-1.5 py-0.2 text-[9px] font-mono font-black uppercase tracking-wider">
+            <span className="inline-block rounded bg-zinc-950 text-white px-1.5 py-0.2 text-[10px] font-mono font-black uppercase tracking-wider">
               {isZoneTopSelection ? "ZONE TOP SELECTION" : "EFFECT SELECTION"}
             </span>
             <h2 className="text-sm font-bold text-zinc-950 mt-0.5 tracking-wide">
@@ -1124,7 +1124,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                     >
                       <div className="flex items-center gap-2 font-mono">
                         <span
-                          className={`w-4 h-4 rounded-full border flex items-center justify-center text-[9px] ${
+                          className={`w-4 h-4 rounded-full border flex items-center justify-center text-[10px] ${
                             isSelected
                               ? "bg-white border-zinc-900 text-zinc-950 font-black"
                               : "border-zinc-400 text-transparent"
@@ -1166,7 +1166,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             </div>
           )}
 
-          <div className="text-[9px] text-zinc-500 font-mono flex items-center justify-between">
+          <div className="text-[10px] text-zinc-500 font-mono flex items-center justify-between">
             <span className="flex items-center gap-1.5 flex-wrap">
               <span>SHORTCUT:</span>
               <span>
@@ -1192,10 +1192,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       >
         <div>
           <div className="flex items-center gap-1.5 font-mono">
-            <span className="inline-block rounded bg-zinc-100 border border-zinc-300 px-1.5 py-0.2 text-[9px] font-bold uppercase tracking-wider text-zinc-700">
+            <span className="inline-block rounded bg-zinc-100 border border-zinc-300 px-1.5 py-0.2 text-[10px] font-bold uppercase tracking-wider text-zinc-700">
               DECISION
             </span>
-            <span className="inline-block rounded bg-zinc-50 border border-zinc-200 text-zinc-500 px-1.5 py-0.2 text-[9px] font-bold">
+            <span className="inline-block rounded bg-zinc-50 border border-zinc-200 text-zinc-500 px-1.5 py-0.2 text-[10px] font-bold">
               未リクエスト
             </span>
           </div>
@@ -1276,7 +1276,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                   }`}
                 >
                   <div className="font-bold text-xs font-serif">{act.actionName || act.actionId}</div>
-                  <div className={`text-[9px] mt-0.5 font-mono ${isSelected ? "text-zinc-300" : "text-zinc-500"}`}>
+                  <div className={`text-[11px] mt-0.5 font-mono ${isSelected ? "text-zinc-200" : "text-zinc-600"}`}>
                     {act.timing ? `[${act.timing}]` : ""} {act.cost ? `Cost: ${act.cost}` : ""}
                   </div>
                 </button>

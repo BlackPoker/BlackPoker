@@ -2408,7 +2408,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         onOpenScenarioBuilder={() => setIsScenarioBuilderOpen(true)}
         fontScale={userPreferences.fontScale}
         onSelectFontScale={(scale) => updateUserPreferences({ fontScale: scale })}
-        onResetFontScale={resetUserPreferencesToDefault}
+        onResetFontScale={() => updateUserPreferences({ fontScale: "100%" })}
       />
 
 
