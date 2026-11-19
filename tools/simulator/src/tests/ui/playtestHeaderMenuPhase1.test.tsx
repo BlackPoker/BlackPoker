@@ -266,4 +266,149 @@ describe("Playtest UI Redesign Phase 1: Header Simplification & Unified Settings
     });
     expect(onResetFontScale).toHaveBeenCalled();
   });
+
+  it("8. ESCキー押下時に設定メニューが閉じ、トリガーボタンへフォーカスが復帰すること", async () => {
+    vi.useFakeTimers();
+    const onClose = vi.fn();
+    const mockFocus = vi.fn();
+
+    const originalWindow = (globalThis as any).window;
+    const originalDocument = (globalThis as any).document;
+
+    const listeners: { [key: string]: ((e: any) => void)[] } = {};
+    const mockWindow = {
+      addEventListener: (type: string, listener: (e: any) => void) => {
+        if (!listeners[type]) listeners[type] = [];
+        listeners[type].push(listener);
+      },
+      removeEventListener: (type: string, listener: (e: any) => void) => {
+        if (!listeners[type]) return;
+        listeners[type] = listeners[type].filter((l) => l !== listener);
+      },
+      dispatchEvent: (event: any) => {
+        const list = [...(listeners[event.type] || [])];
+        for (const l of list) l(event);
+        return true;
+      },
+    };
+
+    const mockDocument = {
+      querySelector: vi.fn().mockImplementation((sel: string) => {
+        if (sel === '[data-testid="header-settings-menu-button"]') {
+          return { focus: mockFocus };
+        }
+        return null;
+      }),
+    };
+
+    (globalThis as any).window = mockWindow;
+    (globalThis as any).document = mockDocument;
+
+    let renderer!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      renderer = TestRenderer.create(
+        <MobileHeaderMenu
+          isOpen={true}
+          onClose={onClose}
+          selectedEnvironmentId="core-battle"
+          onSelectEnvironment={vi.fn()}
+          environmentOptions={[]}
+          matchMode="humanVsAi"
+          onSelectMatchMode={vi.fn()}
+          policyId="gen9-r4-v72c"
+          onSelectPolicyId={vi.fn()}
+          isOfficialEnvironment={false}
+          enablePassAndPlay={false}
+          onTogglePassAndPlay={vi.fn()}
+          onOpenLogModal={vi.fn()}
+          onOpenDebugModal={vi.fn()}
+          onResetGame={vi.fn()}
+          showSeedInput={false}
+        />
+      );
+    });
+
+    act(() => {
+      mockWindow.dispatchEvent({
+        type: "keydown",
+        key: "Escape",
+        keyCode: 27,
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+      });
+    });
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+
+    act(() => {
+      vi.runAllTimers();
+    });
+
+    expect(mockFocus).toHaveBeenCalled();
+
+    (globalThis as any).window = originalWindow;
+    (globalThis as any).document = originalDocument;
+    vi.useRealTimers();
+  });
+
+  it("9. メニューが閉じている（isOpen: false）時はESCキーイベントで onClose が呼ばれないこと", () => {
+    const onClose = vi.fn();
+
+    const originalWindow = (globalThis as any).window;
+    const listeners: { [key: string]: ((e: any) => void)[] } = {};
+    const mockWindow = {
+      addEventListener: (type: string, listener: (e: any) => void) => {
+        if (!listeners[type]) listeners[type] = [];
+        listeners[type].push(listener);
+      },
+      removeEventListener: (type: string, listener: (e: any) => void) => {
+        if (!listeners[type]) return;
+        listeners[type] = listeners[type].filter((l) => l !== listener);
+      },
+      dispatchEvent: (event: any) => {
+        const list = [...(listeners[event.type] || [])];
+        for (const l of list) l(event);
+        return true;
+      },
+    };
+    (globalThis as any).window = mockWindow;
+
+    let renderer!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      renderer = TestRenderer.create(
+        <MobileHeaderMenu
+          isOpen={false}
+          onClose={onClose}
+          selectedEnvironmentId="core-battle"
+          onSelectEnvironment={vi.fn()}
+          environmentOptions={[]}
+          matchMode="humanVsAi"
+          onSelectMatchMode={vi.fn()}
+          policyId="gen9-r4-v72c"
+          onSelectPolicyId={vi.fn()}
+          isOfficialEnvironment={false}
+          enablePassAndPlay={false}
+          onTogglePassAndPlay={vi.fn()}
+          onOpenLogModal={vi.fn()}
+          onOpenDebugModal={vi.fn()}
+          onResetGame={vi.fn()}
+          showSeedInput={false}
+        />
+      );
+    });
+
+    act(() => {
+      mockWindow.dispatchEvent({
+        type: "keydown",
+        key: "Escape",
+        keyCode: 27,
+        preventDefault: vi.fn(),
+        stopPropagation: vi.fn(),
+      });
+    });
+
+    expect(onClose).not.toHaveBeenCalled();
+
+    (globalThis as any).window = originalWindow;
+  });
 });

@@ -776,4 +776,172 @@ describe("DecisionPanel 7 Decision Types Component Evidence Tests [BP-SIM-REG-5.
       expect(r.summary.length).toBeGreaterThan(0);
     }
   });
+
+  // 9. 回帰検証: 複数候補時の未選択提出ブロック & 決定ボタン無効化
+  it("UI-REG-1: Multiple targets/costs require explicit selection and block submission", () => {
+    const multiTargetRequest: DecisionRequest = {
+      protocolVersion: "1.0.0",
+      matchId: "test-match",
+      decisionId: "dec-multi-target",
+      stateVersion: 1,
+      playerId: "p1",
+      source: { type: "ACTION_REQUEST" } as any,
+      catalog: {
+        actions: [
+          {
+            actionRef: 0,
+            actionId: "action.unsummons",
+            actionName: "帰還",
+            timing: "quick",
+            cost: "B",
+            speed: "normal",
+          } as any,
+        ],
+        cardSelections: [
+          { cardSelectionRef: 0, cardIds: ["c-h2", "c-h5"], displayCodes: ["♡2", "♡5"] } as any,
+        ],
+        costPayments: [
+          { costPaymentRef: 0, summary: "防壁1をDRIVE" } as any,
+        ],
+        targetSelections: [
+          { targetSelectionRef: 0, targetUnitId: "u-bw-1", displayName: "防壁1", primaryLabel: "防壁1" } as any,
+          { targetSelectionRef: 1, targetUnitId: "u-sol-1", displayName: "兵士1", primaryLabel: "兵士1" } as any,
+        ],
+        effectSelections: [],
+        unitSelections: [],
+        orderSelections: [],
+      } as any,
+      patterns: [
+        {
+          patternRef: 0,
+          patternId: "pat-return-bw",
+          actionSelectionRef: 0,
+          keyCardSelectionRef: 0,
+          costPaymentRef: 0,
+          targetSelectionRef: 0,
+          kind: "ACTION",
+        } as any,
+        {
+          patternRef: 1,
+          patternId: "pat-return-sol",
+          actionSelectionRef: 0,
+          keyCardSelectionRef: 0,
+          costPaymentRef: 0,
+          targetSelectionRef: 1,
+          kind: "ACTION",
+        } as any,
+      ],
+      observation: {
+        players: [{ playerId: "p1", handCards: [] }, { playerId: "p2" }],
+      } as any,
+    };
+
+    const onSubmit = vi.fn();
+    let renderer!: TestRenderer.ReactTestRenderer;
+
+    act(() => {
+      renderer = TestRenderer.create(
+        <DecisionPanel request={multiTargetRequest} onSubmit={onSubmit} />
+      );
+    });
+
+    // 1. アクション「帰還」をクリック
+    const actionBtn = findButton(renderer.root, (text) => text.includes("帰還"));
+    act(() => {
+      actionBtn.props.onClick();
+    });
+
+    // キーカードとコストは各1候補なので自動確定されるが、対象は2候補あるため未確定状態！
+    // 決定ボタンは disabled であること
+    const submitPassBtn = findButton(renderer.root, (text) => text.includes("リクエスト＆PASS"));
+    expect(submitPassBtn.props.disabled).toBe(true);
+
+    // Enter キーイベントを模倣発火しても onSubmit は呼ばれないこと
+    act(() => {
+      if (typeof window !== "undefined") {
+        window.dispatchEvent({
+          type: "keydown",
+          key: "Enter",
+          preventDefault: () => {},
+          stopPropagation: () => {},
+        } as any);
+      }
+    });
+    expect(onSubmit).not.toHaveBeenCalled();
+
+    // 2. 対象「兵士1」をクリックして明示選択
+    const soldierTargetBtn = findButton(renderer.root, (text) => text.includes("兵士1"));
+    act(() => {
+      soldierTargetBtn.props.onClick();
+    });
+
+    // 対象が確定したため、決定ボタンが有効化される
+    expect(submitPassBtn.props.disabled).toBe(false);
+
+    // 3. 決定ボタンをクリックして提出
+    act(() => {
+      submitPassBtn.props.onClick();
+    });
+
+    expect(onSubmit).toHaveBeenCalledTimes(1);
+    const response: DecisionResponse = onSubmit.mock.calls[0][0];
+    expect(response.selectedPatternRef).toBe(1); // 兵士1が選ばれた patternRef: 1 であること！
+  });
+
+  // 10. 回帰検証: アクション選択後の折りたたみと「変更」ボタン
+  it("UI-REG-2: Action selection collapses list and shows Change button", () => {
+    const twoActionsRequest: DecisionRequest = {
+      protocolVersion: "1.0.0",
+      matchId: "test-match",
+      decisionId: "dec-two-actions",
+      stateVersion: 1,
+      playerId: "p1",
+      source: { type: "ACTION_REQUEST" } as any,
+      catalog: {
+        actions: [
+          { actionRef: 0, actionId: "action.attack", actionName: "攻撃", speed: "normal" } as any,
+          { actionRef: 1, actionId: "action.reinforce", actionName: "増援", speed: "normal" } as any,
+        ],
+        cardSelections: [],
+        costPayments: [],
+        targetSelections: [],
+        effectSelections: [],
+        unitSelections: [],
+        orderSelections: [],
+      } as any,
+      patterns: [
+        { patternRef: 0, patternId: "pat-atk", actionSelectionRef: 0, kind: "ACTION" } as any,
+        { patternRef: 1, patternId: "pat-reinf", actionSelectionRef: 1, kind: "ACTION" } as any,
+      ],
+      observation: { players: [{ playerId: "p1" }] } as any,
+    };
+
+    const onSubmit = vi.fn();
+    let renderer!: TestRenderer.ReactTestRenderer;
+
+    act(() => {
+      renderer = TestRenderer.create(
+        <DecisionPanel request={twoActionsRequest} onSubmit={onSubmit} />
+      );
+    });
+
+    // 初期状態では「攻撃」「増援」のボタンが両方表示されている
+    expect(() => findButton(renderer.root, (t) => t.includes("攻撃"))).not.toThrow();
+    expect(() => findButton(renderer.root, (t) => t.includes("増援"))).not.toThrow();
+
+    // 「攻撃」を選択
+    act(() => {
+      findButton(renderer.root, (t) => t.includes("攻撃")).props.onClick();
+    });
+
+    // 選択後は折りたたまれ、「変更」ボタンが表示される
+    const changeBtn = findButton(renderer.root, (t) => t.includes("変更"));
+    expect(changeBtn).toBeDefined();
+
+    // 「変更」ボタンをクリックすると再度一覧が展開される
+    act(() => {
+      changeBtn.props.onClick();
+    });
+    expect(() => findButton(renderer.root, (t) => t.includes("増援"))).not.toThrow();
+  });
 });

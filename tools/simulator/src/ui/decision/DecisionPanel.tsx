@@ -143,6 +143,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   const [blockAssignmentsDraft, setBlockAssignmentsDraft] = useState<Record<string, string[]> | undefined>(
     matchingDraft?.blockAssignments
   );
+  const [isActionListExpanded, setIsActionListExpanded] = useState<boolean>(false);
   const isSubmittedRef = useRef(false);
   const lastDecisionIdRef = useRef(request.decisionId);
   const lastProcessedBoardClickSeqRef = useRef<number>(lastBoardUnitClick?.seq ?? 0);
@@ -159,6 +160,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
       setSelectedBlockPatternRef(null);
       setFirstSelectedCardId(null);
       setBlockAssignmentsDraft(undefined);
+      setIsActionListExpanded(false);
       isSubmittedRef.current = false;
     }
   }, [request.decisionId, initialActionRef, initialCostRef, initialTargetRef]);
@@ -253,9 +255,17 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
   // 4. 選択中アクション + キーカード + コストで絞り込まれたパターン
   const patternsFilteredByCost = useMemo(() => {
-    if (selectedCostRef === null) return [];
+    if (availableCostRefs.length === 0) {
+      return patternsFilteredByKey;
+    }
+    if (selectedCostRef === null) {
+      if (availableCostRefs.length === 1) {
+        return patternsFilteredByKey.filter((p) => p.costPaymentRef === availableCostRefs[0]);
+      }
+      return [];
+    }
     return patternsFilteredByKey.filter((p) => p.costPaymentRef === selectedCostRef);
-  }, [patternsFilteredByKey, selectedCostRef]);
+  }, [patternsFilteredByKey, availableCostRefs, selectedCostRef]);
 
   // 選択可能な対象一覧
   const availableTargetRefs = useMemo(() => {
@@ -866,30 +876,90 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     onSelectionMarkersChange,
   ]);
 
-  // パターン一致検索
+  // パターン一致検索 (未選択の必須項目がある場合は null を返し提出不可とする)
   const finalMatchedPatternIndex = useMemo(() => {
     if (selectedActionRef === null) return null;
-    return patterns.findIndex((p) => {
+
+    // 1. キーカードの解決
+    let resolvedKeyRef: number | undefined;
+    if (availableKeyRefs.length === 0) {
+      resolvedKeyRef = undefined;
+    } else if (availableKeyRefs.length === 1) {
+      resolvedKeyRef = selectedKeyRef ?? availableKeyRefs[0];
+    } else {
+      if (selectedKeyRef === null) return null; // 複数候補あり未選択
+      resolvedKeyRef = selectedKeyRef;
+    }
+
+    // 2. コストの解決
+    let resolvedCostRef: number | undefined;
+    if (availableCostRefs.length === 0) {
+      resolvedCostRef = undefined;
+    } else if (availableCostRefs.length === 1) {
+      resolvedCostRef = selectedCostRef ?? availableCostRefs[0];
+    } else {
+      if (selectedCostRef === null) return null; // 複数候補あり未選択
+      resolvedCostRef = selectedCostRef;
+    }
+
+    // 3. 対象の解決
+    let resolvedTargetRef: number | undefined;
+    if (availableTargetRefs.length === 0) {
+      resolvedTargetRef = undefined;
+    } else if (availableTargetRefs.length === 1) {
+      resolvedTargetRef = selectedTargetRef ?? availableTargetRefs[0];
+    } else {
+      if (selectedTargetRef === null) return null; // 複数候補あり未選択
+      resolvedTargetRef = selectedTargetRef;
+    }
+
+    const idx = patterns.findIndex((p) => {
       if (p.actionSelectionRef !== selectedActionRef) return false;
-      if (selectedKeyRef !== null) {
-        if (p.keyCardSelectionRef !== selectedKeyRef) return false;
-      } else {
-        if (p.keyCardSelectionRef !== undefined) return false;
-      }
-      if (selectedCostRef !== null) {
-        if (p.costPaymentRef !== selectedCostRef) return false;
-      }
-      if (selectedTargetRef !== null) {
-        if (p.targetSelectionRef !== selectedTargetRef) return false;
-      }
+      if (p.keyCardSelectionRef !== resolvedKeyRef) return false;
+      if (p.costPaymentRef !== resolvedCostRef) return false;
+      if (p.targetSelectionRef !== resolvedTargetRef) return false;
       return true;
     });
-  }, [patterns, selectedActionRef, selectedKeyRef, selectedCostRef, selectedTargetRef]);
+
+    return idx !== -1 ? idx : null;
+  }, [
+    patterns,
+    selectedActionRef,
+    availableKeyRefs,
+    selectedKeyRef,
+    availableCostRefs,
+    selectedCostRef,
+    availableTargetRefs,
+    selectedTargetRef,
+  ]);
 
   const selectedAction = selectedActionRef !== null ? catalog.actions[selectedActionRef] : null;
   const selectedKey = selectedKeyRef !== null ? catalog.cardSelections[selectedKeyRef] : null;
   const selectedCost = selectedCostRef !== null ? catalog.costPayments[selectedCostRef] : null;
   const selectedTarget = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
+
+  const needsKeySelection = availableKeyRefs.length > 1 && selectedKeyRef === null;
+  const needsCostSelection = availableCostRefs.length > 1 && selectedCostRef === null;
+  const needsTargetSelection = availableTargetRefs.length > 1 && selectedTargetRef === null;
+
+  const nextGuidance = useMemo(() => {
+    if (selectedActionRef === null) {
+      return "アクションを選択してください";
+    }
+    if (needsKeySelection) {
+      return "キーカードを選択してください";
+    }
+    if (needsCostSelection) {
+      return "コストの支払い方法を選択してください";
+    }
+    if (needsTargetSelection) {
+      return "対象（ターゲット）を選択してください";
+    }
+    if (finalMatchedPatternIndex !== null && finalMatchedPatternIndex !== -1) {
+      return "設定完了：決定ボタンまたはEnterで送信できます";
+    }
+    return "";
+  }, [selectedActionRef, needsKeySelection, needsCostSelection, needsTargetSelection, finalMatchedPatternIndex]);
 
   const handleActionSubmit = (autoPass: boolean = false) => {
     if (finalMatchedPatternIndex === null || finalMatchedPatternIndex === -1) return;
@@ -1235,40 +1305,157 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         data-testid="decision-panel-scroll-body"
         className="flex-1 min-h-0 overflow-y-auto lg:max-h-[46vh] pr-1 space-y-2"
       >
-        {/* 選択済みサマリーバナー */}
+        {/* 選択状況 & 未設定項目の明示バナー */}
         {selectedAction && (
-          <div className="flex flex-wrap items-center gap-2 p-1.5 bg-zinc-50 rounded border border-zinc-200 text-[11px] font-mono text-zinc-800">
-            <span className="font-bold text-zinc-950">Action: {selectedAction.actionName || selectedAction.actionId}</span>
-            {selectedKey && (
-              <span className="text-zinc-600">
-                | Key: <RichCardText text={selectedKey.displayCodes.join("+")} />
+          <div className="p-2 bg-zinc-50 rounded border border-zinc-200 text-[11px] font-mono text-zinc-800 space-y-1">
+            <div className="flex flex-wrap items-center gap-1.5">
+              <span className="font-bold text-zinc-950 bg-zinc-200/80 px-1.5 py-0.5 rounded font-serif">
+                {selectedAction.actionName || selectedAction.actionId}
               </span>
-            )}
-            {selectedCost && (
-              <span className="text-zinc-600">
-                | Cost: <RichCardText text={selectedCost.summary} />
-              </span>
-            )}
-            {selectedTarget && (
-              <span className="text-zinc-600">
-                | Target: <RichCardText text={selectedTarget.displayName} />
-              </span>
+
+              {/* キーカード状況 */}
+              {availableKeyRefs.length > 0 && (
+                <span className="flex items-center gap-1">
+                  <span className="text-zinc-500">Key:</span>
+                  {selectedKey ? (
+                    <span className="font-bold text-zinc-950 bg-white border border-zinc-300 px-1 py-0.5 rounded">
+                      <RichCardText text={selectedKey.displayCodes.join("+")} />
+                    </span>
+                  ) : availableKeyRefs.length === 1 ? (
+                    <span className="font-bold text-zinc-950 bg-white border border-zinc-300 px-1 py-0.5 rounded">
+                      <RichCardText text={catalog.cardSelections[availableKeyRefs[0]]?.displayCodes.join("+") || "自動選択"} />
+                    </span>
+                  ) : (
+                    <span className="font-bold text-amber-700 bg-amber-50 border border-amber-300 px-1.5 py-0.5 rounded">
+                      未選択 (必須)
+                    </span>
+                  )}
+                </span>
+              )}
+
+              {/* コスト状況 */}
+              {availableCostRefs.length > 0 && (
+                <span className="flex items-center gap-1">
+                  <span className="text-zinc-500">Cost:</span>
+                  {selectedCost ? (
+                    <span className="font-bold text-zinc-950 bg-white border border-zinc-300 px-1 py-0.5 rounded">
+                      <RichCardText text={selectedCost.summary} />
+                    </span>
+                  ) : availableCostRefs.length === 1 ? (
+                    <span className="font-bold text-zinc-950 bg-white border border-zinc-300 px-1 py-0.5 rounded">
+                      <RichCardText text={catalog.costPayments[availableCostRefs[0]]?.summary || "自動選択"} />
+                    </span>
+                  ) : (
+                    <span className="font-bold text-amber-700 bg-amber-50 border border-amber-300 px-1.5 py-0.5 rounded">
+                      未選択 (必須)
+                    </span>
+                  )}
+                </span>
+              )}
+
+              {/* 対象状況 */}
+              {availableTargetRefs.length > 0 && (
+                <span className="flex items-center gap-1">
+                  <span className="text-zinc-500">Target:</span>
+                  {selectedTarget ? (
+                    <span className="font-bold text-zinc-950 bg-white border border-zinc-300 px-1 py-0.5 rounded">
+                      <RichCardText text={selectedTarget.displayName} />
+                    </span>
+                  ) : availableTargetRefs.length === 1 ? (
+                    <span className="font-bold text-zinc-950 bg-white border border-zinc-300 px-1 py-0.5 rounded">
+                      <RichCardText text={catalog.targetSelections[availableTargetRefs[0]]?.displayName || "自動選択"} />
+                    </span>
+                  ) : (
+                    <span className="font-bold text-amber-700 bg-amber-50 border border-amber-300 px-1.5 py-0.5 rounded">
+                      未選択 (必須)
+                    </span>
+                  )}
+                </span>
+              )}
+            </div>
+
+            {/* 次の誘導メッセージ */}
+            {nextGuidance && (
+              <div
+                className={`text-[10px] font-bold ${
+                  finalMatchedPatternIndex !== null && finalMatchedPatternIndex !== -1
+                    ? "text-emerald-700"
+                    : "text-amber-800"
+                }`}
+              >
+                {nextGuidance}
+              </div>
             )}
           </div>
         )}
+
         {/* ステップ1: アクション選択 */}
         <div>
-          <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1">
-            1. アクション
-          </label>
-          <div className="grid grid-cols-2 gap-1.5">
+          <div className="flex items-center justify-between mb-1">
+            <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
+              1. アクション
+            </label>
+            {selectedActionRef !== null && !isActionListExpanded && (
+              <button
+                type="button"
+                onClick={() => setIsActionListExpanded(true)}
+                className="text-[10px] font-mono font-bold text-zinc-600 hover:text-zinc-950 underline px-1 py-0.5"
+              >
+                変更する
+              </button>
+            )}
+            {selectedActionRef !== null && isActionListExpanded && (
+              <button
+                type="button"
+                onClick={() => setIsActionListExpanded(false)}
+                className="text-[10px] font-mono font-bold text-zinc-600 hover:text-zinc-950 underline px-1 py-0.5"
+              >
+                折りたたむ
+              </button>
+            )}
+          </div>
+
+          {/* アクション選択後のコンパクト表示 (選択中かつ折りたたみ時) */}
+          {selectedActionRef !== null && !isActionListExpanded && (
+            <div className="flex items-center justify-between p-1.5 sm:p-2 rounded border border-zinc-950 bg-zinc-950 text-white shadow-sm mb-1.5">
+              <div className="flex items-center gap-2 min-w-0">
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-200 uppercase shrink-0">
+                  選択中
+                </span>
+                <span className="font-bold text-xs font-serif truncate">
+                  {selectedAction?.actionName || selectedAction?.actionId}
+                </span>
+                <span className="text-[11px] font-mono text-zinc-300 truncate">
+                  {selectedAction?.timing ? `[${selectedAction.timing}]` : ""} {selectedAction?.cost ? `Cost: ${selectedAction.cost}` : ""}
+                </span>
+              </div>
+              <button
+                type="button"
+                onClick={() => setIsActionListExpanded(true)}
+                className="ml-2 px-2.5 py-1 text-xs font-mono font-bold bg-white text-zinc-950 hover:bg-zinc-200 rounded transition active:scale-95 shrink-0"
+                aria-label="アクションを変更する"
+              >
+                変更する
+              </button>
+            </div>
+          )}
+
+          {/* 全アクション一覧グリッド (未選択時または展開時に表示、選択済かつ折りたたみ時は hidden) */}
+          <div
+            className={`grid grid-cols-2 gap-1.5 ${
+              selectedActionRef !== null && !isActionListExpanded ? "hidden" : ""
+            }`}
+          >
             {availableActionRefs.map((actRef) => {
               const act = catalog.actions[actRef];
               const isSelected = selectedActionRef === actRef;
               return (
                 <button
                   key={actRef}
-                  onClick={() => handleSelectAction(actRef)}
+                  onClick={() => {
+                    handleSelectAction(actRef);
+                    setIsActionListExpanded(false);
+                  }}
                   className={`rounded border p-1.5 sm:p-2 text-left transition ${
                     isSelected
                       ? "border-zinc-950 bg-zinc-950 text-white shadow ring-1 ring-zinc-950"
@@ -1291,6 +1478,9 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             <div className="flex items-center justify-between mb-1">
               <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500">
                 2. キーカード（任意）
+                {needsKeySelection && (
+                  <span className="text-amber-700 font-bold ml-1.5">[要選択]</span>
+                )}
               </label>
               {isTwoKeyCardAction && (selectedKeyRef !== null || firstSelectedCardId !== null) && (
                 <button
@@ -1449,6 +1639,9 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           <div>
             <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1">
               3. コスト支払い
+              {needsCostSelection && (
+                <span className="text-amber-700 font-bold ml-1.5">[要選択]</span>
+              )}
             </label>
             <div className="grid grid-cols-2 gap-1.5">
               {availableCostRefs.map((costRef) => {
@@ -1479,6 +1672,9 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           <div>
             <label className="block text-[10px] font-mono font-bold uppercase tracking-wider text-zinc-500 mb-1">
               4. 対象（ターゲット）
+              {needsTargetSelection && (
+                <span className="text-amber-700 font-bold ml-1.5">[要選択]</span>
+              )}
             </label>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
               {availableTargetRefs.map((targetRef) => {
@@ -1533,33 +1729,34 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
         data-testid="decision-panel-sticky-footer"
         className="shrink-0 sticky bottom-0 z-10 bg-white pt-1.5 mt-1.5 border-t border-zinc-200"
       >
-        {finalMatchedPatternIndex !== null && finalMatchedPatternIndex !== -1 && (
-          <div className="pb-1.5 mb-1.5 border-b border-zinc-200 flex flex-col sm:flex-row gap-1.5">
-            {selectedAction?.speed === "immediate" ? (
+        <div className="pb-1.5 mb-1.5 border-b border-zinc-200 flex flex-col sm:flex-row gap-1.5">
+          {selectedAction?.speed === "immediate" ? (
+            <button
+              onClick={() => handleActionSubmit(false)}
+              disabled={disabled || finalMatchedPatternIndex === null || finalMatchedPatternIndex === -1}
+              className="w-full min-h-[36px] py-1.5 sm:py-2 px-3 sm:px-4 rounded bg-zinc-950 hover:bg-zinc-800 disabled:opacity-40 disabled:hover:bg-zinc-950 disabled:cursor-not-allowed text-white font-bold transition text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1 font-mono leading-snug"
+            >
+              <span>リクエスト</span>
+            </button>
+          ) : (
+            <>
               <button
                 onClick={() => handleActionSubmit(false)}
-                className="w-full min-h-[36px] py-1.5 sm:py-2 px-3 sm:px-4 rounded bg-zinc-950 hover:bg-zinc-800 text-white font-bold transition text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1 font-mono leading-snug"
+                disabled={disabled || finalMatchedPatternIndex === null || finalMatchedPatternIndex === -1}
+                className="flex-1 min-h-[36px] py-1.5 sm:py-2 px-2.5 sm:px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 disabled:opacity-40 disabled:hover:bg-white disabled:cursor-not-allowed text-zinc-900 font-bold transition text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1 font-mono leading-snug"
               >
-                <span>リクエスト</span>
+                <span>リクエストのみ</span>
               </button>
-            ) : (
-              <>
-                <button
-                  onClick={() => handleActionSubmit(false)}
-                  className="flex-1 min-h-[36px] py-1.5 sm:py-2 px-2.5 sm:px-3 rounded border border-zinc-300 bg-white hover:bg-zinc-100 text-zinc-900 font-bold transition text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1 font-mono leading-snug"
-                >
-                  <span>リクエストのみ</span>
-                </button>
-                <button
-                  onClick={() => handleActionSubmit(true)}
-                  className="flex-1 min-h-[36px] py-1.5 sm:py-2 px-2.5 sm:px-3 rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold transition text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1 font-mono leading-snug"
-                >
-                  <span>リクエスト＆PASS (推奨)</span>
-                </button>
-              </>
-            )}
-          </div>
-        )}
+              <button
+                onClick={() => handleActionSubmit(true)}
+                disabled={disabled || finalMatchedPatternIndex === null || finalMatchedPatternIndex === -1}
+                className="flex-1 min-h-[36px] py-1.5 sm:py-2 px-2.5 sm:px-3 rounded bg-zinc-950 hover:bg-zinc-800 disabled:opacity-40 disabled:hover:bg-zinc-950 disabled:cursor-not-allowed active:scale-95 text-white font-bold transition text-xs sm:text-sm shadow-sm flex items-center justify-center gap-1 font-mono leading-snug"
+              >
+                <span>リクエスト＆PASS (推奨)</span>
+              </button>
+            </>
+          )}
+        </div>
 
         {/* ショートカット操作ガイド */}
         <div className="text-[9px] text-zinc-500 font-mono flex items-center justify-between">

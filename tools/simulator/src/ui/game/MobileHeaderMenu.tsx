@@ -92,6 +92,36 @@ export const MobileHeaderMenu: React.FC<MobileHeaderMenuProps> = ({
   graveTopSelectionMode = "manual",
   onSelectGraveTopSelectionMode,
 }) => {
+  // ESC キー押下時のメニュー終了 & フォーカス復帰
+  React.useEffect(() => {
+    if (!isOpen) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // 1. IME composition check
+      if (e.isComposing || (e as any).keyCode === 229) return;
+
+      if (e.key === "Escape" || e.keyCode === 27) {
+        e.preventDefault();
+        e.stopPropagation();
+        onClose();
+
+        // メニューを開いたトリガーボタンへフォーカスを復帰
+        if (typeof document !== "undefined") {
+          setTimeout(() => {
+            const triggerBtn = document.querySelector<HTMLElement>('[data-testid="header-settings-menu-button"]');
+            triggerBtn?.focus?.();
+          }, 0);
+        }
+      }
+    };
+
+    if (typeof window !== "undefined") {
+      window.addEventListener("keydown", handleKeyDown, true);
+      return () => {
+        window.removeEventListener("keydown", handleKeyDown, true);
+      };
+    }
+  }, [isOpen, onClose]);
 
   if (!isOpen) return null;
 
