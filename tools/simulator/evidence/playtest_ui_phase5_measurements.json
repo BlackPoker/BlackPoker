@@ -1,0 +1,57 @@
+{
+  "workId": "BP-SIM-PLAYTEST-RESPONSIVE-UI-PHASE5-EVIDENCE",
+  "branch": "BlackPoker/issue551-core-flow",
+  "measuredAt": "2026-11-19T12:52:00.000Z",
+  "commits": {
+    "phase4D": "dba008f5be256bed421da4ec1d0565b8f11aa4fe",
+    "phase5A": "7acc19ce5d40d99ba4fe38c64c84db221c6ba4c2",
+    "phase5B": "bcd82d5f44f4d16fe55094606c9912f9364768bc"
+  },
+  "summary": {
+    "graveTopSelectionModes": ["manual", "auto"],
+    "defaultMode": "manual",
+    "storageKey": "blackpoker.playtest.preferences",
+    "algorithm": "Deterministic FNV-1a 32-bit Hash + mix32 Avalanche Bitmixer",
+    "prngIntegrity": "Zero consumption/pollution of AI policy PRNG state",
+    "decisionIdStability": "Zero dependency on unstable decisionId, Date.now(), or Math.random()",
+    "distributionAudit": {
+      "trials1200": {
+        "candidateCount": 3,
+        "distribution": { "c1": 395, "c2": 412, "c3": 393 },
+        "percentages": { "c1": "32.92%", "c2": "34.33%", "c3": "32.75%" },
+        "maxDeviationFromIdeal": "1.00%"
+      },
+      "trials1500": {
+        "candidateCount": 3,
+        "distribution": { "c1": 504, "c2": 501, "c3": 495 },
+        "percentages": { "c1": "33.60%", "c2": "33.40%", "c3": "33.00%" },
+        "maxDeviationFromIdeal": "0.40%"
+      }
+    },
+    "transcriptAndUndoIntegrity": {
+      "newActorType": "autoGraveTop",
+      "findUndoTruncationIndex": "PASSED (skips trailing autoGraveTop and targets last human decision)",
+      "diagnosticReplayStatus": "READY",
+      "deterministicReplayExecution": "PASSED (100% identical stateVersion & step sequence)"
+    },
+    "requiredScenariosVerification": {
+      "scenario1_manualNormalOperation": "PASSED (manual mode preserves interactive dialog wait without submission)",
+      "scenario2_autoImmediateReflection": "PASSED (auto mode deterministically selects candidate and submits immediately)",
+      "scenario3_replayReproducibility": "PASSED (ReplayPlan generated with actor=autoGraveTop and replayed accurately)",
+      "scenario4_undoAppropriateRevert": "PASSED (Undo skips autoGraveTop and safely truncates to preceding human action)",
+      "scenario5_undoIdentityReproduction": "PASSED (Re-entering same state after Undo produces 100% identical choice)",
+      "scenario6_humanVsAiContinuity": "PASSED (Smooth progression from autoGraveTop to subsequent AI policy step)",
+      "scenario7_humanVsHumanSecretProtection": "PASSED (Pass-and-Play overlay secret protection maintained during auto selection)",
+      "scenario8_userPreferenceLiveSwitching": "PASSED (Instant reflect on manual <-> auto toggle in MobileHeaderMenu and localStorage)",
+      "scenario9_doubleSubmitAndLoopProtection": "PASSED (Duplicate decisionId prevented, max 10 consecutive guard enforced)",
+      "scenario10_fontScaleResetIsolation": "PASSED (Font size reset to 100% strictly retains graveTopSelectionMode=auto)"
+    }
+  },
+  "testSuiteResults": {
+    "graveTopAutoSelector_unitTests": { "total": 10, "passed": 10 },
+    "playtestAutoGraveTopIntegration_tests": { "total": 4, "passed": 4 },
+    "playtestAutoGraveTopScenarios_tests": { "total": 10, "passed": 10 },
+    "uiTestSuiteTotal": { "files": 57, "tests": 675, "passed": 675 },
+    "replayTestSuiteTotal": { "files": 4, "tests": 59, "passed": 59 }
+  }
+}
