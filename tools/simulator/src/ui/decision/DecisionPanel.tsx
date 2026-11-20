@@ -223,16 +223,16 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     return patterns.filter((p) => p.actionSelectionRef === selectedActionRef);
   }, [patterns, selectedActionRef]);
 
-  // 選択可能なキーカード一覧 (keyCardSelectionRef が実際に存在するもののみ)
+  // 選択可能なキーカード一覧 (keyCardSelectionRef が実際にカタログに存在するもののみ)
   const availableKeyRefs = useMemo(() => {
     const refs = new Set<number>();
     for (const p of patternsFilteredByAction) {
-      if (p.keyCardSelectionRef !== undefined) {
+      if (p.keyCardSelectionRef !== undefined && catalog.cardSelections?.[p.keyCardSelectionRef] !== undefined) {
         refs.add(p.keyCardSelectionRef);
       }
     }
     return Array.from(refs);
-  }, [patternsFilteredByAction]);
+  }, [patternsFilteredByAction, catalog.cardSelections]);
 
   // 3. 選択中アクション + キーカードで絞り込まれたパターン
   const patternsFilteredByKey = useMemo(() => {
@@ -248,14 +248,16 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     return patternsFilteredByAction.filter((p) => p.keyCardSelectionRef === selectedKeyRef);
   }, [patternsFilteredByAction, availableKeyRefs, selectedKeyRef]);
 
-  // 選択可能なコスト支払い一覧
+  // 選択可能なコスト支払い一覧 (costPaymentRef が実際にカタログに存在するもののみ)
   const availableCostRefs = useMemo(() => {
     const refs = new Set<number>();
     for (const p of patternsFilteredByKey) {
-      if (p.costPaymentRef !== undefined) refs.add(p.costPaymentRef);
+      if (p.costPaymentRef !== undefined && catalog.costPayments?.[p.costPaymentRef] !== undefined) {
+        refs.add(p.costPaymentRef);
+      }
     }
     return Array.from(refs);
-  }, [patternsFilteredByKey]);
+  }, [patternsFilteredByKey, catalog.costPayments]);
 
   // 4. 選択中アクション + キーカード + コストで絞り込まれたパターン
   const patternsFilteredByCost = useMemo(() => {
@@ -271,14 +273,16 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     return patternsFilteredByKey.filter((p) => p.costPaymentRef === selectedCostRef);
   }, [patternsFilteredByKey, availableCostRefs, selectedCostRef]);
 
-  // 選択可能な対象一覧
+  // 選択可能な対象一覧 (targetSelectionRef が実際にカタログに存在するもののみ)
   const availableTargetRefs = useMemo(() => {
     const refs = new Set<number>();
     for (const p of patternsFilteredByCost) {
-      if (p.targetSelectionRef !== undefined) refs.add(p.targetSelectionRef);
+      if (p.targetSelectionRef !== undefined && catalog.targetSelections?.[p.targetSelectionRef] !== undefined) {
+        refs.add(p.targetSelectionRef);
+      }
     }
     return Array.from(refs);
-  }, [patternsFilteredByCost]);
+  }, [patternsFilteredByCost, catalog.targetSelections]);
 
   // アクション選択ハンドラ
   const handleSelectAction = (actRef: number) => {
@@ -1628,7 +1632,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                       }`}
                     >
                       <div className="font-mono font-bold text-xs">
-                        <RichCardText text={keySel.displayCodes.join("+")} />
+                        <RichCardText text={keySel?.displayCodes ? keySel.displayCodes.join("+") : ""} />
                       </div>
                     </button>
                   );
@@ -1662,7 +1666,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                     }`}
                   >
                     <div className="font-mono font-bold text-xs">
-                      <RichCardText text={formatCostPaymentDisplay(costSel, request, battleRelationMap)} />
+                      <RichCardText text={costSel ? formatCostPaymentDisplay(costSel, request, battleRelationMap) : ""} />
                     </div>
                   </button>
                 );
@@ -1689,10 +1693,10 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                     key={targetRef}
                     onClick={() => handleSelectTarget(targetRef)}
                     onMouseEnter={() => {
-                      if (target.targetRequestId) onHighlightRequest?.(target.targetRequestId);
+                      if (target?.targetRequestId) onHighlightRequest?.(target.targetRequestId);
                     }}
                     onMouseLeave={() => {
-                      const current = selectedTargetRef !== null ? catalog.targetSelections[selectedTargetRef] : null;
+                      const current = selectedTargetRef !== null ? catalog.targetSelections?.[selectedTargetRef] : null;
                       onHighlightRequest?.(current?.targetRequestId);
                     }}
                     className={`rounded p-1.5 sm:p-2 text-left transition flex flex-col justify-center ${
@@ -1703,7 +1707,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                   >
                     <div className="flex items-center justify-between w-full">
                       <span className="font-bold text-xs leading-snug">
-                        <RichCardText text={target.primaryLabel || target.displayName} />
+                        <RichCardText text={target?.primaryLabel || target?.displayName || ""} />
                       </span>
                       {isSelected && (
                         <span className="text-[9px] font-mono font-bold px-1 rounded bg-zinc-950 text-white shrink-0 ml-1">
@@ -1711,7 +1715,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
                         </span>
                       )}
                     </div>
-                    {target.secondaryLabel && (
+                    {target?.secondaryLabel && (
                       <span
                         className={`text-[10px] font-mono leading-tight mt-0.5 ${
                           isSelected ? "text-zinc-700 font-medium" : "text-zinc-500"
