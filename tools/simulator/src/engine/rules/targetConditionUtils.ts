@@ -122,6 +122,8 @@ export function evaluateRequestTargetCondition(
   condition: Record<string, any> | undefined,
   context: {
     currentRequestId?: string;
+    actionId?: string;
+    actions?: readonly any[];
   } = {}
 ): TargetConditionEvaluationResult {
   if (!targetRequest) {
@@ -131,6 +133,26 @@ export function evaluateRequestTargetCondition(
   // 自分自身のリクエストは対象不可
   if (context.currentRequestId && targetRequest.id === context.currentRequestId) {
     return { isValid: false, reason: "TARGET_INVALID", detail: "自分自身のリクエストを対象にすることはできません。" };
+  }
+
+  // カウンターアクション（action.counter）または counterableOnly 指定時:
+  // 対象リクエストが uncounterable (カウンター不可) の場合は対象外
+  if (context.actionId === "action.counter" || condition?.counterableOnly === true) {
+    const targetActionDef =
+      targetRequest.action ||
+      (context.actions && context.actions.find((a: any) => a.id === targetRequest.actionId));
+    const isUncounterable =
+      targetRequest.uncounterable === true ||
+      targetRequest.properties?.uncounterable === true ||
+      targetActionDef?.uncounterable === true ||
+      targetActionDef?.properties?.uncounterable === true;
+    if (isUncounterable) {
+      return {
+        isValid: false,
+        reason: "TARGET_UNCOUNTERABLE",
+        detail: `ターゲットリクエスト ${targetRequest.id} (${targetRequest.actionId}) はカウンターの対象にできません。`,
+      };
+    }
   }
 
   if (!condition) {

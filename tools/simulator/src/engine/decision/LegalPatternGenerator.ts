@@ -106,7 +106,8 @@ export class LegalPatternGenerator {
           action,
           state,
           playerId,
-          rulePackage.components
+          rulePackage.components,
+          { actions: rulePackage.actions }
         );
         totalTargets += targetSelections.length;
 

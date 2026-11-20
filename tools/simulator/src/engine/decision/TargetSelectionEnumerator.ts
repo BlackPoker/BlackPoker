@@ -14,8 +14,17 @@ export class TargetSelectionEnumerator {
     action: ActionDefinition,
     state: any,
     requesterPlayerKey: string,
-    components: ComponentDefinition[] = []
+    components: ComponentDefinition[] = [],
+    options?: {
+      actions?: readonly ActionDefinition[];
+    }
   ): TargetSelection[] {
-    return ActionTargetService.enumerateTargets(action, state, requesterPlayerKey, components);
+    return ActionTargetService.enumerateTargets(
+      action,
+      state,
+      requesterPlayerKey,
+      components,
+      options
+    );
   }
 }

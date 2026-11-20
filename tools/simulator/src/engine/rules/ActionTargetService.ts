@@ -43,7 +43,10 @@ export class ActionTargetService {
     action: ActionDefinition,
     state: any,
     requesterPlayerKey: string,
-    components: ComponentDefinition[] = []
+    components: ComponentDefinition[] = [],
+    options?: {
+      actions?: readonly ActionDefinition[];
+    }
   ): TargetSelection[] {
     if (!action.targets || action.targets.length === 0) {
       return [
@@ -62,7 +65,11 @@ export class ActionTargetService {
         targetDef,
         state,
         requesterPlayerKey,
-        components
+        components,
+        {
+          actionId: action.id,
+          actions: options?.actions,
+        }
       );
       results.push(...candidates);
     }
@@ -149,6 +156,8 @@ export class ActionTargetService {
         {
           keyCards: targetRequest.keyCards,
           currentRequestId: targetRequest.id, // 変更対象リクエスト自身へのセルフターゲット禁止
+          actionId: action.id,
+          actions: options?.actions,
         }
       );
 
@@ -232,6 +241,8 @@ export class ActionTargetService {
     contextOptions?: {
       keyCards?: readonly any[];
       currentRequestId?: string;
+      actionId?: string;
+      actions?: readonly any[];
     }
   ): TargetSelection[] {
     const cond = targetDef.condition;
@@ -276,6 +287,8 @@ export class ActionTargetService {
 
         const evalResult = evaluateRequestTargetCondition(req, cond, {
           currentRequestId: contextOptions?.currentRequestId,
+          actionId: contextOptions?.actionId,
+          actions: contextOptions?.actions,
         });
         if (!evalResult.isValid) continue;
 

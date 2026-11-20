@@ -65,23 +65,26 @@ export function validateTargetsAtResolution(
     if (t.type === "request") {
       // 対象リクエストはステージ（requests）上に現在存在し、未キャンセル・未解決であること
       const stageReqs = context.state.stage?.requests || [];
-      const req = stageReqs.find((r: any) => r.id === t.requestId);
+      const reqId = (t as any).requestId || (t as any).targetRequestId;
+      const req = stageReqs.find((r: any) => r.id === reqId);
       if (!req || req.status === "cancelled" || req.status === "resolved") {
         return {
           isValid: false,
           reason: "TARGET_INVALID_AT_RESOLUTION",
-          detail: `ターゲットリクエスト ${t.requestId} はステージ上に存在しないか無効化されています。`,
+          detail: `ターゲットリクエスト ${reqId} はステージ上に存在しないか無効化されています。`,
         };
       }
 
       // DSL Target Condition の評価
       const conditionResult = evaluateRequestTargetCondition(req, tDef?.condition, {
         currentRequestId: request.id,
+        actionId: action.id,
+        actions: context.actions,
       });
       if (!conditionResult.isValid) {
         return {
           isValid: false,
-          reason: "TARGET_INVALID_AT_RESOLUTION",
+          reason: conditionResult.reason || "TARGET_INVALID_AT_RESOLUTION",
           detail: conditionResult.detail || "ターゲットリクエスト条件が不適合です。",
         };
       }
@@ -91,8 +94,9 @@ export function validateTargetsAtResolution(
       // 対象ユニットはプレイヤーのいずれかのフィールドに存在すること
       let foundUnit: any = null;
       let foundOwnerKey: string | undefined;
+      const targetUnitId = t.unitId || (t as any).targetUnitId;
       for (const [pKey, p] of Object.entries<any>(context.state.players || {})) {
-        const u = p.field?.find((unit: any) => unit.unitId === t.unitId);
+        const u = p.field?.find((unit: any) => unit.unitId === targetUnitId);
         if (u) {
           foundUnit = u;
           foundOwnerKey = pKey;
@@ -104,7 +108,7 @@ export function validateTargetsAtResolution(
         return {
           isValid: false,
           reason: "TARGET_INVALID_AT_RESOLUTION",
-          detail: `ターゲットユニット ${t.unitId} はフィールド上に存在しません。`,
+          detail: `ターゲットユニット ${targetUnitId} はフィールド上に存在しません。`,
         };
       }
 
