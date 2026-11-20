@@ -38,6 +38,7 @@ export interface FogView {
   readonly fogId: string;
   readonly componentId: string;
   readonly card?: CardView;
+  readonly cards?: readonly CardView[];
   readonly bindings?: Record<string, any>;
   readonly ownerPlayerId?: PlayerKey;
 }

@@ -1,5 +1,6 @@
 import { CommandContext } from "./CommandRegistry";
 import { getOpponentPlayerKey } from "./playerUtils";
+import { isSoldierType } from "./characterUtils";
 
 export interface PreventDamageAbility {
   target?: string;
@@ -24,7 +25,7 @@ export class AbilityEvaluator {
    * ユニットに適用されているすべてのフォグ（全プレイヤーの fog 領域）の amount 累積値を反映したサイズ計算を行います。
    * Fog の所有者が誰であるかに関わらず、bindings.target === unit.unitId の Fog を合算します。
    */
-  calculateUnitSize(unit: any, stateOrPlayer?: any): number {
+  calculateUnitSize(unit: any, stateOrPlayer?: any, components?: readonly any[]): number {
     if (!unit) return 0;
     const cardsSum = unit.cards ? unit.cards.reduce((sum: number, c: any) => sum + (c.value || 0), 0) : 0;
     let size = cardsSum;
@@ -35,8 +36,17 @@ export class AbilityEvaluator {
         for (const p of Object.values<any>(stateOrPlayer.players)) {
           if (p && Array.isArray(p.fog)) {
             for (const fog of p.fog) {
-              if (fog.bindings && fog.bindings.target === unit.unitId) {
+              if (!fog.bindings) continue;
+              // 1. 単一ユニットターゲット
+              if (fog.bindings.target === unit.unitId) {
                 size += fog.bindings.amount || 0;
+              }
+              // 2. 自軍全兵士ターゲット (フォース等)
+              else if (fog.bindings.target === "self.soldiers" || fog.bindings.allSoldiers === true) {
+                const isOwner = p.field?.some((u: any) => u.unitId === unit.unitId);
+                if (isOwner && isSoldierType(unit, components as any)) {
+                  size += fog.bindings.amount || 0;
+                }
               }
             }
           }
@@ -44,8 +54,14 @@ export class AbilityEvaluator {
       } else if (Array.isArray(stateOrPlayer.fog)) {
         // 単一 player オブジェクトの場合のフォールバック
         for (const fog of stateOrPlayer.fog) {
-          if (fog.bindings && fog.bindings.target === unit.unitId) {
+          if (!fog.bindings) continue;
+          if (fog.bindings.target === unit.unitId) {
             size += fog.bindings.amount || 0;
+          } else if (fog.bindings.target === "self.soldiers" || fog.bindings.allSoldiers === true) {
+            const isOwner = stateOrPlayer.field?.some((u: any) => u.unitId === unit.unitId);
+            if (isOwner && isSoldierType(unit, components as any)) {
+              size += fog.bindings.amount || 0;
+            }
           }
         }
       }

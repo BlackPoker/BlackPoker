@@ -130,7 +130,11 @@ export function verifyCardConservation(
   // Fog (キーカード等のカードオブジェクト)
   if (Array.isArray(player.fog)) {
     for (const fogEntry of player.fog) {
-      if (fogEntry.card && fogEntry.card.id) {
+      if (Array.isArray(fogEntry.cards)) {
+        for (const c of fogEntry.cards) {
+          if (c && c.id) cards.push(c);
+        }
+      } else if (fogEntry.card && fogEntry.card.id) {
         cards.push(fogEntry.card);
       }
     }

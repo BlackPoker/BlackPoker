@@ -70,6 +70,7 @@ export class ObservationFactory {
               fogId: f.fogId || "",
               componentId: f.componentId || "",
               card: f.card ? this.mapCard(f.card, true) : undefined,
+              cards: Array.isArray(f.cards) ? f.cards.map((c: any) => this.mapCard(c, true)) : undefined,
               bindings: f.bindings || {},
               ownerPlayerId: pKey as PlayerKey,
             }))

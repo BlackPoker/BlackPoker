@@ -51,10 +51,12 @@ export function createFogHandler(
       }
     }
 
-    const keyCard = context.keyCard;
+    const keyCards: any[] = Array.isArray(context.keyCards) && context.keyCards.length > 0
+      ? [...context.keyCards]
+      : (context.keyCard ? [context.keyCard] : []);
 
     // 手札からキーカードを取り除き（残っていれば）、fog 領域へ移動
-    if (keyCard) {
+    for (const keyCard of keyCards) {
       let fromZone = "request";
       if (Array.isArray(player.hand)) {
         const idx = player.hand.findIndex((c: any) => c.id === keyCard.id);
@@ -79,12 +81,12 @@ export function createFogHandler(
       }
     }
 
-
-    const cardIdPart = keyCard?.id ? `-${keyCard.id}` : "";
+    const cardIdPart = keyCards.length > 0 ? `-${keyCards.map((c) => c.id).join("_")}` : "";
     const newFog = {
       fogId: `fog-${context.playerKey}-${component}${cardIdPart}-${context.state.stateVersion || 1}`,
       componentId: component,
-      card: keyCard, // キーカードを配置
+      card: keyCards[0], // 互換性のため代表カード
+      cards: keyCards,   // 複数キーカード
       bindings: resolvedBindings,
     };
 
@@ -1263,14 +1265,18 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
 
       // 各除去されたフォグについて墓地移動およびイベント発行
       for (const fog of removedFogs) {
+        const fogCards = Array.isArray(fog.cards) && fog.cards.length > 0
+          ? fog.cards
+          : (fog.card ? [fog.card] : []);
+
         const fogUnit = {
           unitId: fog.fogId,
           kind: "フォグ",
           componentId: fog.componentId,
-          cards: fog.card ? [fog.card] : [],
+          cards: fogCards,
           labels: [],
         };
-        if (fog.card) {
+        if (fogCards.length > 0) {
           GraveTopCoordinator.addUnitToGrave(
             player,
             fogUnit,
@@ -1290,6 +1296,7 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
             fogId: fog.fogId,
             componentId: fog.componentId,
             card: fog.card,
+            cards: fog.cards,
             fromZone: "fog",
             toZone: "grave",
             playerKey: playerKey, // owner
@@ -1297,12 +1304,12 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
         };
         effectInterpreter.dispatchEvent(fogEvent, context);
 
-        // fog.card が存在する場合のみ cardMoved イベントを発行
-        if (fog.card) {
+        // 各カードについて cardMoved イベントを発行
+        for (const card of fogCards) {
           const moveEvent = {
             type: "cardMoved",
             payload: {
-              card: fog.card,
+              card,
               fromZone: "fog",
               toZone: "grave",
               playerKey: playerKey,
