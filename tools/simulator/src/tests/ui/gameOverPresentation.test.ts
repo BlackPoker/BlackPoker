@@ -49,7 +49,7 @@ describe("GameOverPresentation Tests (Phase 4.0-B)", () => {
     expect(html).not.toContain("リプレイを見る");
   });
 
-  it("3. 再戦ボタンの表記が「もう一度対戦する」となっており、'(Replay)' が含まれないこと", () => {
+  it("3. 次の対戦は設定画面から開始するため、終了画面の導線が「次の対戦を設定する」と表示されること", () => {
     const html = renderToString(
       React.createElement(GameOverOverlay, {
         winnerKey: "p2",
@@ -59,10 +59,10 @@ describe("GameOverPresentation Tests (Phase 4.0-B)", () => {
       })
     );
 
-    // 正しい表記
-    expect(html).toContain("もう一度対戦する");
-    // 古い Replay 混同表記が完全に排除されていること
-    expect(html).not.toContain("もう一度対戦する (Replay)");
+    // 直接再戦せず、セットアップ画面に戻る操作であること
+    expect(html).toContain("次の対戦を設定する");
+    expect(html).not.toContain("もう一度対戦する");
+    // Replay と新規対戦を混同しない
     expect(html).not.toContain("(Replay)");
   });
 });

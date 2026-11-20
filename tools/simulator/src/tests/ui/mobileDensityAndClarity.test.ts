@@ -513,7 +513,7 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
       expect(normalizeHumanSeatForMode("humanVsHuman", "p1")).toBe("p1");
     });
 
-    it("R1.2: MobileHeaderMenu で humanVsAi の場合、Human Seat 選択 UI が完全撤廃され、自動決定案内が表示されること", () => {
+    it("R1.2: 対戦中メニューでは Human Seat・AI Policy・対戦開始条件を変更せず、設定画面への中断導線だけを表示すること", () => {
       const html = renderToString(
         React.createElement(MobileHeaderMenu, {
           isOpen: true,
@@ -524,6 +524,8 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
             { id: "core-battle-playtest", name: "Core Battle Playtest", isOfficial: false },
           ],
           showSeedInput: false,
+          isMatchActive: true,
+          activeMatchSeed: 42,
           matchMode: "humanVsAi",
           onSelectMatchMode: () => {},
           policyId: "firstLegal",
@@ -543,15 +545,17 @@ describe("UI Phase 3.3: Mobile Density & Board Clarity Tests", () => {
       expect(html).not.toContain("Player A (p1)");
       expect(html).not.toContain("Player B (p2)");
 
-      // 自動決定案内が表示される
-      expect(html).toContain("※先攻・後攻は対戦開始時に各プレイヤーのライフのトップカード比較により自動決定されます。");
-
-      // AI Policy 選択と実在する4つのポリシーが表示される
-      expect(html).toContain("AI Policy:");
-      expect(html).toContain("FirstLegal (Baseline)");
-      expect(html).toContain("SeededRandom (Baseline)");
-      expect(html).toContain("ManualGenericGenome (Experimental)");
-      expect(html).toContain("ZeroGenome (Debug)");
+      // 対戦条件は設定画面に集約するため、対戦中メニューからは編集できない
+      expect(html).not.toContain("※先攻・後攻は対戦開始時に各プレイヤーのライフのトップカード比較により自動決定されます。");
+      expect(html).not.toContain("AI Policy:");
+      expect(html).not.toContain("FirstLegal (Baseline)");
+      expect(html).not.toContain("SeededRandom (Baseline)");
+      expect(html).not.toContain("ManualGenericGenome (Experimental)");
+      expect(html).not.toContain("ZeroGenome (Debug)");
+      expect(html).not.toContain("対戦環境 (Environment):");
+      expect(html).not.toContain("対戦モード (Match Mode):");
+      expect(html).toContain("現在の対戦");
+      expect(html).toContain("対戦を中断して対戦設定に戻る");
     });
 
     it("R1.3: MobileHeaderMenu で humanVsHuman の場合、自動決定案内も AI Policy も表示されないこと", () => {
