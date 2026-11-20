@@ -236,13 +236,17 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
 
   // 3. 選択中アクション + キーカードで絞り込まれたパターン
   const patternsFilteredByKey = useMemo(() => {
-    return patternsFilteredByAction.filter((p) => {
-      if (selectedKeyRef === null) {
-        return p.keyCardSelectionRef === undefined;
+    if (availableKeyRefs.length === 0) {
+      return patternsFilteredByAction;
+    }
+    if (selectedKeyRef === null) {
+      if (availableKeyRefs.length === 1) {
+        return patternsFilteredByAction.filter((p) => p.keyCardSelectionRef === availableKeyRefs[0]);
       }
-      return p.keyCardSelectionRef === selectedKeyRef;
-    });
-  }, [patternsFilteredByAction, selectedKeyRef]);
+      return [];
+    }
+    return patternsFilteredByAction.filter((p) => p.keyCardSelectionRef === selectedKeyRef);
+  }, [patternsFilteredByAction, availableKeyRefs, selectedKeyRef]);
 
   // 選択可能なコスト支払い一覧
   const availableCostRefs = useMemo(() => {
