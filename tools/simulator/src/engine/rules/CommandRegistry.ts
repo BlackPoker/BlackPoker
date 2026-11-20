@@ -35,6 +35,8 @@ import {
   replaceRequestTargetHandler,
   setUnitStateHandler,
   transformCharacterHandler,
+  moveMatchingUnitsToGraveyardHandler,
+  transformMatchingUnitsHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -1204,5 +1206,13 @@ export class CommandRegistry {
     this.register("replaceRequestTarget", replaceRequestTargetHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("setUnitState", setUnitStateHandler(this.expressionEvaluator, this.effectInterpreter));
     this.register("transformCharacter", transformCharacterHandler(this.expressionEvaluator, this.effectInterpreter));
+    this.register(
+      "moveMatchingUnitsToGraveyard",
+      moveMatchingUnitsToGraveyardHandler(this.expressionEvaluator, this.abilityEvaluator, this.effectInterpreter)
+    );
+    this.register(
+      "transformMatchingUnits",
+      transformMatchingUnitsHandler(this.expressionEvaluator, this.effectInterpreter)
+    );
   }
 }

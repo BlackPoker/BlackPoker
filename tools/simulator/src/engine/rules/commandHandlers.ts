@@ -2505,3 +2505,152 @@ export function transformCharacterHandler(
     }
   };
 }
+
+/**
+ * moveMatchingUnitsToGraveyard: 条件に合致する複数ユニットを一括で墓地へ送る（剣の雨等の全体除去用）
+ */
+export function moveMatchingUnitsToGraveyardHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  abilityEvaluator: AbilityEvaluator,
+  effectInterpreter: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { componentType, maxSize } = args;
+    const resolvedMaxSize =
+      typeof maxSize === "number"
+        ? maxSize
+        : expressionEvaluator.resolveBindingValue(maxSize, context);
+
+    const state = context.state;
+    if (!state || !state.players) return;
+
+    const components = context.components || [];
+
+    // 両プレイヤーのフィールドを走査し、条件合致ユニットを特定
+    for (const [pKey, player] of Object.entries<any>(state.players)) {
+      if (!Array.isArray(player.field)) continue;
+
+      const unitsToRemove: any[] = [];
+      const remainingUnits: any[] = [];
+
+      for (const unit of player.field) {
+        let matches = true;
+        if (componentType === "soldier" || componentType === "character.soldier") {
+          matches = isSoldierType(unit, components);
+        } else if (componentType === "bulwark" || componentType === "character.bulwark") {
+          matches = isBulwarkType(unit, components);
+        } else if (componentType) {
+          matches = unit.componentId === componentType;
+        }
+
+        if (matches && resolvedMaxSize !== undefined) {
+          const unitSize = abilityEvaluator.calculateUnitSize(unit, state);
+          matches = unitSize <= resolvedMaxSize;
+        }
+
+        if (matches) {
+          unitsToRemove.push(unit);
+        } else {
+          remainingUnits.push(unit);
+        }
+      }
+
+      if (unitsToRemove.length > 0) {
+        player.field = remainingUnits;
+        GraveTopCoordinator.addUnitsBatchToGrave(
+          player,
+          unitsToRemove,
+          state,
+          pKey,
+          context.logRecorder,
+          effectInterpreter,
+          context
+        );
+      }
+    }
+  };
+}
+
+/**
+ * transformMatchingUnits: 条件に合致する全ユニットを一括で変形する（奇襲等の全体変形用）
+ */
+export function transformMatchingUnitsHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter?: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const { relation = "self", componentType = "bulwark", destination = "soldier", state: targetState } = args;
+
+    let targetPlayerKey = context.playerKey;
+    if (relation === "opponent") {
+      targetPlayerKey = getOpponentPlayerKey(context.playerKey, context.state);
+    }
+
+    let requestedState: string | undefined;
+    if (targetState !== undefined) {
+      requestedState = expressionEvaluator.resolveBindingValue(targetState, context);
+    }
+
+    const transformResults = CharacterTransformService.transformMatchingCharacters({
+      playerKey: targetPlayerKey,
+      state: context.state,
+      components: context.components || [],
+      condition: {
+        characterType: componentType,
+      },
+      options: {
+        destination,
+        state: requestedState,
+        clearReceivedEffects: true,
+        clearBattleRole: true,
+      },
+    });
+
+    for (const res of transformResults) {
+      if (res.stateChanged && effectInterpreter) {
+        effectInterpreter.dispatchEvent(
+          {
+            type: "unitStateChanged",
+            payload: {
+              unitId: res.sourceUnitId,
+              fromState: res.oldState,
+              toState: res.selectedState,
+              playerKey: res.ownerKey,
+              cause: {
+                type: "effect",
+                command: "transformMatchingUnits",
+                actionId: context.currentAction?.id || context.currentRequest?.actionId,
+              },
+            },
+          },
+          context
+        );
+      }
+
+      const logRecorder =
+        context.logRecorder || (effectInterpreter as any)?.registry?.logRecorder;
+      if (logRecorder) {
+        logRecorder.record({
+          type: "unit.transformed",
+          stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+          playerId: res.ownerKey,
+          sourceUnitId: res.sourceUnitId,
+          sourceComponentId: res.sourceComponentId,
+          sourceCharacterType: res.sourceCharacterType,
+          results: res.results.map((r) => ({
+            unitId: r.unitId,
+            componentId: r.componentId,
+            characterType: r.characterType,
+            cardIds: r.cardIds,
+            face: r.face,
+            state: r.state,
+          })),
+          cause: {
+            actionId: context.currentAction?.id || context.currentRequest?.actionId,
+            requestId: context.currentRequest?.id,
+          },
+        });
+      }
+    }
+  };
+}

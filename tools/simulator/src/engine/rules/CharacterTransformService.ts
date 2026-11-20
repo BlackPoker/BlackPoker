@@ -355,4 +355,231 @@ export class CharacterTransformService {
       })),
     };
   }
+
+  /**
+   * 条件に合致する全キャラクターを一括で変形します（奇襲等の全体変形用）。
+   * 
+   * 【All-or-Nothing / Atomic 保証】
+   * 全対象ユニットの事前検証（Preflight: コンポーネント解決、ID一意性、カード保存則等）を完全に完了してから
+   * 初めて状態更新（Mutation Phase）を実行します。
+   * 途中エラーで一部の防壁のみ変形される不整合状態は一切発生しません。
+   */
+  static transformMatchingCharacters(params: {
+    readonly playerKey: string;
+    readonly state: any;
+    readonly components: readonly ComponentDefinition[];
+    readonly condition: {
+      readonly characterType?: string;
+    };
+    readonly options?: CharacterTransformOptions;
+  }): CharacterTransformResult[] {
+    const { playerKey, state, components, condition, options } = params;
+
+    const player = state.players?.[playerKey];
+    if (!player || !Array.isArray(player.field)) {
+      return [];
+    }
+
+    const targetType = condition.characterType || "bulwark";
+
+    // =========================================================================
+    // 1. 対象ユニットの抽出 (DRIVE状態の防壁も含む)
+    // =========================================================================
+    interface PendingTransformItem {
+      sourceUnit: any;
+      sourceIdx: number;
+      sourceCharType: string;
+      oldState: string;
+      requestedState: string;
+      stateChanged: boolean;
+      resultingUnits: any[];
+      sourceCardIds: string[];
+    }
+
+    const pendingItems: PendingTransformItem[] = [];
+
+    for (let i = 0; i < player.field.length; i++) {
+      const u = player.field[i];
+      if (!isCharacterComponent(u, components)) continue;
+
+      const charType = getCharacterType(u, components);
+      if (charType !== targetType) continue;
+
+      // 対象ユニット発見 -> Preflight 計算
+      const oldState = u.state;
+      let requestedState = options?.state;
+      if (requestedState !== undefined && requestedState !== null) {
+        if (requestedState !== "charge" && requestedState !== "drive") {
+          throw new Error(`要求されたユニット状態が不正です: ${requestedState} (fail-closed)`);
+        }
+      } else {
+        requestedState = oldState;
+      }
+      const stateChanged = oldState !== requestedState;
+
+      // 構成カードの検証
+      if (!u.cards || !Array.isArray(u.cards) || u.cards.length === 0) {
+        throw new Error(`ユニット [${u.unitId}] の構成カードが存在しません (fail-closed)。`);
+      }
+
+      const sourceCardIds: string[] = [];
+      const seenIds = new Set<string>();
+      for (const c of u.cards) {
+        if (!c || typeof c.id !== "string" || c.id.trim() === "") {
+          throw new Error(`ユニット [${u.unitId}] のカードIDが不正です (fail-closed)。`);
+        }
+        if (seenIds.has(c.id)) {
+          throw new Error(`ユニット [${u.unitId}] のカードIDに重複が存在します: '${c.id}' (fail-closed)。`);
+        }
+        if (!isCanonicalPrintedCard(c)) {
+          throw new Error(`ユニット [${u.unitId}] のカード '${c.id}' がCanonicalではありません (fail-closed)。`);
+        }
+        seenIds.add(c.id);
+        sourceCardIds.push(c.id);
+      }
+
+      // 変形先の解決 (bulwark -> soldier)
+      const destination = options?.destination || "soldier";
+      if (destination !== "soldier") {
+        throw new Error(`transformMatchingCharacters: 未対応の変形先指定です: ${destination}`);
+      }
+
+      const card = u.cards[0];
+      const cardUp = { ...card, face: "up" };
+      const destComp = resolveComponentForUnit({
+        cards: [cardUp],
+        face: "up",
+        zone: "field",
+        components,
+        componentType: "character",
+      });
+
+      const resolvedCharType = getCharacterType({ componentId: destComp.id }, components);
+      if (resolvedCharType !== "soldier") {
+        throw new Error(`変形先コンポーネント [${destComp.id}] の characterType が soldier ではありません。`);
+      }
+
+      const destLabels = Array.isArray(destComp.properties?.labels)
+        ? [...destComp.properties.labels]
+        : ["攻撃", "防御"];
+      const destKind = destComp.display?.kind || destComp.properties?.kind || "兵士";
+
+      const resultingUnits = [
+        {
+          unitId: u.unitId,
+          kind: destKind,
+          componentId: destComp.id,
+          state: requestedState,
+          face: "up",
+          cards: [cardUp],
+          labels: [...destLabels],
+          enteredTurn: u.enteredTurn,
+          enteredFieldTurn: u.enteredFieldTurn,
+          enteredFieldBeforeGame: u.enteredFieldBeforeGame,
+        },
+      ];
+
+      pendingItems.push({
+        sourceUnit: u,
+        sourceIdx: i,
+        sourceCharType: charType,
+        oldState,
+        requestedState,
+        stateChanged,
+        resultingUnits,
+        sourceCardIds,
+      });
+    }
+
+    if (pendingItems.length === 0) {
+      return [];
+    }
+
+    // =========================================================================
+    // 2. 全体整合性の事前検証 (Global Preflight)
+    // =========================================================================
+    // 全生成ユニットIDの一意性
+    const allResultUnitIds = pendingItems.flatMap((p) => p.resultingUnits.map((u) => u.unitId));
+    if (new Set(allResultUnitIds).size !== allResultUnitIds.length) {
+      throw new Error("生成されるユニットID群に重複が存在します (fail-closed)。");
+    }
+
+    // 変形対象外の他ユニットとのID衝突チェック
+    const sourceUnitIds = new Set(pendingItems.map((p) => p.sourceUnit.unitId));
+    for (const p of Object.values<any>(state.players || {})) {
+      if (Array.isArray(p?.field)) {
+        for (const u of p.field) {
+          if (u && !sourceUnitIds.has(u.unitId)) {
+            if (allResultUnitIds.includes(u.unitId)) {
+              throw new Error(`生成されるユニットID '${u.unitId}' が既存フィールドユニットと衝突しています (fail-closed)。`);
+            }
+          }
+        }
+      }
+    }
+
+    // 全カード保存則チェック
+    const allSourceCardIds = pendingItems.flatMap((p) => p.sourceCardIds);
+    const allResultCardIds = pendingItems.flatMap((p) => p.resultingUnits.flatMap((u) => u.cards.map((c: any) => c.id)));
+    if (allSourceCardIds.length !== allResultCardIds.length) {
+      throw new Error("変形前後で総カード枚数が一致しません (fail-closed)。");
+    }
+    for (let i = 0; i < allSourceCardIds.length; i++) {
+      if (allSourceCardIds[i] !== allResultCardIds[i]) {
+        throw new Error("変形前後で物理カードIdentityが完全保存されていません (fail-closed)。");
+      }
+    }
+
+    // =========================================================================
+    // 3. MUTATION PHASE (全Preflight成功後にのみ実行)
+    // =========================================================================
+    const results: CharacterTransformResult[] = [];
+
+    // インデックス順の置換（末尾から置換することでインデックスズレを防止）
+    for (const item of pendingItems) {
+      // 効果解除
+      if (options?.clearReceivedEffects) {
+        for (const p of Object.values<any>(state.players || {})) {
+          if (Array.isArray(p.fog)) {
+            for (const f of p.fog) {
+              if (f.bindings && f.bindings.target === item.sourceUnit.unitId) {
+                delete f.bindings.target;
+              }
+            }
+          }
+        }
+      }
+
+      // 戦闘役割解除
+      if (options?.clearBattleRole && item.sourceUnit.battle) {
+        delete item.sourceUnit.battle;
+      }
+
+      // フィールド置換
+      const currentIdx = player.field.findIndex((u: any) => u.unitId === item.sourceUnit.unitId);
+      if (currentIdx !== -1) {
+        player.field.splice(currentIdx, 1, ...item.resultingUnits);
+      }
+
+      results.push({
+        ownerKey: playerKey,
+        sourceUnitId: item.sourceUnit.unitId,
+        sourceComponentId: item.sourceUnit.componentId,
+        sourceCharacterType: item.sourceCharType,
+        oldState: item.oldState,
+        selectedState: item.requestedState,
+        stateChanged: item.stateChanged,
+        results: item.resultingUnits.map((u) => ({
+          unitId: u.unitId,
+          componentId: u.componentId,
+          characterType: getCharacterType(u, components),
+          cardIds: u.cards.map((c: any) => c.id),
+          face: u.face,
+          state: u.state,
+        })),
+      });
+    }
+
+    return results;
+  }
 }
