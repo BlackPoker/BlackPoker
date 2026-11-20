@@ -738,7 +738,7 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
       }
     }
 
-    // 実生成されなかったアクションについて、定義から理由を特定・記録
+    // アクションの分類と理由を記録（「実生成不可の誘発アクション」と「特定局面で未生成のクイック系」を厳密に区別）
     for (const record of auditRecords) {
       if (verifiedActionIds.has(record.actionId)) {
         record.isRealGeneratorVerified = true;
@@ -750,29 +750,162 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
         if (!def) {
           record.unverifiedReason = "定義未検出";
         } else if (def.type === "triggered" || def.request?.trigger === "triggered") {
-          record.unverifiedReason = "誘発アクション（システム自動積載のため手番直接リクエスト不可）";
+          record.unverifiedReason = "直接リクエスト不可の誘発アクション（システム自動積載のため直接宣言不可）";
         } else if (def.request?.timing === "quick") {
-          record.unverifiedReason = "割り込み専用アクション（割り込みチャンス時のみ宣言可能）";
+          record.unverifiedReason = "固定手番局面で未生成（割り込みチャンス・ステージリクエスト等の固有発動条件が必要）";
         } else if (def.request?.timing === "block") {
-          record.unverifiedReason = "ブロック専用アクション（アタック後の防御宣言時のみ宣言可能）";
+          record.unverifiedReason = "固定手番局面で未生成（ブロック宣言タイミングが必要）";
         } else if (def.request?.timing === "damageJudge") {
-          record.unverifiedReason = "ダメージ判定専用アクション（戦闘解決時のみ宣言可能）";
+          record.unverifiedReason = "直接リクエスト不可の誘発アクション（ダメージ判定タイミングでシステム積載）";
         } else if (def.activationCondition) {
-          record.unverifiedReason = "起動条件未充足（特定ゾーン枚数・状態等の事前条件が必要）";
+          record.unverifiedReason = "固定手番局面で未生成（特定ゾーン状態・枚数等の起動条件が必要）";
         } else {
-          record.unverifiedReason = "前提リソース未充足（特定カード/コンポーネントが盤面または手札・墓地に必要）";
+          record.unverifiedReason = "固定手番局面で未生成（特定カード/コンポーネントが前提条件として必要）";
         }
       }
     }
 
-    console.log(`[AUDIT-8] LegalPatternGenerator 実生成 DecisionRequest 検証完了:`);
+    console.log(`[AUDIT-8] LegalPatternGenerator 手番局面 実生成 DecisionRequest 検証完了:`);
     console.log(`- 実証アクション数: ${verifiedActionIds.size}`);
     console.log(`- 実証合法パターン数: ${totalRealPatterns}`);
     expect(verifiedActionIds.size).toBeGreaterThan(0);
     expect(totalRealPatterns).toBeGreaterThan(10);
   });
 
+  // 8B. クイック系アクション（チャンス・割り込みタイミング）の実局面生成検証
+  it("AUDIT-8B: クイック系アクション（チャンス・割り込みタイミング）の実局面生成とDecisionPanel提出検証", () => {
+    // 相手手番でステージにリクエストが存在し、自プレイヤー (p1) にチャンスがある局面を構築
+    const quickState: any = {
+      stateVersion: 1,
+      matchId: "audit-quick-match",
+      turnPlayer: "p2",
+      chancePlayer: "p1", // p1 に割り込みチャンスがある
+      players: {
+        p1: {
+          playerId: "p1",
+          name: "Player 1",
+          hand: [
+            { id: "c-p1-c8", suit: "C", rank: "8", value: 8 }, // ♣8: カウンター用
+            { id: "c-p1-c5", suit: "C", rank: "5", value: 5 }, // ♣5: 対象変更用
+            { id: "c-p1-c6", suit: "C", rank: "6", value: 6 }, // ♣6: 対象変更用
+            { id: "c-p1-ace", suit: "S", rank: "A", value: 1 }, // ♠A: クイック召喚用
+            { id: "c-p1-d4", suit: "D", rank: "4", value: 4 }, // ♦4: 停戦用
+            { id: "c-p1-d5", suit: "D", rank: "5", value: 5 }, // ♦5: 停戦用
+          ],
+          field: [
+            {
+              unitId: "u-p1-bw",
+              componentId: "character.bulwark",
+              kind: "防壁",
+              state: "charge",
+              cards: [{ id: "c-bw1", suit: "D", rank: "2", value: 2 }],
+            },
+            {
+              unitId: "u-p1-sol",
+              componentId: "character.soldier",
+              kind: "一般兵",
+              state: "charge",
+              cards: [{ id: "c-sol1", suit: "H", rank: "7", value: 7 }],
+            },
+          ],
+          life: [{ id: "l1", suit: "H", rank: "5", value: 5 }],
+          grave: [],
+          fog: [],
+          pack: [],
+          rareCards: [],
+        },
+        p2: {
+          playerId: "p2",
+          name: "Player 2",
+          hand: [],
+          field: [
+            {
+              unitId: "u-p2-atk",
+              componentId: "character.soldier",
+              kind: "一般兵",
+              state: "drive",
+              cards: [{ id: "c-p2-atk", suit: "S", rank: "6", value: 6 }],
+            },
+          ],
+          life: [{ id: "l2", suit: "S", rank: "5", value: 5 }],
+          grave: [],
+          fog: [],
+          pack: [],
+          rareCards: [],
+        },
+      },
+      stage: {
+        requests: [
+          {
+            id: "req-opp-atk",
+            actionId: "action.attack",
+            controller: "p2",
+            definitionOwner: "p2",
+            keyCards: [{ id: "c-p2-atk", suit: "S", rank: "6", value: 6 }],
+            status: "pending",
+          },
+          {
+            id: "req-opp-dj",
+            actionId: "action.damageJudge",
+            controller: "p2",
+            definitionOwner: "p2",
+            status: "pending",
+          },
+          {
+            id: "req-opp-twist",
+            actionId: "action.twist",
+            controller: "p2",
+            definitionOwner: "p2",
+            hasTarget: true,
+            targets: [{ id: "tgt-1", targetUnitId: "u-p1-sol" }],
+            status: "pending",
+          },
+        ],
+        history: [],
+      },
+    };
+
+    const { request: quickReq } = LegalPatternGenerator.generateActionRequestDecision(
+      quickState,
+      "p1",
+      proPackage
+    );
+
+    const generatedActionIds = new Set(quickReq.catalog.actions.map((a) => a.actionId));
+    console.log(`[AUDIT-8B] チャンス局面での実生成アクション一覧: [${Array.from(generatedActionIds).join(", ")}]`);
+
+    // クイック系4アクション（counter, quickSummonsAce, changeTarget, truce）が実生成されていることをアサート
+    const expectedQuickActions = ["action.counter", "action.quickSummonsAce", "action.changeTarget", "action.truce"];
+    for (const qId of expectedQuickActions) {
+      expect(generatedActionIds.has(qId)).toBe(true);
+      const record = auditRecords.find((r) => r.actionId === qId);
+      if (record) {
+        record.isRealGeneratorVerified = true;
+        record.verificationType = "REAL_GENERATOR";
+        record.unverifiedReason = undefined;
+      }
+    }
+
+    // DecisionPanel に渡して UI 正常描画・決定ブロック・確定提出を検証
+    const onSubmitQuick = vi.fn();
+    let rendererQuick!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      rendererQuick = TestRenderer.create(<DecisionPanel request={quickReq} onSubmit={onSubmitQuick} />);
+    });
+    // PASS ボタンまたはアクションボタンが存在すること
+    const buttons = rendererQuick.root.findAllByType("button");
+    expect(buttons.length).toBeGreaterThan(0);
+  });
+
   // 9. 選択条件の特殊ケース検証 (混在・非直積・不正ref)
+  // 【仕様確認・監査範囲の明記】:
+  // - BlackPoker 公式YAML仕様上、同一アクション内で「キー不要/必要」「コスト不要/必要」「対象不要/必要」が
+  //   同時に合法手として併存・生成される条件は存在しません（key, cost, targets はアクション定義ごとに静的に一意）。
+  // - したがって現在の DecisionPanel UI に「キーなし」「コストなし」「対象なし」という明示ボタンが存在しないのは
+  //   公式ルール仕様に完全に適合しています。
+  // - 本テスト（Case A, B, C）は、仮に将来の動的ルールや異常データで不要・必要が混在した場合でも、
+  //   「未確定のまま意図せず暗黙送信されないか」「選択肢選択後に正しく該当パターンが提出されるか」という
+  //   データ堅牢性・防御性を実証する模擬耐性検証です。
   it("AUDIT-9: 選択条件の特殊ケース（混在・非直積・不正ref）の安全性検証", () => {
     // --- Case A: 同一アクションで「キー不要」と「キー必要」が混在するパターン ---
     // キー不要 (undefined) と 複数キー必要 (ref 0: ♠A, ref 1: ♥K) が混在
@@ -1110,9 +1243,9 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
     expect((onSubmitF.mock.calls[0][0] as DecisionResponse).selectedPatternRef).toBe(0);
   });
 
-  // 10. ブロッカー割当て不正ケース検証
-  it("AUDIT-10: ブロッカー割当ての不正ケース（同一ブロッカーの複数アタッカー割当て・兵士防壁不正混在・非合法割当て）で決定不能となる検証", () => {
-    // 2体のアタッカー (atk-1, atk-2) と 2体のブロッカー候補 (def-1, def-2)
+  // 10. ブロッカー割当て仕様整合性検証（防壁単独・兵士単独・複数兵士の合法性と、兵士防壁混在・同一ブロッカー重複の不正判定）
+  it("AUDIT-10: ブロッカー割当ての仕様整合性検証（防壁単独・兵士単独・複数兵士ブロックの合法性と、兵士防壁混在・同一ブロッカー重複の不正判定）", () => {
+    // 2体のアタッカー (atk-1, atk-2) と ブロッカー候補 (def-1: 兵士, def-2: 兵士, bw-1: 防壁)
     const blockReq: DecisionRequest = {
       protocolVersion: "1.0.0",
       matchId: "audit-block-req",
@@ -1153,7 +1286,7 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
         targetSelections: [],
         unitSelections: [],
         effectSelections: [
-          // 合法パターン0: 全アタッカー スルー
+          // 合法パターン0: 全アタッカー スルー（合法）
           {
             effectSelectionRef: 0,
             selectionType: "unitAssignment",
@@ -1163,7 +1296,7 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
             ],
             summary: "ブロックなし",
           } as any,
-          // 合法パターン1: atk-1 のみ def-1 でブロック
+          // 合法パターン1: 兵士単独ブロック (atk-1 ← def-1)（合法）
           {
             effectSelectionRef: 1,
             selectionType: "unitAssignment",
@@ -1173,15 +1306,35 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
             ],
             summary: "atk-1 ← def-1",
           } as any,
-          // 合法パターン2: atk-1 を def-1, atk-2 を def-2 でブロック
+          // 合法パターン2: 複数兵士によるブロック (atk-1 ← def-1 + def-2)（合法条件を満たせば可能）
           {
             effectSelectionRef: 2,
             selectionType: "unitAssignment",
             assignments: [
-              { sourceUnitId: "atk-1", selectedUnitIds: ["def-1"] },
-              { sourceUnitId: "atk-2", selectedUnitIds: ["def-2"] },
+              { sourceUnitId: "atk-1", selectedUnitIds: ["def-1", "def-2"] },
+              { sourceUnitId: "atk-2", selectedUnitIds: [] },
             ],
-            summary: "atk-1 ← def-1 / atk-2 ← def-2",
+            summary: "atk-1 ← def-1 + def-2",
+          } as any,
+          // 合法パターン3: 防壁単独でのブロック (atk-1 ← bw-1)（合法！）
+          {
+            effectSelectionRef: 3,
+            selectionType: "unitAssignment",
+            assignments: [
+              { sourceUnitId: "atk-1", selectedUnitIds: ["bw-1"] },
+              { sourceUnitId: "atk-2", selectedUnitIds: [] },
+            ],
+            summary: "atk-1 ← bw-1",
+          } as any,
+          // 合法パターン4: 独立ブロック (atk-1 ← def-1 / atk-2 ← bw-1)（合法！）
+          {
+            effectSelectionRef: 4,
+            selectionType: "unitAssignment",
+            assignments: [
+              { sourceUnitId: "atk-1", selectedUnitIds: ["def-1"] },
+              { sourceUnitId: "atk-2", selectedUnitIds: ["bw-1"] },
+            ],
+            summary: "atk-1 ← def-1 / atk-2 ← bw-1",
           } as any,
         ],
         orderSelections: [],
@@ -1190,34 +1343,46 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
         { patternRef: 0, patternId: "pat-blk-0", effectSelectionRef: 0, kind: "EFFECT_SELECTION" } as any,
         { patternRef: 1, patternId: "pat-blk-1", effectSelectionRef: 1, kind: "EFFECT_SELECTION" } as any,
         { patternRef: 2, patternId: "pat-blk-2", effectSelectionRef: 2, kind: "EFFECT_SELECTION" } as any,
+        { patternRef: 3, patternId: "pat-blk-3", effectSelectionRef: 3, kind: "EFFECT_SELECTION" } as any,
+        { patternRef: 4, patternId: "pat-blk-4", effectSelectionRef: 4, kind: "EFFECT_SELECTION" } as any,
       ],
     };
 
-    // --- 不正ケース 1: 同じブロッカー (def-1) の複数アタッカー (atk-1, atk-2) への重複割当て ---
+    // --- 1. 合法割当てパターンの検証 (findExactMatchPatternRef) ---
+    // (a) スルー
+    expect(findExactMatchPatternRef({ "atk-1": [], "atk-2": [] }, blockReq.catalog.effectSelections)).toBe(0);
+    // (b) 兵士単独ブロック
+    expect(findExactMatchPatternRef({ "atk-1": ["def-1"], "atk-2": [] }, blockReq.catalog.effectSelections)).toBe(1);
+    // (c) 複数兵士によるブロック
+    expect(findExactMatchPatternRef({ "atk-1": ["def-1", "def-2"], "atk-2": [] }, blockReq.catalog.effectSelections)).toBe(2);
+    // (d) 防壁単独でのブロック (合法！)
+    expect(findExactMatchPatternRef({ "atk-1": ["bw-1"], "atk-2": [] }, blockReq.catalog.effectSelections)).toBe(3);
+    // (e) 兵士と防壁の独立ブロック (atk-1に兵士, atk-2に防壁: 合法！)
+    expect(findExactMatchPatternRef({ "atk-1": ["def-1"], "atk-2": ["bw-1"] }, blockReq.catalog.effectSelections)).toBe(4);
+
+    // --- 2. 不正割当てパターンの検証 (exactPatternRef が null となること) ---
+    // 不正1: 同一ブロッカーの複数アタッカーへの重複割当て
     const invalidDuplicateBlockMap = {
       "atk-1": ["def-1"],
       "atk-2": ["def-1"],
     };
-    const exactRefDup = findExactMatchPatternRef(invalidDuplicateBlockMap, blockReq.catalog.effectSelections);
-    expect(exactRefDup).toBeNull(); // 合法パターンに存在しないため null
+    expect(findExactMatchPatternRef(invalidDuplicateBlockMap, blockReq.catalog.effectSelections)).toBeNull();
 
-    // --- 不正ケース 2: 兵士と防壁の不正な混在（防壁 bw-1 をブロックに割り当てようとした状態） ---
-    const invalidBulwarkBlockMap = {
-      "atk-1": ["bw-1"],
+    // 不正2: 同じアタッカーに兵士と防壁を混在させる割当て (ルール上不正！)
+    const invalidSoldierBulwarkMixedBlockMap = {
+      "atk-1": ["def-1", "bw-1"],
       "atk-2": [],
     };
-    const exactRefBulwark = findExactMatchPatternRef(invalidBulwarkBlockMap, blockReq.catalog.effectSelections);
-    expect(exactRefBulwark).toBeNull(); // 防壁によるブロックはルール外のため null
+    expect(findExactMatchPatternRef(invalidSoldierBulwarkMixedBlockMap, blockReq.catalog.effectSelections)).toBeNull();
 
-    // --- 不正ケース 3: 合法パターンに存在しない任意の不正割当て (存在しないユニット "unknown-unit") ---
+    // 不正3: 合法パターンに存在しない割当て
     const invalidUnknownBlockMap = {
       "atk-1": ["unknown-unit"],
       "atk-2": [],
     };
-    const exactRefUnknown = findExactMatchPatternRef(invalidUnknownBlockMap, blockReq.catalog.effectSelections);
-    expect(exactRefUnknown).toBeNull(); // 存在しないユニットのため null
+    expect(findExactMatchPatternRef(invalidUnknownBlockMap, blockReq.catalog.effectSelections)).toBeNull();
 
-    // --- DecisionPanel UI での不正割当て時の決定ボタン無効化検証 ---
+    // --- 3. BlockAssignmentEditor UI における決定ボタンの厳格アサーション ---
     const unitNumberMap = new Map<string, any>([
       ["atk-1", { badge: "①", label: "Player A の 一般兵 ♠10", unitView: {} }],
       ["atk-2", { badge: "②", label: "Player A の 一般兵 ♥9", unitView: {} }],
@@ -1226,34 +1391,56 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
       ["bw-1", { badge: "⑤", label: "Player B の 防壁 ♠2", unitView: {} }],
     ]);
 
-    const onExactChange = vi.fn();
-    const onSelectPat = vi.fn();
-    let editorRenderer!: TestRenderer.ReactTestRenderer;
+    // (A) 兵士・防壁混在の不正割当て時: 決定ボタンが確実に存在し、disabled であること (条件分岐排除・強制アサート)
+    const onExactChangeBad = vi.fn();
+    const onSelectPatBad = vi.fn();
+    let rendererBad!: TestRenderer.ReactTestRenderer;
     act(() => {
-      editorRenderer = TestRenderer.create(
+      rendererBad = TestRenderer.create(
         <BlockAssignmentEditor
           request={blockReq}
           unitNumberMap={unitNumberMap}
-          onSelectPattern={onSelectPat}
-          onExactPatternRefChange={onExactChange}
-          initialAssignments={invalidDuplicateBlockMap} // 不正な重複割当てを渡す
+          onSelectPattern={onSelectPatBad}
+          onExactPatternRefChange={onExactChangeBad}
+          initialAssignments={invalidSoldierBulwarkMixedBlockMap}
         />
       );
     });
+    expect(onExactChangeBad).toHaveBeenCalledWith(null);
+    const buttonsBad = rendererBad.root.findAllByType("button");
+    const confirmBtnBad = buttonsBad.find((b) => extractText(b).includes("決定"));
+    expect(confirmBtnBad).toBeDefined();
+    expect(confirmBtnBad!.props.disabled).toBe(true);
+    act(() => {
+      confirmBtnBad!.props.onClick();
+    });
+    expect(onSelectPatBad).not.toHaveBeenCalled();
 
-    // onExactPatternRefChange に null が通知され、決定ボタンは押せないこと
-    expect(onExactChange).toHaveBeenCalledWith(null);
-
-    // 決定ボタン（「この割り当てで決定」等）を探す
-    const buttons = editorRenderer.root.findAllByType("button");
-    const confirmBtn = buttons.find((b) => extractText(b).includes("決定"));
-    if (confirmBtn) {
-      expect(confirmBtn.props.disabled).toBe(true);
-      act(() => {
-        confirmBtn.props.onClick();
-      });
-      expect(onSelectPat).not.toHaveBeenCalled();
-    }
+    // (B) 防壁単独ブロックの合法割当て時: 決定ボタンが活性化し、クリックで正常提出できること
+    const onExactChangeGood = vi.fn();
+    const onSelectPatGood = vi.fn();
+    let rendererGood!: TestRenderer.ReactTestRenderer;
+    act(() => {
+      rendererGood = TestRenderer.create(
+        <BlockAssignmentEditor
+          request={blockReq}
+          unitNumberMap={unitNumberMap}
+          onSelectPattern={onSelectPatGood}
+          onExactPatternRefChange={onExactChangeGood}
+          initialAssignments={{ "atk-1": ["bw-1"], "atk-2": [] }}
+        />
+      );
+    });
+    expect(onExactChangeGood).toHaveBeenCalledWith(3);
+    const buttonsGood = rendererGood.root.findAllByType("button");
+    const confirmBtnGood = buttonsGood.find((b) => extractText(b).includes("決定"));
+    expect(confirmBtnGood).toBeDefined();
+    expect(confirmBtnGood!.props.disabled).toBe(false);
+    act(() => {
+      confirmBtnGood!.props.onClick();
+    });
+    expect(onSelectPatGood).toHaveBeenCalledTimes(1);
+    expect(onSelectPatGood).toHaveBeenCalledWith(3);
   });
 
   // 11. 監査総括テスト
@@ -1282,6 +1469,8 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
     console.log(`監査対象アクション総数: ${summary.totalActions}`);
     console.log(`- 実生成検証アクション数 (LegalPatternGenerator): ${summary.realCount}`);
     console.log(`- 共通UI検証アクション数 (模擬DecisionRequest): ${summary.mockOnlyCount}`);
+    console.log(`  - うち直接宣言不可の誘発アクション (システム自動積載): ${mockOnlyActions.filter((r) => r.unverifiedReason?.includes("直接リクエスト不可")).length}`);
+    console.log(`  - うち特定リソース未充足の未生成アクション (パック/レア等): ${mockOnlyActions.filter((r) => !r.unverifiedReason?.includes("直接リクエスト不可")).length}`);
     console.log(`- Standard アクション数: ${summary.standardCount}`);
     console.log(`- Pro アクション数: ${summary.proCount}`);
     console.log(`- Master/Extra アクション数: ${summary.masterExtraCount}`);
@@ -1291,12 +1480,12 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
     console.log(`確定後正常提出合格数: ${summary.resolvedSubmitPassCount} / ${summary.totalActions}`);
     console.log(`検証パターン総数: ${summary.totalPatternsTested}`);
 
-    console.log("\n--- [実生成22アクション (LegalPatternGenerator)] ---");
+    console.log(`\n--- [実生成${summary.realCount}アクション (LegalPatternGenerator: 手番22件 + チャンス4件)] ---`);
     realVerifiedActions.forEach((r, idx) => {
       console.log(`  ${idx + 1}. [${r.regulationScope.join("/")}] ${r.actionId} (${r.actionName})`);
     });
 
-    console.log("\n--- [模擬テストのみ15アクション (共通UI検証) & 実生成不可理由] ---");
+    console.log(`\n--- [模擬テストのみ${summary.mockOnlyCount}アクション (共通UI検証) & 実生成不可・未生成理由] ---`);
     mockOnlyActions.forEach((r, idx) => {
       console.log(`  ${idx + 1}. [${r.regulationScope.join("/")}] ${r.actionId} (${r.actionName}): ${r.unverifiedReason}`);
     });
@@ -1306,7 +1495,7 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
     expect(summary.enterBlockedPassCount).toBe(summary.totalActions);
     expect(summary.shiftEnterBlockedPassCount).toBe(summary.totalActions);
     expect(summary.resolvedSubmitPassCount).toBe(summary.totalActions);
-    expect(summary.realCount).toBe(22);
-    expect(summary.mockOnlyCount).toBe(15);
+    expect(summary.realCount).toBe(26);
+    expect(summary.mockOnlyCount).toBe(11);
   });
 });
