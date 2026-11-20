@@ -103,7 +103,7 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
           onClick={onRestart}
           className="px-2.5 py-1 text-[10px] font-bold bg-zinc-950 hover:bg-zinc-800 text-white rounded transition"
         >
-          再戦
+          対戦設定へ
         </button>
       </div>
     );
@@ -201,7 +201,7 @@ export const GameOverOverlay: React.FC<GameOverOverlayProps> = ({
           onClick={onRestart}
           className="w-full py-2.5 px-6 bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white font-bold rounded shadow transition-all text-sm font-mono"
         >
-          もう一度対戦する
+          次の対戦を設定する
         </button>
       </div>
     </div>

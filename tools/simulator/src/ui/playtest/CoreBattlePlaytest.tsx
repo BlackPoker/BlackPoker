@@ -288,6 +288,7 @@ export const CoreBattlePlaytest: React.FC = () => {
   // モバイル用 UI 状態 (collapsed / half / expanded)
   const [sheetMode, setSheetMode] = useState<SheetMode>("collapsed");
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [showReturnToSetupConfirmation, setShowReturnToSetupConfirmation] = useState(false);
   const [showMobileLogModal, setShowMobileLogModal] = useState(false);
   const [showMobileDebugModal, setShowMobileDebugModal] = useState(false);
   const [isReplayVerifyModalOpen, setIsReplayVerifyModalOpen] = useState(false);
@@ -390,7 +391,45 @@ export const CoreBattlePlaytest: React.FC = () => {
     setPresetValidationErrors([]);
     setRuntimeNotice(null);
     setIsAiProcessing(false);
+    setLogs([]);
+    setTraces([]);
+    seqRef.current = 1;
+    setLatestEventMessage("");
+    setUnitSelectionMarkers(new Map());
+    lastActivePlayerRef.current = "p1";
   }, [resetFeedbackFlash]);
+
+  // 対戦途中の終了は確認を経由し、次の対戦設定は必ず MatchSetupScreen で行う。
+  const handleRequestReturnToSetup = useCallback(() => {
+    setIsMobileMenuOpen(false);
+    if (activeMatch) setShowReturnToSetupConfirmation(true);
+  }, [activeMatch]);
+
+  const handleConfirmReturnToSetup = useCallback(() => {
+    setShowReturnToSetupConfirmation(false);
+    setIsMobileMenuOpen(false);
+    setShowMobileLogModal(false);
+    setShowMobileDebugModal(false);
+    setIsReplayVerifyModalOpen(false);
+    setIsReplayViewerOpen(false);
+    setIsScenarioBuilderOpen(false);
+    setIsFeedbackModalOpen(false);
+    setFeedbacks([]);
+    setShareNotice(null);
+    setSetupNotice(null);
+    setRestoredScenarioDefinition(null);
+    setPendingChallengeDefinition(undefined);
+    // 現在の対戦条件を初期選択として引き継ぎ、カードの事前選択だけは必ずやり直す。
+    if (activeMatch) setSelectedEnvironmentId(activeMatch.environmentId);
+    if (activePlaytestSettings) {
+      setPendingMatchMode(activePlaytestSettings.matchMode);
+      setPendingHumanSeat(activePlaytestSettings.humanSeat);
+      setPendingPolicyId(activePlaytestSettings.policyId);
+    }
+    setPendingRareCardSelections({});
+    setPendingScenarioHandSelections({});
+    resetMatchState();
+  }, [activeMatch, activePlaytestSettings, resetMatchState]);
 
   // Challenge 実行中に AI 自動進行ループの各ステップ境界で停止を判定する Generic hook 生成
   const createChallengeStopHook = useCallback(() => {
@@ -527,6 +566,8 @@ export const CoreBattlePlaytest: React.FC = () => {
             }
           );
 
+          // 対戦中断後、古い非同期AIの結果で画面を復活させない。
+          if (sessionRef.current !== session) return;
           setIsAiProcessing(false);
 
           const { entries: initialAiEntries, nextSeq: afterInitialAiSeq } =
@@ -1261,6 +1302,8 @@ export const CoreBattlePlaytest: React.FC = () => {
           }
         );
 
+        // 中断または別対戦開始後に、旧セッションの結果を描画しない。
+        if (sessionRef.current !== session) return;
         setIsAiProcessing(false);
 
         const { entries: aiEntries, nextSeq: afterAiSeq } =
@@ -1856,6 +1899,7 @@ export const CoreBattlePlaytest: React.FC = () => {
     isReplayVerifyModalOpen ||
     isReplayViewerOpen ||
     isScenarioBuilderOpen ||
+    showReturnToSetupConfirmation ||
     isPassAndPlayWaiting;
 
   // キーボードショートカット (P: PASS)
@@ -1910,10 +1954,10 @@ export const CoreBattlePlaytest: React.FC = () => {
             ))}
           </ul>
           <button
-            onClick={() => startNewGame()}
+            onClick={handleConfirmReturnToSetup}
             className="w-full py-2 bg-zinc-950 hover:bg-zinc-800 text-white font-bold rounded shadow transition text-xs font-mono min-h-[44px]"
           >
-            再試行 (Retry)
+            対戦設定に戻る
           </button>
         </div>
       </div>
@@ -2026,7 +2070,7 @@ export const CoreBattlePlaytest: React.FC = () => {
             onClick={() => setIsMobileMenuOpen(true)}
             data-testid="header-context-summary"
             data-environment-id={activeMatch?.environmentId || selectedEnvironmentId}
-            title="クリックして対戦環境・モード・Seed設定を開く"
+            title="現在の対戦情報・表示設定・対戦ツールを開く"
             className="hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded bg-zinc-50 hover:bg-zinc-100 border border-zinc-200 font-mono text-[11px] min-w-0 max-w-[300px] lg:max-w-[420px] xl:max-w-[540px] cursor-pointer transition"
           >
             <span className="text-[9px] font-bold text-zinc-400 shrink-0">Env:</span>
@@ -2080,13 +2124,17 @@ export const CoreBattlePlaytest: React.FC = () => {
             </button>
           )}
 
-          <button
-            type="button"
-            onClick={() => startNewGame()}
-            className="hidden sm:inline-flex items-center justify-center px-2.5 py-1 text-[11px] font-bold rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white border border-zinc-800 shadow-sm transition cursor-pointer"
-          >
-            新しい対戦
-          </button>
+          {activeMatch && (
+            <button
+              type="button"
+              data-testid="header-return-to-setup-button"
+              onClick={handleRequestReturnToSetup}
+              title="現在の対戦を中断し、対戦環境・事前カードを選ぶ画面に戻ります"
+              className="hidden sm:inline-flex items-center justify-center px-2.5 py-1 text-[11px] font-bold rounded bg-zinc-950 hover:bg-zinc-800 active:scale-95 text-white border border-zinc-800 shadow-sm transition cursor-pointer"
+            >
+              対戦を中断
+            </button>
+          )}
 
           {/* 統合設定・メニューボタン (Desktop / Tablet / Mobile 共通常設) */}
           <button
@@ -2523,7 +2571,9 @@ export const CoreBattlePlaytest: React.FC = () => {
       <MobileHeaderMenu
         isOpen={isMobileMenuOpen}
         onClose={() => setIsMobileMenuOpen(false)}
-        selectedEnvironmentId={selectedEnvironmentId}
+        isMatchActive={Boolean(activeMatch)}
+        onReturnToSetup={handleRequestReturnToSetup}
+        selectedEnvironmentId={activeMatch?.environmentId || selectedEnvironmentId}
         onSelectEnvironment={handleSelectEnvironment}
         environmentOptions={environmentOptions}
         activeMatchSeed={activeMatch?.seed}
@@ -2533,7 +2583,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         showSeedInput={isOfficialEnvironment(selectedEnvironmentId)}
         seedInput={seedInput}
         onSeedInputChange={setSeedInput}
-        matchMode={pendingMatchMode}
+        matchMode={activeMatch ? activeMatchMode : pendingMatchMode}
         onSelectMatchMode={handleSelectMatchMode}
         policyId={pendingPolicyId}
         onSelectPolicyId={setPendingPolicyId}
@@ -2542,7 +2592,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         onTogglePassAndPlay={setEnablePassAndPlay}
         onOpenLogModal={() => setShowMobileLogModal(true)}
         onOpenDebugModal={() => setShowMobileDebugModal(true)}
-        onResetGame={() => startNewGame()}
+        onResetGame={handleRequestReturnToSetup}
         onCopyShareUrl={handleCopyShareUrl}
         shareNotice={shareNotice}
         onDownloadDiagnostic={handleDownloadDiagnostic}
@@ -2621,11 +2671,12 @@ export const CoreBattlePlaytest: React.FC = () => {
       )}
 
       {/* Pass-and-Play 交代オーバーレイ (Human vs Human のみ) */}
-      {activeMatchMode === "humanVsHuman" && isPassAndPlayWaiting && (
+      {activeMatchMode === "humanVsHuman" && isPassAndPlayWaiting && !showReturnToSetupConfirmation && (
         <PassAndPlayOverlay
           targetPlayerKey={pendingPlayerKey}
           targetPlayerName={pendingPlayerKey === "p1" ? "Player A" : "Player B"}
           onReady={handlePassAndPlayReady}
+          onReturnToSetup={handleRequestReturnToSetup}
         />
       )}
 
@@ -2636,12 +2687,40 @@ export const CoreBattlePlaytest: React.FC = () => {
           winnerName={gameState?.players?.[currentStep.result.winner || ""]?.name || currentStep.result.winner}
           reason={currentStep.result.reason}
           logs={logs}
-          onRestart={() => startNewGame()}
+          onRestart={handleConfirmReturnToSetup}
           onDownloadDiagnostic={activeMatch?.isScenario ? undefined : handleDownloadDiagnostic}
           onOpenReplayViewer={activeMatch?.isScenario ? undefined : handleOpenCurrentReplay}
           onOpenFeedback={activeMatchMode === "humanVsAi" ? () => setIsFeedbackModalOpen(true) : undefined}
           feedbackCount={feedbacks.length}
         />
+      )}
+
+      {/* 対戦中断の確認：取消時は現在の GameSession に一切触れない */}
+      {showReturnToSetupConfirmation && (
+        <div
+          data-testid="return-to-setup-confirm-modal"
+          className="fixed inset-0 z-[90] flex items-center justify-center bg-black/70 p-4 font-sans"
+        >
+          <div role="dialog" aria-modal="true" aria-labelledby="return-to-setup-title" className="w-full max-w-md rounded-xl border border-zinc-300 bg-white p-5 shadow-2xl text-zinc-950">
+            <h2 id="return-to-setup-title" className="text-lg font-bold">現在の対戦を中断しますか？</h2>
+            <p className="text-sm text-zinc-700 mt-2">
+              中断するとこの対戦の進行状況は失われます。次の対戦環境・モード・Seed・シナリオ手札・レアカードは、対戦設定画面で選び直せます。
+            </p>
+            <p className="text-xs text-zinc-500 mt-2">
+              対戦データが必要な場合は「対戦を続ける」で戻り、診断データを保存してください。
+            </p>
+            <div className="mt-5 flex flex-col sm:flex-row gap-2">
+              <button type="button" data-testid="cancel-return-to-setup" onClick={() => setShowReturnToSetupConfirmation(false)}
+                className="min-h-[44px] flex-1 rounded border border-zinc-300 bg-white px-3 py-2 text-sm font-bold hover:bg-zinc-100">
+                対戦を続ける
+              </button>
+              <button type="button" data-testid="confirm-return-to-setup" onClick={handleConfirmReturnToSetup}
+                className="min-h-[44px] flex-1 rounded bg-zinc-950 px-3 py-2 text-sm font-bold text-white hover:bg-zinc-800">
+                中断して対戦設定に戻る
+              </button>
+            </div>
+          </div>
+        </div>
       )}
 
       {/* AI 違和感フィードバックモーダル */}

@@ -4,12 +4,14 @@ export interface PassAndPlayOverlayProps {
   targetPlayerName: string;
   targetPlayerKey: string;
   onReady: () => void;
+  onReturnToSetup?: () => void;
 }
 
 export const PassAndPlayOverlay: React.FC<PassAndPlayOverlayProps> = ({
   targetPlayerName,
   targetPlayerKey,
   onReady,
+  onReturnToSetup,
 }) => {
   const buttonRef = useRef<HTMLButtonElement>(null);
 
@@ -64,6 +66,16 @@ export const PassAndPlayOverlay: React.FC<PassAndPlayOverlayProps> = ({
         >
           準備完了 (操作画面を表示)
         </button>
+        {onReturnToSetup && (
+          <button
+            type="button"
+            data-testid="pass-and-play-return-to-setup"
+            onClick={onReturnToSetup}
+            className="mt-3 text-xs underline text-zinc-600 hover:text-zinc-950 min-h-[44px]"
+          >
+            対戦を中断して対戦設定に戻る
+          </button>
+        )}
       </div>
     </div>
   );

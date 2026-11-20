@@ -59,7 +59,7 @@ describe("Playtest UI Redesign Phase 1: Header Simplification & Unified Settings
     expect(String(afterModals[0].props.className)).not.toContain("lg:hidden");
   });
 
-  it("3. 設定メニューから既存のすべての操作機能・設定項目へアクセスできること", () => {
+  it("3. 設定メニューから対戦条件を直接変更できず、実行中のツールと中断導線のみを表示すること", () => {
     const onSelectEnvironment = vi.fn();
     const onSeedModeChange = vi.fn();
     const onSeedInputChange = vi.fn();
@@ -119,24 +119,25 @@ describe("Playtest UI Redesign Phase 1: Header Simplification & Unified Settings
       />
     );
 
-    // 全設定・機能が存在することを検証
-    expect(htmlAi).toContain("対戦環境 (Environment):");
-    expect(htmlAi).toContain("対戦SEED (Active Seed):");
+    // 対戦中の設定からは別環境・モード・Seedを直接設定できない
+    expect(htmlAi).not.toContain("対戦環境 (Environment):");
+    expect(htmlAi).not.toContain("次回対戦SEED (Next Match Seed):");
+    expect(htmlAi).not.toContain("12345");
+    expect(htmlAi).not.toContain("対戦モード (Match Mode):");
+    expect(htmlAi).not.toContain("AI Policy:");
+    expect(htmlAi).toContain("現在の対戦");
     expect(htmlAi).toContain("42");
-    expect(htmlAi).toContain("次回対戦SEED (Next Match Seed):");
-    expect(htmlAi).toContain("12345");
-    expect(htmlAi).toContain("対戦モード (Match Mode):");
-    expect(htmlAi).toContain("AI Policy:");
     expect(htmlAi).toContain("Debug パネル表示 (Debug ON/OFF)");
     expect(htmlAi).toContain("🤔 違和感を記録");
     expect(htmlAi).toContain("開始条件を共有");
     expect(htmlAi).toContain("診断データを保存");
     expect(htmlAi).toContain("Replay検証");
-    expect(htmlAi).toContain("初期盤面設定");
+    expect(htmlAi).not.toContain("初期盤面設定");
     expect(htmlAi).toContain("Replay Viewer");
     expect(htmlAi).toContain("対戦ログ (Game Log) を表示");
     expect(htmlAi).toContain("デバッグ情報 (Debug / Canonical Log)");
-    expect(htmlAi).toContain("新しい対戦を開始 (New Match)");
+    expect(htmlAi).toContain("対戦を中断して対戦設定に戻る");
+    expect(htmlAi).not.toContain("新しい対戦を開始 (New Match)");
   });
 
   it("4. Scenario対戦中は設定メニュー内のReplay検証・Replay Viewer・診断データ保存が適切にdisabledになること", () => {
@@ -410,5 +411,53 @@ describe("Playtest UI Redesign Phase 1: Header Simplification & Unified Settings
     expect(onClose).not.toHaveBeenCalled();
 
     (globalThis as any).window = originalWindow;
+  });
+
+  it("10. 対戦中断は確認が必要で、取消では対戦継続、確定後は MatchSetupScreen に戻る", async () => {
+    let renderer!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      renderer = TestRenderer.create(<CoreBattlePlaytest />);
+    });
+    const startScreen = renderer.root.findByType(MatchSetupScreen);
+    await act(async () => {
+      await startScreen.props.onStartMatch();
+    });
+    expect(renderer.root.findAllByProps({ "data-testid": "playtest-active-main" })).toHaveLength(1);
+    expect(renderer.root.findAllByType(MatchSetupScreen)).toHaveLength(0);
+
+    const backButton = renderer.root.findByProps({ "data-testid": "header-return-to-setup-button" });
+    act(() => backButton.props.onClick());
+    expect(renderer.root.findAllByProps({ "data-testid": "return-to-setup-confirm-modal" })).toHaveLength(1);
+    expect(renderer.root.findAllByProps({ "data-testid": "playtest-active-main" })).toHaveLength(1);
+    act(() => renderer.root.findByProps({ "data-testid": "cancel-return-to-setup" }).props.onClick());
+    expect(renderer.root.findAllByProps({ "data-testid": "playtest-active-main" })).toHaveLength(1);
+
+    act(() => renderer.root.findByProps({ "data-testid": "header-return-to-setup-button" }).props.onClick());
+    act(() => renderer.root.findByProps({ "data-testid": "confirm-return-to-setup" }).props.onClick());
+    const nextSetup = renderer.root.findByType(MatchSetupScreen);
+    expect(nextSetup.props.selectedEnvironmentId).toBe("official:light-entry16");
+    expect(renderer.root.findAllByProps({ "data-testid": "playtest-active-main" })).toHaveLength(0);
+
+    // プロ＋ストラテジーの選択は設定画面で行い、シナリオ手札選択が表示される。
+    act(() => nextSetup.props.onSelectEnvironment("official:pro-strategy"));
+    expect(renderer.root.findByType(MatchSetupScreen).props.selectedEnvironmentId).toBe("official:pro-strategy");
+    expect(renderer.root.findByType(MatchSetupScreen).props.environmentOptions.find((e: any) => e.id === "official:pro-strategy").setupRequirements.scenarioHandCount).toBe(3);
+  });
+
+  it("11. 設定メニューの中断操作は直接開始せず、確認画面を表示する", async () => {
+    let renderer!: TestRenderer.ReactTestRenderer;
+    await act(async () => {
+      renderer = TestRenderer.create(<CoreBattlePlaytest />);
+    });
+    await act(async () => {
+      await renderer.root.findByType(MatchSetupScreen).props.onStartMatch();
+    });
+    act(() => renderer.root.findByProps({ "data-testid": "header-settings-menu-button" }).props.onClick());
+    const menu = renderer.root.findByType(MobileHeaderMenu);
+    expect(menu.props.isMatchActive).toBe(true);
+    const menuBack = renderer.root.findByProps({ "data-testid": "menu-return-to-setup-button" });
+    act(() => menuBack.props.onClick());
+    expect(renderer.root.findAllByProps({ "data-testid": "return-to-setup-confirm-modal" })).toHaveLength(1);
+    expect(renderer.root.findAllByProps({ "data-testid": "playtest-active-main" })).toHaveLength(1);
   });
 });
