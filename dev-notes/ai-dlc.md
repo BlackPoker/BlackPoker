@@ -75,8 +75,15 @@ fetchによる共有Gitオブジェクトと専用refの追加以外、既存wor
 1. **作成時点**の `.github/ISSUE_TEMPLATE/` を読み、要望に合うテンプレートを選びます。
 2. 見出し・項目を維持し、日本語で本文案を作ります。現在の改善テンプレートはAs-Is / To-Be / Reason / Noteです。実装時に古いひな形を決め打ちしません。
 3. frontmatterのタイトル、ラベル、担当者も確認します。frontmatter自体は本文へ貼りません。ラベルを勝手に新設しません。
-4. 本文案を提示し、起票指示を受けて `gh issue create --repo BlackPoker/BlackPoker --title <タイトル> --body-file <本文ファイル>` を実行します。ラベル等は実際のテンプレートに従い引数で指定します。
-5. 作成結果のURL・番号を記録し、`gh issue view <番号> --repo BlackPoker/BlackPoker` で対象を確認して開始スクリプトへ渡します。起票の応答が失敗・不明なら `gh issue list --repo BlackPoker/BlackPoker --state all --search <タイトル>` で確認し、同じ本文のIssueができていないか調べます。結果が不明のまま再起票しません。worktree作成だけが失敗した場合も、作成済みIssueを保持してその番号から再開します。
+4. 本文案を提示し、起票指示を受けたら、`tools/dev/create-issue.ps1` にタイトル・本文ファイル・テンプレート由来のラベルと担当者を渡します。スクリプトは起票直前に `gh api --paginate --slurp` で開放中マイルストーンを全件取得し、期限付き候補から最短期限を選びます。同じ期限ならマイルストーン番号の小さい方を選びます。期限なし候補は自動選択しません。明示されたマイルストーンは `-Milestone <名前>` で優先し、開放中の候補と照合します。期限付き候補がない場合は起票を停止し、指定するかマイルストーンなしで起票するか確認します。確認を得た場合だけ `-NoMilestone` を使います。取得失敗時も起票を停止します。
+5. スクリプトは選んだマイルストーンを `gh issue create --milestone` に渡し、作成したIssueのURL・番号・マイルストーンを `gh issue view --json number,url,milestone` で照合します。成功したURL・番号を記録して開始スクリプトへ渡します。起票や照合が失敗・不明なら `gh issue list --repo BlackPoker/BlackPoker --state all --search <タイトル>` で確認し、同じ本文のIssueができていないか調べます。結果が不明のまま再起票しません。worktree作成だけが失敗した場合も、作成済みIssueを保持してその番号から再開します。
+
+```powershell
+# 本文案とテンプレートの設定を確認し、起票指示を受けた後に実行
+pwsh -File tools/dev/create-issue.ps1 -Title '[KAIZEN] 改善案' -BodyFile C:/path/to/issue-body.md -Label enhancement -Assignee BlackPoker
+# 明示指定がある場合は -Milestone '10.0' を追加
+# マイルストーンなしの指示を受けた場合だけ -NoMilestone を追加
+```
 
 作成前の本文案はリポジトリ外の作業メモへ保存できます。Issue発行前に架空の番号を付けません。
 起票と実装計画承認は別の段階です。ただし、既に明示された指示・承認を繰り返し求めません。
@@ -206,3 +213,8 @@ PR URLを報告して終了します。merge、既存worktreeの削除、ブラ�
 
 `pwsh -File tools/dev/tests/start-issue.tests.ps1` は一時Gitリポジトリとghのテスト用応答を使います。
 GitHubアクセス・push・実リポジトリの変更なしで、作成、基点の解決、衝突拒否、元の未コミット変更の保護を確認します。
+
+## 起票スクリプトの検証
+
+`pwsh -File tools/dev/tests/create-issue.tests.ps1` は `gh` をテスト用関数に置き換え、GitHubへの接続や実Issueの作成を行いません。
+最短期限、同期限、無期限候補、明示指定、複数ページ、失敗時の起票停止、作成後のマイルストーン照合、再起票防止を確認します。

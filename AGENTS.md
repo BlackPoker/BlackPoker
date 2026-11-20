@@ -22,7 +22,7 @@ Gitのコミットメッセージを生成する際（「Generate Commit Message
 - 既存worktreeは別作業で使用中です。編集・checkout・stash・reset・削除・既存コンテナの停止をしないでください。新しいIssueは専用worktreeで扱います。
 - ブランチ名やデフォルトブランチを推測しないでください。明示された基点を優先し、未指定ならローカルの `gh` CLIで現在のデフォルトブランチを取得してください。
 - Issueが簡単な記述でも、関連ファイルを調べ、受入条件・変更範囲・必要な検証を整理できます。判断が必要な不明点のみ質問し、実装計画の承認後に編集します。
-- Codex / AntigravityからIssueを起票するときは、作成時点の `.github/ISSUE_TEMPLATE/` から適切なテンプレートを読み、見出しと項目を保った日本語の本文案を作成します。タイトル規則・ラベル・担当指定も確認し、起票指示の範囲で `gh issue create` を実行します。
+- Codex / AntigravityからIssueを起票するときは、作成時点の `.github/ISSUE_TEMPLATE/` から適切なテンプレートを読み、見出しと項目を保った日本語の本文案を作成します。タイトル規則・ラベル・担当指定も確認し、起票指示の範囲で `tools/dev/create-issue.ps1` を実行します。マイルストーンの選択と起票後の照合は `dev-notes/ai-dlc.md` に従います。
 - GitHubに直接作成された既存Issueはそのまま入力として扱い、テンプレートへの書き直しやIssue本文の更新を必須にしません。
 - PRも作成時点の `.github/PULL_REQUEST_TEMPLATE.md` を読み、全見出しを維持した日本語の本文にします。該当しない項目は「無し」と書きます。
 - GitHub操作はローカルの `gh` CLI、Git転送は `git` を使用します。Copilotには依存しません。
