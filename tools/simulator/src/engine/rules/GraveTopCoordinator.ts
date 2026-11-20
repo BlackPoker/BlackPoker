@@ -232,12 +232,18 @@ export class GraveTopCoordinator {
     playerKey: string,
     logRecorder?: any,
     effectInterpreter?: any,
-    context?: any
+    context?: any,
+    options?: {
+      fromZone?: string;
+      skipCardMoved?: boolean;
+    }
   ): { requiresDecision: boolean; candidateCardIds: string[] } {
     if (!Array.isArray(player.grave)) {
       player.grave = [];
     }
     const previousTop = player.graveTopCardId;
+    const fromZone = options?.fromZone || "field";
+    const skipCardMoved = options?.skipCardMoved === true;
 
     const allCards: any[] = [];
     for (const unit of units) {
@@ -246,13 +252,13 @@ export class GraveTopCoordinator {
         for (const card of unit.cards) {
           if (isCardLike(card)) {
             allCards.push(card);
-            if (effectInterpreter && context) {
+            if (!skipCardMoved && effectInterpreter && context) {
               effectInterpreter.dispatchEvent(
                 {
                   type: "cardMoved",
                   payload: {
                     card,
-                    fromZone: "field",
+                    fromZone,
                     toZone: "grave",
                     playerKey,
                     cause: {

@@ -33,7 +33,7 @@ export class ObservationFactory {
   static createObservation(
     state: any,
     viewerPlayerId: PlayerKey,
-    options?: { currentRequest?: any }
+    options?: { currentRequest?: any; components?: readonly any[] }
   ): PlayerObservation {
     const playersView: PlayerObservationView[] = [];
 
@@ -61,7 +61,7 @@ export class ObservationFactory {
 
         // 3. フィールドユニットの処理（自分の裏向き防壁は KNOWN、相手の裏向き防壁は HIDDEN）
         const field: UnitView[] = Array.isArray(p.field)
-          ? p.field.map((u: any) => this.mapUnit(u, isViewer, state))
+          ? p.field.map((u: any) => this.mapUnit(u, isViewer, state, options?.components))
           : [];
 
         // 4. フォグの処理（全フォグは公開情報、ownerPlayerId を付与）
@@ -69,8 +69,8 @@ export class ObservationFactory {
           ? p.fog.map((f: any) => ({
               fogId: f.fogId || "",
               componentId: f.componentId || "",
-              card: f.card ? this.mapCard(f.card, true) : undefined,
-              cards: Array.isArray(f.cards) ? f.cards.map((c: any) => this.mapCard(c, true)) : undefined,
+              card: f.card ? this.mapKnownCard(f.card, true) : undefined,
+              cards: Array.isArray(f.cards) ? f.cards.map((c: any) => this.mapKnownCard(c, true)) : undefined,
               bindings: f.bindings || {},
               ownerPlayerId: pKey as PlayerKey,
             }))
@@ -78,7 +78,7 @@ export class ObservationFactory {
 
         // 5. 切札の処理
         const trumps: UnitView[] = Array.isArray(p.trumps || p.trump)
-          ? (p.trumps || p.trump).map((t: any) => this.mapUnit(t, isViewer, state))
+          ? (p.trumps || p.trump).map((t: any) => this.mapUnit(t, isViewer, state, options?.components))
           : [];
 
         // 6. 墓地の処理
@@ -273,6 +273,18 @@ export class ObservationFactory {
     return undefined;
   }
 
+  private static mapKnownCard(card: any, faceUp: boolean = true): KnownCardView {
+    return {
+      visibility: "KNOWN",
+      cardInstanceId: card?.id || `${card?.suit || ""}${card?.rank || ""}`,
+      suit: card?.suit || "",
+      rank: card?.rank || "",
+      value: card?.value ?? 0,
+      faceUp,
+      code: card?.code || `${card?.suit || ""}${card?.rank || ""}`,
+    };
+  }
+
   private static mapCard(card: any, faceUp: boolean = true): CardView {
     if (!card) {
       return {
@@ -280,15 +292,7 @@ export class ObservationFactory {
         faceUp: false,
       };
     }
-    return {
-      visibility: "KNOWN",
-      cardInstanceId: card.id || `${card.suit}${card.rank}`,
-      suit: card.suit,
-      rank: card.rank,
-      value: card.value ?? 0,
-      faceUp,
-      code: card.code || `${card.suit}${card.rank}`,
-    };
+    return this.mapKnownCard(card, faceUp);
   }
 
   private static hideCard(card: any): CardView {
@@ -299,7 +303,12 @@ export class ObservationFactory {
     };
   }
 
-  private static mapUnit(unit: any, isViewerOwner: boolean = false, state?: any): UnitView {
+  private static mapUnit(
+    unit: any,
+    isViewerOwner: boolean = false,
+    state?: any,
+    components?: readonly any[]
+  ): UnitView {
     const isFaceDown = unit.face === "down";
     const isBulwark = unit.componentId === "character.bulwark" || unit.kind === "防壁";
 
@@ -319,7 +328,7 @@ export class ObservationFactory {
     // （相手の伏せ切札や伏せユニットの秘密カード数値漏洩を防止する generic なプライバシー境界保護）
     const shouldHideSize = isBulwark || (!isViewerOwner && isFaceDown);
     const currentSize = !shouldHideSize && state
-      ? abilityEvaluator.calculateUnitSize(unit, state)
+      ? abilityEvaluator.calculateUnitSize(unit, state, components)
       : undefined;
 
     return {

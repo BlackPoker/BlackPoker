@@ -19,7 +19,7 @@ export function resolveUnblockedCombat(
   context: CommandContext,
   abilityEvaluator: AbilityEvaluator
 ): CombatResult {
-  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state);
+  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state, context.components);
   const targetPlayerKey = attacker.battle?.targetPlayerKey || getOpponentPlayerKey(attackerPlayerKey, context.state);
   const attackerCharacterType = getCharacterType(attacker, context.components) || (isSoldierType(attacker, context.components) ? "soldier" : undefined);
 
@@ -53,9 +53,9 @@ export function resolveSoldierVsSoldiersCombat(
   abilityEvaluator: AbilityEvaluator
 ): CombatResult {
   const attackerCharacterType = getCharacterType(attacker, context.components) || (isSoldierType(attacker, context.components) ? "soldier" : undefined);
-  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state);
+  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state, context.components);
   const blockerSizes = blockers.map((b) =>
-    abilityEvaluator.calculateUnitSize(b, context.state)
+    abilityEvaluator.calculateUnitSize(b, context.state, context.components)
   );
   const blockerTotalSize = blockerSizes.reduce((sum, s) => sum + s, 0);
 
@@ -139,7 +139,7 @@ export function resolveSoldierVsBulwarkCombat(
   abilityEvaluator: AbilityEvaluator
 ): CombatResult {
   const attackerCharacterType = getCharacterType(attacker, context.components) || (isSoldierType(attacker, context.components) ? "soldier" : undefined);
-  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state);
+  const attackerSize = abilityEvaluator.calculateUnitSize(attacker, context.state, context.components);
   const bulwarkCard = bulwark.cards?.[0];
 
   const isJoker = isJokerCard(bulwarkCard);
@@ -268,7 +268,11 @@ export function calculateDamageJudge(
             combatType: "unsupported",
             blockerUnitIds: blockerUnits.map((b: any) => b.unitId),
             blockerPlayerKey,
-            attackerInitialSize: abilityEvaluator.calculateUnitSize(attacker, state.players[attackerPlayerKey]),
+            attackerInitialSize: abilityEvaluator.calculateUnitSize(
+              attacker,
+              state,
+              context.components
+            ),
             attackerMovedToGrave: false,
             blockersMovedToGrave: [],
           });

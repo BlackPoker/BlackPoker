@@ -1064,8 +1064,8 @@ export class CommandRegistry {
   /**
    * [後方互換ブリッジ] ユニットに適用されているすべてのフォグの amount 累積値を反映したサイズ計算を行います。
    */
-  calculateUnitSize(unit: any, player: any): number {
-    return this.abilityEvaluator.calculateUnitSize(unit, player);
+  calculateUnitSize(unit: any, player: any, components?: readonly any[]): number {
+    return this.abilityEvaluator.calculateUnitSize(unit, player, components);
   }
 
   /**

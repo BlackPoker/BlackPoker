@@ -81,7 +81,19 @@ export function getCharacterType(unit: any, components: readonly ComponentDefini
   // --- Legacy compatibility fallback ---
   // ComponentDefinition が存在しない旧環境用のフォールバック
   const kind = unit.kind || "";
-  if (kind === "一般兵" || kind === "兵士" || kind === "soldier") {
+  if (
+    kind === "一般兵" ||
+    kind === "兵士" ||
+    kind === "soldier" ||
+    kind === "英雄" ||
+    kind === "hero" ||
+    kind === "エース" ||
+    kind === "ace" ||
+    kind === "魔術士" ||
+    kind === "magician" ||
+    kind === "装備兵" ||
+    kind === "armedSoldier"
+  ) {
     return "soldier";
   }
   if (kind === "防壁" || kind === "bulwark") {
@@ -89,7 +101,15 @@ export function getCharacterType(unit: any, components: readonly ComponentDefini
   }
 
   const compId = unit.componentId || "";
-  if (compId.includes("soldier") || compId.endsWith(".soldier")) {
+  if (
+    compId === "character.soldier" ||
+    compId === "character.hero" ||
+    compId === "character.ace" ||
+    compId === "character.magician" ||
+    compId === "character.armedSoldier" ||
+    compId.includes("soldier") ||
+    compId.endsWith(".soldier")
+  ) {
     return "soldier";
   }
   if (compId.includes("bulwark") || compId.endsWith(".bulwark")) {

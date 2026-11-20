@@ -48,6 +48,7 @@ export type ActionDefinition = {
   name: string;
   ruby?: string;
   type: string;
+  uncounterable?: boolean;
   request: {
     trigger: "direct" | "triggered" | string;
     speed: "normal" | "immediate" | string;
@@ -148,6 +149,7 @@ export type ActionRequest = {
   cost?: string;
   status: "pending" | "resolving" | "resolved" | "cancelled";
   sequence: number;
+  uncounterable?: boolean;
   action?: ActionDefinition;
   triggered?: boolean;
   source?: "requestBuffer";

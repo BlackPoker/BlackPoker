@@ -13,6 +13,7 @@ export interface KnownCardView {
 export interface HiddenCardView {
   readonly visibility: "HIDDEN";
   readonly opaqueCardId?: string;
+  readonly cardInstanceId?: string;
   readonly faceUp: false;
 }
 

@@ -104,7 +104,9 @@ export class ExpressionEvaluator {
     if (!isNaN(num)) return num;
 
     if (token === "target.size" && context.targetComponent) {
-      return abilityEvaluator ? abilityEvaluator.calculateUnitSize(context.targetComponent, context.state) : 0;
+      return abilityEvaluator
+        ? abilityEvaluator.calculateUnitSize(context.targetComponent, context.state, context.components)
+        : 0;
     }
 
     if (token === "key.rankValue") {
