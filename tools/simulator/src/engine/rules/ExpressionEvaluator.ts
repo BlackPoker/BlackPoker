@@ -113,6 +113,11 @@ export class ExpressionEvaluator {
       return card.value !== undefined ? card.value : rankToValue(card.rank);
     }
 
+    if (token === "keyCards.totalRankValue" || token === "keyCards.sumRankValue") {
+      const cards = context.keyCards || (context.keyCard ? [context.keyCard] : []);
+      return cards.reduce((sum, c) => sum + (c.value !== undefined ? c.value : rankToValue(c.rank)), 0);
+    }
+
     if (token === "keyCards.spade.rankValue") {
       return resolveKeyCardRankValueBySuit(context, "spade");
     }
@@ -144,6 +149,10 @@ export class ExpressionEvaluator {
     if (typeof value === "string") {
       if (value === "key.rankValue" && context.keyCard) {
         return context.keyCard.value !== undefined ? context.keyCard.value : rankToValue(context.keyCard.rank);
+      }
+      if (value === "keyCards.totalRankValue" || value === "keyCards.sumRankValue") {
+        const cards = context.keyCards || (context.keyCard ? [context.keyCard] : []);
+        return cards.reduce((sum, c) => sum + (c.value !== undefined ? c.value : rankToValue(c.rank)), 0);
       }
       if (value === "-key.rankValue" && context.keyCard) {
         const val = context.keyCard.value !== undefined ? context.keyCard.value : rankToValue(context.keyCard.rank);

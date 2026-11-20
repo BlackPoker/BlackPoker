@@ -3,6 +3,7 @@ import { ActionDefinition } from "../../domain/rules/RulePackage";
 import { getOpponentPlayerKey, findUnitOwnerPlayerKey, resolveEffectPlayerKey } from "./playerUtils";
 import {
   isSoldierType,
+  isBulwarkType,
   isLegalBlockerCandidate,
   isCharacterComponent,
   hasUnitLabel,
@@ -894,6 +895,10 @@ export function setAllUnitStateHandler(
       if (componentType === "character") {
         const isChar = isCharacterComponent(unit, components);
         if (!isChar) continue;
+      } else if (componentType === "soldier" || componentType === "character.soldier") {
+        if (!isSoldierType(unit, components)) continue;
+      } else if (componentType === "bulwark" || componentType === "character.bulwark") {
+        if (!isBulwarkType(unit, components)) continue;
       } else if (unit.componentId !== componentType) {
         continue;
       }
