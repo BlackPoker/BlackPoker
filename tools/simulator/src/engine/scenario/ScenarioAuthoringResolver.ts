@@ -19,7 +19,10 @@ import { RegulationCatalog } from "../../domain/regulation/RegulationDefinition"
 import { RegulationValidator } from "../regulation/RegulationValidator";
 import { SimulatorDeckProfileResolver } from "../regulation/SimulatorDeckProfileResolver";
 import { RareCardSelectionService } from "../regulation/RareCardSelectionService";
-import { extractRegulationId } from "../playtest/PlaytestEnvironmentController";
+import {
+  extractRegulationId,
+  isAllowedPreviewRegulation,
+} from "../playtest/PlaytestEnvironmentController";
 import { SeededRandom } from "../random/RandomSource";
 import { deriveSeed, shuffleCards } from "../random/DeterministicShuffle";
 import {
@@ -65,12 +68,13 @@ export class ScenarioAuthoringResolver {
       return { success: false, errors };
     }
 
+    const isPreviewAllowed = Boolean(options?.allowUnimplemented && isAllowedPreviewRegulation(regId));
     const regValidation = RegulationValidator.validateRegulation(catalog, regId, {
-      assertImplemented: !options?.allowUnimplemented,
+      assertImplemented: !isPreviewAllowed,
     });
     if (
       !regValidation.ruleLegal ||
-      (!regValidation.simulatorImplemented && !options?.allowUnimplemented) ||
+      (!regValidation.simulatorImplemented && !isPreviewAllowed) ||
       !regValidation.regulation ||
       !regValidation.frame
     ) {

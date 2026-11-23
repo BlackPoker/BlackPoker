@@ -166,8 +166,18 @@ export const FORMAT_PRESENTATION_ORDER: Record<string, number> = {
 };
 
 /**
+ * プレビューモード時に例外的に表示・対戦を許可する未公開レギュレーションIDのホワイトリスト。
+ * 意図しない全未実装環境の無制限な許可を防ぐため、明示的に列挙します。
+ */
+export const PREVIEW_ALLOWED_REGULATION_IDS = new Set<string>(["mast-strategy"]);
+
+export function isAllowedPreviewRegulation(regulationId: string): boolean {
+  return PREVIEW_ALLOWED_REGULATION_IDS.has(regulationId);
+}
+
+/**
  * レギュレーションカタログから、実装済み（simulatorImplemented === true）の公式環境を動的に列挙します。
- * options.includeUnimplemented が true の場合は、未公開・プレビュー環境も含めて列挙します。
+ * options.includeUnimplemented が true の場合は、ホワイトリストで明示的に許可された未公開プレビュー環境のみを含めて列挙します。
  * Core Battle（擬似環境）を常に先頭に含み、公式環境はFormat難易度順（Light < Standard < Pro < Master）に決定論的ソートされます。
  * 同一 Format 内は意味論を持たない決定論的 tie-break（regId.localeCompare）により順序付けされ、
  * Catalog の Map 登録順に依存しません。
@@ -196,7 +206,10 @@ export function getAvailableEnvironments(
 
   for (const reg of catalog.regulations.values()) {
     const validation = RegulationValidator.validateRegulation(catalog, reg.id);
-    if (validation.simulatorImplemented || options?.includeUnimplemented) {
+    const isPreviewTarget = Boolean(options?.includeUnimplemented && isAllowedPreviewRegulation(reg.id));
+    if (validation.simulatorImplemented || isPreviewTarget) {
+      const isPreviewOnly = !validation.simulatorImplemented && isPreviewTarget;
+      const displayName = isPreviewOnly ? `${reg.name} (プレビュー)` : `${reg.name} (公式)`;
       const deckProfileNotice = SimulatorDeckProfileResolver.getDeckProfileNotice(
         reg.id,
         validation.frame?.id
@@ -208,7 +221,7 @@ export function getAvailableEnvironments(
       officialCandidates.push({
         option: {
           id: `${OFFICIAL_ENV_PREFIX}${reg.id}`,
-          name: `${reg.name} (公式)`,
+          name: displayName,
           isOfficial: true,
           regulationId: reg.id,
           deckProfileNotice,
@@ -490,8 +503,9 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
         };
       }
 
+      const isPreviewAllowed = Boolean(request.allowUnimplemented && isAllowedPreviewRegulation(regulationId));
       const validation = RegulationValidator.validateRegulation(request.catalog, regulationId, {
-        assertImplemented: !request.allowUnimplemented,
+        assertImplemented: !isPreviewAllowed,
       });
 
       const officialRulePackage = RegulationRulePackageSelector.selectRulePackage(

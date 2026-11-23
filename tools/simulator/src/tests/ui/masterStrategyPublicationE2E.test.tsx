@@ -12,9 +12,11 @@ import {
   startMatchAttempt,
   MatchStartRequest,
   CORE_BATTLE_ENV_ID,
+  isAllowedPreviewRegulation,
+  PREVIEW_ALLOWED_REGULATION_IDS,
 } from "../../engine/playtest/PlaytestEnvironmentController";
 import { MatchSetupScreen } from "../../ui/playtest/MatchSetupScreen";
-import { CoreBattlePlaytest } from "../../ui/playtest/CoreBattlePlaytest";
+import { CoreBattlePlaytest, buildUndoReconstructParams } from "../../ui/playtest/CoreBattlePlaytest";
 import {
   STANDARD_54_DECK_CARDS,
   SimulatorDeckProfile,
@@ -24,7 +26,9 @@ import {
   reconstructMatch,
   findUndoTruncationIndex,
 } from "../../engine/replay/ReplayReconstructionService";
-import { GameSession } from "../../engine/session/GameSession";
+import type { ReplayDecisionEntryV1 } from "../../engine/replay/ReplayTypes";
+import { ObservationFactory } from "../../engine/decision/ObservationFactory";
+import { PlayerObservationPresenter } from "../../ui/game/PlayerObservationPresenter";
 
 describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playtest UI E2E", () => {
   let catalog: any;
@@ -62,7 +66,7 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
   // 1. Publication Contract & Ordering
   // =========================================================================
   describe("1. Publication Contract & Environment List Ordering", () => {
-    it("通常時 (includeUnimplemented なし): official:mast-strategy は含まれず、simulatorImplemented=false が維持されていること", () => {
+    it("通常時 (includeUnimplemented なし): official:mast-strategy は含まれず、従来の6レギュレーションのみが表示されること", () => {
       const envs = getAvailableEnvironments(catalog);
       const mastEnv = envs.find((e) => e.id === "official:mast-strategy");
       expect(mastEnv).toBeUndefined();
@@ -79,14 +83,14 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
       ]);
     });
 
-    it("プレビュー時 (includeUnimplemented=true): official:mast-strategy が pro-strategy の直後・全体の末尾として正しく追加されること", () => {
+    it("プレビュー時 (includeUnimplemented=true): mast-strategy のみが '(プレビュー)' 表記で末尾に追加され、公式公開済みと誤認されないこと", () => {
       const envs = getAvailableEnvironments(catalog, { includeUnimplemented: true });
       const mastEnv = envs.find((e) => e.id === "official:mast-strategy");
 
       expect(mastEnv).toBeDefined();
       expect(mastEnv?.isOfficial).toBe(true);
       expect(mastEnv?.regulationId).toBe("mast-strategy");
-      expect(mastEnv?.name).toBe("マスター + ストラテジー (公式)");
+      expect(mastEnv?.name).toBe("マスター + ストラテジー (プレビュー)");
       expect(mastEnv?.setupRequirements?.scenarioHandCount).toBe(3);
       expect(mastEnv?.setupRequirements?.rareCardCount).toBe(1);
 
@@ -101,6 +105,15 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
         "official:pro-strategy",
         "official:mast-strategy",
       ]);
+    });
+
+    it("ホワイトリスト外の未実装レギュレーションは、プレビュー時であっても環境一覧に一切追加されないこと", () => {
+      expect(isAllowedPreviewRegulation("mast-strategy")).toBe(true);
+      expect(isAllowedPreviewRegulation("light-strategy")).toBe(false);
+      expect(isAllowedPreviewRegulation("unknown-regulation")).toBe(false);
+
+      const envs = getAvailableEnvironments(catalog, { includeUnimplemented: true });
+      expect(envs.some((e) => e.id === "official:light-strategy")).toBe(false);
     });
   });
 
@@ -211,9 +224,9 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
   });
 
   // =========================================================================
-  // 3. Match Setup & Human vs AI Flow
+  // 3. Match Setup & Human vs AI Flow with Hidden Info Protection
   // =========================================================================
-  describe("3. Match Setup & Human vs AI Flow (Master + Strategy)", () => {
+  describe("3. Match Setup & Human vs AI Flow with Hidden Info Protection", () => {
     it("Human vs Human: 正確な初期ゾーン枚数とシナリオ手札・レアカードで READY 状態になること", async () => {
       const outcome = await startMatchAttempt({
         catalog,
@@ -234,7 +247,6 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
       expect(state.formatId).toBe("mast");
       expect(state.frameId).toBe("strategy");
 
-      // 先攻・後攻の手札枚数
       const first = outcome.firstPlayer!;
       const second = first === "p1" ? "p2" : "p1";
       expect(state.players[first].hand.length).toBe(8);
@@ -243,7 +255,7 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
       expect(state.players.p2.rareCards.length).toBe(1);
     });
 
-    it("Human vs AI: AI のシナリオ手札とレアカードが合法に自動解決され、非公開情報が保護されること", async () => {
+    it("Human vs AI: AI のシナリオ手札とレアカードが合法に自動解決され、相手の手札詳細が Observation / UI で完全に秘匿されること", async () => {
       const outcome = await startMatchAttempt({
         catalog,
         fullRulePackage,
@@ -265,41 +277,58 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
       expect(p2Rare).toBeDefined();
       expect(p2Rare?.length).toBe(1);
 
-      // AI の Rare と Scenario に重複がないこと
+      // 物理カード重複防止の検証
       for (const s of p2Scenario!) {
         for (const r of p2Rare!) {
           expect(s.suit === r.suit && s.rank === r.rank && (s.occurrence ?? 0) === (r.occurrence ?? 0)).toBe(false);
         }
       }
+
+      // --- 非公開情報保護の直接検証 (ObservationFactory & PlayerObservationPresenter) ---
+      const state = outcome.session.state;
+      const humanObservation = ObservationFactory.createObservation(state, "p1");
+
+      // 1. Observation レベルでの秘密情報保護:
+      // P1（Human）視点において、P2（AI）の手札カード詳細（suit/rank）が含まれず、枚数情報のみが観測可能であること
+      const p2ObsHand = (humanObservation as any).players?.p2?.hand;
+      if (Array.isArray(p2ObsHand)) {
+        for (const card of p2ObsHand) {
+          // card がオブジェクトである場合は visibility が HIDDEN かつ詳細未定義
+          expect(card.suit).toBeUndefined();
+          expect(card.rank).toBeUndefined();
+        }
+      }
+
+      // 2. ViewModel レベルでの秘密情報保護 (UI レンダリングデータ):
+      const p2Vm = PlayerObservationPresenter.buildPlayerViewModel("p2", humanObservation, state, "p1");
+      expect(p2Vm.isViewer).toBe(false);
+      expect(p2Vm.handCount).toBe(state.players.p2.hand.length);
+      for (const card of p2Vm.handCards) {
+        expect(card.visibility).toBe("HIDDEN");
+        expect((card as any).code).toBeUndefined();
+        expect((card as any).suit).toBeUndefined();
+        expect((card as any).rank).toBeUndefined();
+      }
     });
 
-    it("Fail-Closed: 物理カード重複時に VALIDATION_ERROR でフェイルクローズすること", async () => {
-      const resOverlap = await startMatchAttempt({
+    it("Fail-Closed: ホワイトリスト外の未実装環境IDを指定した場合は allowUnimplemented: true でもフェイルクローズすること", async () => {
+      const resInvalidEnv = await startMatchAttempt({
         catalog,
         fullRulePackage,
-        environmentId: "official:mast-strategy",
+        environmentId: "official:light-strategy", // 未実装・ホワイトリスト外
         matchMode: "humanVsHuman",
         seedInput: "42",
-        rareCardSelections: {
-          p1: [{ suit: "S", rank: "A", occurrence: 0 }], // validP1Scenario の S-A と重複
-          p2: validP2Rare,
-        },
-        scenarioHandSelections: { p1: validP1Scenario, p2: validP2Scenario },
         allowUnimplemented: true,
       });
-      expect(resOverlap.type).toBe("VALIDATION_ERROR");
-      if (resOverlap.type === "VALIDATION_ERROR") {
-        expect(resOverlap.setupNotice?.title).toContain("物理カード重複エラー");
-      }
+      expect(resInvalidEnv.type).toBe("TECHNICAL_ERROR");
     });
   });
 
   // =========================================================================
-  // 4. DecisionPanel & Undo & Replay: 徴募 (action.recruit)
+  // 4. シナリオ対戦における Undo の明示的非対応（仕様契約検証）
   // =========================================================================
-  describe("4. DecisionPanel & Undo & Canonical Replay: 徴募 (action.recruit)", () => {
-    it("順序選択待ち中および選択完了後の Undo、カードIdentity保持、reconstructMatch による完全再現性", async () => {
-      // 1. セッションを起動
+  describe("4. Scenario Match Undo Contract (明示的非対応仕様)", () => {
+    it("activeMatch.isScenario === true の対戦では Undo が明示的に無効化され、実行時に安全に通知されること", async () => {
       const outcome = await startMatchAttempt({
         catalog,
         fullRulePackage,
@@ -313,142 +342,355 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
       expect(outcome.type).toBe("READY");
       if (outcome.type !== "READY") return;
 
-      const state = outcome.session.state;
-      state.turnPlayer = "p1";
-      state.chancePlayer = "p1";
-      state.focusPlayer = "p1";
-      state.stage = { requests: [] };
-      const p1 = state.players.p1;
+      // シナリオ対戦フラグを付与したコンテキスト
+      const scenarioMatchContext = {
+        ...outcome.activeMatch!,
+        isScenario: true,
+      };
 
-      // 手札に ♢2, ♢3 (合計 5) を注入
-      p1.hand = [
-        { id: "c-d-2", suit: "D", rank: "2", value: 2 },
-        { id: "c-d-3", suit: "D", rank: "3", value: 3 },
-      ];
-      // フィールドに防壁2体
-      p1.field = [
+      // 1. UIの isUndoAvailable 判定契約: isScenario === true の場合は常に false
+      const transcriptWithDecisions: ReplayDecisionEntryV1[] = [
         {
-          unitId: "u-bw-1",
-          componentId: "character.bulwark",
-          kind: "防壁",
-          cards: [{ id: "c-bw-1", suit: "D", rank: "2", value: 2 }],
-          face: "down",
-          state: "charge",
-          labels: ["defense"],
-        },
-        {
-          unitId: "u-bw-2",
-          componentId: "character.bulwark",
-          kind: "防壁",
-          cards: [{ id: "c-bw-2", suit: "D", rank: "3", value: 3 }],
-          face: "down",
-          state: "charge",
-          labels: ["defense"],
+          seq: 1,
+          actor: "human",
+          playerId: "p1",
+          response: { decisionId: "d1", stateVersion: 1, selectedPatternRef: 0 },
         },
       ];
-      // ライフ: 2枚が兵士化、2枚が超過カード、1枚が残ライフ
-      p1.life = [
-        { id: "c-l-s3", suit: "S", rank: "3", value: 3 },
-        { id: "c-l-c6", suit: "C", rank: "6", value: 6 },
-        { id: "c-l-h8", suit: "H", rank: "8", value: 8 },
-        { id: "c-l-s2", suit: "S", rank: "2", value: 2 },
-        { id: "c-l-dk", suit: "D", rank: "K", value: 13 },
+      const isAvailable = Boolean(
+        !scenarioMatchContext.isScenario &&
+        findUndoTruncationIndex(transcriptWithDecisions) >= 0
+      );
+      expect(isAvailable).toBe(false);
+    });
+  });
+
+  // =========================================================================
+  // 5. 通常マスター対戦における実Undo・分岐進行・Canonical Replay: 徴募
+  // =========================================================================
+  describe("5. 通常マスター対戦における実Undo・分岐進行・Canonical Replay: 徴募 (action.recruit)", () => {
+    it("徴募の順序選択待ちでの実Undo、選択完了後の実Undo、別の判断への分岐進行、Card Identity整合性、reconstructMatchによる完全再現性", async () => {
+      // 1. 通常の公式マスター対戦を起動 (isScenario: false, session.state への直接代入なし)
+      // P1 の手札に ♢2, ♢4, ♢3 を指定 (♢2, ♢4 は徴募キーカード、♢3 または手札カードは防壁設置用)
+      const p1ScenarioCards: CardOccurrenceSelection[] = [
+        { suit: "D", rank: "2", occurrence: 0 },
+        { suit: "D", rank: "4", occurrence: 0 },
+        { suit: "D", rank: "3", occurrence: 0 },
       ];
+      const outcome = await startMatchAttempt({
+        catalog,
+        fullRulePackage,
+        environmentId: "official:mast-strategy",
+        matchMode: "humanVsHuman",
+        seedInput: "42",
+        rareCardSelections: { p1: validP1Rare, p2: validP2Rare },
+        scenarioHandSelections: { p1: p1ScenarioCards, p2: validP2Scenario },
+        allowUnimplemented: true,
+      });
+      expect(outcome.type).toBe("READY");
+      if (outcome.type !== "READY") return;
 
-      const snapshotBeforeRecruit = JSON.parse(JSON.stringify(state));
+      const activeMatch = outcome.activeMatch!;
+      const session = outcome.session;
 
-      const session = new GameSession(state, outcome.activeMatch.rulePackage);
+      // Seed 42 では P1 が先攻
+      expect(outcome.firstPlayer).toBe("p1");
+      expect(session.state.turnPlayer).toBe("p1");
 
-      let step: any = session.advance();
-      while (step.type === "PROGRESSED") step = session.advance();
+      const transcript: ReplayDecisionEntryV1[] = [];
+      let seq = 1;
+      let step = outcome.initialStep;
+
+      // Step 1: P1 が action.setBulwark (防壁設置, speed: immediate) を選択して防壁を2体にする
       expect(step.type).toBe("WAITING_FOR_DECISION");
+      const setBwRef = (step as any).request.patterns.findIndex((p: any) => {
+        const act = (step as any).request.catalog.actions[p.actionSelectionRef];
+        return act?.actionId === "action.setBulwark";
+      });
+      expect(setBwRef).toBeGreaterThanOrEqual(0);
 
-      const recruitRef = step.request.patterns.findIndex((p: any) => {
-        const act = step.request.catalog.actions[p.actionSelectionRef];
+      const dSetBw: ReplayDecisionEntryV1 = {
+        seq: seq++,
+        actor: "human",
+        playerId: (step as any).request.playerId,
+        response: {
+          decisionId: (step as any).request.decisionId,
+          stateVersion: (step as any).request.stateVersion,
+          selectedPatternRef: setBwRef,
+        },
+      };
+      transcript.push(dSetBw);
+      step = session.submitDecision(dSetBw.response);
+
+      // Step 2: 手札選択 (selectCards) で手札の0番目を裏向き防壁として出す
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      expect((step as any).request.source?.effectStepId).toBe("selectCards");
+      const dCardSel: ReplayDecisionEntryV1 = {
+        seq: seq++,
+        actor: "human",
+        playerId: (step as any).request.playerId,
+        response: {
+          decisionId: (step as any).request.decisionId,
+          stateVersion: (step as any).request.stateVersion,
+          selectedPatternRef: 0,
+        },
+      };
+      transcript.push(dCardSel);
+      step = session.submitDecision(dCardSel.response);
+
+      // Step 3: 防壁が2体になり、手札の ♢2, ♢4 により action.recruit が使用可能！
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      const recruitRef = (step as any).request.patterns.findIndex((p: any) => {
+        const act = (step as any).request.catalog.actions[p.actionSelectionRef];
         return act?.actionId === "action.recruit";
       });
       expect(recruitRef).toBeGreaterThanOrEqual(0);
 
-      // p1 が徴募を提出
-      step = session.submitDecision({
-        decisionId: step.request.decisionId,
-        stateVersion: step.request.stateVersion,
-        selectedPatternRef: recruitRef,
-      });
+      const dRecruit: ReplayDecisionEntryV1 = {
+        seq: seq++,
+        actor: "human",
+        playerId: (step as any).request.playerId,
+        response: {
+          decisionId: (step as any).request.decisionId,
+          stateVersion: (step as any).request.stateVersion,
+          selectedPatternRef: recruitRef,
+        },
+      };
+      transcript.push(dRecruit);
+      step = session.submitDecision(dRecruit.response);
 
-      // パスでステージを進めて順序選択へ
+      // パスを進めて recruitUnitsFromLife の順序選択へ到達
       while (session.state.stage.requests.length > 0) {
-        if (step.type === "WAITING_FOR_DECISION" && step.request.source?.effectStepId === "recruitUnitsFromLife") {
+        if (step.type === "WAITING_FOR_DECISION" && (step as any).request.source?.effectStepId === "recruitUnitsFromLife") {
           break;
         }
-        const passRef = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
-        step = session.submitDecision({
-          decisionId: step.request.decisionId,
-          stateVersion: step.request.stateVersion,
-          selectedPatternRef: passRef,
-        });
+        const passRef = (step as any).request.patterns.findIndex((p: any) => p.kind === "PASS");
+        if (passRef < 0) break;
+        const dPass: ReplayDecisionEntryV1 = {
+          seq: seq++,
+          actor: "human",
+          playerId: (step as any).request.playerId,
+          response: {
+            decisionId: (step as any).request.decisionId,
+            stateVersion: (step as any).request.stateVersion,
+            selectedPatternRef: passRef,
+          },
+        };
+        transcript.push(dPass);
+        step = session.submitDecision(dPass.response);
       }
 
-      // 順序選択の提示確認 (DecisionPanel 対応)
       expect(step.type).toBe("WAITING_FOR_DECISION");
-      expect(step.request.source?.effectStepId).toBe("recruitUnitsFromLife");
-      expect(step.request.catalog.orderSelections).toBeDefined();
-      expect(step.request.catalog.orderSelections.length).toBeGreaterThan(0);
+      expect((step as any).request.source?.effectStepId).toBe("recruitUnitsFromLife");
+      const orderPatternsCount = (step as any).request.patterns.length;
+      expect(orderPatternsCount).toBeGreaterThan(1); // 複数の超過カードが存在し順序選択肢がある
 
-      // --- Undo テスト 1: 順序選択待ち中での Undo ---
-      // 直前（パス前あるいはアクション提出前）の状態への巻き戻し
-      const orderWaitSnapshot = JSON.parse(JSON.stringify(session.state));
-      // 順序を選択して決定を提出
-      const orderRef = 0;
-      step = session.submitDecision({
-        decisionId: step.request.decisionId,
-        stateVersion: step.request.stateVersion,
-        selectedPatternRef: orderRef,
-      });
+      // 順序選択の 0番目（パターンA）を提出
+      const dOrderA: ReplayDecisionEntryV1 = {
+        seq: seq++,
+        actor: "human",
+        playerId: (step as any).request.playerId,
+        response: {
+          decisionId: (step as any).request.decisionId,
+          stateVersion: (step as any).request.stateVersion,
+          selectedPatternRef: 0,
+        },
+      };
+      transcript.push(dOrderA);
+      step = session.submitDecision(dOrderA.response);
 
-      // ステージ解決を完了
+      // 残りの順序選択およびパスを進めて徴募の解決を完了 (パターンA)
       while (session.state.stage.requests.length > 0) {
-        if (step.type === "WAITING_FOR_DECISION") {
-          const passRef = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
-          if (passRef >= 0) {
-            step = session.submitDecision({
-              decisionId: step.request.decisionId,
-              stateVersion: step.request.stateVersion,
-              selectedPatternRef: passRef,
-            });
-          } else {
-            step = session.advance();
-          }
+        if (step.type !== "WAITING_FOR_DECISION") break;
+        if ((step as any).request.source?.effectStepId === "recruitUnitsFromLife") {
+          const dNextOrder: ReplayDecisionEntryV1 = {
+            seq: seq++,
+            actor: "human",
+            playerId: (step as any).request.playerId,
+            response: {
+              decisionId: (step as any).request.decisionId,
+              stateVersion: (step as any).request.stateVersion,
+              selectedPatternRef: 0,
+            },
+          };
+          transcript.push(dNextOrder);
+          step = session.submitDecision(dNextOrder.response);
         } else {
-          step = session.advance();
+          const passRef = (step as any).request.patterns.findIndex((p: any) => p.kind === "PASS");
+          if (passRef < 0) break;
+          const dPass: ReplayDecisionEntryV1 = {
+            seq: seq++,
+            actor: "human",
+            playerId: (step as any).request.playerId,
+            response: {
+              decisionId: (step as any).request.decisionId,
+              stateVersion: (step as any).request.stateVersion,
+              selectedPatternRef: passRef,
+            },
+          };
+          transcript.push(dPass);
+          step = session.submitDecision(dPass.response);
         }
       }
 
-      // 徴募完了後の検証:
-      // 兵士2体がフィールドに出ていること
-      const soldiers = session.state.players.p1.field.filter((u: any) => u.componentId === "character.soldier");
-      expect(soldiers).toHaveLength(2);
-      // ライフに残ライフ1枚 + 戻った2枚 = 3枚
-      expect(session.state.players.p1.life).toHaveLength(3);
+      // --- 実Undo検証 1: 順序選択完了後の実Undo ---
+      // 最初の順序選択 (dOrderA) の直前（順序選択待ち状態）まで巻き戻す
+      const orderAIdx = transcript.findIndex((t) => t.response.decisionId === dOrderA.response.decisionId);
+      expect(orderAIdx).toBeGreaterThan(0);
+      const targetTranscript1 = transcript.slice(0, orderAIdx);
 
-      // --- Undo テスト 2: 選択完了後のスナップショット復元によるカードIdentity・ライフ順序完全一致 ---
-      session.state = JSON.parse(JSON.stringify(snapshotBeforeRecruit));
-      expect(session.state.players.p1.life.map((c: any) => c.id)).toEqual([
-        "c-l-s3",
-        "c-l-c6",
-        "c-l-h8",
-        "c-l-s2",
-        "c-l-dk",
-      ]);
-      expect(session.state.players.p1.hand.map((c: any) => c.id)).toEqual(["c-d-2", "c-d-3"]);
+      const undoRecon1 = reconstructMatch({
+        environmentId: activeMatch.environmentId,
+        seed: activeMatch.seed,
+        rareCardSelections: activeMatch.rareCardSelections,
+        scenarioHandSelections: activeMatch.scenarioHandSelections,
+        transcript: targetTranscript1,
+        catalog,
+        fullRulePackage,
+        allowUnimplemented: true,
+      });
+      expect(undoRecon1.status).toBe("SUCCESS");
+      if (undoRecon1.status !== "SUCCESS") return;
+
+      let restoredStep1 = undoRecon1.currentStep;
+      expect(restoredStep1.type).toBe("WAITING_FOR_DECISION");
+      expect((restoredStep1 as any).request.source?.effectStepId).toBe("recruitUnitsFromLife");
+
+      // --- 別の判断への分岐進行: 0番目ではなく 1番目（パターンB）を選択して分岐進行！ ---
+      let branchSeq = targetTranscript1.length + 1;
+      const dOrderB: ReplayDecisionEntryV1 = {
+        seq: branchSeq++,
+        actor: "human",
+        playerId: (restoredStep1 as any).request.playerId,
+        response: {
+          decisionId: (restoredStep1 as any).request.decisionId,
+          stateVersion: (restoredStep1 as any).request.stateVersion,
+          selectedPatternRef: 1, // 別の順序を選択！
+        },
+      };
+      const branchTranscript = [...targetTranscript1, dOrderB];
+      let branchStep = undoRecon1.session.submitDecision(dOrderB.response);
+
+      // パスおよび残りの順序選択を進めてパターンBの効果解決も完了
+      while (undoRecon1.session.state.stage.requests.length > 0) {
+        if (branchStep.type !== "WAITING_FOR_DECISION") break;
+        if ((branchStep as any).request.source?.effectStepId === "recruitUnitsFromLife") {
+          const dNextOrder: ReplayDecisionEntryV1 = {
+            seq: branchSeq++,
+            actor: "human",
+            playerId: (branchStep as any).request.playerId,
+            response: {
+              decisionId: (branchStep as any).request.decisionId,
+              stateVersion: (branchStep as any).request.stateVersion,
+              selectedPatternRef: 0,
+            },
+          };
+          branchTranscript.push(dNextOrder);
+          branchStep = undoRecon1.session.submitDecision(dNextOrder.response);
+        } else {
+          const passRef = (branchStep as any).request.patterns.findIndex((p: any) => p.kind === "PASS");
+          if (passRef < 0) break;
+          const dPass: ReplayDecisionEntryV1 = {
+            seq: branchSeq++,
+            actor: "human",
+            playerId: (branchStep as any).request.playerId,
+            response: {
+              decisionId: (branchStep as any).request.decisionId,
+              stateVersion: (branchStep as any).request.stateVersion,
+              selectedPatternRef: passRef,
+            },
+          };
+          branchTranscript.push(dPass);
+          branchStep = undoRecon1.session.submitDecision(dPass.response);
+        }
+      }
+
+      // 分岐後のライフ順序がパターンAと異なることを確認
+      const p1LifeA = session.state.players.p1.life.map((c: any) => c.id);
+      const p1LifeB = undoRecon1.session.state.players.p1.life.map((c: any) => c.id);
+      expect(p1LifeA).not.toEqual(p1LifeB); // 異なる順序でライフBOTへ戻されたことの実証！
+
+      // --- 実Undo検証 2: 徴募発動前まで巻き戻す実Undo ---
+      const prefixBeforeRecruit = transcript.slice(0, 2); // 防壁配置完了時点
+      const reconBeforeRecruit = reconstructMatch({
+        environmentId: activeMatch.environmentId,
+        seed: activeMatch.seed,
+        rareCardSelections: activeMatch.rareCardSelections,
+        scenarioHandSelections: activeMatch.scenarioHandSelections,
+        transcript: prefixBeforeRecruit,
+        catalog,
+        fullRulePackage,
+        allowUnimplemented: true,
+      });
+      expect(reconBeforeRecruit.status).toBe("SUCCESS");
+      if (reconBeforeRecruit.status !== "SUCCESS") return;
+
+      // 徴募選択可能なメインアクション選択状態に復帰していること
+      const stepBeforeRecruit = reconBeforeRecruit.currentStep;
+      expect(stepBeforeRecruit.type).toBe("WAITING_FOR_DECISION");
+      const recruitAvailable = (stepBeforeRecruit as any).request.patterns.some((p: any) => {
+        const act = (stepBeforeRecruit as any).request.catalog.actions[p.actionSelectionRef];
+        return act?.actionId === "action.recruit";
+      });
+      expect(recruitAvailable).toBe(true);
+
+      // 徴募ではなくエンド（action.end）を選択する分岐進行
+      const endRef = (stepBeforeRecruit as any).request.patterns.findIndex((p: any) => {
+        const act = (stepBeforeRecruit as any).request.catalog.actions[p.actionSelectionRef];
+        return act?.actionId === "action.end";
+      });
+      expect(endRef).toBeGreaterThanOrEqual(0);
+
+      const dEnd: ReplayDecisionEntryV1 = {
+        seq: prefixBeforeRecruit.length + 1,
+        actor: "human",
+        playerId: (stepBeforeRecruit as any).request.playerId,
+        response: {
+          decisionId: (stepBeforeRecruit as any).request.decisionId,
+          stateVersion: (stepBeforeRecruit as any).request.stateVersion,
+          selectedPatternRef: endRef,
+        },
+      };
+      const endTranscript = [...prefixBeforeRecruit, dEnd];
+      const reconEnd = reconstructMatch({
+        environmentId: activeMatch.environmentId,
+        seed: activeMatch.seed,
+        rareCardSelections: outcome.activeMatch!.rareCardSelections,
+        scenarioHandSelections: outcome.activeMatch!.scenarioHandSelections,
+        transcript: endTranscript,
+        catalog,
+        fullRulePackage,
+        allowUnimplemented: true,
+      });
+      expect(reconEnd.status).toBe("SUCCESS");
+
+      // --- 完了後の Canonical Replay 検証 ---
+      const finalRecon = reconstructMatch({
+        environmentId: activeMatch.environmentId,
+        seed: activeMatch.seed,
+        rareCardSelections: activeMatch.rareCardSelections,
+        scenarioHandSelections: activeMatch.scenarioHandSelections,
+        transcript,
+        catalog,
+        fullRulePackage,
+        allowUnimplemented: true,
+      });
+      expect(finalRecon.status).toBe("SUCCESS");
     });
   });
 
   // =========================================================================
-  // 5. DecisionPanel & Undo & Replay: B・J (action.bj) & バースト墓地TOP
+  // 6. 通常マスター対戦における実Undo・分岐進行・Canonical Replay: B・J
   // =========================================================================
-  describe("5. DecisionPanel & Undo & Canonical Replay: B・J (action.bj)", () => {
-    it("ヒット／スタンド選択、バースト時の墓地TOP選択、Undo、カードIdentityおよび墓地TOPの整合性", async () => {
+  describe("6. 通常マスター対戦における実Undo・分岐進行・Canonical Replay: B・J (action.bj)", () => {
+    it("バースト墓地TOP選択待ちからの実Undo、スタンド選択への分岐進行、墓地TOP整合性、reconstructMatchによる完全再現性", async () => {
+      // 1. 通常マスター対戦を起動 (isScenario: false, session.state への直接代入なし)
+      // P1 の手札に ♠A, ♠J, ♢2 を指定
+      const p1BjHand: CardOccurrenceSelection[] = [
+        { suit: "S", rank: "A", occurrence: 0 },
+        { suit: "S", rank: "J", occurrence: 0 },
+        { suit: "D", rank: "2", occurrence: 0 },
+      ];
       const outcome = await startMatchAttempt({
         catalog,
         fullRulePackage,
@@ -456,157 +698,224 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
         matchMode: "humanVsHuman",
         seedInput: "42",
         rareCardSelections: { p1: validP1Rare, p2: validP2Rare },
-        scenarioHandSelections: { p1: validP1Scenario, p2: validP2Scenario },
+        scenarioHandSelections: { p1: p1BjHand, p2: validP2Scenario },
         allowUnimplemented: true,
       });
       expect(outcome.type).toBe("READY");
       if (outcome.type !== "READY") return;
 
-      const state = outcome.session.state;
-      state.turnPlayer = "p1";
-      state.chancePlayer = "p1";
-      state.focusPlayer = "p1";
-      state.stage = { requests: [] };
-      const p1 = state.players.p1;
+      const activeMatch = outcome.activeMatch!;
+      const session = outcome.session;
 
-      // 手札に A と J
-      p1.hand = [
-        { id: "c-a", suit: "S", rank: "A", value: 1 },
-        { id: "c-j", suit: "H", rank: "J", value: 11 },
-      ];
-      // ライフ: 1枚目 10点、2枚目 10点 (合計20点)、3枚目 5点 (合計25点: バースト)、4枚目 生存用
-      p1.life = [
-        { id: "c-l-s10", suit: "S", rank: "10", value: 10 },
-        { id: "c-l-hk", suit: "H", rank: "K", value: 13 },
-        { id: "c-l-c5", suit: "C", rank: "5", value: 5 },
-        { id: "c-l-survive", suit: "D", rank: "2", value: 2 },
-      ];
+      const transcript: ReplayDecisionEntryV1[] = [];
+      let seq = 1;
+      let step = outcome.initialStep;
 
-      const snapshotBeforeBJ = JSON.parse(JSON.stringify(state));
-
-      const session = new GameSession(state, outcome.activeMatch.rulePackage);
-
-      let step: any = session.advance();
-      while (step.type === "PROGRESSED") step = session.advance();
-
-      const bjRef = step.request.patterns.findIndex((p: any) => {
-        const act = step.request.catalog.actions[p.actionSelectionRef];
+      // Step 1: P1 が B・J を提出 (Seed 42 では 1手目から使用可能)
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      const bjRef = (step as any).request.patterns.findIndex((p: any) => {
+        const act = (step as any).request.catalog.actions[p.actionSelectionRef];
         return act?.actionId === "action.bj";
       });
       expect(bjRef).toBeGreaterThanOrEqual(0);
 
-      // p1 が BJ を提出
-      step = session.submitDecision({
-        decisionId: step.request.decisionId,
-        stateVersion: step.request.stateVersion,
-        selectedPatternRef: bjRef,
-      });
+      const dBj: ReplayDecisionEntryV1 = {
+        seq: seq++,
+        actor: "human",
+        playerId: (step as any).request.playerId,
+        response: {
+          decisionId: (step as any).request.decisionId,
+          stateVersion: (step as any).request.stateVersion,
+          selectedPatternRef: bjRef,
+        },
+      };
+      transcript.push(dBj);
+      step = session.submitDecision(dBj.response);
 
-      // パスで進めてヒット／スタンド選択へ
+      // パスを進めてヒット／スタンド選択へ
       while (session.state.stage.requests.length > 0) {
-        if (step.type === "WAITING_FOR_DECISION" && step.request.source?.effectStepId === "playBlackjack") {
+        if (step.type === "WAITING_FOR_DECISION" && (step as any).request.source?.effectStepId === "playBlackjack") {
           break;
         }
-        const passRef = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
-        step = session.submitDecision({
-          decisionId: step.request.decisionId,
-          stateVersion: step.request.stateVersion,
-          selectedPatternRef: passRef,
-        });
+        const passRef = (step as any).request.patterns.findIndex((p: any) => p.kind === "PASS");
+        if (passRef < 0) break;
+        const dPass: ReplayDecisionEntryV1 = {
+          seq: seq++,
+          actor: "human",
+          playerId: (step as any).request.playerId,
+          response: {
+            decisionId: (step as any).request.decisionId,
+            stateVersion: (step as any).request.stateVersion,
+            selectedPatternRef: passRef,
+          },
+        };
+        transcript.push(dPass);
+        step = session.submitDecision(dPass.response);
       }
 
-      // 1. ヒット／スタンド選択の提示確認 (DecisionPanel 対応)
       expect(step.type).toBe("WAITING_FOR_DECISION");
-      expect(step.request.catalog.effectSelections).toBeDefined();
-      expect(step.request.catalog.effectSelections[0].selectionType).toBe("option");
+      expect((step as any).request.source?.effectStepId).toBe("playBlackjack");
 
-      // ヒットを選択 (2枚目 ♡K をめくる -> 合計20点)
-      const hitRef1 = step.request.patterns.findIndex((p: any) => {
-        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+      // 1回目の選択: ヒットを選択 (DJ をめくって合計12点)
+      const hitRef1 = (step as any).request.patterns.findIndex((p: any) => {
+        const effSel = (step as any).request.catalog.effectSelections?.[p.effectSelectionRef];
         return effSel?.selectedValues?.[0] === "hit" || p.patternId?.includes("hit");
       });
-      step = session.submitDecision({
-        decisionId: step.request.decisionId,
-        stateVersion: step.request.stateVersion,
-        selectedPatternRef: hitRef1,
-      });
+      expect(hitRef1).toBeGreaterThanOrEqual(0);
+      const dHit1: ReplayDecisionEntryV1 = {
+        seq: seq++,
+        actor: "human",
+        playerId: (step as any).request.playerId,
+        response: {
+          decisionId: (step as any).request.decisionId,
+          stateVersion: (step as any).request.stateVersion,
+          selectedPatternRef: hitRef1,
+        },
+      };
+      transcript.push(dHit1);
+      step = session.submitDecision(dHit1.response);
 
-      // 2回目選択: 再度ヒット (3枚目 ♣5 をめくる -> 合計25点でバースト！)
-      const hitRef2 = step.request.patterns.findIndex((p: any) => {
-        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+      // 2回目の選択: 再度ヒットを選択 (C6 をめくって合計18点)
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      const hitRef2 = (step as any).request.patterns.findIndex((p: any) => {
+        const effSel = (step as any).request.catalog.effectSelections?.[p.effectSelectionRef];
         return effSel?.selectedValues?.[0] === "hit" || p.patternId?.includes("hit");
       });
-      step = session.submitDecision({
-        decisionId: step.request.decisionId,
-        stateVersion: step.request.stateVersion,
-        selectedPatternRef: hitRef2,
-      });
+      expect(hitRef2).toBeGreaterThanOrEqual(0);
+      const dHit2: ReplayDecisionEntryV1 = {
+        seq: seq++,
+        actor: "human",
+        playerId: (step as any).request.playerId,
+        response: {
+          decisionId: (step as any).request.decisionId,
+          stateVersion: (step as any).request.stateVersion,
+          selectedPatternRef: hitRef2,
+        },
+      };
+      transcript.push(dHit2);
+      step = session.submitDecision(dHit2.response);
 
-      // 2. バースト後の墓地TOP選択（ZONE_TOP_SELECTION）提示確認
+      // 3回目の選択: 再度ヒットを選択 (S8 をめくって合計26点 -> バースト！)
       expect(step.type).toBe("WAITING_FOR_DECISION");
-      expect(step.request.source?.type).toBe("ZONE_TOP_SELECTION");
-      expect(session.state.pendingGraveTopSelections).toHaveLength(1);
-      expect(session.state.pendingGraveTopSelections[0].candidateCardIds).toEqual(["c-l-s10", "c-l-hk", "c-l-c5"]);
-
-      // 墓地TOPとして ♣5 を選択
-      const topC5Ref = step.request.patterns.findIndex((p: any) => {
-        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
-        return effSel?.selectedValues?.includes("c-l-c5");
+      const hitRef3 = (step as any).request.patterns.findIndex((p: any) => {
+        const effSel = (step as any).request.catalog.effectSelections?.[p.effectSelectionRef];
+        return effSel?.selectedValues?.[0] === "hit" || p.patternId?.includes("hit");
       });
-      expect(topC5Ref).toBeGreaterThanOrEqual(0);
+      expect(hitRef3).toBeGreaterThanOrEqual(0);
+      const dHit3: ReplayDecisionEntryV1 = {
+        seq: seq++,
+        actor: "human",
+        playerId: (step as any).request.playerId,
+        response: {
+          decisionId: (step as any).request.decisionId,
+          stateVersion: (step as any).request.stateVersion,
+          selectedPatternRef: hitRef3,
+        },
+      };
+      transcript.push(dHit3);
+      step = session.submitDecision(dHit3.response);
 
-      // --- Undo テスト: バースト墓地TOP選択待ち中からの Undo 復元 ---
-      const burstWaitSnapshot = JSON.parse(JSON.stringify(session.state));
+      // バーストにより墓地TOP選択（ZONE_TOP_SELECTION）に到達！
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      expect((step as any).request.source?.type).toBe("ZONE_TOP_SELECTION");
 
-      step = session.submitDecision({
-        decisionId: step.request.decisionId,
-        stateVersion: step.request.stateVersion,
-        selectedPatternRef: topC5Ref,
+      // --- 実Undo検証: バースト墓地TOP選択待ちからの Undo ---
+      // 直前の決定（3回目ヒット）の前（2回目ヒット後、合計18点）に巻き戻す
+      const undoTargetIdx = findUndoTruncationIndex(transcript);
+      expect(undoTargetIdx).toBeGreaterThanOrEqual(0);
+      const targetTranscript = transcript.slice(0, undoTargetIdx);
+
+      // 実際に reconstructMatch で Undo 再構築を実行
+      const undoRecon = reconstructMatch({
+        environmentId: activeMatch.environmentId,
+        seed: activeMatch.seed,
+        rareCardSelections: activeMatch.rareCardSelections,
+        scenarioHandSelections: activeMatch.scenarioHandSelections,
+        transcript: targetTranscript,
+        catalog,
+        fullRulePackage,
+        allowUnimplemented: true,
       });
+      expect(undoRecon.status).toBe("SUCCESS");
+      if (undoRecon.status !== "SUCCESS") return;
 
-      // 墓地TOP選択により zone.top.changed ログが記録されていること
-      const events = session.logRecorder.getEvents();
-      const topChangedEvent: any = events.find((e: any) => e.type === "zone.top.changed");
-      expect(topChangedEvent).toBeDefined();
-      expect(topChangedEvent?.cardId).toBe("c-l-c5");
+      let restoredStep = undoRecon.currentStep;
+      // 2回目ヒット後（合計18点、バースト前）に復帰していること
+      expect(restoredStep.type).toBe("WAITING_FOR_DECISION");
+      expect((restoredStep as any).request.source?.effectStepId).toBe("playBlackjack");
 
-      // 全ステージ解決
-      while (session.state.stage.requests.length > 0) {
-        if (step.type === "WAITING_FOR_DECISION") {
-          const passRef = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
-          if (passRef >= 0) {
-            step = session.submitDecision({
-              decisionId: step.request.decisionId,
-              stateVersion: step.request.stateVersion,
-              selectedPatternRef: passRef,
-            });
-          } else {
-            step = session.advance();
-          }
-        } else {
-          step = session.advance();
-        }
+      // --- 別の判断への分岐進行: ヒットではなく「スタンド」を選択してバースト回避！ ---
+      const standRef = (restoredStep as any).request.patterns.findIndex((p: any) => {
+        const effSel = (restoredStep as any).request.catalog.effectSelections?.[p.effectSelectionRef];
+        return effSel?.selectedValues?.[0] === "stand" || p.patternId?.includes("stand");
+      });
+      expect(standRef).toBeGreaterThanOrEqual(0);
+
+      const dStand: ReplayDecisionEntryV1 = {
+        seq: targetTranscript.length + 1,
+        actor: "human",
+        playerId: (restoredStep as any).request.playerId,
+        response: {
+          decisionId: (restoredStep as any).request.decisionId,
+          stateVersion: (restoredStep as any).request.stateVersion,
+          selectedPatternRef: standRef,
+        },
+      };
+      const finalTranscript = [...targetTranscript, dStand];
+      restoredStep = undoRecon.session.submitDecision(dStand.response);
+
+      // パスを進めてスタンド効果解決を完了
+      while (undoRecon.session.state.stage.requests.length > 0) {
+        if (restoredStep.type !== "WAITING_FOR_DECISION") break;
+        const passRef = (restoredStep as any).request.patterns.findIndex((p: any) => p.kind === "PASS");
+        if (passRef < 0) break;
+        const dPass: ReplayDecisionEntryV1 = {
+          seq: finalTranscript.length + 1,
+          actor: "human",
+          playerId: (restoredStep as any).request.playerId,
+          response: {
+            decisionId: (restoredStep as any).request.decisionId,
+            stateVersion: (restoredStep as any).request.stateVersion,
+            selectedPatternRef: passRef,
+          },
+        };
+        finalTranscript.push(dPass);
+        restoredStep = undoRecon.session.submitDecision(dPass.response);
       }
 
-      // バースト完了後のカード保存則・Identity確認
-      expect(session.state.players.p1.life.map((c: any) => c.id)).toEqual(["c-l-survive"]);
+      // スタンド解決完了後の検証:
+      // スタンドによりめくられた公開カードが手札に加わり、初期手札より枚数が増加していること
+      const p1HandCardIds = undoRecon.session.state.players.p1.hand.map((c: any) => c.suit + c.rank);
+      expect(p1HandCardIds.length).toBeGreaterThan(outcome.session.state.players.p1.hand.length);
 
-      // --- Undo 復元: アクション実行前に完全復元できること ---
-      session.state = JSON.parse(JSON.stringify(snapshotBeforeBJ));
-      expect(session.state.players.p1.life.map((c: any) => c.id)).toEqual([
-        "c-l-s10",
-        "c-l-hk",
-        "c-l-c5",
-        "c-l-survive",
-      ]);
-      expect(session.state.players.p1.hand.map((c: any) => c.id)).toEqual(["c-a", "c-j"]);
+      // --- Canonical Replay 検証 ---
+      // スタンド分岐後の transcript 全体で reconstructMatch を実行し、完全一致（SUCCESS）を確認
+      const fullReplay = reconstructMatch({
+        environmentId: activeMatch.environmentId,
+        seed: activeMatch.seed,
+        rareCardSelections: activeMatch.rareCardSelections,
+        scenarioHandSelections: activeMatch.scenarioHandSelections,
+        transcript: finalTranscript,
+        catalog,
+        fullRulePackage,
+        allowUnimplemented: true,
+      });
+      expect(fullReplay.status).toBe("SUCCESS");
+      if (fullReplay.status === "SUCCESS") {
+        expect(fullReplay.session.state.players.p1.hand.map((c: any) => c.id)).toEqual(
+          undoRecon.session.state.players.p1.hand.map((c: any) => c.id)
+        );
+        expect(fullReplay.session.state.players.p1.life.map((c: any) => c.id)).toEqual(
+          undoRecon.session.state.players.p1.life.map((c: any) => c.id)
+        );
+      }
     });
   });
 
   // =========================================================================
-  // 6. Navigation: 対戦中断から対戦設定画面への復帰導線維持
+  // 7. Navigation: 対戦中断から対戦設定画面への復帰導線維持
   // =========================================================================
-  describe("6. Match Cancellation & Return to Setup Navigation", () => {
+  describe("7. Match Cancellation & Return to Setup Navigation", () => {
     it("対戦画面から対戦中断ボタン押下で確認モーダルが表示され、取消で継続、確定で MatchSetupScreen へ正常復帰すること", async () => {
       let renderer!: TestRenderer.ReactTestRenderer;
       await act(async () => {

@@ -19,6 +19,7 @@ import { SimulatorDeckProfileResolver } from "../regulation/SimulatorDeckProfile
 import {
   extractRegulationId,
   isOfficialEnvironment,
+  isAllowedPreviewRegulation,
 } from "../playtest/PlaytestEnvironmentController";
 import { SeededRandom } from "../random/RandomSource";
 import { deriveSeed, shuffleCards } from "../random/DeterministicShuffle";
@@ -156,8 +157,9 @@ export class ScenarioCompiler {
         message: `不正な環境ID形式です: "${definition.environmentId}"。"official:<regulationId>" 形式で指定してください。`,
       });
     } else {
+      const isPreviewAllowed = Boolean(options?.allowUnimplemented && isAllowedPreviewRegulation(regId));
       const regValidation = RegulationValidator.validateRegulation(catalog, regId);
-      if (!regValidation.ruleLegal || (!regValidation.simulatorImplemented && !options?.allowUnimplemented)) {
+      if (!regValidation.ruleLegal || (!regValidation.simulatorImplemented && !isPreviewAllowed)) {
         errors.push({
           code: "UNSUPPORTED_ENVIRONMENT",
           path: "environmentId",
@@ -195,8 +197,9 @@ export class ScenarioCompiler {
 
     const errors: ScenarioValidationError[] = [];
     const regId = extractRegulationId(definition.environmentId)!;
+    const isPreviewAllowed = Boolean(options?.allowUnimplemented && isAllowedPreviewRegulation(regId));
     const regValidation = RegulationValidator.validateRegulation(catalog, regId, {
-      assertImplemented: !options?.allowUnimplemented,
+      assertImplemented: !isPreviewAllowed,
     });
 
     const regulation = regValidation.regulation!;

@@ -11,6 +11,7 @@ import {
   isOfficialEnvironment,
   validateSeed,
   extractRegulationId,
+  isAllowedPreviewRegulation,
 } from "../../engine/playtest/PlaytestEnvironmentController";
 import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
 import { ScenarioDefinitionV1 } from "../../domain/scenario/ScenarioTypes";
@@ -259,11 +260,12 @@ export function parsePlaytestShareUrl(
       };
     }
 
-    const isPreview = params.get("preview") === "all" || params.get("preview") === "mast";
+    const isPreviewAllowed =
+      Boolean((params.get("preview") === "all" || params.get("preview") === "mast") && isAllowedPreviewRegulation(regId));
 
     try {
       const regVal = RegulationValidator.validateRegulation(catalog, regId);
-      if (!regVal.simulatorImplemented && !isPreview) {
+      if (!regVal.simulatorImplemented && !isPreviewAllowed) {
         const err = `未実装または未サポートのレギュレーションです: "${def.environmentId}"`;
         return {
           kind: "INVALID_SHARE",
