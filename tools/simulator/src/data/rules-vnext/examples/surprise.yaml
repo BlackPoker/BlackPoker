@@ -1,0 +1,39 @@
+actions:
+  - id: action.surprise
+    name: 奇襲
+    ruby: きしゅう
+    type: magic
+    uncounterable: true
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    cost: BB
+
+    key:
+      id: keys
+      count: 2
+      condition:
+        card:
+          suit: club
+          rank: "A..10"
+          zone: hand
+
+    text:
+      effect: |-
+        1. 自分の場にいる防壁を全て兵士にする。このターンに場に出た防壁を兵士にする場合、その兵士はこのターンに出た兵士と同様に扱う。
+        2. 自分の場にいる全ての兵士をチャージ状態にする。
+
+    effect:
+      - transformMatchingUnits:
+          relation: self
+          componentType: bulwark
+          destination: soldier
+          state: charge
+      - setAllUnitState:
+          relation: self
+          zone: field
+          componentType: soldier
+          state: charge

@@ -463,6 +463,7 @@ export class CommandRegistry {
       status: "pending",
       sequence: seq,
       action,
+      uncounterable: action.uncounterable === true ? true : undefined,
     };
 
     const logRecorder = context.logRecorder || this.logRecorder;

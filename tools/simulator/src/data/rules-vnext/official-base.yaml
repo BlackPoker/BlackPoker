@@ -147,6 +147,19 @@ components:
           target: binding.target
           amount: binding.amount
 
+  - id: fog.force
+    name: フォース
+    type: fog
+    zone: fog
+
+    text:
+      ability: このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。
+
+    abilities:
+      - sizeModifier:
+          target: binding.target
+          amount: binding.amount
+
   - id: character.bulwark
     name: 防壁
     ruby: ぼうへき

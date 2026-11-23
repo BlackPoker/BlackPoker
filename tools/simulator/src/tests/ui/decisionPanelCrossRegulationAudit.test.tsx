@@ -1495,7 +1495,7 @@ describe("DecisionPanel Cross-Regulation Comprehensive Audit (Standard, Pro, Mas
     expect(summary.enterBlockedPassCount).toBe(summary.totalActions);
     expect(summary.shiftEnterBlockedPassCount).toBe(summary.totalActions);
     expect(summary.resolvedSubmitPassCount).toBe(summary.totalActions);
-    expect(summary.realCount).toBe(26);
-    expect(summary.mockOnlyCount).toBe(11);
+    expect(summary.realCount).toBe(28);
+    expect(summary.mockOnlyCount).toBe(13);
   });
 });

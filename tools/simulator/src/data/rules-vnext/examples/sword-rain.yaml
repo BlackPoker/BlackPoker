@@ -1,0 +1,30 @@
+actions:
+  - id: action.swordRain
+    name: 剣の雨
+    ruby: つるぎのあめ
+    type: magic
+    uncounterable: true
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    cost: BB
+
+    key:
+      id: keys
+      count: 2
+      condition:
+        card:
+          suit: spade
+          rank: "A..10"
+          zone: hand
+
+    text:
+      effect: サイズがキーカードの合計値以下の全ての兵士を墓地に移す。
+
+    effect:
+      - moveMatchingUnitsToGraveyard:
+          componentType: soldier
+          maxSize: keyCards.totalRankValue

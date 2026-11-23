@@ -1,0 +1,31 @@
+actions:
+  - id: action.force
+    name: フォース
+    type: magic
+    uncounterable: true
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    cost: BB
+
+    key:
+      id: keys
+      count: 2
+      condition:
+        card:
+          suit: heart
+          rank: "A..10"
+          zone: hand
+
+    text:
+      effect: このターンが終わるまで自分の兵士全ての数字は、キーカードの合計値分加算される。その印としてフォグにキーカードを置き、フォースとする。
+
+    effect:
+      - createFog:
+          component: fog.force
+          bindings:
+            target: self.soldiers
+            amount: keyCards.totalRankValue

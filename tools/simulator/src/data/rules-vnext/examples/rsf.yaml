@@ -1,0 +1,45 @@
+actions:
+  - id: action.rsf
+    name: R・S・F
+    ruby: アールエスエフ
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    cost: BB
+
+    key:
+      id: keys
+      count: 5
+      sameSuit: true
+      conditions:
+        - card:
+            rank: "A"
+            zone: hand
+        - card:
+            rank: "10"
+            zone: hand
+        - card:
+            rank: "J"
+            zone: hand
+        - card:
+            rank: "Q"
+            zone: hand
+        - card:
+            rank: "K"
+            zone: hand
+
+    targets:
+      - id: targetPlayer
+        type: player
+
+    text:
+      effect: 対象のプレイヤーに40点のダメージを与える。
+
+    effect:
+      - dealDamage:
+          target: targetPlayer
+          amount: 40
