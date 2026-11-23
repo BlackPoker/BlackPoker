@@ -1,125 +1,51 @@
 # GitHub環境設定
-次のように設定ししています。
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+## ブランチの役割
 
-<!-- code_chunk_output -->
+| ブランチ | 役割 |
+| --- | --- |
+| `develop` | 開発用のデフォルトブランチ。通常のPRの向き先。 |
+| `master` | レビューと検証を経た最新正式版。 |
+| `6th`、`7th`、`8th`、`9th` など | 世代ごとの公式ルール。 |
+| 作業ブランチ | Issue単位の開発と確認。 |
+| `gh-pages` | GitHub Pagesの生成物。公開元はルート。 |
 
-- [GitHub環境設定](#github環境設定)
-- [GitHubAction](#githubaction)
-  - [refresh_docs](#refresh_docs)
-    - [処理の流れ](#処理の流れ)
-- [リリース手順](#リリース手順)
-  - [新版作成時](#新版作成時)
-  - [リリース時](#リリース時)
-
-<!-- /code_chunk_output -->
-
-# GitHubAction
+正式リリースタグ `vX.Y.Z` は正式版のコミットを指す固定参照です。
 
 ## refresh_docs
 
-ブランチ単位にドキュメントを生成し、github-pagesに反映します。
-実行契機は以下があります。
+アクションリストと公式ルールのHTML/PDFを生成します。毎日4:00 (日本時間) の定期実行は、デフォルトが `develop` になった後に開発版を更新します。作業・世代ブランチは手動実行できます。`master` 向けPRは公開せずにビルドします。安定版の公開は、現在の `master` のSHAを指す正式タグを `tags` に指定した手動実行で行います。
 
-  * 手動実行
-    * ブランチを指定して実行できます。
-  * 自動実行
-    * 毎日masterブランチを対象に実行します。
+公開ジョブは生成物を確認し、対象のルールサイトだけを更新します。更新前に `gh-pages` の先端を取得し、他の公開が先に反映された場合は新しい先端に対象の生成物を適用し直します。ビルドに失敗すると公開ジョブは起動しません。ブランチ先端がビルド後に進んだ場合は古い成果物の公開を中止します。
 
-### 処理の流れ
+### 公開先
 
-```mermaid
-sequenceDiagram
-  actor line_7 as developer
-  participant line_6 as cron
-  participant line_1 as refresh_docs
-  participant line_2 as repository<br>this
-  participant line_5 as repository<br>gh-pages
-  participant line_3 as Docker<br>actionlist
-  participant line_4 as Docker<br>blackpoker-doc
-  participant line_8 as GitHub bot<br>pages-build-deployment
-  line_7 ->> line_1: 手動実行
-  line_6 ->> line_1: AM 4:00(JST)
-  line_1 ->> line_2: checkout<br>path:main
-  line_1 ->> line_3: アクションリスト<br>HTML,PDF生成
-  line_1 ->> line_1: URL置換処理
-  Note right of line_1: 公式ルール内の<br>URLを置換
-  line_1 ->> line_4: 公式ルール<br>HTML,PDF生成
-  line_1 ->> line_5: checkout<br>path:pages
-  line_1 ->> line_1: 生成したファイルをコピー
-  line_1 ->> line_5: push
-  line_5 ->> line_8: trigger
-```
+- 安定版は [HTML](https://blackpoker.github.io/BlackPoker/master/) と [PDF](https://blackpoker.github.io/BlackPoker/master/blackpoker.pdf) を提供します。
+- 開発版は [HTML](https://blackpoker.github.io/BlackPoker/develop/) と [PDF](https://blackpoker.github.io/BlackPoker/develop/blackpoker.pdf) を提供します。
+- 世代別と単一階層の作業ブランチは従来のパスを使います。既存の `BlackPoker/<名前>` も維持します。その他の階層付きブランチは `_branches/<ブランチ名のSHA-256>/` に公開します。公開先は `python tools/dev/docs-target.py refs/heads/<ブランチ>` で確認できます。
+- ルールサイトの更新では、同じ公開先の `playtest/` と `tutorial/` を保持します。両機能の既存PRの移行と公式ルールサイトへの統合は [#662](https://github.com/BlackPoker/BlackPoker/issues/662) で追跡します。
+- 新しい公開物と生成元SHAの対応は、対象ディレクトリの `build-sha.txt` と Actions の実行履歴で確認します。
 
-# リリース手順
+## リリース手順
 
-リリース作業には、新しいブランチ（例：`9th`）を**新規作成する場合（パターンA）**と、すでに存在するブランチに**マージする場合（パターンB）**の2つのパターンがあります。それぞれGitHub上での操作手順が異なります。
+1. `develop` から今回リリースする変更を選び、対象世代ブランチ向けのPRにまとめます。新版の場合は、採用するソースから世代ブランチを準備します。`tools/actionlist/original/version.json` の版と日付、変更履歴RSTとその一覧を更新します。
+2. 世代側の候補をビルドし、HTML、PDF、アクションリスト、版の表示、リンクを確認します。Simulator・Tutorialの公開範囲に変更があれば関連する検証も実施します。
+3. 検証済みの世代の内容を昇格用PRで `master` に反映します。公式ルールとアクション定義のツリーを世代側と照合し、ブランチ固有の運用ファイルの差分を確認します。レビューと必須チェックの成功を確認してからマージします。
+4. マージ後の `master` の正確なSHAに新しい `vX.Y.Z` タグを付けます。既存タグは移動しません。Actionsの `refresh_docs` を `master`、`tags=vX.Y.Z` で手動実行します。対象世代のサイトも必要に応じて対象ブランチから手動更新します。
+5. ActionsとPagesの反映を確認し、安定版と世代別サイトのHTML/PDF、変更履歴、アクションリストのリンク、生成元SHAを記録します。反映後にGitHub Releaseの案内を公開します。
 
-## パターンA：新規の版数（例: 9.0版）を作成し、新しいブランチを作る場合
-もともと `9th` のようなリリース用ブランチが存在しない場合の操作手順です。
+作業の記録は [リリースIssue](../.github/ISSUE_TEMPLATE/release-task.md) のチェック項目を使います。
 
-1. **変更履歴RSTファイルの作成**
-    * `source/revision-history/` 配下に新しく `9.2th.rst` などの変更履歴RSTファイルを作成し、変更箇所をまとめます（前バージョンのファイルをコピーして流用すると便利です）。
-2. **変更履歴一覧（toctree）への追加**
-    * `source/revision-history/revision-history.rst` の `toctree` ディレクティブの先頭に、新しく作成したファイル名（例: `9.2th`）を追記してリストに登録します。
-3. **GitHub上での新ブランチ作成**
-    * GitHubのリポジトリトップページ（ [BlackPoker/BlackPoker](https://github.com/BlackPoker/BlackPoker) ）にアクセスします。
-    * 左上にあるブランチ選択ドロップダウン（通常は `master` が選択されています）をクリックします。
-    * 入力欄に新しいブランチ名（例: `9th`）を入力します。
-    * ドロップダウンの下部に表示される **「Create branch: 9th from 'master'」** をクリックします。これで `master` の最新状態を引き継いだ `9th` ブランチが作成されます。
-4. **Issueテンプレートの更新**
-    * 新しいリリース用ブランチに合わせて、`.github/ISSUE_TEMPLATE/release-task.md` 内に記載されている `Xth` などのブランチ名の記述箇所を新しいブランチ名に書き換えて `master` にコミットします。
+## 初回の切替
 
----
+1. `master`、対象世代、`gh-pages` の先端と保護設定、公開物、未完了PRを記録し、保全用の固定参照を用意します。未完了の開発PRの移行先を事前に確認します。
+2. 現行 `master` の開発履歴を保持する `develop` を用意し、公開workflowと運用文書の変更は `develop` 向けのPRで反映します。昇格候補のツリーは検証済みの第9版を基礎に作り、公開処理など必要な運用ファイルを選んで載せます。現行 `master` を親に持つ昇格PRを使い、ソースと定義に未採用の変更が混ざっていないことを照合します。
+3. 開発版を確認し、`develop` をデフォルトに切り替えます。通常開発の必須チェックと既存PRの向き先を確認します。旧定期実行の完了を確認してから、安定版更新へ進みます。
+4. `master` へのPRとレビューを必須にし、強制更新・削除を禁止します。安定版公開を許可するタグの作成権限を管理します。昇格PRのビルドを確認し、切替対象とロールバック点を記録してから安定版を公開します。
+5. `master` と `develop` のHTML/PDF、世代別URL、既存確認サイト、`playtest/`、`tutorial/` を確認します。既存の配信workflowが期待どおり起動することを確認します。
 
-## パターンB：既存の版数（例: 9.1版）をリリースし、既存ブランチに反映する場合
-すでに `9th` のようなリリース用ブランチが存在し、`master` に加えた複数の修正をそのブランチに反映（マージ）する場合の操作手順です。
+## 復旧
 
-1. **バージョン情報の更新 (version.json)**
-    * `tools/actionlist/original/version.json` を開き、以下の内容を編集して `master` ブランチにコミットします。
-      * `ver`: 新しいバージョン名（例: `第9.1.0版`）
-      * `lastupdate`: リリース日（例: `2026/07/02`）
-      * ※これにより、ビルドされるHTML/PDFドキュメントやアクションリスト内のバージョン情報が自動的に一括更新されます。
-2. **GitHubでPull Request（PR）を作成する**
-    * GitHubの [Pull Requests タブ](https://github.com/BlackPoker/BlackPoker/pulls) を開きます。
-    * 右上の **「New pull request」** ボタンをクリックします。
-    * 比較対象となるブランチを選択します：
-        * 左側の **base:** に、反映先となるリリースブランチ（例: `9th`）を選択します。
-        * 右側の **compare:** に、反映元となる `master` を選択します。
-    * **「Create pull request」** ボタンをクリックします。
-    * タイトル（例: `Release 9.1`）を入力し、再度 **「Create pull request」** をクリックしてPRを起票します。
-3. **PRをマージする**
-    * 自動ビルド・テストがパスしたことを確認します。
-    * PRページの下部にある **「Merge pull request」** をクリックし、**「Confirm merge」** をクリックしてマージを完了します。
+公開前に失敗した場合は、失敗した段階で作業を止めます。既に設定を切り替えた場合は、変更したデフォルトブランチ・保護設定・PRの向き先を記録と照合し、必要な設定を戻します。
 
-### 💡 注意：マージ後の「recent pushes」表示について
-PRをマージした直後、GitHubのトップページ等に **「`Xth had recent pushes XX minutes ago`」** という黄色いバナーが表示されることがあります。
-
-* **原因**: GitHubが「更新されたブランチ（`Xth`）からデフォルトブランチへの逆向きのPull Requestを作りませんか？」と自動でリコメンドしている表示です。
-* **対応**: 今回のリリース作業では、`master` から `Xth` への反映が目的であり、逆向きのPRは不要です。したがって、この表示は**完全に無視（スルー）**して問題ありません。（「Compare & pull request」ボタンは押さずに無視してください）
-
----
-
-## GitHubでのリリース（タグ）作成手順
-マージ完了後、または新ブランチ作成後に正式なリリースバージョン（例：`v9.0.1` などのタグ）を発行する手順です。
-
-1. **Releases ページを開く**
-    * GitHubの [Releases ページ](https://github.com/BlackPoker/BlackPoker/releases) を開きます。
-2. **ドラフトの作成開始**
-    * 右上にある **「Draft a new release」** ボタンをクリックします。
-3. **リリースの設定入力**
-    * **Choose a tag**: 新しいバージョンタグを入力します（例: `v9.0.1` や `v9.1.0`）。入力後、直下に表示される **「Create new tag: vX.Y.Z on publish」** をクリックします。
-    * **Target**: リリース対象のブランチを選択します。
-      * デフォルトは `master` になっていますが、必ず**リリース用ブランチ（例: `9th` などの対象ブランチ）**に変更してください。
-    * **Release title**: リリース名を入力します。通常はタグ名と同じ `vX.Y.Z` で問題ありません。
-    * **Description**: リリース内容の説明を記載します（例: 変更内容や対応したIssueへのリンクなど）。
-4. **リリースの発行**
-    * ページ最下部にある緑色の **「Publish release」** ボタンをクリックします。これでタグが作成され、リリースが公開されます。
-
----
-
-## リリース用Issueの起票
-実際のリリース作業は、以下のリンクからIssueを発行し、そのチェックリストに沿って進めます。手順の全体像はIssue内にすべて記載されています。
-
-[Release-issue作成リンク](https://github.com/BlackPoker/BlackPoker/issues/new?assignees=BlackPoker&labels=task&projects=&template=release-task.md&title=%5BReleaseTask%5D+)
+公開後に問題が分かった場合は、前回の正常な `gh-pages` のSHAから問題のある公開先だけを復元し、通常の追加コミットで反映します。同時に他の公開先の差分が含まれていないことを確認します。安定版ソースの修正が必要な場合は `master` 向けPRで修正し、検証済みSHAに新しい正式タグを付け直します。既存タグと履歴は保持します。

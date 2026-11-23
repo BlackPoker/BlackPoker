@@ -1,166 +1,117 @@
 name: refresh_docs
 
-# vから始まるタグが付いたら実行する（例: v1, v1.2, v1.2.3）←現在動作していない
 on:
   workflow_dispatch:
     inputs:
       logLevel:
-        required: true
         description: ログレベル
+        required: true
         default: warning
       tags:
+        description: master公開時に指定する正式リリースタグ (vX.Y.Z)
+        type: string
   schedule:
-    # 日本時間AM4:00に動作
     - cron: '0 19 * * *'
+  pull_request:
+    branches: [master]
+
+permissions:
+  contents: read
 
 jobs:
-  release:
-    name: release build
+  build:
+    name: build rule site
+    if: github.event_name != 'schedule' || github.ref == 'refs/heads/develop'
     runs-on: ubuntu-latest
-
-    strategy:
-      matrix:
-        python-version: [3.7]
-        node-version: [14.7]
-
+    outputs:
+      target: ${{ steps.target.outputs.target }}
     steps:
-      # 変数設定
-      - name: Set output
-        id: vars
-        run: echo ::set-output name=short_ref::${GITHUB_REF#refs/*/}
-
-      # 準備
-      - name: checkout
-        uses: actions/checkout@v2
+      - uses: actions/checkout@v4
         with:
-          path: main
-#         with:
-#           ref: ${{ github.head_ref }}
-#           ssh-key: ${{ secrets.DEPLOY_KEY }}
-      - name: clear
-        run: rm -rf ./main/dist/*
-    
-      # アクションリスト生成
-      - name: build builder image
-        working-directory: ./main/tools/actionlist
+          persist-credentials: false
+      - name: 公開先と生成元を確認
+        id: target
         env:
-          DOCKER_BUILDKIT: 1
+          RELEASE_TAG: ${{ inputs.tags }}
+          SOURCE_REMOTE: ${{ github.server_url }}/${{ github.repository }}.git
         run: |
-           mkdir -p `pwd`/dist/web-site
-           docker build --pull --rm -f "Dockerfile" -t actionlist:latest "."
-           docker run --rm --user $UID -v `pwd`/dist:/dist actionlist:latest
-            
-#       # sphinx実行
-#       - name: Set up Python ${{ matrix.python-version }}
-#         uses: actions/setup-python@v2
-#         with:
-#           python-version: ${{ matrix.python-version }}
-#       - name: Install dependencies
-#         run: |
-#           python -m pip install --upgrade pip
-#           pip install flake8 pytest
-#           if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-#       - name: execute sphinx
-#         run: sphinx-build -b html ./source ./docs  
-        
-      # HTML,PDF生成(sphix実行)
-      - name: build builder image
-        working-directory: ./main
-        env:
-          DOCKER_BUILDKIT: 1
+          if [[ "$GITHUB_EVENT_NAME" == pull_request ]]; then
+            exit 0
+          fi
+          target=$(python3 tools/dev/docs-target.py "$GITHUB_REF")
+          bash tools/dev/check-docs-source.sh "$SOURCE_REMOTE" "$GITHUB_REF" "$GITHUB_SHA" "$RELEASE_TAG"
+          printf 'target=%s\n' "$target" >> "$GITHUB_OUTPUT"
+          export DOCS_TARGET="$target"
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          from urllib.parse import quote
+
+          branch = quote(os.environ["GITHUB_REF_NAME"], safe="/")
+          target = quote(os.environ["DOCS_TARGET"], safe="/")
+          conf = Path("source/conf.py")
+          conf.write_text(conf.read_text().replace("'master/source/'", f"'{branch}/source/'"))
+          for path in Path("source/appendix").glob("*.rst"):
+              base = "https://blackpoker.github.io/BlackPoker/"
+              # 公開先の指定がない既存リンクだけを、このビルドの公開先に向ける。
+              text = path.read_text()
+              for prefix in ("actionlist/", "blackpoker"):
+                  text = text.replace(base + prefix, f"{base}{target}/{prefix}")
+              path.write_text(text)
+          PY
+      - name: アクションリスト生成
+        working-directory: tools/actionlist
         run: |
-           cp -r ./tools/actionlist/dist/source/auto/* ./source/auto/
-           cp ./tools/actionlist/original/version.json ./source/version.json
-           sed -i -e 's,'\''github_version'\'': '\''master/source/'\'','\''github_version'\'': '\''${{ steps.vars.outputs.short_ref }}/source/'\'',g' ./source/conf.py
-           cat ./source/conf.py
-           sed -i -e 's,https://blackpoker.github.io/BlackPoker/,https://blackpoker.github.io/BlackPoker/${{ steps.vars.outputs.short_ref }}/,g' ./source/appendix/*.rst
-           mkdir -p `pwd`/docs
-           docker build --pull --rm -f "Dockerfile" -t blackpoker-doc:latest "."
-           docker run --rm --user $UID -v `pwd`/docs:/docs blackpoker-doc:latest
-
-      # gh-pageに反映
-      - name: copy docs
-        working-directory: ./main
+          mkdir -p dist/web-site
+          docker build --pull --rm -t actionlist:latest .
+          docker run --rm --user "$UID" -v "$PWD/dist:/dist" actionlist:latest
+      - name: HTMLとPDFを生成
         run: |
-          mkdir -p ./docs/actionlist/html
-          mkdir -p ./docs/actionlist/pdf
-          cp -r ./tools/actionlist/dist/web-site/static/* docs/actionlist/html
-          cp -r ./tools/actionlist/dist/blackpoker-*.pdf docs/actionlist/pdf
+          cp -r tools/actionlist/dist/source/auto/. source/auto/
+          cp tools/actionlist/original/version.json source/version.json
+          mkdir site-output
+          docker build --pull --rm -t blackpoker-doc:latest .
+          docker run --rm --user "$UID" -v "$PWD/site-output:/docs" blackpoker-doc:latest
+          mkdir -p site-output/actionlist/{html,pdf}
+          cp -r tools/actionlist/dist/web-site/static/. site-output/actionlist/html/
+          cp tools/actionlist/dist/blackpoker-*.pdf site-output/actionlist/pdf/
+          test -s site-output/index.html
+          test -s site-output/blackpoker.pdf
+          test -s site-output/actionlist/html/all.html
+          printf '%s\n' "$GITHUB_SHA" > site-output/build-sha.txt
+      - uses: actions/upload-artifact@v4
+        if: github.event_name != 'pull_request'
+        with:
+          name: rule-site
+          path: site-output/
+          if-no-files-found: error
 
-#      - name: Use Node.js ${{ matrix.node-version }}
-#        uses: actions/setup-node@v1
-#        env:
-#          TZ: 'Asia/Tokyo'
-#           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#        with:
-#          node-version: ${{ matrix.node-version }}
-
-      - name: checkout
-        uses: actions/checkout@v2
+  publish:
+    name: publish rule site
+    needs: build
+    if: github.event_name != 'pull_request' && needs.build.outputs.target != ''
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    concurrency:
+      group: blackpoker-gh-pages
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          path: source-repo
+          persist-credentials: false
+      - uses: actions/checkout@v4
         with:
           ref: gh-pages
           path: pages
-          
-      - name: copy docs
-        working-directory: ./
-        run: |
-          pwd
-          ls -la
-          mkdir ../tmp_docs
-          mv ./main/docs/* ../tmp_docs/.
-          rm -rf ./pages/${{ steps.vars.outputs.short_ref }}
-          mkdir -p ./pages/${{ steps.vars.outputs.short_ref }}
-          mv ../tmp_docs/* ./pages/${{ steps.vars.outputs.short_ref }}/.
-          ls -la ./main
-          ls -la ./pages
-          cd ./pages
-          git config --global user.email "blackpoker.official@gmail.com"
-          git config --global user.name "BlackPoker"
-          git config -l
-          git status
-          git add .
-          git commit -m "refresh docs" -a
-          git pull
-          git push
-
-      # # HTMLはzipにまとめる
-      # - name: create zip
-      #   run: |
-      #     mkdir -p ./docs/actionlist/html
-      #     mkdir -p ./docs/actionlist/pdf
-      #     cp -r ./tools/actionlist/dist/web-site/static/* docs/actionlist/html
-      #     cp -r ./tools/actionlist/dist/blackpoker-v6*.pdf docs/actionlist/pdf
-      #     zip -r HTML.zip ./docs
-      # # GitHubにリリースを作る
-      # - name: create release
-      #   id: create_release
-      #   uses: actions/create-release@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     tag_name: ${{ github.ref }}
-      #     release_name: ${{ github.ref }}
-      #     draft: false
-      #     prerelease: false
-
-      # PDFファイルをリリースページにアップロード
-      # - name: upload PDF
-      #   uses: actions/upload-release-asset@v1
-      #   env:
-      #     GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #   with:
-      #     upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #     asset_path: ./_build/latex/sphinx.pdf
-      #     asset_name: manual_PDF.pdf
-      #     asset_content_type: application/pdf
-
-      # HTMLを固めたzipをリリースページにアップロード
-      #- name: upload HTML
-      #  uses: actions/upload-release-asset@v1
-      #  env:
-      #    GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      #  with:
-      #    upload_url: ${{ steps.create_release.outputs.upload_url }}
-      #    asset_path: ./HTML.zip
-      #    asset_name: manual_HTML.zip
-      #    asset_content_type: application/zip
+      - uses: actions/download-artifact@v4
+        with:
+          name: rule-site
+          path: site-output
+      - name: 検証済みの成果物を公開
+        env:
+          DOCS_TARGET: ${{ needs.build.outputs.target }}
+          RELEASE_TAG: ${{ inputs.tags }}
+          SOURCE_REMOTE: ${{ github.server_url }}/${{ github.repository }}.git
+        run: bash source-repo/tools/dev/publish-docs.sh
