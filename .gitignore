@@ -38,3 +38,6 @@ tools/actionlist/dist/
 tools/actionlist/target/
 tools/actionlist/original/merged.yaml
 tools/actionlist/original/merged-frame.yaml
+
+# Issueごとのローカル作業記録（PR本文に必要な結果を転記する）
+/.ai-dlc/
