@@ -34,7 +34,7 @@
 4. マージ後の `master` の正確なSHAに新しい `vX.Y.Z` タグを付けます。既存タグは移動しません。Actionsの `refresh_docs` を `master`、`tags=vX.Y.Z` で手動実行し、対象世代ブランチからも手動実行します。対象世代ブランチはリリースIssueに明記し、`version.json` の `target_ver` と照合します。2026-11-23時点の最新世代ブランチは `9th` です。公開先は `conf.py` の版数表示ではなく、実行時のブランチrefを `tools/dev/docs-target.py` に渡した結果で決まります。
 5. `master` と対象世代ブランチそれぞれのActions成功とPagesへの反映を確認し、両サイトのHTML/PDF、変更履歴、アクションリストのリンク、生成元SHAとActions runのURLを記録します。反映後にGitHub Releaseの案内を公開します。
 
-作業の記録は [リリースIssue](../.github/ISSUE_TEMPLATE/release-task.md) のチェック項目を使います。Codexでの段階別の確認と承認境界は [リリース用手順](release-ai-dlc.md) を参照してください。
+作業の記録は [リリースIssue](../.github/ISSUE_TEMPLATE/release-task.md) のチェック項目を使います。Codex / Antigravityでの段階別の確認と承認境界は [リリース用手順](release-ai-dlc.md) を参照してください。
 
 ## 初回の切替
 

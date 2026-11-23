@@ -1,6 +1,6 @@
-# Codexから進めるリリース作業
+# Codex / Antigravityから進めるリリース作業
 
-対象は BlackPoker/BlackPoker の Release Task Issue です。既存Issueを選ぶか、対象がなければ新規に起票してから進めます。通常Issueのworktree管理、記録、PRの基本手順は [ai-dlc.md](ai-dlc.md) に従い、この文書ではリリース固有の判断と確認を定めます。[GitHub環境設定](github-setting.md#リリース手順) と [Release Taskテンプレート](../.github/ISSUE_TEMPLATE/release-task.md) も併せて確認します。
+対象は BlackPoker/BlackPoker の Release Task Issue です。既存Issueを選ぶか、対象がなければ新規に起票してから進めます。通常Issueのworktree管理、記録、PRの基本手順は [ai-dlc.md](ai-dlc.md) に従い、この文書では両AIに共通するリリース固有の判断と確認を定めます。Codexは [bp-releaseスキル](../.agents/skills/bp-release/SKILL.md)、Antigravityは [bp-releaseワークフロー](../.agents/workflows/bp-release.md) から入ります。[GitHub環境設定](github-setting.md#リリース手順) と [Release Taskテンプレート](../.github/ISSUE_TEMPLATE/release-task.md) も併せて確認します。
 
 ## 0. Release Task Issueを選ぶか作る
 

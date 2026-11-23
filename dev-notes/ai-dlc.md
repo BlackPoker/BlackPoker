@@ -23,6 +23,7 @@ Issue発行前の相談には [bp-task-plan](../.agents/skills/bp-task-plan/SKIL
 配置と呼び出しは [OpenAI公式のスキル資料](https://learn.chatgpt.com/docs/build-skills) を参照してください。
 Antigravityでは [bp-taskワークフロー](../.agents/workflows/bp-task.md) に同じ入力を渡します。
 どちらの入口もこの文書を正本とし、Issue/PRのテンプレートやGit操作を別実装にしません。
+Release Task Issueを選択・起票して進める場合はCodexの [bp-release](../.agents/skills/bp-release/SKILL.md) またはAntigravityの [bp-releaseワークフロー](../.agents/workflows/bp-release.md) を使い、リリース固有の手順は [release-ai-dlc.md](release-ai-dlc.md) を正本とします。
 
 | 入力 | 進め方 |
 | --- | --- |

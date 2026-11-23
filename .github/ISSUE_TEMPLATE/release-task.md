@@ -32,4 +32,4 @@ assignees: BlackPoker
 - [ ] 対象世代ブランチでも `refresh_docs` を手動実行し、その世代のHTML/PDF、変更履歴、アクションリストを確認する。世代側の公開元SHAとActionsのURLを記録する。
 - [ ] GitHub Releaseを発行し、対象のマイルストーンとプロジェクトを整理する。
 
-詳細は [リリース手順](https://github.com/BlackPoker/BlackPoker/blob/develop/dev-notes/github-setting.md#リリース手順) と [Codex用の段階別手順](https://github.com/BlackPoker/BlackPoker/blob/develop/dev-notes/release-ai-dlc.md) を参照。
+詳細は [リリース手順](https://github.com/BlackPoker/BlackPoker/blob/develop/dev-notes/github-setting.md#リリース手順) と [Codex / Antigravity用の段階別手順](https://github.com/BlackPoker/BlackPoker/blob/develop/dev-notes/release-ai-dlc.md) を参照。
