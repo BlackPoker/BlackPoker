@@ -317,6 +317,96 @@ export class GraveTopCoordinator {
   }
 
   /**
+   * 複数カードのバッチを一括して墓地に追加します（ブラックジャックのバースト等）。
+   * 物理カードを直接 player.grave に追加し、カードの同一性を保持します。
+   * - 実移動カード1枚: 自動的に新しい墓地TOPとして設定 (Decision不要)。
+   * - 実移動カード2枚以上: 墓地TOPを一旦クリアし、移動カード全件の中から所有者にTOP選択Decisionを要求するPendingを登録。
+   */
+  static addCardsBatchToGrave(
+    player: any,
+    cards: any[],
+    state: any,
+    playerKey: string,
+    logRecorder?: any,
+    effectInterpreter?: any,
+    context?: any,
+    options?: {
+      fromZone?: string;
+      skipCardMoved?: boolean;
+      command?: string;
+    }
+  ): { requiresDecision: boolean; candidateCardIds: string[] } {
+    if (!Array.isArray(player.grave)) {
+      player.grave = [];
+    }
+    const previousTop = player.graveTopCardId;
+    const fromZone = options?.fromZone || "life";
+    const skipCardMoved = options?.skipCardMoved === true;
+    const command = options?.command || "playBlackjack";
+
+    const validCards: any[] = [];
+    for (const card of cards) {
+      if (isCardLike(card)) {
+        player.grave.push(card);
+        validCards.push(card);
+        if (!skipCardMoved && effectInterpreter && context) {
+          effectInterpreter.dispatchEvent(
+            {
+              type: "cardMoved",
+              payload: {
+                card,
+                fromZone,
+                toZone: "grave",
+                playerKey,
+                cause: {
+                  type: "effect",
+                  command,
+                  actionId: context.currentAction?.id || context.currentRequest?.actionId,
+                  requestId: context.currentRequest?.id,
+                },
+              },
+            },
+            context
+          );
+        }
+      }
+    }
+
+    if (validCards.length === 0) {
+      return { requiresDecision: false, candidateCardIds: [] };
+    }
+
+    if (validCards.length === 1) {
+      const topCardId = validCards[0].id;
+      player.graveTopCardId = topCardId;
+      recordZoneTopChanged(
+        logRecorder,
+        state?.stateVersion ?? 1,
+        playerKey,
+        previousTop,
+        topCardId
+      );
+      return { requiresDecision: false, candidateCardIds: [] };
+    }
+
+    // 複数カード同時移動バッチ
+    player.graveTopCardId = undefined;
+    const candidateCardIds = validCards.map((c: any) => c.id);
+
+    if (!state.pendingGraveTopSelections) {
+      state.pendingGraveTopSelections = [];
+    }
+    state.pendingGraveTopSelections.push({
+      playerId: playerKey as PlayerKey,
+      candidateCardIds,
+      previousTopCardId: previousTop,
+      reason: "MULTI_CARD_GRAVE_MOVE",
+    });
+
+    return { requiresDecision: true, candidateCardIds };
+  }
+
+  /**
    * 墓地から物理カードを1枚取り出します（リアニメイト等）。
    * - 非TOP離脱: 墓地TOPは不変 (Decision不要)。
    * - TOP離脱かつ残存0枚: 墓地TOPは undefined (Decision不要)。

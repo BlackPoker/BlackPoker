@@ -2829,8 +2829,20 @@ export function recruitUnitsFromLifeHandler(
 
       for (let i = 0; i < eligibleCards.length; i++) {
         const card = eligibleCards[i];
+        let targetCompDef: any;
+        if (context.components && context.components.length > 0) {
+          targetCompDef = resolveComponentForUnit({
+            cards: [card],
+            face: "up",
+            zone: "field",
+            components: context.components,
+            componentType: "character",
+          });
+        }
+        const componentId = targetCompDef?.id || "character.soldier";
+
         const soldierUnit = buildFieldUnitFromComponent({
-          componentId: "character.soldier",
+          componentId,
           playerKey: context.playerKey,
           card,
           face: "up",
@@ -3118,29 +3130,19 @@ export function playBlackjackHandler(
 
     // 22点以上: バースト（全公開カードを墓地へ送る）
     if (score >= 22) {
-      for (const card of bjCards) {
-        player.grave.push(card);
-        if (effectInterpreter) {
-          effectInterpreter.dispatchEvent(
-            {
-              type: "cardMoved",
-              payload: {
-                card,
-                fromZone: "life",
-                toZone: "grave",
-                playerKey: context.playerKey,
-                cause: {
-                  type: "effect",
-                  command: "playBlackjack",
-                  actionId: context.currentAction?.id || context.currentRequest?.actionId,
-                  requestId: context.currentRequest?.id,
-                },
-              },
-            },
-            context
-          );
+      GraveTopCoordinator.addCardsBatchToGrave(
+        player,
+        bjCards,
+        context.state,
+        context.playerKey,
+        context.logRecorder,
+        effectInterpreter,
+        context,
+        {
+          fromZone: "life",
+          command: "playBlackjack",
         }
-      }
+      );
       delete context.selections["_bjCards"];
       delete context.selections[selectionKey];
       return;

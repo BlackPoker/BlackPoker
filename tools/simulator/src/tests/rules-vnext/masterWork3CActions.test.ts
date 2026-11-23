@@ -6,6 +6,7 @@ import { loadRulePackageFromDirectory } from "../../engine/rules/RuleLoader";
 import { loadRegulationCatalog } from "../../engine/regulation/RegulationLoader";
 import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
 import { calculateBlackjackScore } from "../../engine/rules/commandHandlers";
+import { hasHaste, isLegalAttackerCandidate } from "../../engine/rules/characterUtils";
 
 describe("作業3C: マスターアクション（徴募・B・J）統合検証", () => {
   let masterRulePackage: RulePackage;
@@ -407,6 +408,126 @@ describe("作業3C: マスターアクション（徴募・B・J）統合検証"
       // ライフには元々の1枚 + 戻った4枚で5枚
       expect(session.state.players.p1.life).toHaveLength(5);
     });
+
+    it("1.6: 適格カードのランクに応じた正確なコンポーネント解決（A→ace, 2..10→soldier, J..K→hero, Joker→magician）、ドライブ状態、召喚酔い、速攻、カード保存則の検証", () => {
+      const state = createBaseState();
+      state.players.p1.field = [
+        {
+          unitId: "u-bw-1",
+          componentId: "character.bulwark",
+          kind: "防壁",
+          cards: [{ id: "c-bw-1", suit: "D", rank: "2", value: 2 }],
+          face: "down",
+          state: "charge",
+          labels: ["defense"],
+        },
+        {
+          unitId: "u-bw-2",
+          componentId: "character.bulwark",
+          kind: "防壁",
+          cards: [{ id: "c-bw-2", suit: "D", rank: "3", value: 3 }],
+          face: "down",
+          state: "charge",
+          labels: ["defense"],
+        },
+      ];
+      // ♢10 + ♢10 (合計 20: 全カードが適格上限内)
+      state.players.p1.hand = [
+        { id: "c-d-10a", suit: "D", rank: "10", value: 10 },
+        { id: "c-d-10b", suit: "D", rank: "10", value: 10 },
+      ];
+      // ライフ: A, 5, K, Joker の4種別を配置 + 生存用ライフ1枚
+      state.players.p1.life = [
+        { id: "c-l-sa", suit: "S", rank: "A", value: 1 },
+        { id: "c-l-h5", suit: "H", rank: "5", value: 5 },
+        { id: "c-l-ck", suit: "C", rank: "K", value: 13 },
+        { id: "c-l-jk", suit: "J", rank: "Joker", value: 0 },
+        { id: "c-l-survive", suit: "D", rank: "2", value: 2 },
+      ];
+
+      const initialTotalCards =
+        state.players.p1.hand.length +
+        state.players.p1.field.length +
+        state.players.p1.life.length;
+
+      const session = new GameSession(state, masterRulePackage);
+      let step: any = session.advance();
+      const recruitRef = step.request.patterns.findIndex((p: any) => {
+        const act = step.request.catalog.actions[p.actionSelectionRef];
+        return act?.actionId === "action.recruit";
+      });
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: recruitRef,
+      });
+
+      resolveStageToEmpty(session);
+
+      // 1. 各カードのコンポーネント解決検証
+      const fieldUnits = session.state.players.p1.field;
+
+      // A -> character.ace
+      const aceUnit = fieldUnits.find((u: any) => u.cards[0]?.id === "c-l-sa");
+      expect(aceUnit).toBeDefined();
+      expect(aceUnit.componentId).toBe("character.ace");
+      expect(aceUnit.kind).toBe("エース");
+      expect(aceUnit.state).toBe("drive");
+      expect(aceUnit.face).toBe("up");
+      expect(aceUnit.enteredFieldTurn).toBe(1);
+
+      // 5 -> character.soldier
+      const soldierUnit = fieldUnits.find((u: any) => u.cards[0]?.id === "c-l-h5");
+      expect(soldierUnit).toBeDefined();
+      expect(soldierUnit.componentId).toBe("character.soldier");
+      expect(soldierUnit.kind).toBe("一般兵");
+      expect(soldierUnit.state).toBe("drive");
+      expect(soldierUnit.face).toBe("up");
+      expect(soldierUnit.enteredFieldTurn).toBe(1);
+
+      // K -> character.hero
+      const heroUnit = fieldUnits.find((u: any) => u.cards[0]?.id === "c-l-ck");
+      expect(heroUnit).toBeDefined();
+      expect(heroUnit.componentId).toBe("character.hero");
+      expect(heroUnit.kind).toBe("英雄");
+      expect(heroUnit.state).toBe("drive");
+      expect(heroUnit.face).toBe("up");
+      expect(heroUnit.enteredFieldTurn).toBe(1);
+
+      // Joker -> character.magician
+      const magicianUnit = fieldUnits.find((u: any) => u.cards[0]?.id === "c-l-jk");
+      expect(magicianUnit).toBeDefined();
+      expect(magicianUnit.componentId).toBe("character.magician");
+      expect(magicianUnit.kind).toBe("魔術士");
+      expect(magicianUnit.state).toBe("drive");
+      expect(magicianUnit.face).toBe("up");
+      expect(magicianUnit.enteredFieldTurn).toBe(1);
+
+      // 2. 速攻（hasHaste）と召喚酔い（isLegalAttackerCandidate）の検証
+      // エースは速攻を保持するため、召喚ターンでもアタッカー候補になれる
+      expect(hasHaste(aceUnit, masterRulePackage.components)).toBe(true);
+      expect(isLegalAttackerCandidate({ ...aceUnit, state: "charge" }, masterRulePackage.components, 1)).toBe(true);
+
+      // 一般兵、英雄は速攻を持たないため、召喚ターンには攻撃不可（召喚酔い）
+      expect(hasHaste(soldierUnit, masterRulePackage.components)).toBe(false);
+      expect(isLegalAttackerCandidate({ ...soldierUnit, state: "charge" }, masterRulePackage.components, 1)).toBe(false);
+
+      expect(hasHaste(heroUnit, masterRulePackage.components)).toBe(false);
+      expect(isLegalAttackerCandidate({ ...heroUnit, state: "charge" }, masterRulePackage.components, 1)).toBe(false);
+
+      // 魔術士は公式ルール上速攻（haste）を持つため、召喚ターンでもアタッカー候補になれる
+      expect(hasHaste(magicianUnit, masterRulePackage.components)).toBe(true);
+      expect(isLegalAttackerCandidate({ ...magicianUnit, state: "charge" }, masterRulePackage.components, 1)).toBe(true);
+
+      // 3. カード保存則（Total Card Count Invariant）の検証
+      // ライフから減った4枚が過不足なくフィールドに配置され、キーカード2枚は墓地へ送られている
+      const finalTotalCards =
+        session.state.players.p1.hand.length +
+        session.state.players.p1.field.reduce((sum: number, u: any) => sum + (u.cards?.length || 0), 0) +
+        session.state.players.p1.life.length +
+        session.state.players.p1.grave.reduce((sum: number, g: any) => sum + (Array.isArray(g.cards) ? g.cards.length : 1), 0);
+      expect(finalTotalCards).toBe(initialTotalCards);
+    });
   });
 
   // ==========================================================================
@@ -529,7 +650,7 @@ describe("作業3C: マスターアクション（徴募・B・J）統合検証"
       expect(session.state.players.p1.life.map((c: any) => c.id)).toEqual(["c-l-hk"]);
     });
 
-    it("2.4: ヒット選択後にバースト（22点以上）した場合、全公開カードが墓地へ移動して終了すること", () => {
+    it("2.4: ヒット選択後にバースト（22点以上）した場合、ZONE_TOP_SELECTION が発生し、選択したカードが墓地TOPになること", () => {
       const state = createBaseState();
       state.players.p1.hand = [
         { id: "c-a", suit: "S", rank: "A", value: 1 },
@@ -595,14 +716,43 @@ describe("作業3C: マスターアクション（徴募・B・J）統合検証"
         selectedPatternRef: hitRef2,
       });
 
-      // 3枚目めくりで25点（バースト）！Decision要求なく即時墓地送りで終了
+      // 3枚目めくりで25点（バースト）！
+      // 複数枚（3枚）のカードが同時に墓地へ送られたため、GraveTopCoordinator により墓地TOP選択が要求される
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      expect(step.request.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(session.state.pendingGraveTopSelections).toHaveLength(1);
+      expect(session.state.pendingGraveTopSelections[0].candidateCardIds).toEqual(["c-l-s10", "c-l-hk", "c-l-c5"]);
+      expect(step.request.catalog.effectSelections).toHaveLength(3);
+
+      // ♣5 (c-l-c5) を墓地TOPとして選択
+      const topSelectRef = step.request.patterns.findIndex((p: any) => {
+        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+        return effSel?.selectedValues?.includes("c-l-c5");
+      });
+      expect(topSelectRef).toBeGreaterThanOrEqual(0);
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: topSelectRef,
+      });
+
+      // 墓地TOP選択後の検証:
+      // 1. pendingGraveTopSelections が解消されていること
+      expect(session.state.pendingGraveTopSelections).toHaveLength(0);
+      // 2. 墓地TOP選択により ♣5 が墓地TOPに設定されたことが zone.top.changed ログに記録されていること
+      const topChangedLogs = session.logRecorder.getEvents().filter((l: any) => l.type === "zone.top.changed");
+      expect(topChangedLogs.some((l: any) => l.cardId === "c-l-c5" && l.playerId === "p1")).toBe(true);
+      // 3. アクション完了に伴い未配置キーカード (c-a, c-j) が墓地へ送られ、最終墓地TOPが c-j になること
+      expect(session.state.players.p1.graveTopCardId).toBe("c-j");
+      // 4. 公開カード ♠10, ♡K, ♣5 がすべて墓地に移動していること（Identity保持）
+      const graveCardIds = session.state.players.p1.grave.map((c: any) => c.id);
+      expect(graveCardIds).toContain("c-l-s10");
+      expect(graveCardIds).toContain("c-l-hk");
+      expect(graveCardIds).toContain("c-l-c5");
+
+      // ステージ解決完了（完了時にキーカード c-a, c-j が墓地へ送られる）
       resolveStageToEmpty(session);
 
-      // 検証:
-      // 公開カード ♠10, ♡K, ♣5 がすべて墓地に移動していること
-      expect(session.state.players.p1.grave.some((c: any) => c.id === "c-l-s10")).toBe(true);
-      expect(session.state.players.p1.grave.some((c: any) => c.id === "c-l-hk")).toBe(true);
-      expect(session.state.players.p1.grave.some((c: any) => c.id === "c-l-c5")).toBe(true);
       // 手札には加わっていないこと
       expect(session.state.players.p1.hand.some((c: any) => c.id === "c-l-s10")).toBe(false);
       // ライフは生存用の1枚
@@ -714,6 +864,360 @@ describe("作業3C: マスターアクション（徴募・B・J）統合検証"
       expect(session2.state.players.p1.life).toEqual(session1.state.players.p1.life);
       expect(session2.state.players.p1.grave).toEqual(session1.state.players.p1.grave);
       expect(session2.state.stage).toEqual(session1.state.stage);
+    });
+
+    it("2.7: バースト時の墓地TOP選択を含む一連の対戦が Replay / Undo で完全再現すること", () => {
+      const state = createBaseState();
+      state.players.p1.hand = [
+        { id: "c-a", suit: "S", rank: "A", value: 1 },
+        { id: "c-j", suit: "H", rank: "J", value: 11 },
+      ];
+      state.players.p1.life = [
+        { id: "c-l-s10", suit: "S", rank: "10", value: 10 },
+        { id: "c-l-hk", suit: "H", rank: "K", value: 13 },
+        { id: "c-l-c5", suit: "C", rank: "5", value: 5 },
+        { id: "c-l-survive", suit: "D", rank: "A", value: 1 },
+      ];
+
+      const initialSnapshot = JSON.parse(JSON.stringify(state));
+      const session = new GameSession(state, masterRulePackage);
+      const recordedDecisions: any[] = [];
+
+      let step: any = session.advance();
+      while (step.type === "WAITING_FOR_DECISION") {
+        let chosenRef = 0;
+        if (step.request.playerId === "p1" && recordedDecisions.length === 0) {
+          chosenRef = step.request.patterns.findIndex((p: any) => {
+            const act = step.request.catalog.actions[p.actionSelectionRef];
+            return act?.actionId === "action.bj";
+          });
+        } else if (step.request.source?.effectStepId === "playBlackjack") {
+          // ヒットを選択
+          chosenRef = step.request.patterns.findIndex((p: any) => {
+            const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+            return effSel?.selectedValues?.[0] === "hit" || p.patternId?.includes("hit");
+          });
+          if (chosenRef < 0) chosenRef = 0;
+        } else if (step.request.source?.type === "ZONE_TOP_SELECTION") {
+          // 墓地TOP選択: ♣5 を選択
+          chosenRef = step.request.patterns.findIndex((p: any) => {
+            const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+            return effSel?.selectedValues?.includes("c-l-c5");
+          });
+          if (chosenRef < 0) chosenRef = 0;
+        } else {
+          chosenRef = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+          if (chosenRef < 0) chosenRef = 0;
+        }
+
+        recordedDecisions.push({
+          decisionId: step.request.decisionId,
+          stateVersion: step.request.stateVersion,
+          selectedPatternRef: chosenRef,
+        });
+
+        step = session.submitDecision({
+          decisionId: step.request.decisionId,
+          stateVersion: step.request.stateVersion,
+          selectedPatternRef: chosenRef,
+        });
+
+        if (session.state.stage.requests.length === 0 && session.state.pendingGraveTopSelections.length === 0 && recordedDecisions.length >= 4) {
+          break;
+        }
+      }
+
+      // 墓地TOP選択ログに ♣5 が記録されていること
+      expect(session.logRecorder.getEvents().some((l: any) => l.type === "zone.top.changed" && l.cardId === "c-l-c5")).toBe(true);
+      expect(session.state.players.p1.grave.map((c: any) => c.id)).toContain("c-l-c5");
+
+      // Replay 実行
+      const replaySession = new GameSession(JSON.parse(JSON.stringify(initialSnapshot)), masterRulePackage);
+      let replayStep: any = replaySession.advance();
+      for (const dec of recordedDecisions) {
+        expect(replayStep.type).toBe("WAITING_FOR_DECISION");
+        expect(replayStep.request.stateVersion).toBe(dec.stateVersion);
+        replayStep = replaySession.submitDecision({
+          decisionId: replayStep.request.decisionId,
+          stateVersion: replayStep.request.stateVersion,
+          selectedPatternRef: dec.selectedPatternRef,
+        });
+      }
+
+      expect(replaySession.state.stateVersion).toBe(session.state.stateVersion);
+      expect(replaySession.state.players.p1.graveTopCardId).toBe(session.state.players.p1.graveTopCardId);
+      expect(replaySession.state.players.p1.grave).toEqual(session.state.players.p1.grave);
+      expect(replaySession.state.players.p1.life).toEqual(session.state.players.p1.life);
+    });
+  });
+
+  // ==========================================================================
+  // 3. ライフ不足と中断中状態・カード保存則・Undo検証
+  // ==========================================================================
+  describe("3. ライフ不足と中断中状態・カード保存則・Undo検証", () => {
+    it("3.1: 徴募の中断中（超過カード順序選択待ち）において、全ゲームカード保存則が厳密に成立すること", () => {
+      const state = createBaseState();
+      state.players.p1.field = [
+        {
+          unitId: "u-bw-1",
+          componentId: "character.bulwark",
+          kind: "防壁",
+          cards: [{ id: "c-bw-1", suit: "D", rank: "2", value: 2 }],
+          face: "down",
+          state: "charge",
+          labels: ["defense"],
+        },
+        {
+          unitId: "u-bw-2",
+          componentId: "character.bulwark",
+          kind: "防壁",
+          cards: [{ id: "c-bw-2", suit: "D", rank: "3", value: 3 }],
+          face: "down",
+          state: "charge",
+          labels: ["defense"],
+        },
+      ];
+      state.players.p1.hand = [
+        { id: "c-d-2", suit: "D", rank: "2", value: 2 },
+        { id: "c-d-3", suit: "D", rank: "3", value: 3 },
+      ];
+      // ライフ: 2枚適格, 2枚超過, 1枚BOT
+      state.players.p1.life = [
+        { id: "c-l-s3", suit: "S", rank: "3", value: 3 },
+        { id: "c-l-c6", suit: "C", rank: "6", value: 6 },
+        { id: "c-l-h8", suit: "H", rank: "8", value: 8 },
+        { id: "c-l-s2", suit: "S", rank: "2", value: 2 },
+        { id: "c-l-dk", suit: "D", rank: "K", value: 13 },
+      ];
+
+      // 初期カードIDリスト（全ゾーン）
+      const initialCardIds: string[] = [
+        ...state.players.p1.hand.map((c: any) => c.id),
+        ...state.players.p1.field.map((u: any) => u.cards[0].id),
+        ...state.players.p1.life.map((c: any) => c.id),
+      ].sort();
+
+      const session = new GameSession(state, masterRulePackage);
+      let step: any = session.advance();
+      const recruitRef = step.request.patterns.findIndex((p: any) => {
+        const act = step.request.catalog.actions[p.actionSelectionRef];
+        return act?.actionId === "action.recruit";
+      });
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: recruitRef,
+      });
+
+      // 解決を進め、順序選択待ち（中断状態）に到達させる
+      while (session.state.stage.requests.length > 0) {
+        if (step.type === "WAITING_FOR_DECISION" && step.request.source?.effectStepId === "recruitUnitsFromLife") {
+          break;
+        }
+        const passRef = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+        step = session.submitDecision({
+          decisionId: step.request.decisionId,
+          stateVersion: step.request.stateVersion,
+          selectedPatternRef: passRef,
+        });
+      }
+
+      expect(step.request.source?.effectStepId).toBe("recruitUnitsFromLife");
+
+      // 中断中（順序選択待ち）のカード走査:
+      // 手札 + フィールド + ライフ + 墓地 + stage上のキーカード + resolvingContext.selections._recruitExcessCards
+      const currentCardsInPlay: string[] = [
+        ...session.state.players.p1.hand.map((c: any) => c.id),
+        ...session.state.players.p1.field.flatMap((u: any) => u.cards.map((c: any) => c.id)),
+        ...session.state.players.p1.life.map((c: any) => c.id),
+        ...session.state.players.p1.grave.map((c: any) => c.id),
+        ...(session.state.stage?.requests?.flatMap((r: any) => r.keyCards?.map((c: any) => c.id) || []) || []),
+        ...(session.resolvingContext?.selections?.["_recruitExcessCards"]?.map((c: any) => c.id) || []),
+      ].sort();
+
+      expect(currentCardsInPlay).toEqual(initialCardIds);
+    });
+
+    it("3.2: BJの中断中（ヒット／スタンド選択待ち）において、全ゲームカード保存則が厳密に成立すること", () => {
+      const state = createBaseState();
+      state.players.p1.hand = [
+        { id: "c-a", suit: "S", rank: "A", value: 1 },
+        { id: "c-j", suit: "H", rank: "J", value: 11 },
+      ];
+      state.players.p1.life = [
+        { id: "c-l-s8", suit: "S", rank: "8", value: 8 },
+        { id: "c-l-hk", suit: "H", rank: "K", value: 13 },
+      ];
+
+      const initialCardIds: string[] = [
+        ...state.players.p1.hand.map((c: any) => c.id),
+        ...state.players.p1.life.map((c: any) => c.id),
+      ].sort();
+
+      const session = new GameSession(state, masterRulePackage);
+      let step: any = session.advance();
+      const bjRef = step.request.patterns.findIndex((p: any) => {
+        const act = step.request.catalog.actions[p.actionSelectionRef];
+        return act?.actionId === "action.bj";
+      });
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: bjRef,
+      });
+
+      // 解決へ進め、1回目のヒット/スタンド選択待ちに到達
+      while (session.state.stage.requests.length > 0) {
+        if (step.type === "WAITING_FOR_DECISION" && step.request.source?.effectStepId === "playBlackjack") {
+          break;
+        }
+        const passRef = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+        step = session.submitDecision({
+          decisionId: step.request.decisionId,
+          stateVersion: step.request.stateVersion,
+          selectedPatternRef: passRef,
+        });
+      }
+
+      expect(step.request.source?.effectStepId).toBe("playBlackjack");
+
+      // 中断中のカード走査:
+      // 手札 + ライフ + 墓地 + stage上のキーカード + resolvingContext.selections._bjCards
+      const currentCardsInPlay: string[] = [
+        ...session.state.players.p1.hand.map((c: any) => c.id),
+        ...session.state.players.p1.life.map((c: any) => c.id),
+        ...session.state.players.p1.grave.map((c: any) => c.id),
+        ...(session.state.stage?.requests?.flatMap((r: any) => r.keyCards?.map((c: any) => c.id) || []) || []),
+        ...(session.resolvingContext?.selections?.["_bjCards"]?.map((c: any) => c.id) || []),
+      ].sort();
+
+      expect(currentCardsInPlay).toEqual(initialCardIds);
+    });
+
+    it("3.3: BJにおけるライフ0枚時の動作検証（初期ライフ0枚での安全な即時終了）", () => {
+      const state = createBaseState();
+      state.players.p1.hand = [
+        { id: "c-a", suit: "S", rank: "A", value: 1 },
+        { id: "c-j", suit: "H", rank: "J", value: 11 },
+      ];
+      // ライフ0枚（本来ライフ0は敗北だが、効果解決時の境界値として安全に終了することを検証）
+      state.players.p1.life = [];
+
+      const session = new GameSession(state, masterRulePackage);
+      let step: any = session.advance();
+
+      // 勝敗判定で即時終了するか、または合法アクションから除外されるか、あるいは実行時安全に0枚終了するか
+      if (step.type === "WAITING_FOR_DECISION") {
+        const bjRef = step.request.patterns.findIndex((p: any) => {
+          const act = step.request.catalog.actions[p.actionSelectionRef];
+          return act?.actionId === "action.bj";
+        });
+        if (bjRef >= 0) {
+          step = session.submitDecision({
+            decisionId: step.request.decisionId,
+            stateVersion: step.request.stateVersion,
+            selectedPatternRef: bjRef,
+          });
+          // クラッシュせず安全に終了すること
+          expect(() => resolveStageToEmpty(session)).not.toThrow();
+          expect(session.state.players.p1.hand).toHaveLength(0); // キーカード2枚が消費されたのみ
+        }
+      }
+    });
+
+    it("3.4: 徴募の中断中からの Undo / Snapshot 復元と再決定の完全再現性検証", () => {
+      const state = createBaseState();
+      state.players.p1.field = [
+        {
+          unitId: "u-bw-1",
+          componentId: "character.bulwark",
+          kind: "防壁",
+          cards: [{ id: "c-bw-1", suit: "D", rank: "2", value: 2 }],
+          face: "down",
+          state: "charge",
+          labels: ["defense"],
+        },
+        {
+          unitId: "u-bw-2",
+          componentId: "character.bulwark",
+          kind: "防壁",
+          cards: [{ id: "c-bw-2", suit: "D", rank: "3", value: 3 }],
+          face: "down",
+          state: "charge",
+          labels: ["defense"],
+        },
+      ];
+      state.players.p1.hand = [
+        { id: "c-d-2", suit: "D", rank: "2", value: 2 },
+        { id: "c-d-3", suit: "D", rank: "3", value: 3 },
+      ];
+      state.players.p1.life = [
+        { id: "c-l-s3", suit: "S", rank: "3", value: 3 },
+        { id: "c-l-c6", suit: "C", rank: "6", value: 6 },
+        { id: "c-l-h8", suit: "H", rank: "8", value: 8 },
+        { id: "c-l-s2", suit: "S", rank: "2", value: 2 },
+        { id: "c-l-dk", suit: "D", rank: "K", value: 13 },
+      ];
+
+      const session = new GameSession(state, masterRulePackage);
+      let step: any = session.advance();
+      const recruitRef = step.request.patterns.findIndex((p: any) => {
+        const act = step.request.catalog.actions[p.actionSelectionRef];
+        return act?.actionId === "action.recruit";
+      });
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: recruitRef,
+      });
+
+      // 順序選択待ちまで進める
+      while (session.state.stage.requests.length > 0) {
+        if (step.type === "WAITING_FOR_DECISION" && step.request.source?.effectStepId === "recruitUnitsFromLife") {
+          break;
+        }
+        const passRef = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+        step = session.submitDecision({
+          decisionId: step.request.decisionId,
+          stateVersion: step.request.stateVersion,
+          selectedPatternRef: passRef,
+        });
+      }
+
+      expect(step.request.source?.effectStepId).toBe("recruitUnitsFromLife");
+
+      // この中断状態の Snapshot を作成
+      const snapshot = session.createSnapshot();
+
+      // パターン0で決定を提出して完了させる
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: 0,
+      });
+      resolveStageToEmpty(session);
+      const finalState1 = JSON.parse(JSON.stringify(session.state));
+
+      // Snapshot からセッションを復元 (Undo 相当)
+      const restoredSession = GameSession.fromSnapshot(snapshot, masterRulePackage);
+      let restoredStep: any = restoredSession.advance();
+      expect(restoredStep.type).toBe("WAITING_FOR_DECISION");
+      expect(restoredStep.request.source?.effectStepId).toBe("recruitUnitsFromLife");
+
+      // 再度同一の決定（パターン0）を提出
+      restoredStep = restoredSession.submitDecision({
+        decisionId: restoredStep.request.decisionId,
+        stateVersion: restoredStep.request.stateVersion,
+        selectedPatternRef: 0,
+      });
+      resolveStageToEmpty(restoredSession);
+      const finalState2 = JSON.parse(JSON.stringify(restoredSession.state));
+
+      // 2回の実行結果（状態、ライフ、フィールド、墓地）が完全に一致すること
+      expect(finalState2.players.p1.life).toEqual(finalState1.players.p1.life);
+      expect(finalState2.players.p1.field).toEqual(finalState1.players.p1.field);
+      expect(finalState2.players.p1.grave).toEqual(finalState1.players.p1.grave);
+      expect(finalState2.stateVersion).toBe(finalState1.stateVersion);
     });
   });
 });
