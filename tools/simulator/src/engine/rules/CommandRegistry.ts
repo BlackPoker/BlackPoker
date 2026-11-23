@@ -37,6 +37,8 @@ import {
   transformCharacterHandler,
   moveMatchingUnitsToGraveyardHandler,
   transformMatchingUnitsHandler,
+  recruitUnitsFromLifeHandler,
+  playBlackjackHandler,
 } from "./commandHandlers";
 import { ComponentDefinition, ActionDefinition, EffectCommand, ActionRequest, ActionRequestTarget } from "../../domain/rules/RulePackage";
 import { CostResolver } from "./CostResolver";
@@ -199,7 +201,7 @@ export interface CommandContext {
 }
 
 
-export type CommandHandler = (args: Record<string, any>, context: CommandContext) => void;
+export type CommandHandler = (args: Record<string, any>, context: CommandContext) => void | EffectInterruption;
 
 /**
  * 高レベル命令（createFog, summonUnit 等）を登録・解釈・実行するレジストリ。
@@ -253,13 +255,13 @@ export class CommandRegistry {
   /**
    * 命令を実行する
    */
-  execute(name: string, args: Record<string, any>, context: CommandContext) {
+  execute(name: string, args: Record<string, any>, context: CommandContext): void | EffectInterruption {
     const handler = this.handlers.get(name);
     if (!handler) {
       throw new Error(`未定義の高レベル命令です: ${name}`);
     }
     context.matchSeed = context.matchSeed ?? this.matchSeed;
-    handler(args, context);
+    return handler(args, context);
   }
 
   /**
@@ -884,10 +886,14 @@ export class CommandRegistry {
       selections,
     };
 
-    const startPath: readonly number[] =
-      continuation.effectStepId === "zoneTopSelection" || continuation.effectStepId === "selectUnitCardOrder"
-        ? (continuation.effectPath ?? [0])
-        : EffectPathCodec.advanceLastIndex(continuation.effectPath ?? [0]);
+    const isResumingSameStep =
+      continuation.effectStepId === "zoneTopSelection" ||
+      continuation.effectStepId === "selectUnitCardOrder" ||
+      continuation.effectStepId === "recruitUnitsFromLife" ||
+      continuation.effectStepId === "playBlackjack";
+    const startPath: readonly number[] = isResumingSameStep
+      ? (continuation.effectPath ?? [0])
+      : EffectPathCodec.advanceLastIndex(continuation.effectPath ?? [0]);
     const execResult = this.effectInterpreter.executeEffectsWithInterruption(
       action.effect,
       resolveContext,
@@ -1214,6 +1220,14 @@ export class CommandRegistry {
     this.register(
       "transformMatchingUnits",
       transformMatchingUnitsHandler(this.expressionEvaluator, this.effectInterpreter)
+    );
+    this.register(
+      "recruitUnitsFromLife",
+      recruitUnitsFromLifeHandler(this.expressionEvaluator, this.effectInterpreter)
+    );
+    this.register(
+      "playBlackjack",
+      playBlackjackHandler(this.expressionEvaluator, this.effectInterpreter)
     );
   }
 }

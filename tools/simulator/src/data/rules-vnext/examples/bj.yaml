@@ -1,0 +1,36 @@
+actions:
+  - id: action.bj
+    name: B・J
+    ruby: ビージェー
+    type: magic
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: quick
+
+    key:
+      id: keys
+      count: 2
+      conditions:
+        - card:
+            rank: "A"
+            zone: hand
+        - card:
+            rank: "J"
+            zone: hand
+
+    text:
+      effect: >
+        1. 合計点を0とし、自分のライフの山札から1枚めくり表向きにする。公開したカードをまとめて公開カードと呼ぶ。
+        2. めくったカードの点数を合計点に加える。
+        - Aは11点として扱う。ただし合計点が22点以上になる場合は1点として扱う。
+        - J,Q,Kは10点、Jokerは0点、2〜10は数字どおりとして扱う。
+        3. 合計点が22点以上になった場合、公開カードをすべて墓地に置き、効果を終了する。
+        4. 合計点が21点以下の場合、ヒットもしくはスタンドを行う。
+        - ヒット: さらに1枚めくり、手順2に戻る。
+        - スタンド: 公開カードすべてを手札に加え、効果を終了する。
+
+    effect:
+      - playBlackjack:
+          target: self

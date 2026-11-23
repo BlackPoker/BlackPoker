@@ -62,8 +62,8 @@ describe("RuleLoader Node & Browser Consistency Tests (Phase 21B)", () => {
     expect(nodeActionIds).toContain("action.reverse");
     expect(browserActionIds).toContain("action.reverse");
 
-    // 実総数の確認 (全41アクション、全12コンポーネント)
-    expect(browserActionIds.length).toBe(41);
+    // 実総数の確認 (全43アクション、全12コンポーネント)
+    expect(browserActionIds.length).toBe(43);
     expect(browserCompIds.length).toBe(12);
   });
 

@@ -12,7 +12,7 @@ import {
   resolveComponentForUnit,
 } from "./characterUtils";
 import { CommandHandler, finalizeRequestKeyCards, cancelStageRequest } from "./CommandRegistry";
-import { validateCompleteOrder } from "./OrderSelectionValidator";
+import { validateCompleteOrder, validatePartialOrder } from "./OrderSelectionValidator";
 import { findPhysicalCardInGrave, removePhysicalCardFromGrave, isCardLike, isDirectCard, hasUnitWrapperProperty } from "./graveCardUtils";
 import { moveUnitToGraveyard, moveUnitToHand, resolveUniqueFieldUnitById } from "./unitMovementUtils";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
@@ -26,7 +26,7 @@ import { ExpressionEvaluator } from "./ExpressionEvaluator";
 import { AbilityEvaluator } from "./AbilityEvaluator";
 import { TurnManager } from "./TurnManager";
 import { calculateDamageJudge, applyDamageJudgeResult, cleanupTransientBattleState } from "./damageJudgeUtils";
-import { isCardInGameZones, isSamePrintedCard, isCanonicalPrintedCard, isJokerCard } from "./cardUtils";
+import { isCardInGameZones, isSamePrintedCard, isCanonicalPrintedCard, isJokerCard, rankToValue } from "./cardUtils";
 import { deriveRuntimeShuffleSeed, shuffleDeterministic } from "../random/DeterministicShuffle";
 import { SeededRandom } from "../random/RandomSource";
 
@@ -2691,5 +2691,505 @@ export function transformMatchingUnitsHandler(
         });
       }
     }
+  };
+}
+
+/**
+ * ブラックジャックの点数計算ルールに基づきカード群の合計スコアを算出します。
+ * - A: 基本 11 点。ただし合計が 22 点以上になる場合は 1 点として扱う。
+ * - J, Q, K: 10 点。
+ * - Joker: 0 点。
+ * - 2〜10: 数字どおり。
+ */
+export function calculateBlackjackScore(cards: any[]): number {
+  if (!Array.isArray(cards) || cards.length === 0) return 0;
+
+  let aces = 0;
+  let nonAceTotal = 0;
+
+  for (const card of cards) {
+    if (!card) continue;
+    const rankStr = String(card.rank ?? "").trim().toUpperCase();
+    const isJoker = isJokerCard(card) || rankStr === "JOKER" || rankStr === "0";
+    if (isJoker) {
+      continue;
+    }
+    if (rankStr === "A" || card.value === 1) {
+      aces++;
+    } else if (
+      rankStr === "J" ||
+      rankStr === "Q" ||
+      rankStr === "K" ||
+      card.value === 11 ||
+      card.value === 12 ||
+      card.value === 13
+    ) {
+      nonAceTotal += 10;
+    } else {
+      const val =
+        typeof card.value === "number" && card.value >= 2 && card.value <= 10
+          ? card.value
+          : parseInt(rankStr, 10);
+      nonAceTotal += isNaN(val) ? 0 : val;
+    }
+  }
+
+  if (aces === 0) {
+    return nonAceTotal;
+  }
+
+  let bestScore = nonAceTotal + aces * 11;
+  let remainingAcesToDowngrade = aces;
+
+  while (bestScore >= 22 && remainingAcesToDowngrade > 0) {
+    bestScore -= 10;
+    remainingAcesToDowngrade--;
+  }
+
+  return bestScore;
+}
+
+/**
+ * recruitUnitsFromLife: ライフの一番上から最大4枚めくり、
+ * キーカード合計値以下のカードを兵士としてドライブ状態で場に出す。
+ * 残りのカードをライフの一番下に好きな順で戻す。
+ */
+export function recruitUnitsFromLifeHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter?: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const player = context.state.players?.[context.playerKey];
+    if (!player) {
+      throw new Error(`recruitUnitsFromLife: プレイヤーが見つかりません (${context.playerKey})`);
+    }
+    if (!Array.isArray(player.life)) {
+      player.life = [];
+    }
+    if (!Array.isArray(player.field)) {
+      player.field = [];
+    }
+
+    const selectionKey = "recruitOrder";
+    if (!context.selections) {
+      context.selections = {};
+    }
+
+    const storedExcessCards: any[] | undefined = context.selections["_recruitExcessCards"];
+
+    // 1. 初回実行（まだ超過カードが保持されていない場合）
+    if (!storedExcessCards) {
+      let maxSize: number;
+      if (typeof args.maxSize === "number") {
+        maxSize = args.maxSize;
+      } else if (typeof args.maxSize === "string" && args.maxSize.trim().length > 0) {
+        maxSize = Number(expressionEvaluator.resolveBindingValue(args.maxSize, context));
+      } else {
+        const keyCards = Array.isArray(context.keyCards) && context.keyCards.length > 0
+          ? context.keyCards
+          : (context.keyCard ? [context.keyCard] : []);
+        maxSize = keyCards.reduce((acc: number, c: any) => acc + (c.value ?? rankToValue(c.rank)), 0);
+      }
+
+      const maxCards = typeof args.maxCards === "number" ? args.maxCards : 4;
+      const revealCount = Math.min(maxCards, player.life.length);
+      const revealedCards: any[] = [];
+
+      for (let i = 0; i < revealCount; i++) {
+        const card = player.life.shift();
+        if (card) {
+          revealedCards.push(card);
+          if (effectInterpreter) {
+            effectInterpreter.dispatchEvent(
+              {
+                type: "cardRevealed",
+                payload: {
+                  playerKey: context.playerKey,
+                  target: "all",
+                  card,
+                  sourceZone: "life",
+                },
+              },
+              context
+            );
+          }
+        }
+      }
+
+      const eligibleCards: any[] = [];
+      const excessCards: any[] = [];
+      for (const card of revealedCards) {
+        const val = card.value ?? rankToValue(card.rank);
+        if (val <= maxSize) {
+          eligibleCards.push(card);
+        } else {
+          excessCards.push(card);
+        }
+      }
+
+      for (let i = 0; i < eligibleCards.length; i++) {
+        const card = eligibleCards[i];
+        const soldierUnit = buildFieldUnitFromComponent({
+          componentId: "character.soldier",
+          playerKey: context.playerKey,
+          card,
+          face: "up",
+          state: "drive",
+          components: context.components,
+          stateVersion: context.state.stateVersion || 1,
+          turnCount: context.state.turnCount ?? 1,
+          disambiguator: i,
+        });
+        player.field.push(soldierUnit);
+        if (effectInterpreter) {
+          effectInterpreter.dispatchEvent(
+            {
+              type: "cardMoved",
+              payload: {
+                card,
+                fromZone: "life",
+                toZone: "field",
+                playerKey: context.playerKey,
+                targetUnitId: soldierUnit.unitId,
+                cause: {
+                  type: "effect",
+                  command: "recruitUnitsFromLife",
+                  actionId: context.currentAction?.id || context.currentRequest?.actionId,
+                  requestId: context.currentRequest?.id,
+                },
+              },
+            },
+            context
+          );
+        }
+      }
+
+      if (excessCards.length === 0) {
+        return;
+      }
+
+      if (excessCards.length === 1) {
+        player.life.push(excessCards[0]);
+        if (effectInterpreter) {
+          effectInterpreter.dispatchEvent(
+            {
+              type: "cardMoved",
+              payload: {
+                card: excessCards[0],
+                fromZone: "life",
+                toZone: "life",
+                playerKey: context.playerKey,
+                cause: {
+                  type: "effect",
+                  command: "recruitUnitsFromLife",
+                  actionId: context.currentAction?.id || context.currentRequest?.actionId,
+                  requestId: context.currentRequest?.id,
+                },
+              },
+            },
+            context
+          );
+        }
+        return;
+      }
+
+      context.selections["_recruitExcessCards"] = excessCards;
+      return {
+        interrupted: true,
+        effectIndex: 0,
+        effectStepId: "recruitUnitsFromLife",
+        selectionId: selectionKey,
+        selectionType: "order",
+        candidates: excessCards,
+        decisionPlayerKey: context.playerKey,
+      };
+    }
+
+    // 2. 再開実行（超過カードの順序選択）
+    const excessCards: any[] = storedExcessCards;
+    const candidateCardIds = excessCards.map((c) => c.id);
+    const currentSelection = context.selections[selectionKey];
+
+    let partialOrder: string[] = [];
+    if (Array.isArray(currentSelection)) {
+      validatePartialOrder(currentSelection, candidateCardIds);
+      partialOrder = currentSelection;
+    }
+
+    if (partialOrder.length === excessCards.length) {
+      validateCompleteOrder(partialOrder, candidateCardIds);
+      for (const cardId of partialOrder) {
+        const card = excessCards.find((c) => c.id === cardId);
+        if (card) {
+          player.life.push(card);
+          if (effectInterpreter) {
+            effectInterpreter.dispatchEvent(
+              {
+                type: "cardMoved",
+                payload: {
+                  card,
+                  fromZone: "life",
+                  toZone: "life",
+                  playerKey: context.playerKey,
+                  cause: {
+                    type: "effect",
+                    command: "recruitUnitsFromLife",
+                    actionId: context.currentAction?.id || context.currentRequest?.actionId,
+                    requestId: context.currentRequest?.id,
+                  },
+                },
+              },
+              context
+            );
+          }
+        }
+      }
+      delete context.selections["_recruitExcessCards"];
+      return;
+    }
+
+    const remainingCardIds = candidateCardIds.filter((id) => !partialOrder.includes(id));
+
+    if (remainingCardIds.length === 1) {
+      const finalOrder = [...partialOrder, remainingCardIds[0]];
+      validateCompleteOrder(finalOrder, candidateCardIds);
+      context.selections[selectionKey] = finalOrder;
+      for (const cardId of finalOrder) {
+        const card = excessCards.find((c) => c.id === cardId);
+        if (card) {
+          player.life.push(card);
+          if (effectInterpreter) {
+            effectInterpreter.dispatchEvent(
+              {
+                type: "cardMoved",
+                payload: {
+                  card,
+                  fromZone: "life",
+                  toZone: "life",
+                  playerKey: context.playerKey,
+                  cause: {
+                    type: "effect",
+                    command: "recruitUnitsFromLife",
+                    actionId: context.currentAction?.id || context.currentRequest?.actionId,
+                    requestId: context.currentRequest?.id,
+                  },
+                },
+              },
+              context
+            );
+          }
+        }
+      }
+      delete context.selections["_recruitExcessCards"];
+      return;
+    }
+
+    return {
+      interrupted: true,
+      effectIndex: 0,
+      effectStepId: "recruitUnitsFromLife",
+      selectionId: selectionKey,
+      selectionType: "order",
+      candidates: excessCards,
+      decisionPlayerKey: context.playerKey,
+    };
+  };
+}
+
+/**
+ * playBlackjack: ライフからカードを1枚めくり、点数を計算する。
+ * - 22以上: バースト（全公開カードを墓地へ送る）
+ * - 21以下: ヒットまたはスタンドを選択
+ *   - ヒット: もう1枚めくる
+ *   - スタンド: 全公開カードを手札に加える
+ * - ライフ切れ: 自動的にスタンド
+ */
+export function playBlackjackHandler(
+  expressionEvaluator: ExpressionEvaluator,
+  effectInterpreter?: EffectInterpreter
+): CommandHandler {
+  return (args, context) => {
+    const player = context.state.players?.[context.playerKey];
+    if (!player) {
+      throw new Error(`playBlackjack: プレイヤーが見つかりません (${context.playerKey})`);
+    }
+    if (!Array.isArray(player.life)) {
+      player.life = [];
+    }
+    if (!Array.isArray(player.hand)) {
+      player.hand = [];
+    }
+    if (!Array.isArray(player.grave)) {
+      player.grave = [];
+    }
+
+    const selectionKey = "bjAction";
+    if (!context.selections) {
+      context.selections = {};
+    }
+
+    let bjCards: any[] = context.selections["_bjCards"];
+    const rawAction = context.selections[selectionKey];
+    const currentAction = Array.isArray(rawAction) ? rawAction[0] : rawAction;
+
+    // 1. 初回実行（まだカードをめくっていない場合）
+    if (!bjCards) {
+      bjCards = [];
+      context.selections["_bjCards"] = bjCards;
+
+      if (player.life.length === 0) {
+        delete context.selections["_bjCards"];
+        return;
+      }
+
+      const card = player.life.shift();
+      if (card) {
+        bjCards.push(card);
+        if (effectInterpreter) {
+          effectInterpreter.dispatchEvent(
+            {
+              type: "cardRevealed",
+              payload: {
+                playerKey: context.playerKey,
+                target: "all",
+                card,
+                sourceZone: "life",
+              },
+            },
+            context
+          );
+        }
+      }
+    } else if (currentAction === "hit") {
+      // 2. ヒット選択後の再開（もう1枚めくる）
+      context.selections[selectionKey] = undefined;
+      if (player.life.length > 0) {
+        const card = player.life.shift();
+        if (card) {
+          bjCards.push(card);
+          if (effectInterpreter) {
+            effectInterpreter.dispatchEvent(
+              {
+                type: "cardRevealed",
+                payload: {
+                  playerKey: context.playerKey,
+                  target: "all",
+                  card,
+                  sourceZone: "life",
+                },
+              },
+              context
+            );
+          }
+        }
+      }
+    } else if (currentAction === "stand") {
+      // 3. スタンド選択後の再開（全公開カードを手札に加えて完了）
+      for (const card of bjCards) {
+        player.hand.push(card);
+        if (effectInterpreter) {
+          effectInterpreter.dispatchEvent(
+            {
+              type: "cardMoved",
+              payload: {
+                card,
+                fromZone: "life",
+                toZone: "hand",
+                playerKey: context.playerKey,
+                cause: {
+                  type: "effect",
+                  command: "playBlackjack",
+                  actionId: context.currentAction?.id || context.currentRequest?.actionId,
+                  requestId: context.currentRequest?.id,
+                },
+              },
+            },
+            context
+          );
+        }
+      }
+      delete context.selections["_bjCards"];
+      delete context.selections[selectionKey];
+      return;
+    }
+
+    // 4. 点数計算および分岐判定
+    const score = calculateBlackjackScore(bjCards);
+
+    // 22点以上: バースト（全公開カードを墓地へ送る）
+    if (score >= 22) {
+      for (const card of bjCards) {
+        player.grave.push(card);
+        if (effectInterpreter) {
+          effectInterpreter.dispatchEvent(
+            {
+              type: "cardMoved",
+              payload: {
+                card,
+                fromZone: "life",
+                toZone: "grave",
+                playerKey: context.playerKey,
+                cause: {
+                  type: "effect",
+                  command: "playBlackjack",
+                  actionId: context.currentAction?.id || context.currentRequest?.actionId,
+                  requestId: context.currentRequest?.id,
+                },
+              },
+            },
+            context
+          );
+        }
+      }
+      delete context.selections["_bjCards"];
+      delete context.selections[selectionKey];
+      return;
+    }
+
+    // 21点以下でライフが0枚: 自動スタンド（これ以上引けない）
+    if (player.life.length === 0) {
+      for (const card of bjCards) {
+        player.hand.push(card);
+        if (effectInterpreter) {
+          effectInterpreter.dispatchEvent(
+            {
+              type: "cardMoved",
+              payload: {
+                card,
+                fromZone: "life",
+                toZone: "hand",
+                playerKey: context.playerKey,
+                cause: {
+                  type: "effect",
+                  command: "playBlackjack",
+                  actionId: context.currentAction?.id || context.currentRequest?.actionId,
+                  requestId: context.currentRequest?.id,
+                },
+              },
+            },
+            context
+          );
+        }
+      }
+      delete context.selections["_bjCards"];
+      delete context.selections[selectionKey];
+      return;
+    }
+
+    // 21点以下でライフが残っている: ヒット／スタンド選択を要求
+    const options = [
+      { value: "hit", label: `ヒット（もう1枚引く / 現在${score}点）` },
+      { value: "stand", label: `スタンド（手札に加える / 現在${score}点）` },
+    ];
+
+    return {
+      interrupted: true,
+      effectIndex: 0,
+      effectStepId: "playBlackjack",
+      selectionId: selectionKey,
+      selectionType: "option",
+      candidates: options,
+      decisionPlayerKey: context.playerKey,
+    };
   };
 }

@@ -30,7 +30,10 @@ describe("Lightweight Benchmark (BP-SIM-AI-REQUEST-CONDITIONED-SELECTION-V1 - Fe
     const frame = catalog.frames.get(reg.frameId)!;
     const outcome = OfficialRegulationMatchSetup.setupMatch(reg, frame, rulePackage, seed);
     if (outcome.type !== "READY") throw new Error(outcome.reason);
-    return new GameSession(outcome.state, rulePackage);
+    return new GameSession(outcome.state, rulePackage, {
+      matchId: outcome.state.matchId,
+      matchSeed: seed,
+    });
   };
 
   it("Benchmark A: Single DecisionRequest Encode + Score + Argmax Throughput", () => {

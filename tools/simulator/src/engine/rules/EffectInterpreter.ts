@@ -183,7 +183,7 @@ export class EffectInterpreter {
         this.executeEffects(args.else, context);
       }
     } else {
-      this.registry.execute(name, args, context);
+      return this.registry.execute(name, args, context);
     }
   }
 
@@ -680,7 +680,19 @@ export class EffectInterpreter {
         continue;
       }
 
-      this.executeEffect(effect, context);
+      const commandResult = this.executeEffect(effect, context);
+      if (
+        commandResult &&
+        typeof commandResult === "object" &&
+        "interrupted" in commandResult &&
+        commandResult.interrupted
+      ) {
+        return {
+          ...commandResult,
+          effectIndex: commandResult.effectIndex ?? i,
+          effectPath: commandResult.effectPath ?? EffectPathCodec.createTopLevelPath(i),
+        };
+      }
 
       // コマンド単位即時中断 (Immediate Post-Command Interruption)
       // 最後のeffectであっても、pendingGraveTopSelectionsが存在すれば必ず中断する (i < effects.length - 1 ガード撤廃)

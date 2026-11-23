@@ -1,0 +1,32 @@
+actions:
+  - id: action.recruit
+    name: 徴募
+    ruby: ちょうぼ
+    type: magic
+    uncounterable: true
+
+    request:
+      trigger: direct
+      speed: normal
+      timing: main
+
+    cost: BB
+
+    key:
+      id: keys
+      count: 2
+      condition:
+        card:
+          suit: diamond
+          rank: "A..10"
+          zone: hand
+
+    text:
+      effect: >
+        1. ライフの一番上から4枚めくり、キーカードの合計値以下のカードを兵士としてドライブ状態で場に出す。
+        2. 残りのカードをライフの一番下に好きな順で移す。
+
+    effect:
+      - recruitUnitsFromLife:
+          maxCards: 4
+          maxSize: keyCards.totalRankValue

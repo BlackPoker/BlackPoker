@@ -117,7 +117,7 @@ describe("マスター＋ストラテジー カタログ＆レギュレーショ
 
     // C. 実際の rules-vnext ディレクトリから解決した場合の検証
     // 作業3B時点でマスター専用4アクション（swordRain, force, surprise, rsf）のYAMLが追加されたため、
-    // 解決されるアクションは プロ31 + ストラテジー4 + マスター4 = 39 アクションとなる（未実装2アクションが安全に除外される）。
+    // 作業3C完了により、全41アクション（プロ31 + ストラテジー4 + マスター6）がすべて実YAML解決される。
     const rulesDir = path.resolve(__dirname, "../../data/rules-vnext");
     const actualBasePackage = await loadRulePackageFromDirectory(rulesDir);
     const actualDerivedPackage = RegulationRulePackageSelector.selectRulePackage(
@@ -126,14 +126,11 @@ describe("マスター＋ストラテジー カタログ＆レギュレーショ
       regulation,
       frame
     );
-    expect(actualDerivedPackage.actions.length).toBe(39);
+    expect(actualDerivedPackage.actions.length).toBe(41);
 
-    // 未解決のアクションIDが残りのマスター専用2アクション（recruit, bj）であることを確認
+    // 未解決のアクションIDが 0 件（すべて実解決）であることを確認
     const resolvedActionIds = new Set(actualDerivedPackage.actions.map((a) => a.id));
     const unresolvedActionIds = combinedActionIds.filter((id) => !resolvedActionIds.has(id));
-    expect(unresolvedActionIds).toEqual([
-      "action.recruit",
-      "action.bj",
-    ]);
+    expect(unresolvedActionIds).toEqual([]);
   });
 });

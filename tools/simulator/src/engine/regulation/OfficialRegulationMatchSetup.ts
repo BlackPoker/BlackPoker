@@ -348,6 +348,7 @@ export class OfficialRegulationMatchSetup {
       stateVersion: 1,
       version: 1,
       matchId,
+      matchSeed,
       regulationId: regulation.id,
       formatId: regulation.formatId,
       frameId: regulation.frameId,

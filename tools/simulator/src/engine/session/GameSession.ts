@@ -137,7 +137,7 @@ export class GameSession {
     }
     this.rulePackage = rulePackage;
     this.registry = options?.registry || new CommandRegistry();
-    this.matchSeed = options?.matchSeed;
+    this.matchSeed = options?.matchSeed ?? (this.state as any)?.matchSeed;
     this.registry.setMatchSeed(this.matchSeed);
     this.matchId = options?.matchId || `match-${Date.now()}`;
     this.passTracker = options?.passTracker || new PassTracker();

@@ -109,7 +109,7 @@ describe("action.search (サーチ) & Immediate Life Selection Tests [BP-SIM-REG
 
     // Master format (Full RulePackage: 41 actions)
     expect(rulePackage.actions.some((a) => a.id === "action.search")).toBe(true);
-    expect(rulePackage.actions.length).toBe(41);
+    expect(rulePackage.actions.length).toBe(43);
   });
 
   // ===========================================================================
