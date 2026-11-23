@@ -40,7 +40,8 @@ import {
 export class ScenarioAuthoringResolver {
   public static resolve(
     draft: ScenarioAuthoringDraftV1,
-    catalog: RegulationCatalog
+    catalog: RegulationCatalog,
+    options?: { allowUnimplemented?: boolean }
   ): ScenarioAuthoringResult {
     const errors: ScenarioValidationError[] = [];
 
@@ -65,9 +66,14 @@ export class ScenarioAuthoringResolver {
     }
 
     const regValidation = RegulationValidator.validateRegulation(catalog, regId, {
-      assertImplemented: true,
+      assertImplemented: !options?.allowUnimplemented,
     });
-    if (!regValidation.ruleLegal || !regValidation.simulatorImplemented || !regValidation.regulation || !regValidation.frame) {
+    if (
+      !regValidation.ruleLegal ||
+      (!regValidation.simulatorImplemented && !options?.allowUnimplemented) ||
+      !regValidation.regulation ||
+      !regValidation.frame
+    ) {
       errors.push({
         code: "UNSUPPORTED_ENVIRONMENT",
         path: "environmentId",

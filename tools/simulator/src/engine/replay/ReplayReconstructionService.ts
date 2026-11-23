@@ -46,6 +46,7 @@ export interface ReconstructMatchParams {
     readonly id?: string;
     readonly version?: string;
   };
+  readonly allowUnimplemented?: boolean;
 }
 
 export type ReconstructMatchResult =
@@ -112,6 +113,7 @@ export function reconstructMatch(
       scenarioHandSelections: params.scenarioHandSelections,
       catalog: params.catalog,
       fullRulePackage: params.fullRulePackage,
+      allowUnimplemented: params.allowUnimplemented,
     });
 
     if (outcome.type !== "READY") {

@@ -44,6 +44,7 @@ export interface ScenarioCompilerOptions {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   };
+  readonly allowUnimplemented?: boolean;
 }
 
 export type ScenarioCompileOutcome =
@@ -135,7 +136,8 @@ export class ScenarioCompiler {
    */
   public static validateDefinition(
     definition: ScenarioDefinitionV1,
-    catalog: RegulationCatalog
+    catalog: RegulationCatalog,
+    options?: { allowUnimplemented?: boolean }
   ): ScenarioValidationResult {
     const parseResult = parseScenarioDefinitionV1(definition);
     if (!parseResult.success) {
@@ -155,7 +157,7 @@ export class ScenarioCompiler {
       });
     } else {
       const regValidation = RegulationValidator.validateRegulation(catalog, regId);
-      if (!regValidation.ruleLegal || !regValidation.simulatorImplemented) {
+      if (!regValidation.ruleLegal || (!regValidation.simulatorImplemented && !options?.allowUnimplemented)) {
         errors.push({
           code: "UNSUPPORTED_ENVIRONMENT",
           path: "environmentId",
@@ -180,7 +182,9 @@ export class ScenarioCompiler {
     options?: ScenarioCompilerOptions
   ): ScenarioCompileOutcome {
     // 1. 静的バリデーション
-    const staticValidation = this.validateDefinition(definition, catalog);
+    const staticValidation = this.validateDefinition(definition, catalog, {
+      allowUnimplemented: options?.allowUnimplemented,
+    });
     if (!staticValidation.valid) {
       return {
         type: "VALIDATION_ERROR",
@@ -192,7 +196,7 @@ export class ScenarioCompiler {
     const errors: ScenarioValidationError[] = [];
     const regId = extractRegulationId(definition.environmentId)!;
     const regValidation = RegulationValidator.validateRegulation(catalog, regId, {
-      assertImplemented: true,
+      assertImplemented: !options?.allowUnimplemented,
     });
 
     const regulation = regValidation.regulation!;

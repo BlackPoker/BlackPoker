@@ -171,10 +171,16 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
 }) => {
   // 利用可能な公式環境一覧（simulatorImplemented === true のみ。Core Battle は対象外）
   // 通常対戦画面 (getAvailableEnvironments) と同一の順序・定義 (SSOT) を使用
+  const isPreviewMode = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.search);
+    return params.get("preview") === "all" || params.get("preview") === "mast";
+  }, []);
+
   const officialEnvironments = useMemo(() => {
-    return getAvailableEnvironments(catalog)
+    return getAvailableEnvironments(catalog, { includeUnimplemented: isPreviewMode })
       .filter((env) => env.isOfficial && env.id !== "official:core-battle");
-  }, [catalog]);
+  }, [catalog, isPreviewMode]);
 
   const resolveDeckProfileForEnv = useCallback(
     (envId: string) => {
@@ -585,8 +591,10 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
 
   // ScenarioAuthoringResolver による自動補完解決
   const authoringResult = useMemo(() => {
-    return ScenarioAuthoringResolver.resolve(authoringDraft, catalog);
-  }, [authoringDraft, catalog]);
+    return ScenarioAuthoringResolver.resolve(authoringDraft, catalog, {
+      allowUnimplemented: isPreviewMode,
+    });
+  }, [authoringDraft, catalog, isPreviewMode]);
 
   // Canonical な ScenarioDefinitionV1 (Resolver解決結果またはエラー時フォールバック)
   const currentDefinition: ScenarioDefinitionV1 = useMemo(() => {
@@ -656,8 +664,9 @@ export const ScenarioBuilderModal: React.FC<ScenarioBuilderModalProps> = ({
     const rareCount = currentFrame?.setup.rareCardCount ?? 0;
     return ScenarioCompiler.compile(authoringResult.definition, catalog, fullRulePackage, {
       rareCardSelections: rareCount > 0 ? rareCardSelections : undefined,
+      allowUnimplemented: isPreviewMode,
     });
-  }, [authoringResult, catalog, fullRulePackage, currentFrame, rareCardSelections]);
+  }, [authoringResult, catalog, fullRulePackage, currentFrame, rareCardSelections, isPreviewMode]);
 
   // カード追加用ローカル入力ステート (P1/P2共通または個別)
   const [activeTab, setActiveTab] = useState<"p1" | "p2" | "settings">(initialTab ?? "settings");

@@ -259,9 +259,11 @@ export function parsePlaytestShareUrl(
       };
     }
 
+    const isPreview = params.get("preview") === "all" || params.get("preview") === "mast";
+
     try {
       const regVal = RegulationValidator.validateRegulation(catalog, regId);
-      if (!regVal.simulatorImplemented) {
+      if (!regVal.simulatorImplemented && !isPreview) {
         const err = `未実装または未サポートのレギュレーションです: "${def.environmentId}"`;
         return {
           kind: "INVALID_SHARE",
@@ -373,7 +375,8 @@ export function parsePlaytestShareUrl(
   }
 
   const warnings: string[] = [];
-  const availableEnvs = getAvailableEnvironments(catalog);
+  const isPreview = params.get("preview") === "all" || params.get("preview") === "mast";
+  const availableEnvs = getAvailableEnvironments(catalog, { includeUnimplemented: isPreview });
 
   // 1. 環境ID (env) の検証
   const rawEnv = params.get("env");

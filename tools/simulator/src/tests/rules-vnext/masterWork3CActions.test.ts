@@ -570,6 +570,190 @@ describe("作業3C: マスターアクション（徴募・B・J）統合検証"
       ])).toBe(22);
     });
 
+    it("2.1.2: A → A → 10 のめくり順序において、動的再評価方式によりバーストを回避し、12点でスタンドして手札に加えられること（逐次加算方式との差異保証）", () => {
+      const state = createBaseState();
+      state.players.p1.hand = [
+        { id: "c-a", suit: "S", rank: "A", value: 1 },
+        { id: "c-j", suit: "H", rank: "J", value: 11 },
+      ];
+      // ライフ構成:
+      // 1枚目: ♠A (11点)
+      // 2枚目: ♡A (動的再評価で 11 + 1 = 12点)
+      // 3枚目: ♠10 (動的再評価で 1 + 1 + 10 = 12点。逐次加算方式なら 12 + 10 = 22 でバースト)
+      // 4枚目: 生存用ライフ
+      state.players.p1.life = [
+        { id: "c-l-sa", suit: "S", rank: "A", value: 1 },
+        { id: "c-l-ha", suit: "H", rank: "A", value: 1 },
+        { id: "c-l-s10", suit: "S", rank: "10", value: 10 },
+        { id: "c-l-survive", suit: "D", rank: "2", value: 2 },
+      ];
+
+      const session = new GameSession(state, masterRulePackage);
+      let step: any = session.advance();
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+
+      const bjRef = step.request.patterns.findIndex((p: any) => {
+        const act = step.request.catalog.actions[p.actionSelectionRef];
+        return act?.actionId === "action.bj";
+      });
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: bjRef,
+      });
+
+      // パスでステージを進めて 1枚目めくり後（♠A = 11点）の選択へ
+      while (session.state.stage.requests.length > 0) {
+        if (step.type === "WAITING_FOR_DECISION" && step.request.source?.effectStepId === "playBlackjack") {
+          break;
+        }
+        const passRef = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+        step = session.submitDecision({
+          decisionId: step.request.decisionId,
+          stateVersion: step.request.stateVersion,
+          selectedPatternRef: passRef,
+        });
+      }
+
+      // 1回目選択: ヒットを選択 (♡A をめくる)
+      const hitRef1 = step.request.patterns.findIndex((p: any) => {
+        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+        return effSel?.selectedValues?.[0] === "hit" || p.patternId?.includes("hit");
+      });
+      expect(hitRef1).toBeGreaterThanOrEqual(0);
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: hitRef1,
+      });
+
+      // 2回目選択へ到達（1枚目A + 2枚目A = 12点）
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      expect(step.request.source?.effectStepId).toBe("playBlackjack");
+
+      // 2回目選択: ヒットを選択 (♠10 をめくる)
+      const hitRef2 = step.request.patterns.findIndex((p: any) => {
+        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+        return effSel?.selectedValues?.[0] === "hit" || p.patternId?.includes("hit");
+      });
+      expect(hitRef2).toBeGreaterThanOrEqual(0);
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: hitRef2,
+      });
+
+      // 3回目選択へ到達（動的再評価により A+A+10 = 1+1+10 = 12点。バーストせず選択肢が提示される！）
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      expect(step.request.source?.effectStepId).toBe("playBlackjack");
+
+      // 3回目選択: スタンドを選択
+      const standRef = step.request.patterns.findIndex((p: any) => {
+        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+        return effSel?.selectedValues?.[0] === "stand" || p.patternId?.includes("stand");
+      });
+      expect(standRef).toBeGreaterThanOrEqual(0);
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: standRef,
+      });
+
+      resolveStageToEmpty(session);
+
+      // めくられた3枚すべて（♠A, ♡A, ♠10）が手札に加わっていること
+      expect(session.state.players.p1.hand.some((c: any) => c.id === "c-l-sa")).toBe(true);
+      expect(session.state.players.p1.hand.some((c: any) => c.id === "c-l-ha")).toBe(true);
+      expect(session.state.players.p1.hand.some((c: any) => c.id === "c-l-s10")).toBe(true);
+      // ライフには生存用ライフのみ残る
+      expect(session.state.players.p1.life.map((c: any) => c.id)).toEqual(["c-l-survive"]);
+    });
+
+    it("2.1.3: A → 2 → 9 のめくり順序において、動的再評価方式により12点でスタンドできること", () => {
+      const state = createBaseState();
+      state.players.p1.hand = [
+        { id: "c-a", suit: "S", rank: "A", value: 1 },
+        { id: "c-j", suit: "H", rank: "J", value: 11 },
+      ];
+      // ライフ構成:
+      // 1枚目: ♠A (11点)
+      // 2枚目: ♠2 (11 + 2 = 13点)
+      // 3枚目: ♠9 (動的再評価で 1 + 2 + 9 = 12点。バースト回避)
+      // 4枚目: 生存用ライフ
+      state.players.p1.life = [
+        { id: "c-l-sa", suit: "S", rank: "A", value: 1 },
+        { id: "c-l-s2", suit: "S", rank: "2", value: 2 },
+        { id: "c-l-s9", suit: "S", rank: "9", value: 9 },
+        { id: "c-l-survive", suit: "D", rank: "2", value: 2 },
+      ];
+
+      const session = new GameSession(state, masterRulePackage);
+      let step: any = session.advance();
+      const bjRef = step.request.patterns.findIndex((p: any) => {
+        const act = step.request.catalog.actions[p.actionSelectionRef];
+        return act?.actionId === "action.bj";
+      });
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: bjRef,
+      });
+
+      // パスでステージを進めて1枚目めくり後へ
+      while (session.state.stage.requests.length > 0) {
+        if (step.type === "WAITING_FOR_DECISION" && step.request.source?.effectStepId === "playBlackjack") {
+          break;
+        }
+        const passRef = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+        step = session.submitDecision({
+          decisionId: step.request.decisionId,
+          stateVersion: step.request.stateVersion,
+          selectedPatternRef: passRef,
+        });
+      }
+
+      // 1回目選択: ヒット (♠2 をめくる -> 13点)
+      const hitRef1 = step.request.patterns.findIndex((p: any) => {
+        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+        return effSel?.selectedValues?.[0] === "hit" || p.patternId?.includes("hit");
+      });
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: hitRef1,
+      });
+
+      // 2回目選択: ヒット (♠9 をめくる -> 動的再評価で 1+2+9 = 12点)
+      const hitRef2 = step.request.patterns.findIndex((p: any) => {
+        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+        return effSel?.selectedValues?.[0] === "hit" || p.patternId?.includes("hit");
+      });
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: hitRef2,
+      });
+
+      // 3回目選択: スタンド
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      const standRef = step.request.patterns.findIndex((p: any) => {
+        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+        return effSel?.selectedValues?.[0] === "stand" || p.patternId?.includes("stand");
+      });
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: standRef,
+      });
+
+      resolveStageToEmpty(session);
+
+      expect(session.state.players.p1.hand.some((c: any) => c.id === "c-l-sa")).toBe(true);
+      expect(session.state.players.p1.hand.some((c: any) => c.id === "c-l-s2")).toBe(true);
+      expect(session.state.players.p1.hand.some((c: any) => c.id === "c-l-s9")).toBe(true);
+      expect(session.state.players.p1.life.map((c: any) => c.id)).toEqual(["c-l-survive"]);
+    });
+
     it("2.2: YAML 定義が正しく読み込まれ、キーカード A と J、タイミング quick、コストなしであること", () => {
       const action = masterRulePackage.actions.find((a) => a.id === "action.bj");
       expect(action).toBeDefined();

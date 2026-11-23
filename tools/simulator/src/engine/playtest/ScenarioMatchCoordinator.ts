@@ -50,6 +50,7 @@ export interface PrepareScenarioMatchParams {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   };
+  readonly allowUnimplemented?: boolean;
 }
 
 export type PrepareScenarioMatchResult =
@@ -92,6 +93,7 @@ export function prepareScenarioMatchAttempt(
   // 1. Prepare: Scenario コンパイル
   const outcome = ScenarioCompiler.compile(definition, catalog, fullRulePackage, {
     rareCardSelections: params.rareCardSelections,
+    allowUnimplemented: params.allowUnimplemented,
   });
   if (outcome.type !== "READY") {
     const errorMsg = outcome.errors

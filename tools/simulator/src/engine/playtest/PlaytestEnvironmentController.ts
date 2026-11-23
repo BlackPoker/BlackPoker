@@ -162,16 +162,21 @@ export const FORMAT_PRESENTATION_ORDER: Record<string, number> = {
   light: 100,
   standard: 200,
   pro: 300,
+  mast: 400,
 };
 
 /**
  * レギュレーションカタログから、実装済み（simulatorImplemented === true）の公式環境を動的に列挙します。
- * Core Battle（擬似環境）を常に先頭に含み、公式環境はFormat難易度順（Light < Standard < Pro）に決定論的ソートされます。
+ * options.includeUnimplemented が true の場合は、未公開・プレビュー環境も含めて列挙します。
+ * Core Battle（擬似環境）を常に先頭に含み、公式環境はFormat難易度順（Light < Standard < Pro < Master）に決定論的ソートされます。
  * 同一 Format 内は意味論を持たない決定論的 tie-break（regId.localeCompare）により順序付けされ、
  * Catalog の Map 登録順に依存しません。
  */
-export function getAvailableEnvironments(catalog: RegulationCatalog): EnvironmentOption[] {
-  const options: EnvironmentOption[] = [
+export function getAvailableEnvironments(
+  catalog: RegulationCatalog,
+  options?: { includeUnimplemented?: boolean }
+): EnvironmentOption[] {
+  const optionsList: EnvironmentOption[] = [
     {
       id: CORE_BATTLE_ENV_ID,
       name: "Core Battle（開発・検証）",
@@ -191,7 +196,7 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
 
   for (const reg of catalog.regulations.values()) {
     const validation = RegulationValidator.validateRegulation(catalog, reg.id);
-    if (validation.simulatorImplemented) {
+    if (validation.simulatorImplemented || options?.includeUnimplemented) {
       const deckProfileNotice = SimulatorDeckProfileResolver.getDeckProfileNotice(
         reg.id,
         validation.frame?.id
@@ -226,10 +231,10 @@ export function getAvailableEnvironments(catalog: RegulationCatalog): Environmen
   });
 
   for (const item of officialCandidates) {
-    options.push(item.option);
+    optionsList.push(item.option);
   }
 
-  return options;
+  return optionsList;
 }
 
 /**
@@ -296,6 +301,7 @@ export interface MatchStartRequest {
     readonly p1?: readonly CardOccurrenceSelection[];
     readonly p2?: readonly CardOccurrenceSelection[];
   };
+  readonly allowUnimplemented?: boolean;
 }
 
 export type MatchStartOutcome =
@@ -485,7 +491,7 @@ export function startMatchAttempt(request: MatchStartRequest): MatchStartOutcome
       }
 
       const validation = RegulationValidator.validateRegulation(request.catalog, regulationId, {
-        assertImplemented: true,
+        assertImplemented: !request.allowUnimplemented,
       });
 
       const officialRulePackage = RegulationRulePackageSelector.selectRulePackage(

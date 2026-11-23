@@ -132,6 +132,7 @@ export interface BuildUndoReconstructParamsArgs {
   readonly targetTranscript: readonly any[];
   readonly catalog: any;
   readonly fullRulePackage: any;
+  readonly allowUnimplemented?: boolean;
 }
 
 export function buildUndoReconstructParams(
@@ -147,6 +148,7 @@ export function buildUndoReconstructParams(
     catalog: args.catalog,
     fullRulePackage: args.fullRulePackage,
     expectedRulePackage: args.activeMatch.rulePackage,
+    allowUnimplemented: args.allowUnimplemented,
   };
 }
 
@@ -160,14 +162,22 @@ export const CoreBattlePlaytest: React.FC = () => {
   } = usePlaytestUserPreferences();
   const [fullRulePackage] = useState(() => loadRulePackageForBrowser());
   const [catalog] = useState(() => loadRegulationCatalogForBrowser());
-  const environmentOptions = useMemo(() => getAvailableEnvironments(catalog), [catalog]);
+  const isPreviewMode = useMemo(() => {
+    if (typeof window === "undefined") return false;
+    const params = new URLSearchParams(window.location.search);
+    return params.get("preview") === "all" || params.get("preview") === "mast";
+  }, []);
+  const environmentOptions = useMemo(
+    () => getAvailableEnvironments(catalog, { includeUnimplemented: isPreviewMode }),
+    [catalog, isPreviewMode]
+  );
   const [rulePackage] = useState(() => getPlaytestRulePackage(fullRulePackage));
   const sessionRef = useRef<GameSession | null>(null);
   const seqRef = useRef<number>(1);
 
   // Pending 設定（UI入力中・対戦セッションには「新しい対戦」押下まで反映されない）
   const [selectedEnvironmentId, setSelectedEnvironmentId] = useState<string>(() =>
-    chooseDefaultPlaytestEnvironment(getAvailableEnvironments(catalog))
+    chooseDefaultPlaytestEnvironment(getAvailableEnvironments(catalog, { includeUnimplemented: isPreviewMode }))
   );
   const [seedMode, setSeedMode] = useState<PlaytestSeedMode>("auto");
   const [pendingAutoSeed, setPendingAutoSeed] = useState<number>(() => generateAutoSeed());
@@ -725,6 +735,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         matchMode: mode,
         rareCardSelections: pendingRareCardSelections,
         scenarioHandSelections: pendingScenarioHandSelections,
+        allowUnimplemented: isPreviewMode,
       });
 
       if (outcome.type !== "READY") {
@@ -817,6 +828,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         humanSeat: effectiveHumanSeat,
         policyId: effectivePolicyId,
         rareCardSelections: effectiveRareSelections,
+        allowUnimplemented: isPreviewMode,
       });
 
       if (result.status !== "READY") {
@@ -1441,6 +1453,7 @@ export const CoreBattlePlaytest: React.FC = () => {
         targetTranscript,
         catalog,
         fullRulePackage,
+        allowUnimplemented: isPreviewMode,
       })
     );
 

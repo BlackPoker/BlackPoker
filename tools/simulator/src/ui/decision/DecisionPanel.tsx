@@ -621,6 +621,18 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   // EFFECT_RESOLUTION 用の人間可読パターンリスト
   const humanReadableEffectPatterns = useMemo(() => {
     const rawPatterns = patterns.map((p, idx) => {
+      // 順序選択 (p.orderSelectionRef)
+      if (p.orderSelectionRef !== undefined && catalog.orderSelections) {
+        const ord = catalog.orderSelections[p.orderSelectionRef];
+        if (ord) {
+          return {
+            patternIndex: idx,
+            label: ord.summary || "順序選択",
+            selectedValues: ord.orderedIds || [],
+          };
+        }
+      }
+
       const eff = p.effectSelectionRef !== undefined ? catalog.effectSelections[p.effectSelectionRef] : undefined;
       if (!eff) return { patternIndex: idx, label: "効果の選択", selectedValues: [] };
 
