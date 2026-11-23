@@ -1259,16 +1259,11 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
         return !isFog;
       });
 
-      if (removedFogs.length === 0) continue;
-
       if (!player.grave) {
         player.grave = [];
       }
 
-      const fogUnits: any[] = [];
-      const fogEventsToDispatch: any[] = [];
-
-      // 各除去されたフォグについて仮想ユニット構築およびイベントデータ準備
+      // 各除去されたフォグについて墓地移動およびイベント発行
       for (const fog of removedFogs) {
         const fogCards = Array.isArray(fog.cards) && fog.cards.length > 0
           ? fog.cards
@@ -1281,15 +1276,21 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
           cards: fogCards,
           labels: [],
         };
-
         if (fogCards.length > 0) {
-          fogUnits.push(fogUnit);
+          GraveTopCoordinator.addUnitToGrave(
+            player,
+            fogUnit,
+            context.state,
+            playerKey,
+            context.logRecorder
+          );
         } else {
+          if (!player.grave) player.grave = [];
           player.grave.push(fogUnit);
         }
 
-        // fogRemoved イベント
-        fogEventsToDispatch.push({
+        // fogRemoved イベントを必ず発行
+        const fogEvent = {
           type: "fogRemoved",
           payload: {
             fogId: fog.fogId,
@@ -1299,28 +1300,23 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
             fromZone: "fog",
             toZone: "grave",
             playerKey: playerKey, // owner
-          },
-        });
-      }
+          }
+        };
+        effectInterpreter.dispatchEvent(fogEvent, context);
 
-      // プレイヤーごとの一括バッチ墓地移動（複数カード時は pendingGraveTopSelections へ登録）
-      // addUnitsBatchToGrave 内で各カードについて fromZone: "fog" の cardMoved イベントが発行される
-      if (fogUnits.length > 0) {
-        GraveTopCoordinator.addUnitsBatchToGrave(
-          player,
-          fogUnits,
-          context.state,
-          playerKey,
-          context.logRecorder,
-          effectInterpreter,
-          context,
-          { fromZone: "fog" }
-        );
-      }
-
-      // fogRemoved イベント発行
-      for (const ev of fogEventsToDispatch) {
-        effectInterpreter.dispatchEvent(ev, context);
+        // 各カードについて cardMoved イベントを発行
+        for (const card of fogCards) {
+          const moveEvent = {
+            type: "cardMoved",
+            payload: {
+              card,
+              fromZone: "fog",
+              toZone: "grave",
+              playerKey: playerKey,
+            }
+          };
+          effectInterpreter.dispatchEvent(moveEvent, context);
+        }
       }
     }
   };
@@ -2537,7 +2533,7 @@ export function moveMatchingUnitsToGraveyardHandler(
 
     const components = context.components || [];
 
-    // === Phase 1: Preflight Validation (All-or-Nothing) ===
+    // === Stage 1: 事前検証 (All-or-Nothing) ===
     // 全プレイヤーのフィールドを走査し、除去対象ユニットを特定・事前検証する
     const targetsByPlayer = new Map<
       string,
@@ -2567,7 +2563,7 @@ export function moveMatchingUnitsToGraveyardHandler(
         }
 
         if (matches) {
-          // Preflight: ユニット構造とカードの完全性チェック
+          // 事前検証: ユニット構造とカードの完全性チェック
           if (!Array.isArray(unit.cards) || unit.cards.length === 0) {
             throw new Error(
               `moveMatchingUnits: 不正なユニット構造です (unitId: ${unit.unitId}, cards が存在しないか空です)`
@@ -2595,7 +2591,7 @@ export function moveMatchingUnitsToGraveyardHandler(
       targetsByPlayer.set(pKey, { player, unitsToRemove, remainingUnits });
     }
 
-    // === Phase 2: Atomic Commit ===
+    // === Stage 2: アトミックコミット ===
     // すべての検証をパスした後にのみ、盤面状態（field）を更新し墓地へ一括移動する
     for (const [pKey, { player, unitsToRemove, remainingUnits }] of targetsByPlayer.entries()) {
       if (unitsToRemove.length === 0) continue;

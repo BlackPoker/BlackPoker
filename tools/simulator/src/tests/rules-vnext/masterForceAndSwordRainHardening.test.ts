@@ -297,10 +297,10 @@ describe("Master + Strategy Hardening: Force Size Calculation, Batch Fog Removal
   });
 
   // ==========================================================================
-  // 2. 複数Fogの同時除去のバッチ化・墓地TOP選択・保存則・ログ整合性
+  // 2. 複数Fogの同時除去の墓地TOP選択・既存対戦互換性・保存則・ログ整合性
   // ==========================================================================
-  describe("2. Batch Fog Removal: Single Fog x2, Force + Single Fog, Multi-Player Fogs", () => {
-    it("2.1: Same player has 2 single-card Fogs -> Batch moved, pendingGraveTopSelections queued for player", () => {
+  describe("2. Fog Removal: Single Fog Compatibility, Force Multi-Card Fog, Multi-Player Fogs", () => {
+    it("2.1: Same player has 2 single-card Fogs -> Sequential grave addition, NO pending decision (existing match compatibility), last fog becomes graveTop", () => {
       const state = createBaseState();
       const cleanupHandler = cleanupFogsHandler(effectInterpreter);
 
@@ -341,17 +341,59 @@ describe("Master + Strategy Hardening: Force Size Calculation, Batch Fog Removal
       expect(state.players.p1.grave[0].cards[0].id).toBe("c-fog-1");
       expect(state.players.p1.grave[1].cards[0].id).toBe("c-fog-2");
 
-      // 複数カード移動のため pendingGraveTopSelections に登録され、自動で上書きされていないこと
+      // 既存対戦互換: 単一カードFogのみの場合は Decision を発生させず、最後のFogが墓地TOPになる
+      expect(state.pendingGraveTopSelections).toHaveLength(0);
+      expect(state.players.p1.graveTopCardId).toBe("c-fog-2");
+
+      // カード保存則検証
+      expect(getAllPlayerCardIds(state.players.p1)).toEqual(initialCards);
+    });
+
+    it("2.2: 2-card Force Fog -> Automatically queues pendingGraveTopSelections with candidateCardIds [force1, force2]", () => {
+      const state = createBaseState();
+      const cleanupHandler = cleanupFogsHandler(effectInterpreter);
+
+      const forceCard1 = { id: "c-force-1", suit: "H", rank: "5", value: 5 };
+      const forceCard2 = { id: "c-force-2", suit: "H", rank: "7", value: 7 };
+
+      state.players.p1.fog = [
+        {
+          fogId: "fog-force",
+          componentId: "fog.force",
+          cards: [forceCard1, forceCard2],
+        },
+      ];
+
+      const initialCards = getAllPlayerCardIds(state.players.p1);
+
+      const context: CommandContext = {
+        playerKey: "p1",
+        state,
+        components: mockComponents,
+        logRecorder,
+      };
+
+      cleanupHandler({}, context);
+
+      // フォグ領域は空になる
+      expect(state.players.p1.fog).toHaveLength(0);
+      expect(state.players.p1.grave).toHaveLength(1);
+      expect(state.players.p1.grave[0].cards).toHaveLength(2);
+
+      // 複数カード（フォース）の移動のため pendingGraveTopSelections に登録される
       expect(state.pendingGraveTopSelections).toHaveLength(1);
       expect(state.pendingGraveTopSelections[0].playerId).toBe("p1");
-      expect(state.pendingGraveTopSelections[0].candidateCardIds).toEqual(["c-fog-1", "c-fog-2"]);
+      expect(state.pendingGraveTopSelections[0].candidateCardIds).toEqual([
+        "c-force-1",
+        "c-force-2",
+      ]);
       expect(state.players.p1.graveTopCardId).toBeUndefined();
 
       // カード保存則検証
       expect(getAllPlayerCardIds(state.players.p1)).toEqual(initialCards);
     });
 
-    it("2.2: Same player has 2-card Force Fog and 1-card Fog -> 3 cards total moved, candidateCardIds contains all 3", () => {
+    it("2.3: Same player has 2-card Force Fog and 1-card Fog -> Force Fog queues pending, single Fog does not overwrite pending selection", () => {
       const state = createBaseState();
       const cleanupHandler = cleanupFogsHandler(effectInterpreter);
 
@@ -386,39 +428,39 @@ describe("Master + Strategy Hardening: Force Size Calculation, Batch Fog Removal
       expect(state.players.p1.fog).toHaveLength(0);
       expect(state.players.p1.grave).toHaveLength(2);
 
+      // フォースFogの pending 選択が単一Fogによって上書きされず保護される
       expect(state.pendingGraveTopSelections).toHaveLength(1);
       expect(state.pendingGraveTopSelections[0].playerId).toBe("p1");
       expect(state.pendingGraveTopSelections[0].candidateCardIds).toEqual([
         "c-force-1",
         "c-force-2",
-        "c-single",
       ]);
+      expect(state.players.p1.graveTopCardId).toBeUndefined();
 
+      // 全3枚が墓地へ移動し、カード保存則が満たされる
       expect(getAllPlayerCardIds(state.players.p1)).toEqual(initialCards);
     });
 
-    it("2.3: Both players have multiple Fogs -> Independent pendingGraveTopSelections for both p1 and p2", () => {
+    it("2.4: Both players have 2-card Force Fogs -> Independent pendingGraveTopSelections for both p1 and p2", () => {
       const state = createBaseState();
       const cleanupHandler = cleanupFogsHandler(effectInterpreter);
 
-      // p1: 2枚
+      // p1: 2枚フォース
       state.players.p1.fog = [
         {
-          fogId: "fog-p1-1",
-          componentId: "fog.statue",
-          cards: [{ id: "c-p1-1", suit: "S", rank: "3", value: 3 }],
-        },
-        {
-          fogId: "fog-p1-2",
-          componentId: "fog.statue",
-          cards: [{ id: "c-p1-2", suit: "S", rank: "4", value: 4 }],
+          fogId: "fog-p1-force",
+          componentId: "fog.force",
+          cards: [
+            { id: "c-p1-1", suit: "S", rank: "3", value: 3 },
+            { id: "c-p1-2", suit: "S", rank: "4", value: 4 },
+          ],
         },
       ];
 
-      // p2: 2枚
+      // p2: 2枚フォース
       state.players.p2.fog = [
         {
-          fogId: "fog-p2-1",
+          fogId: "fog-p2-force",
           componentId: "fog.force",
           cards: [
             { id: "c-p2-1", suit: "H", rank: "2", value: 2 },
