@@ -10,7 +10,7 @@ Issue → 調査・計画承認 → 実装 → 検証 → 確認用push → ブ�
 - `gh --version` と `gh auth status --hostname github.com` で実行環境を確認します。`gh` が見つからない場合は実行パス・導入状況を確認し、認証情報をチャットやリポジトリへ貼り付けません。
 - GitHub API操作は `gh`、fetch/pushはGitを使用します。CopilotやGitHub用MCPは必要ありません。
 - 開始スクリプトはAIを自動起動しません。Codexアプリ/CLIまたはAntigravity App/IDEで、出力されたworktreeのルートだけを開きます。親の複数フォルダーworkspaceを流用しません。
-- 基点は `-Base` に**リモート上のブランチ名**を指定します（remote名を付けない）。未指定時はGitHubの現在のデフォルトブランチを取得します。
+- 基点は `-Base` に**リモート上のブランチ名**を指定します（remote名を付けない）。未指定時はGitHubの現在のデフォルトブランチを取得します。切替後の通常開発はデフォルトの `develop` を基点にします。正式リリースを `master` に昇格する場合は基点を明示します。
 
 ## 2. Issueの入口
 
@@ -167,10 +167,7 @@ git diff --stat "$($context.baseCommit)...HEAD"
 git log --oneline "$($context.baseCommit)..HEAD"
 ```
 
-既存 `refresh_docs.yaml` はブランチ名をシェルと公開ディレクトリに直接使用します。
-この手順では確認サイト用に英数字から始まる英数字・ハイフン・アンダースコア・ドットの**単一階層**の新規ブランチ（例: `issue-123-docs`）を推奨します。
-スラッシュを含む既存ブランチ名を改名してはいけません。その場合は公開先の親子関係やシェル安全性を別途確認してから、既存運用に従います。
-公開先がデフォルトブランチ・安定版・他作業のサイトと重ならないことも確認します。
+新規の確認用ブランチは単一階層の名前 (例: `issue-123-docs`) を使うと、公開URLから対象を判別できます。公開先の決定方法と既存URLの扱いは [GitHub環境設定](github-setting.md#公開先) を参照してください。公開先が開発版・安定版・世代別サイト・他の確認サイトと重ならないことを確認します。
 
 ```powershell
 if ($branch -notmatch '^[A-Za-z0-9][A-Za-z0-9._-]*$' -or $branch.Contains('..')) { throw '既存workflowの公開パスを個別確認してください' }
@@ -187,8 +184,8 @@ gh run list --repo $repo --workflow refresh_docs.yaml --branch $branch --event w
 失敗したら `gh run view <run-id> --repo <repo> --log-failed` で原因を確認し、失敗として報告します。
 同じSHAのrunが複数ある場合は起動時刻で区別します。
 
-公式ルールの確認先は `https://blackpoker.github.io/BlackPoker/<ブランチ>/` です。
-実際のブランチ名をURLエンコードして提示します。公開先はこのルール用workflowで確認したものです。
+公式ルールの確認先は `https://blackpoker.github.io/BlackPoker/<公開先>/` です。
+公開先の各階層をURLエンコードして提示します。公開先はこのルール用workflowで確認したものです。
 Pagesへの反映が遅れることがあるため、生成成功だけで表示確認済みにしません。変更対象のHTMLへ直接移動できるURLを特定し、そのページに変更が反映されたことを確認します。サイトのトップページURLだけで代用しません。
 目視結果には対象HTMLのURL、生成元SHA、Actions runのURL、確認した見出し・リンク・表・図・表示崩れ、確認者、日時を残します。
 追加pushで生成元SHAが変わった場合は、同じブランチで`refresh_docs`を再実行し、新しいSHAのrun成功と対象HTMLの表示を再確認します。PR本文のURL・生成元SHA・run URL・確認結果を更新し、古いSHAの結果を現在の確認結果として残しません。

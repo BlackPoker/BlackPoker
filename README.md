@@ -9,13 +9,16 @@
 
 | 区分 | リンク | 変更履歴 |
 | :--- | :--- | :--- |
-| **最新安定版** | **[▶ 第9版公式ルール (安定版)](https://blackpoker.github.io/BlackPoker/9th/)** | [第9.0版](https://blackpoker.github.io/BlackPoker/9th/revision-history/9.0th.html) / [第9.1版](https://blackpoker.github.io/BlackPoker/9th/revision-history/9.1th.html) |
-| **開発中** | [開発中最新公式ルール](https://blackpoker.github.io/BlackPoker/master/) | - |
+| **最新安定版** | **[▶ 公式ルール](https://blackpoker.github.io/BlackPoker/master/)** / [PDF](https://blackpoker.github.io/BlackPoker/master/blackpoker.pdf) | [第9.0版](https://blackpoker.github.io/BlackPoker/9th/revision-history/9.0th.html) / [第9.1版](https://blackpoker.github.io/BlackPoker/9th/revision-history/9.1th.html) |
+| **開発中** | [開発中の公式ルール](https://blackpoker.github.io/BlackPoker/develop/) | - |
 
 ---
 
 <details>
 <summary><b>📚 過去の版数（アーカイブ）</b></summary>
+
+### 第9版
+- [第9版公式ルール](https://blackpoker.github.io/BlackPoker/9th/)
 
 ### 第8版
 - [第8版公式ルール (安定版)](https://blackpoker.github.io/BlackPoker/8th/)
