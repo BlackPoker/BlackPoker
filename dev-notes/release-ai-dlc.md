@@ -1,6 +1,14 @@
 # Codexから進めるリリース作業
 
-対象は BlackPoker/BlackPoker の既存 Release Task Issue です。通常Issueのworktree管理、記録、PRの基本手順は [ai-dlc.md](ai-dlc.md) に従い、この文書ではリリース固有の判断と確認を定めます。[GitHub環境設定](github-setting.md#リリース手順) と [Release Taskテンプレート](../.github/ISSUE_TEMPLATE/release-task.md) も併せて確認します。
+対象は BlackPoker/BlackPoker の Release Task Issue です。既存Issueを選ぶか、対象がなければ新規に起票してから進めます。通常Issueのworktree管理、記録、PRの基本手順は [ai-dlc.md](ai-dlc.md) に従い、この文書ではリリース固有の判断と確認を定めます。[GitHub環境設定](github-setting.md#リリース手順) と [Release Taskテンプレート](../.github/ISSUE_TEMPLATE/release-task.md) も併せて確認します。
+
+## 0. Release Task Issueを選ぶか作る
+
+番号・URLが渡されたら、そのIssueが BlackPoker/BlackPoker のRelease Taskか確認します。番号の誤記や取得失敗を新規起票へ読み替えません。指定がなければ `gh` で開放中のRelease Task Issue候補を調べ、タイトル・本文・対象版を照合します。該当Issueが複数または不明なら対象を確認し、別のリリースを重複起票しません。
+
+対象Issueがなければ、リリースする版、対象世代ブランチ、新規/既存の別、採用元、希望するマイルストーンを整理します。判断に必要な情報がなければ確認します。作成時点の `.github/ISSUE_TEMPLATE/release-task.md` のfrontmatterと全見出し・チェック項目を読み、`[ReleaseTask]` のタイトル、日本語の本文案、テンプレート由来のラベルと担当者を提示します。起票指示が今回の依頼に含まれていれば、案を提示した上でその範囲で続行します。含まれていなければ起票指示を待ちます。
+
+起票には `tools/dev/create-issue.ps1` を使い、マイルストーンの選択・停止条件・作成後照合は [共通手順](ai-dlc.md#codex--antigravityとの相談からissueを作成) に従います。作成したURL・番号・マイルストーンを照合し、失敗や結果不明のときは同じ本文のIssueができていないか調べ、結果が分かるまで再起票しません。Issueが確定したら、その番号を `start-issue.ps1` に渡して専用worktreeを準備します。Issueが確定する前にworktreeを作らず、版数変更や公開も始めません。
 
 ## 1. 対象を固定する
 
