@@ -61,22 +61,21 @@ describe("マスター＋ストラテジー カタログ＆レギュレーショ
     expect(reg!.sourceRulesVersion).toBe("9.1.2");
   });
 
-  it("3. RegulationValidator で mast-strategy は ruleLegal=true, recommended=true, simulatorImplemented=false であること", async () => {
+  it("3. RegulationValidator で mast-strategy は ruleLegal=true, recommended=true, simulatorImplemented=true であること", async () => {
     const catalog = await loadRegulationCatalog();
     const result = RegulationValidator.validateRegulation(catalog, "mast-strategy");
 
     expect(result.ruleLegal).toBe(true);
     // strategy.yaml の recommendedFormatIds に mast が含まれるため recommended は true
     expect(result.recommended).toBe(true);
-    // 作業2の段階ではまだ実装完了前のため simulatorImplemented は必ず false (fail-closed)
-    expect(result.simulatorImplemented).toBe(false);
+    // 作業5Bでの公式公開に伴い simulatorImplemented は true
+    expect(result.simulatorImplemented).toBe(true);
 
-    // assertImplemented: true で SimulatorNotImplementedError が投げられること
-    expect(() =>
-      RegulationValidator.validateRegulation(catalog, "mast-strategy", {
-        assertImplemented: true,
-      })
-    ).toThrow(SimulatorNotImplementedError);
+    // assertImplemented: true でもエラーが投げられず正常終了すること
+    const verifiedResult = RegulationValidator.validateRegulation(catalog, "mast-strategy", {
+      assertImplemented: true,
+    });
+    expect(verifiedResult.simulatorImplemented).toBe(true);
   });
 
   it("4. RegulationRulePackageSelector: カタログ要求41アクションと、現行実YAML解決アクション(35件)の区別を検証", async () => {

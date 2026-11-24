@@ -66,31 +66,13 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
   // 1. Publication Contract & Ordering
   // =========================================================================
   describe("1. Publication Contract & Environment List Ordering", () => {
-    it("通常時 (includeUnimplemented なし): official:mast-strategy は含まれず、従来の6レギュレーションのみが表示されること", () => {
+    it("通常時 (公式公開): official:mast-strategy が正式公開され、全7レギュレーションが難易度順に表示されること", () => {
       const envs = getAvailableEnvironments(catalog);
       const mastEnv = envs.find((e) => e.id === "official:mast-strategy");
-      expect(mastEnv).toBeUndefined();
-
-      const envIds = envs.map((e) => e.id);
-      expect(envIds).toEqual([
-        "core-battle",
-        "official:light-entry16",
-        "official:light-pack",
-        "official:standard-pack",
-        "official:standard-rarePack",
-        "official:pro-rarePack",
-        "official:pro-strategy",
-      ]);
-    });
-
-    it("プレビュー時 (includeUnimplemented=true): mast-strategy のみが '(プレビュー)' 表記で末尾に追加され、公式公開済みと誤認されないこと", () => {
-      const envs = getAvailableEnvironments(catalog, { includeUnimplemented: true });
-      const mastEnv = envs.find((e) => e.id === "official:mast-strategy");
-
       expect(mastEnv).toBeDefined();
       expect(mastEnv?.isOfficial).toBe(true);
       expect(mastEnv?.regulationId).toBe("mast-strategy");
-      expect(mastEnv?.name).toBe("マスター + ストラテジー (プレビュー)");
+      expect(mastEnv?.name).toBe("マスター + ストラテジー (公式)");
       expect(mastEnv?.setupRequirements?.scenarioHandCount).toBe(3);
       expect(mastEnv?.setupRequirements?.rareCardCount).toBe(1);
 
@@ -107,8 +89,7 @@ describe("BP-SIM-MASTER-STRATEGY-PHASE-4: Master + Strategy Publication & Playte
       ]);
     });
 
-    it("ホワイトリスト外の未実装レギュレーションは、プレビュー時であっても環境一覧に一切追加されないこと", () => {
-      expect(isAllowedPreviewRegulation("mast-strategy")).toBe(true);
+    it("未実装レギュレーションは、プレビュー時であっても環境一覧に一切追加されないこと", () => {
       expect(isAllowedPreviewRegulation("light-strategy")).toBe(false);
       expect(isAllowedPreviewRegulation("unknown-regulation")).toBe(false);
 

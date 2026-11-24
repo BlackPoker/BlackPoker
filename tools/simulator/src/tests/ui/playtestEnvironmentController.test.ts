@@ -166,6 +166,7 @@ describe("PlaytestEnvironmentController (Phase 2.4.1)", () => {
         "official:standard-rarePack",
         "official:pro-rarePack",
         "official:pro-strategy",
+        "official:mast-strategy",
       ]);
 
       // Core Battle が先頭

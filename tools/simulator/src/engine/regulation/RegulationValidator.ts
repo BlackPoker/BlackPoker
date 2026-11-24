@@ -66,6 +66,7 @@ export class RegulationValidator {
       "standard:rarePack",
       "pro:rarePack",
       "pro:strategy",
+      "mast:strategy",
     ]);
     const simulatorImplemented = IMPLEMENTED_COMBINATIONS.has(`${formatId}:${frameId}`);
 

@@ -44,7 +44,7 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-2: PlaytestEnvironmentController Scenario Ha
       const envs = getAvailableEnvironments(catalog);
       for (const env of envs) {
         expect(env.setupRequirements).toBeDefined();
-        if (env.id === "official:pro-strategy") {
+        if (env.id.includes("strategy")) {
           expect(env.setupRequirements?.scenarioHandCount).toBe(3);
           expect(env.setupRequirements?.rareCardCount).toBe(1);
         } else {

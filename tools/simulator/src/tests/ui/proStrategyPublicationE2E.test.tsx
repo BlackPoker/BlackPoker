@@ -70,7 +70,7 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-4: Pro + Strategy Publication E2E Acceptance
       expect(proStrategyEnv?.setupRequirements?.rareCardCount).toBe(1);
     });
 
-    it("orders official environments strictly: Core Battle -> Light -> Standard -> Pro with pro-strategy at the end", () => {
+    it("orders official environments strictly: Core Battle -> Light -> Standard -> Pro -> Master", () => {
       const envs = getAvailableEnvironments(catalog);
       const envIds = envs.map((e) => e.id);
 
@@ -82,6 +82,7 @@ describe("BP-SIM-PRO-STRATEGY-PHASE-4: Pro + Strategy Publication E2E Acceptance
         "official:standard-rarePack",
         "official:pro-rarePack",
         "official:pro-strategy",
+        "official:mast-strategy",
       ]);
     });
   });

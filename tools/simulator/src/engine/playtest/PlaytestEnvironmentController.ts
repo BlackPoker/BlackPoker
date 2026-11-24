@@ -168,8 +168,9 @@ export const FORMAT_PRESENTATION_ORDER: Record<string, number> = {
 /**
  * プレビューモード時に例外的に表示・対戦を許可する未公開レギュレーションIDのホワイトリスト。
  * 意図しない全未実装環境の無制限な許可を防ぐため、明示的に列挙します。
+ * （※ mast-strategy の正式公開に伴い、現在は未公開環境なし）
  */
-export const PREVIEW_ALLOWED_REGULATION_IDS = new Set<string>(["mast-strategy"]);
+export const PREVIEW_ALLOWED_REGULATION_IDS = new Set<string>([]);
 
 export function isAllowedPreviewRegulation(regulationId: string): boolean {
   return PREVIEW_ALLOWED_REGULATION_IDS.has(regulationId);

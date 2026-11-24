@@ -467,6 +467,7 @@ describe("MatchSetupScreen & Entry UX (UI Phase 3.1)", () => {
         "official:standard-rarePack",
         "official:pro-rarePack",
         "official:pro-strategy",
+        "official:mast-strategy",
       ]);
 
       // Pro が Standard より後にレンダリングされていることを確認
