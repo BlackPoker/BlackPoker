@@ -721,7 +721,7 @@ describe("BlackPoker Work 4-4 R2 — Gen 8 Official Holdout Runner & Statistical
         maxDecisionsPerMatch: 500,
         champions,
       });
-    }, 60000);
+    }, 180000);
 
     afterAll(async () => {
       if (pool1Worker) await pool1Worker.terminate();

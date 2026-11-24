@@ -1244,8 +1244,13 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
       ...Object.keys(state.players).filter((k) => k !== turnPlayer),
     ];
 
-    // 1. 全プレイヤーの対象Fogを事前確定・収集し、領域から一斉に除去
-    const fogsByPlayer = new Map<string, any[]>();
+    // 1. 全プレイヤーの移動対象カードを確定・事前検証する
+    interface FogPlayerPlan {
+      playerKey: string;
+      removedFogs: any[];
+      fogUnits: any[];
+    }
+    const plans: FogPlayerPlan[] = [];
 
     for (const playerKey of orderedPlayerKeys) {
       const player = state.players[playerKey];
@@ -1272,52 +1277,88 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
       });
 
       if (removedFogs.length > 0) {
-        fogsByPlayer.set(playerKey, removedFogs);
+        const fogUnits = removedFogs.map((fog: any) => {
+          const fogCards = Array.isArray(fog.cards) && fog.cards.length > 0
+            ? fog.cards
+            : (fog.card ? [fog.card] : []);
+
+          return {
+            unitId: fog.fogId,
+            kind: "フォグ",
+            componentId: fog.componentId,
+            cards: fogCards,
+            labels: [],
+          };
+        });
+
+        plans.push({
+          playerKey,
+          removedFogs,
+          fogUnits,
+        });
       }
     }
 
-    // 2. プレイヤーごとに一括同時墓地移動を行い、イベントを発行 (Issue #669)
-    for (const playerKey of orderedPlayerKeys) {
-      const removedFogs = fogsByPlayer.get(playerKey);
-      if (!removedFogs || removedFogs.length === 0) continue;
+    if (plans.length === 0) {
+      return;
+    }
 
-      const player = state.players[playerKey];
+    // 2. 全Fogを除去し、全対象カードを各プレイヤーの墓地へ移動する。
+    // 3. 墓地TOPおよび選択Pendingを整合させる。
+    // ※ GraveTopCoordinator.addUnitsBatchToGrave に skipCardMoved: true を指定することで、
+    //    全プレイヤーの墓地追加とPending整合が完了するまでイベント発行を保留し、中間状態でのイベント発火を防止する。
+    for (const plan of plans) {
+      const player = state.players[plan.playerKey];
       if (!player.grave) {
         player.grave = [];
       }
 
-      const fogUnits = removedFogs.map((fog: any) => {
-        const fogCards = Array.isArray(fog.cards) && fog.cards.length > 0
-          ? fog.cards
-          : (fog.card ? [fog.card] : []);
-
-        return {
-          unitId: fog.fogId,
-          kind: "フォグ",
-          componentId: fog.componentId,
-          cards: fogCards,
-          labels: [],
-        };
-      });
-
-      // GraveTopCoordinator.addUnitsBatchToGrave を利用して一括墓地移動
-      // - 構成カード総計1枚: 自動的に新しい墓地TOPとして設定 (Decision不要)
-      // - 構成カード総計2枚以上: 墓地TOPを未確定(undefined)とし、移動カード全件を候補とするTOP選択Pendingを1件登録 (Issue #669)
       GraveTopCoordinator.addUnitsBatchToGrave(
         player,
-        fogUnits,
+        plan.fogUnits,
         context.state,
-        playerKey,
+        plan.playerKey,
         context.logRecorder,
         effectInterpreter,
         context,
         {
           fromZone: "fog",
+          skipCardMoved: true, // 全プレイヤーの移動完了後に一括イベント発行
         }
       );
+    }
 
-      // 各除去されたフォグについて fogRemoved イベントを発行
-      for (const fog of removedFogs) {
+    // 4. 全移動完了後にカード移動・Fog除去イベントを発行する
+    // この時点で、全プレイヤーのFog領域は空であり、かつ全対象カードが各自の墓地に格納されているため、
+    // いかなるイベントリスナーや誘発条件も完全な同時移動後の状態を参照できる。
+    for (const plan of plans) {
+      // (a) 各カードについて cardMoved イベントを発行
+      for (const unit of plan.fogUnits) {
+        if (Array.isArray(unit.cards)) {
+          for (const card of unit.cards) {
+            effectInterpreter.dispatchEvent(
+              {
+                type: "cardMoved",
+                payload: {
+                  card,
+                  fromZone: "fog",
+                  toZone: "grave",
+                  playerKey: plan.playerKey,
+                  cause: {
+                    type: "action",
+                    actionId: context.currentAction?.id || context.currentRequest?.actionId,
+                  },
+                  characterType: unit.componentId,
+                },
+              },
+              context
+            );
+          }
+        }
+      }
+
+      // (b) 各除去されたフォグについて fogRemoved イベントを発行
+      for (const fog of plan.removedFogs) {
         const fogCards = Array.isArray(fog.cards) && fog.cards.length > 0
           ? fog.cards
           : (fog.card ? [fog.card] : []);
@@ -1331,7 +1372,7 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
             cards: fog.cards || fogCards,
             fromZone: "fog",
             toZone: "grave",
-            playerKey: playerKey, // owner
+            playerKey: plan.playerKey, // owner
           },
         };
         effectInterpreter.dispatchEvent(fogEvent, context);

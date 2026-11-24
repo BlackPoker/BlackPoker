@@ -1,6 +1,6 @@
 {
   "workId": "BP-SIM-AI-GEN9-BLOCK-QUALITY-DIAGNOSTIC",
-  "timestamp": "2026-11-24T03:55:17.323Z",
+  "timestamp": "2026-11-24T17:11:41.544Z",
   "scenarios": {
     "scenario-1-favorable-soldier-block": {
       "description": "ライフ15、敵サイズ3、自軍チャージ兵士サイズ6 (有利ブロック可能: 撃破かつ自軍生存)",
@@ -827,7 +827,7 @@
         "blockRecordsCount": 1,
         "blockRecords": [
           {
-            "decisionId": "dec-eff-req-3-selectBlockAssignments-1795492517392",
+            "decisionId": "dec-eff-req-3-selectBlockAssignments-1795540301765",
             "source": {
               "type": "EFFECT_RESOLUTION",
               "sourceRequestRef": "req-3",
@@ -898,7 +898,7 @@
         "blockRecordsCount": 1,
         "blockRecords": [
           {
-            "decisionId": "dec-eff-req-3-selectBlockAssignments-1795492517409",
+            "decisionId": "dec-eff-req-3-selectBlockAssignments-1795540301810",
             "source": {
               "type": "EFFECT_RESOLUTION",
               "sourceRequestRef": "req-3",
