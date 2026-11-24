@@ -1,6 +1,6 @@
 {
   "workId": "BP-SIM-AI-GEN9-WORK57A-BEHAVIOR-QUALITY-AUDIT",
-  "timestamp": "2026-11-17T17:25:19.413Z",
+  "timestamp": "2026-11-24T02:30:58.710Z",
   "totalScenarios": 21,
   "results": [
     {
@@ -504,8 +504,9 @@
         {
           "ref": 0,
           "base": 0.14406700756722116,
-          "tactical": 0,
-          "final": 0.14406700756722116
+          "tactical": 2,
+          "final": 2.1440670075672212,
+          "reason": "Lethal unblocked attack bonus (+2.0): totalAtk=5 >= oppLife=5"
         },
         {
           "ref": 1,
@@ -518,8 +519,9 @@
         {
           "ref": 0,
           "base": 0.14406700756722116,
-          "tactical": 0,
-          "final": 0.14406700756722116
+          "tactical": 2,
+          "final": 2.1440670075672212,
+          "reason": "t18_attack_unblocked_lethal=1.0 (totalAtk=5>=oppLife=5)"
         },
         {
           "ref": 1,
@@ -534,17 +536,18 @@
       "scenarioId": "BP-AI-14",
       "name": "無謀なアタックの回避",
       "priority": "P0",
-      "v72Status": "FAIL",
-      "v73Status": "FAIL",
-      "v72ChosenRef": 0,
-      "v73ChosenRef": 0,
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 1,
+      "v73ChosenRef": 1,
       "expectedPatternRef": 1,
       "v72Scores": [
         {
           "ref": 0,
           "base": 0.15497931793853117,
-          "tactical": 0,
-          "final": 0.15497931793853117
+          "tactical": -0.30000000000000004,
+          "final": -0.14502068206146887,
+          "reason": "Suicide attack penalty (-0.30): maxMyAtk=1 < minOppBlk=6"
         },
         {
           "ref": 1,
@@ -557,8 +560,9 @@
         {
           "ref": 0,
           "base": 0.15497931793853117,
-          "tactical": 0,
-          "final": 0.15497931793853117
+          "tactical": -0.30000000000000004,
+          "final": -0.14502068206146887,
+          "reason": "t13_attack_suicide_scaled=0.86"
         },
         {
           "ref": 1,
@@ -567,8 +571,7 @@
           "final": -0.06907519698420879
         }
       ],
-      "rootCauseCategory": "C",
-      "notes": "自滅アタック回避: v7.2=0, v7.3=0"
+      "notes": "自滅アタック回避: v7.2=1, v7.3=1"
     },
     {
       "scenarioId": "BP-AI-15",
@@ -826,17 +829,18 @@
       "scenarioId": "BP-AI-21",
       "name": "攻撃後のリアニメイト",
       "priority": "P2",
-      "v72Status": "AMBIGUOUS",
-      "v73Status": "AMBIGUOUS",
-      "v72ChosenRef": 1,
-      "v73ChosenRef": 1,
+      "v72Status": "PASS",
+      "v73Status": "PASS",
+      "v72ChosenRef": 0,
+      "v73ChosenRef": 0,
       "expectedPatternRef": 0,
       "v72Scores": [
         {
           "ref": 0,
           "base": 0.14793823290171096,
-          "tactical": 0,
-          "final": 0.14793823290171096
+          "tactical": 0.2,
+          "final": 0.347938232901711,
+          "reason": "Unblocked attack bonus (+0.2)"
         },
         {
           "ref": 1,
@@ -855,8 +859,9 @@
         {
           "ref": 0,
           "base": 0.14793823290171096,
-          "tactical": 0,
-          "final": 0.14793823290171096
+          "tactical": 0.2,
+          "final": 0.347938232901711,
+          "reason": "t10_attack_unblocked_nonlethal=1.0"
         },
         {
           "ref": 1,
@@ -871,7 +876,7 @@
           "final": -0.04051284528310264
         }
       ],
-      "notes": "攻撃優先(0) vs 直前リアニメイト(1): v7.2=1, v7.3=1"
+      "notes": "攻撃優先(0) vs 直前リアニメイト(1): v7.2=0, v7.3=0"
     }
   ]
 }

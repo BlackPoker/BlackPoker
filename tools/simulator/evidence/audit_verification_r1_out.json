@@ -4,8 +4,9 @@
       {
         "patternRef": 0,
         "baseScore": 0.15497931793853117,
-        "tacticalAdjustment": 0,
-        "finalScore": 0.15497931793853117
+        "tacticalAdjustment": -0.30000000000000004,
+        "finalScore": -0.14502068206146887,
+        "reason": "Suicide attack penalty (-0.30): maxMyAtk=1 < minOppBlk=6"
       },
       {
         "patternRef": 1,
@@ -14,7 +15,7 @@
         "finalScore": -0.06907519698420879
       }
     ],
-    "bestPatternRef": 0
+    "bestPatternRef": 1
   },
   "bp_ai_14_with": {
     "scoredPatterns": [

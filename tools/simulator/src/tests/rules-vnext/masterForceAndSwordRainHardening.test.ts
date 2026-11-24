@@ -300,7 +300,7 @@ describe("Master + Strategy Hardening: Force Size Calculation, Batch Fog Removal
   // 2. 複数Fogの同時除去の墓地TOP選択・既存対戦互換性・保存則・ログ整合性
   // ==========================================================================
   describe("2. Fog Removal: Single Fog Compatibility, Force Multi-Card Fog, Multi-Player Fogs", () => {
-    it("2.1: Same player has 2 single-card Fogs -> Sequential grave addition, NO pending decision (existing match compatibility), last fog becomes graveTop", () => {
+    it("2.1: Same player has 2 single-card Fogs -> Simultaneous grave addition (Issue #669), 1 pending decision with both candidates, graveTop undefined until chosen", () => {
       const state = createBaseState();
       const cleanupHandler = cleanupFogsHandler(effectInterpreter);
 
@@ -341,9 +341,11 @@ describe("Master + Strategy Hardening: Force Size Calculation, Batch Fog Removal
       expect(state.players.p1.grave[0].cards[0].id).toBe("c-fog-1");
       expect(state.players.p1.grave[1].cards[0].id).toBe("c-fog-2");
 
-      // 既存対戦互換: 単一カードFogのみの場合は Decision を発生させず、最後のFogが墓地TOPになる
-      expect(state.pendingGraveTopSelections).toHaveLength(0);
-      expect(state.players.p1.graveTopCardId).toBe("c-fog-2");
+      // Issue #669: 単一カードFogが複数ある場合も同時墓地移動となり、全候補から墓地TOP選択Decisionを1件要求
+      expect(state.pendingGraveTopSelections).toHaveLength(1);
+      expect(state.pendingGraveTopSelections[0].playerId).toBe("p1");
+      expect(state.pendingGraveTopSelections[0].candidateCardIds).toEqual(["c-fog-1", "c-fog-2"]);
+      expect(state.players.p1.graveTopCardId).toBeUndefined();
 
       // カード保存則検証
       expect(getAllPlayerCardIds(state.players.p1)).toEqual(initialCards);
@@ -393,7 +395,7 @@ describe("Master + Strategy Hardening: Force Size Calculation, Batch Fog Removal
       expect(getAllPlayerCardIds(state.players.p1)).toEqual(initialCards);
     });
 
-    it("2.3: Same player has 2-card Force Fog and 1-card Fog -> Force Fog queues pending, single Fog does not overwrite pending selection", () => {
+    it("2.3: Same player has 2-card Force Fog and 1-card Fog -> Simultaneous grave addition (Issue #669), 1 pending with all 3 candidates", () => {
       const state = createBaseState();
       const cleanupHandler = cleanupFogsHandler(effectInterpreter);
 
@@ -428,12 +430,13 @@ describe("Master + Strategy Hardening: Force Size Calculation, Batch Fog Removal
       expect(state.players.p1.fog).toHaveLength(0);
       expect(state.players.p1.grave).toHaveLength(2);
 
-      // フォースFogの pending 選択が単一Fogによって上書きされず保護される
+      // Issue #669: 全Fogカードが一括同時移動するため、全3枚が候補となるPendingが1件登録される
       expect(state.pendingGraveTopSelections).toHaveLength(1);
       expect(state.pendingGraveTopSelections[0].playerId).toBe("p1");
       expect(state.pendingGraveTopSelections[0].candidateCardIds).toEqual([
         "c-force-1",
         "c-force-2",
+        "c-single",
       ]);
       expect(state.players.p1.graveTopCardId).toBeUndefined();
 

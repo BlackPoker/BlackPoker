@@ -288,14 +288,20 @@ export class GraveTopCoordinator {
 
     if (allCards.length === 1) {
       const topCardId = allCards[0].id;
-      player.graveTopCardId = topCardId;
-      recordZoneTopChanged(
-        logRecorder,
-        state?.stateVersion ?? 1,
-        playerKey,
-        previousTop,
-        topCardId
-      );
+      const hasPending =
+        Array.isArray(state?.pendingGraveTopSelections) &&
+        state.pendingGraveTopSelections.some((p: any) => p.playerId === playerKey);
+
+      if (!hasPending) {
+        player.graveTopCardId = topCardId;
+        recordZoneTopChanged(
+          logRecorder,
+          state?.stateVersion ?? 1,
+          playerKey,
+          previousTop,
+          topCardId
+        );
+      }
       return { requiresDecision: false, candidateCardIds: [] };
     }
 

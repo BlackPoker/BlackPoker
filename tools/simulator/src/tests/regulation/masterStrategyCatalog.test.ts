@@ -8,7 +8,10 @@ import {
   clearRegulationCache,
 } from "../../engine/regulation/RegulationLoader";
 import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
-import { RegulationRulePackageSelector } from "../../engine/regulation/RegulationRulePackageSelector";
+import {
+  RegulationRulePackageSelector,
+  RulePackageIntegrityError,
+} from "../../engine/regulation/RegulationRulePackageSelector";
 import {
   SimulatorNotImplementedError,
 } from "../../domain/regulation/RegulationDefinition";
@@ -132,5 +135,61 @@ describe("マスター＋ストラテジー カタログ＆レギュレーショ
     const resolvedActionIds = new Set(actualDerivedPackage.actions.map((a) => a.id));
     const unresolvedActionIds = combinedActionIds.filter((id) => !resolvedActionIds.has(id));
     expect(unresolvedActionIds).toEqual([]);
+  });
+
+  it("5. Fail-Closed: 欠落定義が存在する場合に RulePackageIntegrityError がスローされ、全レギュレーションで整合性が取れていること", async () => {
+    const catalog = await loadRegulationCatalog();
+    const rulesDir = path.resolve(__dirname, "../../data/rules-vnext");
+    const actualBasePackage = await loadRulePackageFromDirectory(rulesDir);
+
+    const mastFormat = catalog.formats.get("mast")!;
+    const strategyFrame = catalog.frames.get("strategy")!;
+    const mastReg = catalog.regulations.get("mast-strategy")!;
+
+    // A. アクションが欠落している場合 -> RulePackageIntegrityError
+    const deficientActionsPackage: RulePackage = {
+      ...actualBasePackage,
+      actions: actualBasePackage.actions.filter((a) => a.id !== "action.recruit"),
+    };
+    expect(() =>
+      RegulationRulePackageSelector.selectRulePackage(
+        deficientActionsPackage,
+        mastFormat,
+        mastReg,
+        strategyFrame
+      )
+    ).toThrow(RulePackageIntegrityError);
+
+    // B. コンポーネントが欠落している場合 -> RulePackageIntegrityError
+    const deficientComponentsPackage: RulePackage = {
+      ...actualBasePackage,
+      components: actualBasePackage.components.filter((c) => c.id !== "fog.force"),
+    };
+    expect(() =>
+      RegulationRulePackageSelector.selectRulePackage(
+        deficientComponentsPackage,
+        mastFormat,
+        mastReg,
+        strategyFrame
+      )
+    ).toThrow(RulePackageIntegrityError);
+
+    // C. 既存全6レギュレーション（＋mast-strategy）において欠落なく完全生成されること
+    for (const [regId, reg] of catalog.regulations.entries()) {
+      const format = catalog.formats.get(reg.formatId);
+      const frame = reg.frameId ? catalog.frames.get(reg.frameId) : undefined;
+      expect(format).toBeDefined();
+
+      expect(() => {
+        const pkg = RegulationRulePackageSelector.selectRulePackage(
+          actualBasePackage,
+          format!,
+          reg,
+          frame
+        );
+        expect(pkg.actions.length).toBeGreaterThan(0);
+        expect(pkg.components.length).toBeGreaterThan(0);
+      }).not.toThrow();
+    }
   });
 });

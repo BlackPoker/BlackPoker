@@ -1,4 +1,10 @@
 import { parse } from "yaml";
+import { fileURLToPath } from "url";
+import * as path from "path";
+import * as fs from "fs";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 import {
   FormatDefinition,
   FrameDefinition,
@@ -25,9 +31,6 @@ export async function loadRegulationCatalog(baseDir?: string): Promise<Regulatio
   if (catalogCache && !baseDir) {
     return catalogCache;
   }
-
-  const fs = await import("fs");
-  const path = await import("path");
 
   const resolvedBaseDir = baseDir
     ? path.resolve(baseDir)

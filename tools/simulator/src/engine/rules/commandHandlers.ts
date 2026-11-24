@@ -1236,18 +1236,31 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
     const state = context.state;
     if (!state || !state.players) return;
 
-    for (const [playerKey, player] of Object.entries<any>(state.players)) {
+    const turnPlayer = (state.turnPlayer && state.players[state.turnPlayer])
+      ? state.turnPlayer
+      : Object.keys(state.players)[0];
+    const orderedPlayerKeys = [
+      turnPlayer,
+      ...Object.keys(state.players).filter((k) => k !== turnPlayer),
+    ];
+
+    // 1. 全プレイヤーの対象Fogを事前確定・収集し、領域から一斉に除去
+    const fogsByPlayer = new Map<string, any[]>();
+
+    for (const playerKey of orderedPlayerKeys) {
+      const player = state.players[playerKey];
+      if (!player) continue;
+
       if (!player.fog) {
         player.fog = [];
         continue;
       }
 
       const removedFogs: any[] = [];
-
       player.fog = player.fog.filter((f: any) => {
         const compId = f.componentId;
         const compDef = context.components?.find((c: any) => c.id === compId);
-        
+
         const isFog = compDef
           ? compDef.type === "fog"
           : compId?.startsWith("fog.");
@@ -1255,68 +1268,73 @@ export function cleanupFogsHandler(effectInterpreter: EffectInterpreter): Comman
         if (isFog) {
           removedFogs.push(f);
         }
-        // フォグコンポーネントであれば除去する (filterで残さない)
         return !isFog;
       });
 
+      if (removedFogs.length > 0) {
+        fogsByPlayer.set(playerKey, removedFogs);
+      }
+    }
+
+    // 2. プレイヤーごとに一括同時墓地移動を行い、イベントを発行 (Issue #669)
+    for (const playerKey of orderedPlayerKeys) {
+      const removedFogs = fogsByPlayer.get(playerKey);
+      if (!removedFogs || removedFogs.length === 0) continue;
+
+      const player = state.players[playerKey];
       if (!player.grave) {
         player.grave = [];
       }
 
-      // 各除去されたフォグについて墓地移動およびイベント発行
-      for (const fog of removedFogs) {
+      const fogUnits = removedFogs.map((fog: any) => {
         const fogCards = Array.isArray(fog.cards) && fog.cards.length > 0
           ? fog.cards
           : (fog.card ? [fog.card] : []);
 
-        const fogUnit = {
+        return {
           unitId: fog.fogId,
           kind: "フォグ",
           componentId: fog.componentId,
           cards: fogCards,
           labels: [],
         };
-        if (fogCards.length > 0) {
-          GraveTopCoordinator.addUnitToGrave(
-            player,
-            fogUnit,
-            context.state,
-            playerKey,
-            context.logRecorder
-          );
-        } else {
-          if (!player.grave) player.grave = [];
-          player.grave.push(fogUnit);
-        }
+      });
 
-        // fogRemoved イベントを必ず発行
+      // GraveTopCoordinator.addUnitsBatchToGrave を利用して一括墓地移動
+      // - 構成カード総計1枚: 自動的に新しい墓地TOPとして設定 (Decision不要)
+      // - 構成カード総計2枚以上: 墓地TOPを未確定(undefined)とし、移動カード全件を候補とするTOP選択Pendingを1件登録 (Issue #669)
+      GraveTopCoordinator.addUnitsBatchToGrave(
+        player,
+        fogUnits,
+        context.state,
+        playerKey,
+        context.logRecorder,
+        effectInterpreter,
+        context,
+        {
+          fromZone: "fog",
+        }
+      );
+
+      // 各除去されたフォグについて fogRemoved イベントを発行
+      for (const fog of removedFogs) {
+        const fogCards = Array.isArray(fog.cards) && fog.cards.length > 0
+          ? fog.cards
+          : (fog.card ? [fog.card] : []);
+
         const fogEvent = {
           type: "fogRemoved",
           payload: {
             fogId: fog.fogId,
             componentId: fog.componentId,
-            card: fog.card,
-            cards: fog.cards,
+            card: fog.card || (fogCards.length === 1 ? fogCards[0] : undefined),
+            cards: fog.cards || fogCards,
             fromZone: "fog",
             toZone: "grave",
             playerKey: playerKey, // owner
-          }
+          },
         };
         effectInterpreter.dispatchEvent(fogEvent, context);
-
-        // 各カードについて cardMoved イベントを発行
-        for (const card of fogCards) {
-          const moveEvent = {
-            type: "cardMoved",
-            payload: {
-              card,
-              fromZone: "fog",
-              toZone: "grave",
-              playerKey: playerKey,
-            }
-          };
-          effectInterpreter.dispatchEvent(moveEvent, context);
-        }
       }
     }
   };

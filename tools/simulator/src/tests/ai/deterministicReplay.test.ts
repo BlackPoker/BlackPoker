@@ -139,14 +139,16 @@ describe("Deterministic Replay Gate (決定論的リプレイ検証)", () => {
     expect(res1.finalStateHash).toBe(res2.finalStateHash);
     expect(computeTraceDigest(res1)).toBe(computeTraceDigest(res2));
 
-    // 2. R3 Evidence の期待値検証
+    // 2. Issue #669 (Fog同時墓地移動) 整合後の期待値検証
+    // Turn 1 エンド時、p1のFog 2枚が同時墓地移動となり、新仕様に基づき [D-41] で ZONE_TOP_SELECTION が発生。
+    // その後の対戦フロー自体は決定論的に完全に同一(7ターン完走、勝者p1)で進行し、総決定数が 124 -> 125 へ遷移する。
     expect(res1.completed).toBe(true);
     expect(res1.winner).toBe("p1");
-    expect(res1.totalDecisions).toBe(124);
+    expect(res1.totalDecisions).toBe(125);
     expect(res1.turnCount).toBe(7);
-    expect(res1.finalStateHash).toBe("sh2-4122835f3963d13b");
+    expect(res1.finalStateHash).toBe("sh2-bfdd5ce046dc20aa");
     expect(computeTraceDigest(res1)).toBe(
-      "cf982b065e3aaea9880962b8e6b29b651359e3b5ce3c4df265f1d3bcd8a3bcc0"
+      "0a49c286c6c7f20c8bbd1847cb24535aaff227fc916d4dfa40cd438f20f19836"
     );
   });
 
@@ -188,14 +190,16 @@ describe("Deterministic Replay Gate (決定論的リプレイ検証)", () => {
     expect(res1.finalStateHash).toBe(res2.finalStateHash);
     expect(computeTraceDigest(res1)).toBe(computeTraceDigest(res2));
 
-    // 2. R3 Evidence の期待値検証
+    // 2. Issue #669 (Fog同時墓地移動) 整合後の期待値検証
+    // Turn 1 エンド時、p1のFog 2枚が同時墓地移動となり、新仕様に基づき [D-41] で ZONE_TOP_SELECTION が発生。
+    // その後の対戦フロー自体は決定論的に完全に同一(3ターン完走、勝者p1)で進行し、総決定数が 70 -> 71 へ遷移する。
     expect(res1.completed).toBe(true);
     expect(res1.winner).toBe("p1");
-    expect(res1.totalDecisions).toBe(70);
+    expect(res1.totalDecisions).toBe(71);
     expect(res1.turnCount).toBe(3);
-    expect(res1.finalStateHash).toBe("sh2-2cab13b4423e6489");
+    expect(res1.finalStateHash).toBe("sh2-8e6708da7541e58d");
     expect(computeTraceDigest(res1)).toBe(
-      "a9af3c8c12ed91c7d14c1983c5ef15e416291c7408d1a821ce1b672c65a89d0d"
+      "5ada3d692594d74ed676800f009f8e5a37c955e9ff036e42d20b67dce19b0e9a"
     );
   });
 
