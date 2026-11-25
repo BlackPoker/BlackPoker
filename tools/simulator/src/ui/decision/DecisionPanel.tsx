@@ -5,6 +5,7 @@ import { PatternExpander } from "../../engine/decision/PatternExpander";
 import { formatCardDisplay, formatCardList, formatSuitSymbol, formatOfficialSuitSymbol } from "../../engine/rules/cardUtils";
 import { BlockAssignmentEditor } from "./BlockAssignmentEditor";
 import { isBlockAssignmentRequest } from "./blockAssignmentUtils";
+import { AttackerSelectionEditor, buildUnitSetSelectionModel } from "./AttackerSelectionEditor";
 import { BattleRelationPresenter, type UnitBattleDisplayInfo } from "../game/BattleRelationPresenter";
 import { RichCardText } from "../common/RichCardText";
 import { CardView } from "../game/CardView";
@@ -1120,6 +1121,12 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           eff.selectionType === "unit"
       );
 
+    const unitSetModel =
+      !isBlockAssignment && !isZoneTopSelection && !isCardSelection
+        ? buildUnitSetSelectionModel(request)
+        : null;
+    const isUnitSetSelection = Boolean(unitSetModel?.isUnitSetSelection);
+
     const headerTitle = isZoneTopSelection
       ? "墓地TOPを選択"
       : isBlockAssignment
@@ -1184,6 +1191,13 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
               onExactPatternRefChange={setSelectedBlockPatternRef}
               initialAssignments={blockAssignmentsDraft}
               onAssignmentsChange={setBlockAssignmentsDraft}
+              lastBoardUnitClick={lastBoardUnitClick}
+            />
+          ) : isUnitSetSelection ? (
+            <AttackerSelectionEditor
+              request={request}
+              unitNumberMap={unitNumberMap}
+              onExactPatternRefChange={setSelectedEffectPatternRef}
               lastBoardUnitClick={lastBoardUnitClick}
             />
           ) : (
