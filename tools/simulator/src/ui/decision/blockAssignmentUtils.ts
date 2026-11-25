@@ -1,7 +1,20 @@
 import { EffectSelection, UnitAssignment } from "../../domain/decision/DecisionCatalog";
+import { BlockAssignmentStreamProvider, DecisionRequest } from "../../domain/decision/DecisionRequest";
 
 export interface AttackerBlockMap {
   [attackerUnitId: string]: string[];
+}
+
+/**
+ * DecisionRequest がブロック割当判断かどうかを判定（配列方式・ストリーミング方式両対応）
+ */
+export function isBlockAssignmentRequest(request: Readonly<DecisionRequest>): boolean {
+  if (request.blockAssignmentStream || request.blockAssignmentStreamMeta) {
+    return true;
+  }
+  return (request.catalog.effectSelections || []).some(
+    (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
+  );
 }
 
 /**
@@ -85,7 +98,8 @@ export function canAssignBlocker(
   currentMap: AttackerBlockMap,
   attackerUnitId: string,
   blockerUnitId: string,
-  effectSelections: readonly EffectSelection[]
+  effectSelections: readonly EffectSelection[],
+  stream?: BlockAssignmentStreamProvider
 ): boolean {
   const curList = currentMap[attackerUnitId] || [];
   let nextList: string[];
@@ -102,6 +116,26 @@ export function canAssignBlocker(
     [attackerUnitId]: nextList,
   };
 
+  if (effectSelections.length === 0 && stream) {
+    for (const targetAssignments of stream.iterateAssignments()) {
+      const targetMap: { [atkId: string]: readonly string[] } = {};
+      for (const asgn of targetAssignments) {
+        targetMap[asgn.sourceUnitId] = asgn.selectedUnitIds || [];
+      }
+      let isCandidate = true;
+      for (const [atkId, curBlockers] of Object.entries(hypotheticalMap)) {
+        if (curBlockers.length === 0) continue;
+        const tgtBlockers = targetMap[atkId] || [];
+        if (!curBlockers.every((bId) => tgtBlockers.includes(bId))) {
+          isCandidate = false;
+          break;
+        }
+      }
+      if (isCandidate) return true;
+    }
+    return false;
+  }
+
   const matches = findMatchingEffectSelectionIndices(hypotheticalMap, effectSelections);
   return matches.length > 0;
 }
@@ -111,8 +145,20 @@ export function canAssignBlocker(
  */
 export function findExactMatchPatternRef(
   currentMap: AttackerBlockMap,
-  effectSelections: readonly EffectSelection[]
+  effectSelections: readonly EffectSelection[],
+  stream?: BlockAssignmentStreamProvider
 ): number | null {
+  if (effectSelections.length === 0 && stream) {
+    let idx = 0;
+    for (const assignments of stream.iterateAssignments()) {
+      if (isAssignmentExactMatch(currentMap, assignments)) {
+        return idx;
+      }
+      idx++;
+    }
+    return null;
+  }
+
   for (let i = 0; i < effectSelections.length; i++) {
     const effSel = effectSelections[i];
     if (effSel.assignments && isAssignmentExactMatch(currentMap, effSel.assignments)) {

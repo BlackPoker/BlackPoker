@@ -4,6 +4,7 @@ import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { PatternExpander } from "../../engine/decision/PatternExpander";
 import { formatCardDisplay, formatCardList, formatSuitSymbol, formatOfficialSuitSymbol } from "../../engine/rules/cardUtils";
 import { BlockAssignmentEditor } from "./BlockAssignmentEditor";
+import { isBlockAssignmentRequest } from "./blockAssignmentUtils";
 import { BattleRelationPresenter, type UnitBattleDisplayInfo } from "../game/BattleRelationPresenter";
 import { RichCardText } from "../common/RichCardText";
 import { CardView } from "../game/CardView";
@@ -765,9 +766,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     }
 
     if (request.source?.type === "EFFECT_RESOLUTION") {
-      const isBlockAssignment = (catalog.effectSelections || []).some(
-        (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
-      );
+      const isBlockAssignment = isBlockAssignmentRequest(request);
       if (isBlockAssignment) {
         // BlockAssignmentEditor 側で処理
         return;
@@ -836,9 +835,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
     const NUMBER_BADGES = ["①", "②", "③", "④", "⑤", "⑥", "⑦", "⑧", "⑨", "⑩", "⑪", "⑫", "⑬", "⑭", "⑮", "⑯"];
 
     if (request.source?.type === "EFFECT_RESOLUTION" || request.source?.type === "ZONE_TOP_SELECTION") {
-      const isBlockAssignment = (catalog.effectSelections || []).some(
-        (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
-      );
+      const isBlockAssignment = isBlockAssignmentRequest(request);
       if (isBlockAssignment) {
         const assignedBlockerIds = new Set<string>();
         if (blockAssignmentsDraft) {
@@ -1065,9 +1062,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
           }
         } else {
           // EFFECT_RESOLUTION / ZONE_TOP_SELECTION
-          const isBlockAssignment = (catalog.effectSelections || []).some(
-            (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
-          );
+          const isBlockAssignment = isBlockAssignmentRequest(request);
           if (isBlockAssignment) {
             if (selectedBlockPatternRef !== null) {
               e.preventDefault();
@@ -1112,9 +1107,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
   // EFFECT_RESOLUTION / ZONE_TOP_SELECTION 時の UI
   if (request.source?.type === "EFFECT_RESOLUTION" || request.source?.type === "ZONE_TOP_SELECTION") {
     const isZoneTopSelection = request.source?.type === "ZONE_TOP_SELECTION";
-    const isBlockAssignment = (catalog.effectSelections || []).some(
-      (eff) => eff.selectionType === "unitAssignment" || eff.assignments !== undefined
-    );
+    const isBlockAssignment = isBlockAssignmentRequest(request);
     const isCardSelection = (catalog.effectSelections || []).some(
       (eff) => eff.selectionType === "card"
     );

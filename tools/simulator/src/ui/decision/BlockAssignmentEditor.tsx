@@ -45,18 +45,33 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
       }
     }
 
-    for (const eff of effectSelections) {
-      if (eff.assignments) {
-        for (const asgn of eff.assignments) {
-          if (asgn.sourceUnitId && !atkMap.has(asgn.sourceUnitId)) {
-            const unit = allFieldUnits.get(asgn.sourceUnitId);
-            atkMap.set(asgn.sourceUnitId, unit || { unitId: asgn.sourceUnitId });
-          }
-          if (asgn.selectedUnitIds) {
-            for (const bId of asgn.selectedUnitIds) {
-              if (!blkMap.has(bId)) {
-                const unit = allFieldUnits.get(bId);
-                blkMap.set(bId, unit || { unitId: bId });
+    if (effectSelections.length === 0 && request.blockAssignmentStreamMeta) {
+      for (const atkId of request.blockAssignmentStreamMeta.attackerUnitIds) {
+        if (!atkMap.has(atkId)) {
+          const unit = allFieldUnits.get(atkId);
+          atkMap.set(atkId, unit || { unitId: atkId });
+        }
+      }
+      for (const bId of request.blockAssignmentStreamMeta.candidateBlockerUnitIds) {
+        if (!blkMap.has(bId)) {
+          const unit = allFieldUnits.get(bId);
+          blkMap.set(bId, unit || { unitId: bId });
+        }
+      }
+    } else {
+      for (const eff of effectSelections) {
+        if (eff.assignments) {
+          for (const asgn of eff.assignments) {
+            if (asgn.sourceUnitId && !atkMap.has(asgn.sourceUnitId)) {
+              const unit = allFieldUnits.get(asgn.sourceUnitId);
+              atkMap.set(asgn.sourceUnitId, unit || { unitId: asgn.sourceUnitId });
+            }
+            if (asgn.selectedUnitIds) {
+              for (const bId of asgn.selectedUnitIds) {
+                if (!blkMap.has(bId)) {
+                  const unit = allFieldUnits.get(bId);
+                  blkMap.set(bId, unit || { unitId: bId });
+                }
               }
             }
           }
@@ -68,7 +83,7 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
       attackers: Array.from(atkMap.values()),
       candidateBlockers: Array.from(blkMap.values()),
     };
-  }, [effectSelections, request.observation]);
+  }, [effectSelections, request.observation, request.blockAssignmentStreamMeta]);
 
   // 各アタッカーに対するブロッカー割当て状態 (初期状態: initialAssignments または 各アタッカー = [])
   const [assignments, setAssignments] = useState<AttackerBlockMap>(() => {
@@ -114,7 +129,7 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
             [targetAttackerId]: curList.filter((id) => id !== clickedId),
           };
         }
-        if (canAssignBlocker(prev, targetAttackerId, clickedId, effectSelections)) {
+        if (canAssignBlocker(prev, targetAttackerId, clickedId, effectSelections, request.blockAssignmentStream)) {
           return {
             ...prev,
             [targetAttackerId]: [...curList, clickedId],
@@ -152,8 +167,8 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
 
   // 現在の割当てと完全一致する Legal Pattern のインデックス
   const exactPatternRef = useMemo(() => {
-    return findExactMatchPatternRef(assignments, effectSelections);
-  }, [assignments, effectSelections]);
+    return findExactMatchPatternRef(assignments, effectSelections, request.blockAssignmentStream);
+  }, [assignments, effectSelections, request.blockAssignmentStream]);
 
   useEffect(() => {
     onExactPatternRefChange?.(exactPatternRef);
@@ -224,7 +239,8 @@ export const BlockAssignmentEditor: React.FC<BlockAssignmentEditorProps> = ({
                       assignments,
                       attacker.unitId,
                       blocker.unitId,
-                      effectSelections
+                      effectSelections,
+                      request.blockAssignmentStream
                     );
                     const isDisabled = !isSelected && !canSelect;
 

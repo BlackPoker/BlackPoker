@@ -120,6 +120,17 @@ export class PlaytestConservativePolicy implements DecisionPolicy {
   }
 
   choose(request: Readonly<DecisionRequest>): DecisionResponse {
+    if (request.blockAssignmentStream && (!request.patterns || request.patterns.length === 0)) {
+      if (request.blockAssignmentStream.patternCount <= 0) {
+        throw new Error(`DecisionRequest に選択可能なパターンが存在しません: ${request.decisionId}`);
+      }
+      return {
+        decisionId: request.decisionId,
+        stateVersion: request.stateVersion,
+        selectedPatternRef: 0,
+      };
+    }
+
     if (!request.patterns || request.patterns.length === 0) {
       throw new Error(`DecisionRequest に選択可能なパターンが存在しません: ${request.decisionId}`);
     }
