@@ -11,6 +11,7 @@ import {
   findExactMatchPatternRef,
   AttackerBlockMap,
 } from "../../ui/decision/blockAssignmentUtils.js";
+import { buildUnitSetSelectionModel } from "../../ui/decision/AttackerSelectionEditor.js";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -39,8 +40,8 @@ describe("ブロック割当ストリーミング対応 回帰テスト (作業A
       },
       scenarioHandSelections: {
         p1: [
-          { suit: "H", rank: "2", occurrence: 0 },
-          { suit: "H", rank: "3", occurrence: 0 },
+          { suit: "C", rank: "2", occurrence: 0 },
+          { suit: "C", rank: "3", occurrence: 0 },
           { suit: "S", rank: "A", occurrence: 0 },
         ] as any,
         p2: [
