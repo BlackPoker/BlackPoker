@@ -39,7 +39,7 @@ export function buildUnitSetSelectionModel(request: Readonly<DecisionRequest>): 
     if (!eff || (eff.selectionType !== "unit" && eff.selectionType !== "target")) {
       return { isUnitSetSelection: false, candidateUnitIds: [], patternMap: new Map() };
     }
-    const ids = eff.selectedUnitIds ?? eff.selectedValues ?? [];
+    const ids = eff.selectedValues ?? [];
     for (const id of ids) {
       candidateSet.add(id);
     }
@@ -74,7 +74,7 @@ export const AttackerSelectionEditor: React.FC<AttackerSelectionEditorProps> = (
     const firstEffRef = request.patterns[0]?.effectSelectionRef;
     const firstEff =
       firstEffRef !== undefined ? request.catalog.effectSelections?.[firstEffRef] : undefined;
-    return [...(firstEff?.selectedUnitIds ?? firstEff?.selectedValues ?? [])];
+    return [...(firstEff?.selectedValues ?? [])];
   });
 
   const lastProcessedSeqRef = useRef<number>(lastBoardUnitClick?.seq ?? 0);

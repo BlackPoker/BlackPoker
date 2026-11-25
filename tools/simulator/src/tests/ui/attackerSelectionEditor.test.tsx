@@ -36,13 +36,20 @@ function createAttackSelectionRequest(unitIds: string[]): DecisionRequest {
     decisionId: "dec-atk-1",
     stateVersion: 10,
     playerId: "p1",
-    source: { type: "EFFECT_RESOLUTION", effectStep: "selectUnits" },
+    source: {
+      type: "EFFECT_RESOLUTION",
+      sourceRequestRef: "req-1",
+      effectStepId: "selectUnits",
+    },
     patterns,
     catalog: {
       actions: [],
       cardSelections: [],
       costPayments: [],
       effectSelections,
+      unitSelections: [],
+      targetSelections: [],
+      orderSelections: [],
     },
     observation: { players: [] } as any,
   };

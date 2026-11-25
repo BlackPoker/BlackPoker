@@ -88,7 +88,7 @@ describe("ブロック割当ストリーミング対応 回帰テスト (作業A
     const session = createFourVsFiveBlockSession(1875946702);
     const policy = new PlaytestConservativePolicy();
 
-    let step = session.advance();
+    let step: any = session.advance();
     expect(step.type).toBe("WAITING_FOR_DECISION");
     if (step.type !== "WAITING_FOR_DECISION") return;
 
@@ -131,7 +131,7 @@ describe("ブロック割当ストリーミング対応 回帰テスト (作業A
         const fourAtkIdx = req.patterns.findIndex((p) => {
           if (p.effectSelectionRef === undefined) return false;
           const eff = req.catalog.effectSelections?.[p.effectSelectionRef];
-          const count = eff?.selectedUnitIds?.length ?? eff?.selectedValues?.length ?? 0;
+          const count = eff?.selectedValues?.length ?? 0;
           return count === 4;
         });
         expect(fourAtkIdx).toBeGreaterThanOrEqual(0);
@@ -163,9 +163,10 @@ describe("ブロック割当ストリーミング対応 回帰テスト (作業A
 
   it("Human vs Human(UIユーティリティ)でも1,649通りのストリーミングブロック割当と既存ルール制約が機能すること", () => {
     const session = createFourVsFiveBlockSession(1875946702);
-    let step = session.advance();
+    let step: any = session.advance();
     if (step.type !== "WAITING_FOR_DECISION") throw new Error("unexpected");
 
+    if (step.type !== "WAITING_FOR_DECISION") throw new Error("unexpected");
     const attackIdx = step.request.patterns.findIndex((p) => {
       if (p.kind !== "ACTION" || p.actionSelectionRef === undefined) return false;
       const act = step.request.catalog.actions?.[p.actionSelectionRef];
@@ -177,12 +178,13 @@ describe("ブロック割当ストリーミング対応 回帰テスト (作業A
       selectedPatternRef: attackIdx,
     });
 
-    while (step.type === "WAITING_FOR_DECISION" && !step.request.blockAssignmentStream) {
+    while (step.type === "WAITING_FOR_DECISION") {
+      if (step.request.blockAssignmentStream) break;
       if (step.request.source?.type === "EFFECT_RESOLUTION") {
         const fourAtkIdx = step.request.patterns.findIndex((p) => {
           if (p.effectSelectionRef === undefined) return false;
           const eff = step.request.catalog.effectSelections?.[p.effectSelectionRef];
-          const count = eff?.selectedUnitIds?.length ?? eff?.selectedValues?.length ?? 0;
+          const count = eff?.selectedValues?.length ?? 0;
           return count === 4;
         });
         step = session.submitDecision({
@@ -259,9 +261,21 @@ describe("ブロック割当ストリーミング対応 回帰テスト (作業A
         decisionId: "dec-empty",
         stateVersion: 1,
         playerId: "p1",
-        source: { type: "EFFECT_RESOLUTION", effectStep: "selectBlockAssignments" },
+        source: {
+          type: "EFFECT_RESOLUTION",
+          sourceRequestRef: "req-1",
+          effectStepId: "selectBlockAssignments",
+        },
         patterns: [],
-        catalog: { actions: [], cardSelections: [], costPayments: [], effectSelections: [] },
+        catalog: {
+          actions: [],
+          cardSelections: [],
+          costPayments: [],
+          effectSelections: [],
+          unitSelections: [],
+          targetSelections: [],
+          orderSelections: [],
+        },
         observation: { players: [] } as any,
       })
     ).toThrow(/選択可能なパターンが存在しません/);
