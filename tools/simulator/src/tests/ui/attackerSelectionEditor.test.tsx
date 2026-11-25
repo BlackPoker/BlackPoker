@@ -6,10 +6,15 @@ import {
   buildUnitSetSelectionModel,
 } from "../../ui/decision/AttackerSelectionEditor";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
+import { LegalPattern } from "../../domain/decision/LegalPattern";
+import { EffectSelection } from "../../domain/decision/DecisionCatalog";
 
-function createAttackSelectionRequest(unitIds: string[]): DecisionRequest {
-  const effectSelections: any[] = [];
-  const patterns: any[] = [];
+function createAttackSelectionRequest(
+  unitIds: string[],
+  decisionId: string = "dec-atk-1"
+): DecisionRequest {
+  const effectSelections: EffectSelection[] = [];
+  const patterns: LegalPattern[] = [];
   const total = 1 << unitIds.length;
 
   for (let mask = 0; mask < total; mask++) {
@@ -22,10 +27,11 @@ function createAttackSelectionRequest(unitIds: string[]): DecisionRequest {
     const idx = effectSelections.length;
     effectSelections.push({
       selectionType: "unit",
-      selectedUnitIds: selected,
+      selectedValues: selected,
     });
     patterns.push({
-      kind: "EFFECT",
+      patternId: `pat-${idx}`,
+      kind: "EFFECT_SELECTION",
       effectSelectionRef: idx,
     });
   }
@@ -33,13 +39,14 @@ function createAttackSelectionRequest(unitIds: string[]): DecisionRequest {
   return {
     protocolVersion: "1.0",
     matchId: "atk-ui-test",
-    decisionId: "dec-atk-1",
+    decisionId,
     stateVersion: 10,
     playerId: "p1",
     source: {
       type: "EFFECT_RESOLUTION",
       sourceRequestRef: "req-1",
       effectStepId: "selectUnits",
+      sourceActionId: "action.attack",
     },
     patterns,
     catalog: {
@@ -64,7 +71,7 @@ describe("AttackerSelectionEditor (作業B)", () => {
     ])
   );
 
-  it("4体(16通り)の合法パターンを兵士単位(4ボタン)に集約し、全選択・全解除・個別集合が正確なpatternRefに一致すること", () => {
+  it("4体(16通り)の合法パターンを兵士単位に集約し、全選択・全解除・空集合・個別集合が正確なpatternRefに一致すること", () => {
     const req = createAttackSelectionRequest(unitIds);
     const model = buildUnitSetSelectionModel(req);
     expect(model.isUnitSetSelection).toBe(true);
@@ -80,6 +87,7 @@ describe("AttackerSelectionEditor (作業B)", () => {
 
     const html = renderToStaticMarkup(
       <AttackerSelectionEditor
+        key={req.decisionId}
         request={req}
         unitNumberMap={unitNumberMap}
         onExactPatternRefChange={() => {}}
@@ -90,5 +98,19 @@ describe("AttackerSelectionEditor (作業B)", () => {
     expect(html).toContain("全解除");
     expect(html).toContain("attacker-unit-btn-u1");
     expect(html).toContain("attacker-unit-btn-u4");
+  });
+
+  it("action.attack 以外の EFFECT_RESOLUTION には適用されないこと", () => {
+    const req = createAttackSelectionRequest(unitIds);
+    const nonAttackReq: DecisionRequest = {
+      ...req,
+      source: {
+        type: "EFFECT_RESOLUTION",
+        sourceRequestRef: "req-2",
+        effectStepId: "selectUnits",
+        sourceActionId: "action.reverse",
+      },
+    };
+    expect(buildUnitSetSelectionModel(nonAttackReq).isUnitSetSelection).toBe(false);
   });
 });

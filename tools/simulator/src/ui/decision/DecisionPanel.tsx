@@ -1195,6 +1195,7 @@ export const DecisionPanel: React.FC<DecisionPanelProps> = ({
             />
           ) : isUnitSetSelection ? (
             <AttackerSelectionEditor
+              key={request.decisionId}
               request={request}
               unitNumberMap={unitNumberMap}
               onExactPatternRefChange={setSelectedEffectPatternRef}

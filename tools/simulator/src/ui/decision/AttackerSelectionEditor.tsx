@@ -22,6 +22,13 @@ export function buildUnitSetSelectionModel(request: Readonly<DecisionRequest>): 
   candidateUnitIds: string[];
   patternMap: Map<string, number>;
 } {
+  if (
+    request.source?.type !== "EFFECT_RESOLUTION" ||
+    request.source.sourceActionId !== "action.attack"
+  ) {
+    return { isUnitSetSelection: false, candidateUnitIds: [], patternMap: new Map() };
+  }
+
   const effs = request.catalog.effectSelections || [];
   if (request.patterns.length === 0 || effs.length === 0) {
     return { isUnitSetSelection: false, candidateUnitIds: [], patternMap: new Map() };

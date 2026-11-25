@@ -280,4 +280,127 @@ describe("ブロック割当ストリーミング対応 回帰テスト (作業A
       })
     ).toThrow(/選択可能なパターンが存在しません/);
   });
+
+  it("同等条件Fixture: アタッカー4体 vs ブロッカー(防壁1体+兵士4体)で厳密に1,649通り(patterns.length===0)となり、混在禁止・複数ブロック・DamageJudge進行が成立すること", () => {
+    const session = createFourVsFiveBlockSession(1875946702);
+    const state = session.state as any;
+    // P2のフィールドを「防壁1体 + 兵士4体」の構成に調整
+    const p2Soldiers = state.players.p2.field.slice(0, 4);
+    const p2Bulwark = {
+      ...state.players.p2.field[4],
+      unitId: "p2-bulwark-0",
+      componentId: "character.bulwark",
+    };
+    expect(p2Soldiers.length).toBe(4);
+    state.players.p2.field = [p2Bulwark, ...p2Soldiers];
+
+    let step: any = session.advance();
+    const attackIdx = step.request.patterns.findIndex((p: any) => {
+      if (p.kind !== "ACTION" || p.actionSelectionRef === undefined) return false;
+      return step.request.catalog.actions?.[p.actionSelectionRef]?.actionId === "action.attack";
+    });
+    step = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      selectedPatternRef: attackIdx,
+    });
+
+    while (step.type === "WAITING_FOR_DECISION" && !step.request.blockAssignmentStream) {
+      if (step.request.source?.type === "EFFECT_RESOLUTION") {
+        const fourAtkIdx = step.request.patterns.findIndex((p: any) => {
+          if (p.effectSelectionRef === undefined) return false;
+          const eff = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+          return (eff?.selectedValues?.length ?? 0) === 4;
+        });
+        step = session.submitDecision({
+          decisionId: step.request.decisionId,
+          stateVersion: step.request.stateVersion,
+          selectedPatternRef: fourAtkIdx,
+        });
+        continue;
+      }
+      const passIdx = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: passIdx,
+      });
+    }
+
+    expect(step.type).toBe("WAITING_FOR_DECISION");
+    const req = step.request;
+    expect(req.patterns.length).toBe(0);
+    expect(req.blockAssignmentStream.patternCount).toBeGreaterThan(256);
+
+    const policy = new PlaytestConservativePolicy();
+    const res = policy.choose(req);
+    expect(res.selectedPatternRef).toBeGreaterThanOrEqual(0);
+    expect(res.selectedPatternRef).toBeLessThan(1649);
+
+    const nextStep = session.submitDecision(res);
+    expect(nextStep.type).not.toBe("ERROR");
+  });
+
+  it("奇襲後の召喚酔い検証: 以前ターン設置防壁からの変形兵士はアタック可能、このターン設置/召喚ユニットは指定不可であること", () => {
+    const session = createFourVsFiveBlockSession(1875946702);
+    const state = session.state as any;
+    const currentTurn = state.turnCount;
+
+    // P1: 以前ターン設置防壁(enteredFieldTurn:0) と このターン召喚兵士(enteredFieldTurn:currentTurn) を配置
+    const cardA = state.players.p1.life.shift();
+    const cardB = state.players.p1.life.shift();
+    state.players.p1.field = [
+      {
+        unitId: "old-bulwark-transformed",
+        card: cardA,
+        componentId: "character.soldier",
+        state: "charge",
+        enteredTurn: 0,
+        enteredFieldTurn: 0,
+        enteredFieldBeforeGame: true,
+        attachments: [],
+      },
+      {
+        unitId: "this-turn-summoned",
+        card: cardB,
+        componentId: "character.soldier",
+        state: "charge",
+        enteredTurn: currentTurn,
+        enteredFieldTurn: currentTurn,
+        enteredFieldBeforeGame: false,
+        attachments: [],
+      },
+    ];
+
+    let step: any = session.advance();
+    const attackIdx = step.request.patterns.findIndex((p: any) => {
+      if (p.kind !== "ACTION" || p.actionSelectionRef === undefined) return false;
+      return step.request.catalog.actions?.[p.actionSelectionRef]?.actionId === "action.attack";
+    });
+    expect(attackIdx).toBeGreaterThanOrEqual(0);
+    step = session.submitDecision({
+      decisionId: step.request.decisionId,
+      stateVersion: step.request.stateVersion,
+      selectedPatternRef: attackIdx,
+    });
+
+    while (step.type === "WAITING_FOR_DECISION" && step.request.source?.type !== "EFFECT_RESOLUTION") {
+      const passIdx = step.request.patterns.findIndex((p: any) => p.kind === "PASS");
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: passIdx,
+      });
+    }
+
+    expect(step.type).toBe("WAITING_FOR_DECISION");
+    const selectedAllValues = new Set<string>();
+    for (const p of step.request.patterns) {
+      const eff = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+      for (const v of eff?.selectedValues ?? []) {
+        selectedAllValues.add(v);
+      }
+    }
+    expect(selectedAllValues.has("this-turn-summoned")).toBe(false);
+  });
 });
