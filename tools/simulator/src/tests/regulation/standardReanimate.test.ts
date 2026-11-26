@@ -521,7 +521,11 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
     const cardPat = step4.request.patterns.findIndex(
       (p: any) => p.effectSelectionRef !== undefined && step4.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("c-k1")
     );
-    session.submitDecision({ decisionId: step4.request.decisionId, stateVersion: step4.request.stateVersion, selectedPatternRef: cardPat });
+    const step5: any = session.submitDecision({ decisionId: step4.request.decisionId, stateVersion: step4.request.stateVersion, selectedPatternRef: cardPat });
+    // 2枚キーカードの ZONE_TOP_SELECTION を完了すると、誘発チェックで nextGeneration が即時解決される
+    expect(step5.type).toBe("WAITING_FOR_DECISION");
+    expect(step5.request.source.type).toBe("ZONE_TOP_SELECTION");
+    session.submitDecision({ decisionId: step5.request.decisionId, stateVersion: step5.request.stateVersion, selectedPatternRef: 0 });
 
     // ターゲットの J 兵士が墓地に送られたことによる nextGeneration は誘発している
     // (field -> grave のみ誘発、grave -> field の c-k1 は誘発しないため nextGen の triggered は 1件のみ)
@@ -1137,7 +1141,14 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
         (p: any) => p.effectSelectionRef !== undefined && s4.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("c-gBottom")
       );
       expect(bottomPat).toBeGreaterThanOrEqual(0);
-      session.submitDecision({ decisionId: s4.request.decisionId, stateVersion: s4.request.stateVersion, selectedPatternRef: bottomPat });
+      const s5: any = session.submitDecision({ decisionId: s4.request.decisionId, stateVersion: s4.request.stateVersion, selectedPatternRef: bottomPat });
+      expect(s5.type).toBe("WAITING_FOR_DECISION");
+      expect(s5.request.source.type).toBe("ZONE_TOP_SELECTION");
+      const kh1Pat = s5.request.patterns.findIndex(
+        (p: any) => p.effectSelectionRef !== undefined && s5.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("k-h1")
+      );
+      expect(kh1Pat).toBeGreaterThanOrEqual(0);
+      session.submitDecision({ decisionId: s5.request.decisionId, stateVersion: s5.request.stateVersion, selectedPatternRef: kh1Pat });
 
       // 蘇生された c-gBottom が場に出ていること
       const p1Field = session.state.players.p1.field;
@@ -1247,7 +1258,14 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
         (p: any) => p.effectSelectionRef !== undefined && s4.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("c-gTop")
       );
       expect(topPat).toBeGreaterThanOrEqual(0);
-      session.submitDecision({ decisionId: s4.request.decisionId, stateVersion: s4.request.stateVersion, selectedPatternRef: topPat });
+      const s5: any = session.submitDecision({ decisionId: s4.request.decisionId, stateVersion: s4.request.stateVersion, selectedPatternRef: topPat });
+      expect(s5.type).toBe("WAITING_FOR_DECISION");
+      expect(s5.request.source.type).toBe("ZONE_TOP_SELECTION");
+      const kh2Pat = s5.request.patterns.findIndex(
+        (p: any) => p.effectSelectionRef !== undefined && s5.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("k-h2")
+      );
+      expect(kh2Pat).toBeGreaterThanOrEqual(0);
+      session.submitDecision({ decisionId: s5.request.decisionId, stateVersion: s5.request.stateVersion, selectedPatternRef: kh2Pat });
 
       // c-gTop は場へ
       expect(session.state.players.p1.field.some((u: any) => u.cards?.some((c: any) => c.id === "c-gTop"))).toBe(true);
@@ -1534,7 +1552,14 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       const selPat = s.request.patterns.findIndex(
         (p: any) => p.effectSelectionRef !== undefined && s.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("c-init-grave")
       );
-      session.submitDecision({ decisionId: s.request.decisionId, stateVersion: s.request.stateVersion, selectedPatternRef: selPat });
+      s = session.submitDecision({ decisionId: s.request.decisionId, stateVersion: s.request.stateVersion, selectedPatternRef: selPat });
+      expect(s.type).toBe("WAITING_FOR_DECISION");
+      expect(s.request.source.type).toBe("ZONE_TOP_SELECTION");
+      const kh1Pat = s.request.patterns.findIndex(
+        (p: any) => p.effectSelectionRef !== undefined && s.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("k-h1")
+      );
+      expect(kh1Pat).toBeGreaterThanOrEqual(0);
+      session.submitDecision({ decisionId: s.request.decisionId, stateVersion: s.request.stateVersion, selectedPatternRef: kh1Pat });
 
       // アクション全工程完了後の墓地:
       // [ targetSolCard (Unit wrapper), k-s1 (Card), k-h1 (Card) ]
@@ -1652,12 +1677,27 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       expect(state.players.p1.graveTopCardId).toBe("c-other-1");
       expect(state.pendingGraveTopSelections?.length ?? 0).toBe(0);
 
-      // 7. リクエストを再開
-      const resumeResult = registry.resumeRequest(
+      // 7. リクエストを再開 -> 2枚キーカード同時墓地移動により2回目の ZONE_TOP_SELECTION が発生
+      let resumeResult = registry.resumeRequest(
         request,
         result.continuation!,
         ["c-other-1"],
         result.context!
+      );
+      expect(resumeResult.type).toBe("WAITING_FOR_DECISION");
+      expect(resumeResult.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(state.stage.requests.length).toBe(0);
+      expect(state.stage.history.length).toBe(0);
+      expect(request.status).toBe("resolving");
+      expect((logRecorder as any).events.find((e: any) => e.type === "request.resolved")).toBeUndefined();
+
+      // 7.5. キーカード墓地TOP選択 (k-s1) を適用して解決完了契約を確定
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "k-s1", logRecorder);
+      resumeResult = registry.resumeRequest(
+        request,
+        resumeResult.continuation!,
+        undefined,
+        resumeResult.context!
       );
 
       // 8. 墓地TOP選択後に解決完了契約が実行され、Stage から除去され、Key Cards が墓地へ送られる
@@ -1665,6 +1705,7 @@ describe("Official Regulation Phase 3.0-E - Reanimate & Grave Physical Card Sele
       expect(state.stage.requests.length).toBe(0);
       expect(state.stage.history.length).toBe(1);
       expect(request.status).toBe("resolved");
+      expect(state.players.p1.graveTopCardId).toBe("k-s1");
 
       const p1GraveAfter = state.players.p1.grave;
       const keyS1InGrave = p1GraveAfter.some((e: any) => e.id === "k-s1");

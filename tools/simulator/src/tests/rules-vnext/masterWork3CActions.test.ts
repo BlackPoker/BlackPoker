@@ -920,21 +920,42 @@ describe("作業3C: マスターアクション（徴募・B・J）統合検証"
         selectedPatternRef: topSelectRef,
       });
 
-      // 墓地TOP選択後の検証:
-      // 1. pendingGraveTopSelections が解消されていること
+      // バースト墓地TOP選択後の検証:
+      // 1. バースト分の ZONE_TOP_SELECTION により ♣5 が墓地TOPに設定されたことが zone.top.changed ログに記録されていること
+      const topChangedLogsBeforeKey = session.logRecorder.getEvents().filter((l: any) => l.type === "zone.top.changed");
+      expect(topChangedLogsBeforeKey.some((l: any) => l.cardId === "c-l-c5" && l.playerId === "p1")).toBe(true);
+
+      // 2. 続いて、action.bj 自身の2枚キーカード (c-a, c-j) 同時墓地移動に伴う別バッチの ZONE_TOP_SELECTION が要求されること
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      expect(step.request.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(step.request.playerId).toBe("p1");
+      expect(session.state.pendingGraveTopSelections).toHaveLength(1);
+      expect(session.state.pendingGraveTopSelections[0].candidateCardIds).toEqual(["c-a", "c-j"]);
+
+      // キーカードの中から c-j を墓地TOPとして選択
+      const keyTopRef = step.request.patterns.findIndex((p: any) => {
+        const effSel = step.request.catalog.effectSelections?.[p.effectSelectionRef];
+        return effSel?.selectedValues?.includes("c-j");
+      });
+      expect(keyTopRef).toBeGreaterThanOrEqual(0);
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: keyTopRef,
+      });
+
+      // 3. pendingGraveTopSelections が完全に解消され、最終墓地TOPが c-j になること
       expect(session.state.pendingGraveTopSelections).toHaveLength(0);
-      // 2. 墓地TOP選択により ♣5 が墓地TOPに設定されたことが zone.top.changed ログに記録されていること
-      const topChangedLogs = session.logRecorder.getEvents().filter((l: any) => l.type === "zone.top.changed");
-      expect(topChangedLogs.some((l: any) => l.cardId === "c-l-c5" && l.playerId === "p1")).toBe(true);
-      // 3. アクション完了に伴い未配置キーカード (c-a, c-j) が墓地へ送られ、最終墓地TOPが c-j になること
       expect(session.state.players.p1.graveTopCardId).toBe("c-j");
       // 4. 公開カード ♠10, ♡K, ♣5 がすべて墓地に移動していること（Identity保持）
       const graveCardIds = session.state.players.p1.grave.map((c: any) => c.id);
       expect(graveCardIds).toContain("c-l-s10");
       expect(graveCardIds).toContain("c-l-hk");
       expect(graveCardIds).toContain("c-l-c5");
+      expect(graveCardIds).toContain("c-a");
+      expect(graveCardIds).toContain("c-j");
 
-      // ステージ解決完了（完了時にキーカード c-a, c-j が墓地へ送られる）
+      // ステージ解決完了
       resolveStageToEmpty(session);
 
       // 手札には加わっていないこと

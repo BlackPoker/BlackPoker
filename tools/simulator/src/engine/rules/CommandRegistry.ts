@@ -46,12 +46,17 @@ import { TriggerResolver } from "./TriggerResolver";
 import { RequestBufferProcessor } from "./RequestBufferProcessor";
 import { PlayerKey } from "../../domain/decision/DecisionSource";
 import { CostPayment, TargetSelection } from "../../domain/decision/DecisionCatalog";
-import { EffectContinuation } from "../session/GameSession";
+import {
+  EffectContinuation,
+  REQUEST_KEY_CARD_FINALIZATION_STEP_ID,
+  CANCELLED_REQUEST_KEY_CARD_FINALIZATION_STEP_ID,
+} from "../session/GameSession";
 import { LegalPatternGenerator } from "../decision/LegalPatternGenerator";
 import { isCardInGameZones } from "./cardUtils";
 import { MatchLogRecorder, normalizeCardLocation } from "../log/MatchLogRecorder";
 import { validateTargetsAtResolution } from "./ResolutionTargetValidator";
 import { GraveTopCoordinator } from "./GraveTopCoordinator";
+import { isDirectCard } from "./graveCardUtils";
 import { EffectPathCodec } from "./EffectPathCodec";
 import {
   resolveKeyCardSourceZone,
@@ -77,42 +82,80 @@ export function finalizeRequestKeyCards(
   request: ActionRequest,
   context: CommandContext,
   effectInterpreter?: EffectInterpreter
-): void {
-  if (!request.keyCards || request.keyCards.length === 0) return;
+): { requiresDecision: boolean; movedCount: number } {
+  if (!request.keyCards || request.keyCards.length === 0) {
+    return { requiresDecision: false, movedCount: 0 };
+  }
   const player = context.state.players?.[request.controller];
-  if (!player) return;
+  if (!player) {
+    return { requiresDecision: false, movedCount: 0 };
+  }
+
+  // 1. 残存キーカードの特定と重複・妥当性検証（状態変更前に全件検証し部分移動を防止）
+  const seenIds = new Set<string>();
+  const remainingKeyCards: any[] = [];
+  for (const keyCard of request.keyCards) {
+    if (!isDirectCard(keyCard)) {
+      throw new Error(`finalizeRequestKeyCards: 不正なキーカードが含まれています (requestId=${request.id})`);
+    }
+    if (seenIds.has(keyCard.id)) {
+      throw new Error(`finalizeRequestKeyCards: 重複した物理カードIDが含まれています: ${keyCard.id}`);
+    }
+    seenIds.add(keyCard.id);
+    if (!isCardInGameZones(keyCard.id, context.state)) {
+      remainingKeyCards.push(keyCard);
+    }
+  }
+
+  if (remainingKeyCards.length === 0) {
+    return { requiresDecision: false, movedCount: 0 };
+  }
 
   if (!Array.isArray(player.grave)) {
     player.grave = [];
   }
 
-  for (const keyCard of request.keyCards) {
-    if (!keyCard || !keyCard.id) continue;
-    if (!isCardInGameZones(keyCard.id, context.state)) {
-      GraveTopCoordinator.addCardToGrave(
-        player,
-        keyCard,
-        context.state,
-        request.controller,
-        context.logRecorder
-      );
-      if (effectInterpreter) {
-        effectInterpreter.dispatchEvent(
-          {
-            type: "cardMoved",
-            payload: {
-              card: keyCard,
-              fromZone: "request",
-              toZone: "grave",
-              playerKey: request.controller,
-              cause: { type: "action", actionId: request.actionId, requestId: request.id },
-            },
+  const logRecorder = context.logRecorder || (effectInterpreter as any)?.registry?.logRecorder;
+
+  // 2. 同一の墓地移動処理単位として一括同時移動（skipCardMoved: true で中間状態露出を防止）
+  const batchResult = GraveTopCoordinator.addCardsBatchToGrave(
+    player,
+    remainingKeyCards,
+    context.state,
+    request.controller,
+    logRecorder,
+    effectInterpreter,
+    context,
+    {
+      fromZone: "request",
+      skipCardMoved: true,
+      command: "finalizeRequestKeyCards",
+    }
+  );
+
+  // 3. 全対象カードの移動・Pending整合後に cardMoved イベントを一括発行
+  if (effectInterpreter) {
+    for (const keyCard of remainingKeyCards) {
+      effectInterpreter.dispatchEvent(
+        {
+          type: "cardMoved",
+          payload: {
+            card: keyCard,
+            fromZone: "request",
+            toZone: "grave",
+            playerKey: request.controller,
+            cause: { type: "action", actionId: request.actionId, requestId: request.id },
           },
-          context
-        );
-      }
+        },
+        context
+      );
     }
   }
+
+  return {
+    requiresDecision: batchResult.requiresDecision,
+    movedCount: remainingKeyCards.length,
+  };
 }
 
 /**
@@ -515,9 +558,11 @@ export class CommandRegistry {
    * アクションリクエストの解決完了契約（Canonical Resolution Order）を一元処理します。
    * 1. Stage からリクエストを除去（stage.popped ログ記録）
    * 2. キーカード後処理（finalizeRequestKeyCards: 未配置キーカードを墓地へ）
+   * 2.5. 2枚以上の残存キーカード移動に伴う墓地TOP選択が必要な場合は WAITING_FOR_DECISION を返却
+   *      （選択完了まで status="resolved" / stage.history 追加 / request.resolved / actionResolved / COMPLETED は保留）
    * 3. request.status = "resolved"
    * 4. Stage 履歴（context.state.stage.history）へ push
-   * 5. request.resolved ログ記録（Stage除去・キーカード処理完了後に記録）
+   * 5. request.resolved ログ記録（Stage除去・キーカード処理・墓地TOP選択完了後に記録）
    * 6. actionResolved イベント発行
    * 7. { type: "COMPLETED", request } を返却
    */
@@ -529,10 +574,18 @@ export class CommandRegistry {
       reason?: string;
       detail?: string;
     }
-  ): {
-    type: "COMPLETED";
-    request: ActionRequest;
-  } {
+  ):
+    | {
+        type: "COMPLETED";
+        request: ActionRequest;
+      }
+    | {
+        type: "WAITING_FOR_DECISION";
+        request: ActionRequest;
+        decisionRequest: any;
+        continuation: EffectContinuation;
+        context: CommandContext;
+      } {
     if (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
       throw new Error(`finalizeRequestResolution: 未解決の pendingGraveTopSelections が存在します。`);
     }
@@ -546,9 +599,12 @@ export class CommandRegistry {
 
     const logRecorder = context.logRecorder || this.logRecorder;
 
-    // 1. Stage からリクエストを除去
+    // 1. Stage からリクエストを除去（2重除去しない）
     if (context.state.stage.requests && context.state.stage.requests.length > 0) {
-      const idx = context.state.stage.requests.lastIndexOf(request);
+      let idx = context.state.stage.requests.lastIndexOf(request);
+      if (idx === -1) {
+        idx = context.state.stage.requests.findIndex((r: any) => r.id === request.id);
+      }
       if (idx !== -1) {
         const depthBefore = context.state.stage.requests.length;
         context.state.stage.requests.splice(idx, 1);
@@ -566,16 +622,83 @@ export class CommandRegistry {
       }
     }
 
-    // 2. キーカード後処理（未配置カードを墓地へ）
-    finalizeRequestKeyCards(request, context, this.effectInterpreter);
+    // 2. キーカード後処理（未配置カードを墓地へ同時移動）
+    const keyCardResult = finalizeRequestKeyCards(request, context, this.effectInterpreter);
+
+    // 2.5. キーカード墓地移動に伴う墓地TOP選択が発生した場合、WAITING_FOR_DECISION を返却
+    if (
+      keyCardResult.requiresDecision ||
+      (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0)
+    ) {
+      const nextPending = context.state.pendingGraveTopSelections[0];
+      const actionDef = request.action || context.currentAction || context.actions?.find((a) => a.id === request.actionId);
+      const continuation: EffectContinuation = {
+        sourceRequestId: request.id,
+        effectPath: [actionDef?.effect?.length ?? 0],
+        effectStepId: REQUEST_KEY_CARD_FINALIZATION_STEP_ID,
+        selectionId: "graveTopCard",
+        finalizationOptions: {
+          effectExecuted: options.effectExecuted,
+          reason: options.reason,
+          detail: options.detail,
+        },
+      };
+      const decisionRequest = GraveTopCoordinator.createDecisionRequest(
+        context.state,
+        nextPending,
+        {
+          stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+          matchId: context.state.matchId,
+        }
+      );
+      return {
+        type: "WAITING_FOR_DECISION",
+        request,
+        decisionRequest,
+        continuation,
+        context: {
+          ...context,
+          playerKey: context.playerKey || request.controller,
+          currentAction: actionDef,
+          currentRequest: request,
+          logRecorder,
+        },
+      };
+    }
+
+    return this.completeRequestResolutionBody(request, context, options);
+  }
+
+  private completeRequestResolutionBody(
+    request: ActionRequest,
+    context: CommandContext,
+    options: {
+      effectExecuted: boolean;
+      reason?: string;
+      detail?: string;
+    }
+  ): {
+    type: "COMPLETED";
+    request: ActionRequest;
+  } {
+    if (request.status === "resolved") {
+      throw new Error(`completeRequestResolutionBody: リクエスト [${request.id}] は既に解決完了しています。`);
+    }
+    if (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+      throw new Error(`completeRequestResolutionBody: 未解決の pendingGraveTopSelections が存在します。`);
+    }
+
+    const logRecorder = context.logRecorder || this.logRecorder;
 
     // 3. ステータス更新
     request.status = "resolved";
 
-    // 4. Stage 履歴への追加
-    context.state.stage.history.push(request);
+    // 4. Stage 履歴への追加（重複防止）
+    if (!context.state.stage.history.some((r: any) => r.id === request.id)) {
+      context.state.stage.history.push(request);
+    }
 
-    // 5. 解決ログ記録（必ずStage除去・キーカード後処理の後に記録）
+    // 5. 解決ログ記録（必ずStage除去・キーカード後処理・墓地TOP選択完了後に記録）
     if (logRecorder) {
       logRecorder.record({
         type: "request.resolved",
@@ -635,8 +758,43 @@ export class CommandRegistry {
 
     // キャンセル済みリクエストのスキップ
     if (request.status === "cancelled") {
-      finalizeRequestKeyCards(request, context, this.effectInterpreter);
-      context.state.stage.history.push(request);
+      const keyCardResult = finalizeRequestKeyCards(request, context, this.effectInterpreter);
+      if (!context.state.stage.history.some((r: any) => r.id === request.id)) {
+        context.state.stage.history.push(request);
+      }
+      if (
+        keyCardResult.requiresDecision ||
+        (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0)
+      ) {
+        const nextPending = context.state.pendingGraveTopSelections[0];
+        const logRecorder = context.logRecorder || this.logRecorder;
+        const continuation: EffectContinuation = {
+          sourceRequestId: request.id,
+          effectPath: [request.action?.effect?.length ?? 0],
+          effectStepId: CANCELLED_REQUEST_KEY_CARD_FINALIZATION_STEP_ID,
+          selectionId: "graveTopCard",
+        };
+        const decisionRequest = GraveTopCoordinator.createDecisionRequest(
+          context.state,
+          nextPending,
+          {
+            stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+            matchId: context.state.matchId,
+          }
+        );
+        return {
+          type: "WAITING_FOR_DECISION",
+          request,
+          decisionRequest,
+          continuation,
+          context: {
+            ...context,
+            playerKey: context.playerKey || request.controller,
+            currentRequest: request,
+            logRecorder,
+          },
+        };
+      }
       return {
         type: "COMPLETED",
         request,
@@ -806,6 +964,65 @@ export class CommandRegistry {
     continuation?: EffectContinuation;
     context?: CommandContext;
   } {
+    if (continuation.effectStepId === REQUEST_KEY_CARD_FINALIZATION_STEP_ID) {
+      if (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+        const nextPending = context.state.pendingGraveTopSelections[0];
+        const decisionRequest = GraveTopCoordinator.createDecisionRequest(
+          context.state,
+          nextPending,
+          {
+            stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+            matchId: context.state.matchId,
+          }
+        );
+        return {
+          type: "WAITING_FOR_DECISION",
+          request,
+          decisionRequest,
+          continuation,
+          context,
+        };
+      }
+
+      if (!context.state.stage) {
+        context.state.stage = { requests: [], history: [] };
+      }
+      if (!context.state.stage.history) {
+        context.state.stage.history = [];
+      }
+
+      return this.completeRequestResolutionBody(
+        request,
+        context,
+        continuation.finalizationOptions ?? { effectExecuted: true }
+      );
+    }
+
+    if (continuation.effectStepId === CANCELLED_REQUEST_KEY_CARD_FINALIZATION_STEP_ID) {
+      if (context.state.pendingGraveTopSelections && context.state.pendingGraveTopSelections.length > 0) {
+        const nextPending = context.state.pendingGraveTopSelections[0];
+        const decisionRequest = GraveTopCoordinator.createDecisionRequest(
+          context.state,
+          nextPending,
+          {
+            stateVersion: context.state.stateVersion ?? context.state.version ?? 1,
+            matchId: context.state.matchId,
+          }
+        );
+        return {
+          type: "WAITING_FOR_DECISION",
+          request,
+          decisionRequest,
+          continuation,
+          context,
+        };
+      }
+      return {
+        type: "COMPLETED",
+        request,
+      };
+    }
+
     const action = request.action || context.actions?.find((a) => a.id === request.actionId);
     if (!action || !action.effect) {
       throw new Error(
@@ -971,9 +1188,9 @@ export class CommandRegistry {
     const isImmediate = action.request?.speed === "immediate";
     const req = this.createRequest(action, context);
     if (isImmediate) {
-      this.resolveRequest(req, context);
+      return this.resolveRequest(req, context);
     } else {
-      this.resolveTopRequest(context);
+      return this.resolveTopRequest(context);
     }
   }
 

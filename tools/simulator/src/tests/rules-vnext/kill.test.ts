@@ -588,8 +588,24 @@ describe("BP-SIM-REG-5.0-C-PRO-KILL: Pro Action Kill Implementation & Specificat
       expect(state.players.p2.field).toHaveLength(1);
       expect(state.players.p2.grave).toHaveLength(0);
 
-      // 2. Resolve request
-      const res = registry.resolveRequest(req, context);
+      // 2. Resolve request -> 2枚残存キーカード同時墓地移動に伴い ZONE_TOP_SELECTION で一時停止
+      let res = registry.resolveRequest(req, context);
+      expect(res.type).toBe("WAITING_FOR_DECISION");
+      expect(res.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(res.decisionRequest?.playerId).toBe("p1");
+      expect(req.status).toBe("resolving");
+      expect(state.stage.requests).toHaveLength(0);
+      expect(state.stage.history).toHaveLength(0);
+      expect(recordedLogs.find((l) => l.type === "request.resolved")).toBeUndefined();
+
+      GraveTopCoordinator.applyGraveTopSelection(
+        state,
+        "p1",
+        "p1-s3",
+        logRecorder as any,
+        state.stateVersion
+      );
+      res = registry.resumeRequest(req, res.continuation!, undefined, res.context!);
       expect(res.type).toBe("COMPLETED");
 
       // Target Soldier removed from p2 field and placed in p2 grave (NOT p1 grave!)
@@ -896,8 +912,14 @@ describe("BP-SIM-REG-5.0-C-PRO-KILL: Pro Action Kill Implementation & Specificat
       // 2. Intervening event: targetSoldier leaves field before Kill resolves (e.g. sacrificed or returned)
       state.players.p2.field = [otherSoldier];
 
-      // 3. Resolve request
-      const res = registry.resolveRequest(req, context);
+      // 3. Resolve request -> 効果スキップ後も2枚キーカード同時墓地移動により ZONE_TOP_SELECTION 発生
+      let res = registry.resolveRequest(req, context);
+      expect(res.type).toBe("WAITING_FOR_DECISION");
+      expect(res.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(req.status).toBe("resolving");
+
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "p1-s3");
+      res = registry.resumeRequest(req, res.continuation!, undefined, res.context!);
       expect(res.type).toBe("COMPLETED");
 
       // Survivor soldier is untouched

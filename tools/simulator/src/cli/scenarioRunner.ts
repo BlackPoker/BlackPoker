@@ -3,6 +3,8 @@ import { loadRulePackageFromDirectory } from "../engine/rules/RuleLoader";
 import { CommandRegistry, CommandContext } from "../engine/rules/CommandRegistry";
 import { TurnManager } from "../engine/rules/TurnManager";
 import { TriggerProcessingCoordinator } from "../engine/rules/TriggerProcessingCoordinator";
+import { GraveTopCoordinator } from "../engine/rules/GraveTopCoordinator";
+import { selectAutoGraveTopCandidate } from "../engine/playtest/GraveTopAutoSelector";
 
 const colors = {
   reset: "\x1b[0m",
@@ -113,7 +115,7 @@ function setupRegistryHook(registry: CommandRegistry) {
   const originalExecute = registry.execute;
   registry.execute = function (name: string, args: any, context: any) {
     console.log(`  ${colors.green}[CMD]${colors.reset} ${name}: ${JSON.stringify(args)}`);
-    originalExecute.call(this, name, args, context);
+    const execResult = originalExecute.call(this, name, args, context);
     if (name === "startAttack") {
       const state = context.state;
       const attackerUnit = context.targetComponent;
@@ -144,6 +146,7 @@ function setupRegistryHook(registry: CommandRegistry) {
         console.log(`  ${colors.bold}${colors.cyan}[BLOCK]${colors.reset} blocker=${blockerName}, attacker=${attackerName}`);
       }
     }
+    return execResult;
   };
 
   // Event dispatch hook
@@ -169,6 +172,91 @@ function setupRegistryHook(registry: CommandRegistry) {
     }
     originalDispatchEvent.call(this, event, context);
   };
+}
+
+function drainResolutionDecisions(
+  registry: CommandRegistry,
+  initialResult: any,
+  context: CommandContext,
+  matchSeed: number = 1
+) {
+  let result = initialResult;
+  while (result && result.type === "WAITING_FOR_DECISION") {
+    const decisionRequest = result.decisionRequest;
+    const activeContext = result.context || context;
+    if (decisionRequest?.source?.type === "ZONE_TOP_SELECTION") {
+      const stateVersion = activeContext.state?.stateVersion ?? 1;
+      const autoSelection = selectAutoGraveTopCandidate({
+        request: decisionRequest,
+        matchSeed,
+        stateVersion,
+      });
+      console.log(
+        `  ${colors.bold}${colors.magenta}[DECISION:ZONE_TOP_SELECTION]${colors.reset} player=${decisionRequest.playerId}, reason=${(decisionRequest.source as any).reason}, candidates=[${autoSelection.candidateCardIds.join(", ")}], chosen=${autoSelection.selectedCardId} (autoGraveTop deterministic: matchSeed=${matchSeed}, stateVersion=${stateVersion})`
+      );
+      GraveTopCoordinator.applyGraveTopSelection(
+        activeContext.state,
+        decisionRequest.playerId,
+        autoSelection.selectedCardId,
+        activeContext.logRecorder || registry.logRecorder,
+        stateVersion
+      );
+      result = registry.resumeRequest(
+        result.request,
+        result.continuation,
+        undefined,
+        activeContext
+      );
+    } else {
+      const patterns = decisionRequest?.patterns || [];
+      if (patterns.length === 0) {
+        throw new Error(`シナリオ実行中の中断判断に合法パターンが存在しません: ${decisionRequest?.source?.type}`);
+      }
+      const chosenPattern = patterns[0];
+      let selectedValues: readonly string[] | undefined;
+      let assignments: readonly any[] | undefined;
+      let targetSelection: any;
+      if (chosenPattern.effectSelectionRef !== undefined) {
+        const effSel = decisionRequest.catalog?.effectSelections?.[chosenPattern.effectSelectionRef];
+        selectedValues = effSel?.selectedValues;
+        assignments = effSel?.assignments;
+        targetSelection = effSel?.targetSelection;
+      } else if (chosenPattern.orderSelectionRef !== undefined) {
+        selectedValues = decisionRequest.catalog?.orderSelections?.[chosenPattern.orderSelectionRef]?.orderedIds;
+      }
+      console.log(
+        `  ${colors.bold}${colors.magenta}[DECISION:${decisionRequest?.source?.type || "EFFECT_RESOLUTION"}]${colors.reset} player=${decisionRequest?.playerId}, chosenPattern=${chosenPattern.patternId}`
+      );
+      result = registry.resumeRequest(
+        result.request,
+        result.continuation,
+        selectedValues,
+        activeContext,
+        assignments,
+        targetSelection
+      );
+    }
+  }
+  return result;
+}
+
+function executeActionWithDecisions(
+  registry: CommandRegistry,
+  action: any,
+  context: CommandContext,
+  matchSeed: number = 1
+) {
+  const initialResult = registry.executeAction(action, context);
+  return drainResolutionDecisions(registry, initialResult, context, matchSeed);
+}
+
+function resolveTopRequestWithDecisions(
+  registry: CommandRegistry,
+  context: CommandContext,
+  matchSeed: number = 1
+) {
+  const initialResult = registry.resolveTopRequest(context);
+  return drainResolutionDecisions(registry, initialResult, context, matchSeed);
 }
 
 async function runUpScenario(rulePackage: any) {
@@ -248,7 +336,7 @@ async function runUpScenario(rulePackage: any) {
 
   subHeader("アクション実行: 「アップ」");
   console.log(`実行アクション: ${upAction.name} (Key: ${keyCard.suit}${keyCard.rank})`);
-  registry.executeAction(upAction, context);
+  executeActionWithDecisions(registry, upAction, context, 1);
 
   subHeader("最終状態");
   logState(state);
@@ -262,7 +350,7 @@ async function runUpScenario(rulePackage: any) {
 
   subHeader("アクション実行: 「エンド」 (Player A)");
   console.log(`実行アクション: ${endAction.name}`);
-  registry.executeAction(endAction, context);
+  executeActionWithDecisions(registry, endAction, context, 1);
 
   subHeader("エンド解決後の状態");
   logState(state);
@@ -331,7 +419,7 @@ async function runDownScenario(rulePackage: any) {
   };
 
   console.log(`\n実行アクション: ${downAction.name} (Key: ${keyCardA.suit}${keyCardA.rank})`);
-  registryA.executeAction(downAction, contextA);
+  executeActionWithDecisions(registryA, downAction, contextA, 2);
 
   subHeader("パターンA 最終状態");
   logState(stateA);
@@ -388,7 +476,7 @@ async function runDownScenario(rulePackage: any) {
   };
 
   console.log(`\n実行アクション: ${downAction.name} (Key: ${keyCardB.suit}${keyCardB.rank})`);
-  registryB.executeAction(downAction, contextB);
+  executeActionWithDecisions(registryB, downAction, contextB, 2);
 
   subHeader("パターンB 最終状態");
   logState(stateB);
@@ -460,7 +548,7 @@ async function runBulwarkAndNextGenScenario(rulePackage: any) {
 
   subHeader("アクション実行: 「防壁破壊」");
   console.log(`実行アクション: ${destroyAction.name}`);
-  registry.executeAction(destroyAction, context);
+  executeActionWithDecisions(registry, destroyAction, context, 3);
 
   const coordinator = new TriggerProcessingCoordinator();
   coordinator.processPendingTriggers(state, rulePackage, registry);
@@ -557,7 +645,7 @@ async function runFortressDefenseScenario(rulePackage: any) {
     actions: rulePackage.actions,
     components: rulePackage.components,
   };
-  registry.executeAction(setBulwarkAction, setBulwarkContext);
+  executeActionWithDecisions(registry, setBulwarkAction, setBulwarkContext, 4);
 
   subHeader("防壁設置後の状態");
   logState(state);
@@ -585,7 +673,7 @@ async function runFortressDefenseScenario(rulePackage: any) {
   subHeader("アクション実行: 「投擲」 (Player A -> Player B)");
   console.log(`実行アクション: ${throwingAction.name} (Key: Spade 5 + Club 2 -> 本来 5 ダメージ)`);
   
-  registry.executeAction(throwingAction, throwingContext);
+  executeActionWithDecisions(registry, throwingAction, throwingContext, 4);
 
   subHeader("最終状態");
   logState(state);
@@ -686,11 +774,11 @@ async function runCounterScenario(rulePackage: any) {
   subHeader("ステージ上のリクエストを順次解決");
   // 最新のカウンターから解決 (LIFO)
   console.log(`\n--- カウンター (ID: ${req2.id}) の解決 ---`);
-  registry.resolveTopRequest(counterContext);
+  resolveTopRequestWithDecisions(registry, counterContext, 5);
 
   // 次にアップの解決
   console.log(`\n--- アップ (ID: ${req1.id}) の解決 ---`);
-  registry.resolveTopRequest(upContext);
+  resolveTopRequestWithDecisions(registry, upContext, 5);
 
   subHeader("最終状態");
   logState(state);
@@ -759,7 +847,7 @@ async function runTwistScenario(rulePackage: any) {
 
   subHeader("ステージ上のリクエストを解決");
   console.log(`\n--- ツイスト (ID: ${req.id}) の解決 ---`);
-  registry.resolveTopRequest(context);
+  resolveTopRequestWithDecisions(registry, context, 6);
 
   subHeader("最終状態");
   logState(state);
@@ -843,7 +931,7 @@ async function runAttackScenario(rulePackage: any) {
 
   subHeader("ステージ上のアタックリクエストを解決");
   console.log(`\n--- アタック (ID: ${reqAttack.id}) の解決 ---`);
-  registry.resolveTopRequest(contextP1);
+  resolveTopRequestWithDecisions(registry, contextP1, 7);
 
   subHeader("チャンスの移行");
   console.log("アタック解決後、チャンスを Player B へ移します。");
@@ -867,7 +955,7 @@ async function runAttackScenario(rulePackage: any) {
 
   subHeader("ステージ上のブロックリクエストを解決");
   console.log(`\n--- ブロック (ID: ${reqBlock.id}) の解決 ---`);
-  registry.resolveTopRequest(contextP2);
+  resolveTopRequestWithDecisions(registry, contextP2, 7);
 
   subHeader("チャンスを手番プレイヤーへ戻す");
   console.log("ブロック解決後、ダメージ判定を行うためチャンスを手番プレイヤー (Player A) へ戻します。");
@@ -893,7 +981,7 @@ async function runAttackScenario(rulePackage: any) {
 
   subHeader("ステージ上のダメージ判定リクエストを解決");
   console.log(`\n--- ダメージ判定 (ID: ${reqDamage.id}) の解決 ---`);
-  registry.resolveTopRequest(contextDamage);
+  resolveTopRequestWithDecisions(registry, contextDamage, 7);
 
   subHeader("最終状態");
   logState(state);
@@ -983,7 +1071,7 @@ async function runTurnCycleScenario(rulePackage: any) {
   const reqEnd = registry.createRequest(endAction, contextEnd);
 
   subHeader("エンド (ID: " + reqEnd.id + ") の解決");
-  registry.resolveTopRequest(contextEnd);
+  resolveTopRequestWithDecisions(registry, contextEnd, 8);
 
   subHeader("エンド解決後の状態 (ターン交代とチャージ即時解決・ドロー積載)");
   // エンド解決により turnPlayer が p2 へ交代し、チャージがバッファへ誘発
@@ -1003,7 +1091,7 @@ async function runTurnCycleScenario(rulePackage: any) {
   logState(state);
 
   subHeader("ドロー (ID: " + reqDraw.id + ") の解決 (PASS/PASS成立後)");
-  registry.resolveTopRequest(contextDraw);
+  resolveTopRequestWithDecisions(registry, contextDraw, 8);
   state.chancePlayer = "p2"; // 解決後は手番プレイヤーへチャンスが戻る
 
   subHeader("最終状態");

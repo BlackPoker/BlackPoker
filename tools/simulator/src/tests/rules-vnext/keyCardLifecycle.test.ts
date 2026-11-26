@@ -6,6 +6,7 @@ import { GameSession } from "../../engine/session/GameSession";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { isCardInGameZones } from "../../engine/rules/cardUtils";
 import { CostPayment } from "../../domain/decision/DecisionCatalog";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 
 
 function createCostPayment(partial: Partial<CostPayment> & { summary?: string }): CostPayment {
@@ -569,13 +570,21 @@ describe("Key Card Lifecycle Comprehensive Tests (Phase 21B.8.2)", () => {
     // Stage には [two-key-req, counterReq] が積まれている
     expect(state.stage.requests.length).toBe(2);
 
-    // Counter 解決
-    registry.resolveTopRequest({
+    // Counter 解決 -> 被カウンター対象の2枚キーカード同時墓地移動により p1 の ZONE_TOP_SELECTION で一時停止
+    let counterRes = registry.resolveTopRequest({
       state,
       playerKey: "p2",
       actions: rulePackage.actions,
       components: rulePackage.components,
-    });
+    })!;
+    expect(counterRes.type).toBe("WAITING_FOR_DECISION");
+    expect(counterRes.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+    expect(counterRes.decisionRequest?.playerId).toBe("p1");
+    expect(state.players.p2.grave.some((c) => c.id === "c5-uuid")).toBe(false);
+
+    GraveTopCoordinator.applyGraveTopSelection(state, "p1", "k1-uuid");
+    counterRes = registry.resumeRequest(counterReq, counterRes.continuation!, undefined, counterRes.context!);
+    expect(counterRes.type).toBe("COMPLETED");
 
     // 2-key request が無条件で cancelled になり、Stage から即座に取り除かれていること
     expect(state.stage.requests.length).toBe(0);

@@ -219,6 +219,9 @@ export function isCardInGameZones(cardId: string, state: any): boolean {
     // 2. field
     if (Array.isArray(player.field)) {
       for (const unit of player.field) {
+        if (unit?.card?.id === cardId) {
+          return true;
+        }
         if (Array.isArray(unit.cards) && unit.cards.some((c: any) => c?.id === cardId)) {
           return true;
         }
@@ -253,6 +256,17 @@ export function isCardInGameZones(cardId: string, state: any): boolean {
     // 7. rareCards
     if (Array.isArray(player.rareCards) && player.rareCards.some((c: any) => c?.id === cardId)) {
       return true;
+    }
+    // 8. trumps
+    if (Array.isArray(player.trumps)) {
+      for (const trump of player.trumps) {
+        if (trump?.id === cardId || trump?.card?.id === cardId) {
+          return true;
+        }
+        if (Array.isArray(trump?.cards) && trump.cards.some((c: any) => c?.id === cardId)) {
+          return true;
+        }
+      }
     }
   }
   return false;

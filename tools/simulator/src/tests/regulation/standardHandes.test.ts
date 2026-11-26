@@ -346,9 +346,20 @@ describe("Official Regulation Phase 3.0-F - Handes & Opponent Hand Effect Select
     };
 
     const session = new GameSession(state, standardRulePackage);
-    const step4 = playHandesAndPass(session);
+    let step4 = playHandesAndPass(session);
 
-    // 中断 (EFFECT_RESOLUTION) にならず、手番プレイヤー (p1) の通常行動要求に戻っている
+    // 相手手札0枚のため EFFECT_RESOLUTION は発生せず、2枚キーカード同時墓地移動に伴う p1 の ZONE_TOP_SELECTION が発生する
+    expect(step4.type).toBe("WAITING_FOR_DECISION");
+    expect(step4.request.source.type).toBe("ZONE_TOP_SELECTION");
+    expect(step4.request.playerId).toBe("p1");
+
+    step4 = session.submitDecision({
+      decisionId: step4.request.decisionId,
+      stateVersion: step4.request.stateVersion,
+      selectedPatternRef: 0,
+    });
+
+    // TOP選択完了後に手番プレイヤー (p1) の通常行動要求に戻っている
     expect(step4.type).toBe("WAITING_FOR_DECISION");
     expect(step4.request.source.type).toBe("ACTION_REQUEST");
     expect(session.state.players.p2.hand.length).toBe(0);
@@ -449,13 +460,20 @@ describe("Official Regulation Phase 3.0-F - Handes & Opponent Hand Effect Select
 
     const session = new GameSession(state, standardRulePackage);
     const step = playHandesAndPass(session);
-    session.submitDecision({
+    const afterDiscard = session.submitDecision({
       decisionId: step.request.decisionId,
       stateVersion: step.request.stateVersion,
       selectedPatternRef: 0,
     });
 
     expect(session.state.players.p2.graveTopCardId).toBe("c-p2-new");
+
+    // p1 の2枚キーカード移動に伴う ZONE_TOP_SELECTION のみが要求され、p2 側の ZONE_TOP_SELECTION は発生しない
+    expect(afterDiscard.type).toBe("WAITING_FOR_DECISION");
+    if (afterDiscard.type === "WAITING_FOR_DECISION") {
+      expect(afterDiscard.request.source.type).toBe("ZONE_TOP_SELECTION");
+      expect(afterDiscard.request.playerId).toBe("p1");
+    }
 
     const logs = session.logRecorder.getEvents();
     const topChanged: any = logs.find(
@@ -465,8 +483,8 @@ describe("Official Regulation Phase 3.0-F - Handes & Opponent Hand Effect Select
     expect(topChanged.cardId).toBe("c-p2-new");
     expect(topChanged.previousCardId).toBeUndefined();
 
-    const zoneTopDec = logs.find((l: any) => l.source === "ZONE_TOP_SELECTION");
-    expect(zoneTopDec).toBeUndefined();
+    const zoneTopDecForP2 = logs.find((l: any) => l.source === "ZONE_TOP_SELECTION" && l.playerId === "p2");
+    expect(zoneTopDecForP2).toBeUndefined();
   });
 
   it("Test 9: Existing grave transition emits zone.top.changed with previousTopCardId", () => {
@@ -537,11 +555,21 @@ describe("Official Regulation Phase 3.0-F - Handes & Opponent Hand Effect Select
 
     const session = new GameSession(state, standardRulePackage);
     const step = playHandesAndPass(session);
-    session.submitDecision({
+    const afterDiscard = session.submitDecision({
       decisionId: step.request.decisionId,
       stateVersion: step.request.stateVersion,
       selectedPatternRef: 0,
     });
+
+    // ハンデスの2枚キーカード同時墓地移動による ZONE_TOP_SELECTION を完了してから確定
+    expect(afterDiscard.type).toBe("WAITING_FOR_DECISION");
+    if (afterDiscard.type === "WAITING_FOR_DECISION" && afterDiscard.request.source.type === "ZONE_TOP_SELECTION") {
+      session.submitDecision({
+        decisionId: afterDiscard.request.decisionId,
+        stateVersion: afterDiscard.request.stateVersion,
+        selectedPatternRef: 0,
+      });
+    }
 
     const logs = session.logRecorder.getEvents();
 

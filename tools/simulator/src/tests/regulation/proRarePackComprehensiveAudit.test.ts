@@ -46,6 +46,7 @@ import {
 import { RulePackage, ActionDefinition, ActionRequest } from "../../domain/rules/RulePackage";
 import { PlaytestDecisionTranscriptEntryV1 } from "../../ui/playtest/PlaytestDecisionTranscript";
 import { CommandRegistry, CommandContext, cancelStageRequest } from "../../engine/rules/CommandRegistry";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 import { TurnManager } from "../../engine/rules/TurnManager";
 import { MatchLogRecorder } from "../../engine/log/MatchLogRecorder";
 import { validateTargetsAtResolution } from "../../engine/rules/ResolutionTargetValidator";
@@ -489,6 +490,38 @@ class ActionExecutionHarness {
     const act = this.fullRulePackage.actions.find((a) => a.id === actionId);
     if (!act) throw new Error(`Action not found in RulePackage: ${actionId}`);
     return act;
+  }
+
+  private resolveAllCommandDecisions(
+    state: any,
+    initialRes: any,
+    selectedValues?: readonly string[],
+    targetSelection?: any
+  ): any {
+    let res = initialRes;
+    while (res?.type === "WAITING_FOR_DECISION") {
+      if (res.decisionRequest?.source?.type === "ZONE_TOP_SELECTION") {
+        const candidateId =
+          res.decisionRequest.catalog?.effectSelections?.[0]?.selectedValues?.[0] ||
+          state.pendingGraveTopSelections?.[0]?.candidateCardIds?.[0];
+        GraveTopCoordinator.applyGraveTopSelection(
+          state,
+          res.decisionRequest.playerId,
+          candidateId
+        );
+        res = this.registry.resumeRequest(res.request, res.continuation!, undefined, res.context!);
+      } else {
+        res = this.registry.resumeRequest(
+          res.request,
+          res.continuation!,
+          selectedValues,
+          res.context!,
+          undefined,
+          targetSelection
+        );
+      }
+    }
+    return res;
   }
 
   // 1. action.end
@@ -1068,7 +1101,7 @@ class ActionExecutionHarness {
       components: this.fullRulePackage.components,
     };
     this.registry.createRequest(action, context);
-    this.registry.resolveTopRequest(context);
+    this.resolveAllCommandDecisions(state, this.registry.resolveTopRequest(context));
     const ok = state.players.p2.field.length === 0 && state.players.p2.grave.length > 0;
     return { ok, summary: "Bulwark destroyed and moved to grave" };
   }
@@ -1090,8 +1123,8 @@ class ActionExecutionHarness {
       components: this.fullRulePackage.components,
     };
     this.registry.createRequest(action, context);
-    const res = this.registry.resolveTopRequest(context);
-    const ok = res !== undefined && state.stage.history.length === 1;
+    const res = this.resolveAllCommandDecisions(state, this.registry.resolveTopRequest(context));
+    const ok = res?.type === "COMPLETED" && state.stage.history.length === 1;
     return { ok, summary: "Throwing damage resolved against opponent" };
   }
 
@@ -1119,11 +1152,9 @@ class ActionExecutionHarness {
       actions: this.fullRulePackage.actions,
       components: this.fullRulePackage.components,
     };
-    const req = this.registry.createRequest(action, context);
+    this.registry.createRequest(action, context);
     const step1 = this.registry.resolveTopRequest(context);
-    if (step1?.type === "WAITING_FOR_DECISION" && step1.continuation) {
-      this.registry.resumeRequest(req, step1.continuation, ["c2"], step1.context!);
-    }
+    this.resolveAllCommandDecisions(state, step1, ["c2"]);
     const ok = state.stage.history.length === 1;
     return { ok, summary: "DeathLance executed against target soldier" };
   }
@@ -1147,11 +1178,9 @@ class ActionExecutionHarness {
       actions: this.fullRulePackage.actions,
       components: this.fullRulePackage.components,
     };
-    const req = this.registry.createRequest(action, context);
+    this.registry.createRequest(action, context);
     const step1 = this.registry.resolveTopRequest(context);
-    if (step1?.type === "WAITING_FOR_DECISION" && step1.continuation) {
-      this.registry.resumeRequest(req, step1.continuation, ["charge1"], step1.context!);
-    }
+    this.resolveAllCommandDecisions(state, step1, ["charge1"]);
     const ok = state.players.p1.field.some((u: any) => u.componentId === "character.bulwark");
     return { ok, summary: "Bulwark deployed from life via AddBulwark" };
   }
@@ -1189,11 +1218,9 @@ class ActionExecutionHarness {
       actions: this.fullRulePackage.actions,
       components: this.fullRulePackage.components,
     };
-    const req = this.registry.createRequest(action, context);
+    this.registry.createRequest(action, context);
     const step1 = this.registry.resolveTopRequest(context);
-    if (step1?.type === "WAITING_FOR_DECISION" && step1.continuation) {
-      this.registry.resumeRequest(req, step1.continuation, ["gc-1"], step1.context!);
-    }
+    this.resolveAllCommandDecisions(state, step1, ["gc-1"]);
     const ok = state.players.p1.field.some((u: any) =>
       u.cards.some((c: any) => c.id === "gc-1")
     );
@@ -1218,11 +1245,9 @@ class ActionExecutionHarness {
       actions: this.fullRulePackage.actions,
       components: this.fullRulePackage.components,
     };
-    const req = this.registry.createRequest(action, context);
+    this.registry.createRequest(action, context);
     const step1 = this.registry.resolveTopRequest(context);
-    if (step1?.type === "WAITING_FOR_DECISION" && step1.continuation) {
-      this.registry.resumeRequest(req, step1.continuation, ["p2c"], step1.context!);
-    }
+    this.resolveAllCommandDecisions(state, step1, ["p2c"]);
     const ok = state.players.p2.hand.length === 0;
     return { ok, summary: "Opponent card discarded from hand" };
   }
@@ -1253,7 +1278,7 @@ class ActionExecutionHarness {
       components: this.fullRulePackage.components,
     };
     this.registry.createRequest(action, context);
-    this.registry.resolveTopRequest(context);
+    this.resolveAllCommandDecisions(state, this.registry.resolveTopRequest(context));
     const ok = state.players.p2.field.length === 0 && state.players.p2.grave.length > 0;
     return { ok, summary: "Target soldier killed and moved to grave" };
   }
@@ -1276,11 +1301,9 @@ class ActionExecutionHarness {
       actions: this.fullRulePackage.actions,
       components: this.fullRulePackage.components,
     };
-    const req = this.registry.createRequest(action, context);
+    this.registry.createRequest(action, context);
     const step1 = this.registry.resolveTopRequest(context);
-    if (step1?.type === "WAITING_FOR_DECISION" && step1.continuation) {
-      this.registry.resumeRequest(req, step1.continuation, ["gc1"], step1.context!);
-    }
+    this.resolveAllCommandDecisions(state, step1, ["gc1"]);
     const ok = state.players.p1.hand.some((c: any) => c.id === "gc1");
     return { ok, summary: "Card retrieved from grave back to hand" };
   }
@@ -1312,7 +1335,7 @@ class ActionExecutionHarness {
       components: this.fullRulePackage.components,
     };
     this.registry.createRequest(action, context);
-    this.registry.resolveTopRequest(context);
+    this.resolveAllCommandDecisions(state, this.registry.resolveTopRequest(context));
     const ok = djReq.status === "cancelled";
     return { ok, summary: "DamageJudge request cancelled by Truce" };
   }
@@ -1347,18 +1370,13 @@ class ActionExecutionHarness {
       actions: this.fullRulePackage.actions,
       components: this.fullRulePackage.components,
     };
-    const req = this.registry.createRequest(action, context);
+    this.registry.createRequest(action, context);
     const step1 = this.registry.resolveTopRequest(context);
-    if (step1?.type === "WAITING_FOR_DECISION" && step1.continuation) {
-      this.registry.resumeRequest(
-        req,
-        step1.continuation,
-        undefined,
-        step1.context!,
-        undefined,
-        { targetType: "unit", targetUnitId: "sb", targetDefinitionId: "target" }
-      );
-    }
+    this.resolveAllCommandDecisions(state, step1, undefined, {
+      targetType: "unit",
+      targetUnitId: "sb",
+      targetDefinitionId: "target",
+    });
     const targetUnitId = (killReq.targets?.[0] as any)?.unitId;
     const ok = targetUnitId === "sb";
     return { ok, summary: `Kill target redirected from sa to ${targetUnitId}` };
@@ -1384,9 +1402,7 @@ class ActionExecutionHarness {
     };
     const req = this.registry.createRequest(action, context);
     const step1 = this.registry.resolveRequest(req, context);
-    if (step1?.type === "WAITING_FOR_DECISION" && step1.continuation) {
-      this.registry.resumeRequest(req, step1.continuation, ["l1"], step1.context!);
-    }
+    this.resolveAllCommandDecisions(state, step1, ["l1"]);
     const ok = state.players.p1.hand.some((c: any) => c.id === "l1");
     return { ok, summary: "Card retrieved from life via Search" };
   }
@@ -1417,12 +1433,10 @@ class ActionExecutionHarness {
       actions: this.fullRulePackage.actions,
       components: this.fullRulePackage.components,
     };
-    const req = this.registry.createRequest(action, context);
+    this.registry.createRequest(action, context);
     const step1 = this.registry.resolveTopRequest(context);
-    if (step1?.type === "WAITING_FOR_DECISION" && step1.continuation) {
-      this.registry.resumeRequest(req, step1.continuation, ["drive"], step1.context!);
-    }
-    const ok = state.stage.history.length === 1;
+    const finalRes = this.resolveAllCommandDecisions(state, step1, ["drive"]);
+    const ok = finalRes?.type === "COMPLETED" && state.stage.history.length === 1;
     return { ok, summary: "Character reversed via transformCharacter" };
   }
 
@@ -1461,8 +1475,11 @@ class ActionExecutionHarness {
       components: this.fullRulePackage.components,
     };
     this.registry.createRequest(action, context);
-    this.registry.resolveTopRequest(context);
-    const ok = state.stage.history.length === 1 && state.players.p1.field.every((u: any) => u.unitId !== "u1");
+    const finalRes = this.resolveAllCommandDecisions(state, this.registry.resolveTopRequest(context));
+    const ok =
+      finalRes?.type === "COMPLETED" &&
+      state.stage.history.length === 1 &&
+      state.players.p1.field.every((u: any) => u.unitId !== "u1");
     return { ok, summary: "Soldier unsummoned to hand, cost B paid" };
   }
 }
@@ -2180,9 +2197,13 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
         // B & C. 対象消失
         state.players.p1.field = [];
 
-        // D & E. resolution 実行 -> WAITING_FOR_DECISION に入らず安全に完了
-        const res = registry.resolveTopRequest(context);
-        expect(res?.type).toBe("COMPLETED");
+        // D & E. resolution 実行 -> 効果スキップ後、2枚残存キーカードの ZONE_TOP_SELECTION を完了して COMPLETED
+        let res = registry.resolveTopRequest(context)!;
+        expect(res.type).toBe("WAITING_FOR_DECISION");
+        expect(res.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+        GraveTopCoordinator.applyGraveTopSelection(state, "p1", "k1");
+        res = registry.resumeRequest(res.request, res.continuation!, undefined, res.context!);
+        expect(res.type).toBe("COMPLETED");
         expect(state.players.p1.grave).toHaveLength(2);
         tracker.recordTarget("action.reverse", "2.6.2");
       });
@@ -2223,9 +2244,13 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
         // B & C. 対象消失
         state.players.p1.field = [state.players.p1.field[0]]; // 防壁のみ残す
 
-        // D & E. resolution 実行 -> バウンスなし、keyCards 帰還
-        const res = registry.resolveTopRequest(context);
-        expect(res?.type).toBe("COMPLETED");
+        // D & E. resolution 実行 -> バウンスなし、2枚残存キーカードの ZONE_TOP_SELECTION を経て完了
+        let res = registry.resolveTopRequest(context)!;
+        expect(res.type).toBe("WAITING_FOR_DECISION");
+        expect(res.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+        GraveTopCoordinator.applyGraveTopSelection(state, "p1", "k1");
+        res = registry.resumeRequest(res.request, res.continuation!, undefined, res.context!);
+        expect(res.type).toBe("COMPLETED");
         tracker.recordTarget("action.unsummons", "2.6.3");
       });
 
@@ -2266,9 +2291,13 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
         // B & C. 対象 request が Stage から除去される
         state.stage.requests = [state.stage.requests[1]];
 
-        // D & E. resolution 実行 -> 対象不在のため中断なしで COMPLETED、効果スキップ
-        const res = registry.resolveTopRequest(context);
-        expect(res?.type).toBe("COMPLETED");
+        // D & E. resolution 実行 -> 対象不在のため効果スキップ、2枚残存キーカードの ZONE_TOP_SELECTION を経て COMPLETED
+        let res = registry.resolveTopRequest(context)!;
+        expect(res.type).toBe("WAITING_FOR_DECISION");
+        expect(res.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+        GraveTopCoordinator.applyGraveTopSelection(state, "p2", "k1");
+        res = registry.resumeRequest(res.request, res.continuation!, undefined, res.context!);
+        expect(res.type).toBe("COMPLETED");
         tracker.recordTarget("action.changeTarget", "2.6.4");
       });
 
@@ -3251,22 +3280,33 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       };
       const ctReq = registry.createRequest(changeTargetAction, ctContext);
 
-      // 3. Change Target 解決 -> 新対象 sB を選択
-      const ctStep1 = registry.resolveTopRequest(ctContext);
-      if (ctStep1?.type === "WAITING_FOR_DECISION" && ctStep1.continuation) {
-        registry.resumeRequest(
+      // 3. Change Target 解決 -> 新対象 sB を選択 -> 2枚キーカードの ZONE_TOP_SELECTION 完了
+      let ctRes: any = registry.resolveTopRequest(ctContext);
+      if (ctRes?.type === "WAITING_FOR_DECISION" && ctRes.continuation) {
+        ctRes = registry.resumeRequest(
           ctReq,
-          ctStep1.continuation,
+          ctRes.continuation,
           undefined,
-          ctStep1.context!,
+          ctRes.context!,
           undefined,
           { targetType: "unit", targetUnitId: "sb", targetDefinitionId: "target" }
         );
       }
+      while (ctRes?.type === "WAITING_FOR_DECISION" && ctRes.decisionRequest?.source?.type === "ZONE_TOP_SELECTION") {
+        const cid = ctRes.decisionRequest.catalog.effectSelections[0].selectedValues[0];
+        GraveTopCoordinator.applyGraveTopSelection(state, ctRes.decisionRequest.playerId, cid);
+        ctRes = registry.resumeRequest(ctRes.request, ctRes.continuation!, undefined, ctRes.context!);
+      }
+      expect(ctRes?.type).toBe("COMPLETED");
       expect((killReq.targets?.[0] as any)?.unitId).toBe("sb");
 
       // 4. Kill 解決 -> sB が墓地へ送られ、sA は生存
-      registry.resolveTopRequest(killContext);
+      let killRes: any = registry.resolveTopRequest(killContext);
+      while (killRes?.type === "WAITING_FOR_DECISION" && killRes.decisionRequest?.source?.type === "ZONE_TOP_SELECTION") {
+        const cid = killRes.decisionRequest.catalog.effectSelections[0].selectedValues[0];
+        GraveTopCoordinator.applyGraveTopSelection(state, killRes.decisionRequest.playerId, cid);
+        killRes = registry.resumeRequest(killRes.request, killRes.continuation!, undefined, killRes.context!);
+      }
       expect(state.players.p2.field).toHaveLength(1);
       expect(state.players.p2.field[0].unitId).toBe("sa");
       expect(state.players.p2.grave.some((u: any) => u.unitId === "sb")).toBe(true);
@@ -3335,10 +3375,16 @@ describe("Pro + RarePack Comprehensive Audit [BP-SIM-REG-5.0-K-PRO-RAREPACK-COMP
       registry.createRequest(counterAction, counterContext);
       expect(state.stage.requests).toHaveLength(3);
 
-      // 3. Counter 解決 -> Change Target が cancelled されステージから除去
-      const counterRes = registry.resolveTopRequest(counterContext);
-      expect(counterRes?.type).toBe("COMPLETED");
+      // 3. Counter 解決 -> Change Target が cancelled されステージから除去、2枚キーカードの ZONE_TOP_SELECTION を経て Counter 完了
+      let counterRes = registry.resolveTopRequest(counterContext)!;
+      expect(counterRes.type).toBe("WAITING_FOR_DECISION");
+      expect(counterRes.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(counterRes.decisionRequest?.playerId).toBe("p2");
       expect(ctReq.status).toBe("cancelled");
+
+      GraveTopCoordinator.applyGraveTopSelection(state, "p2", "k1");
+      counterRes = registry.resumeRequest(counterRes.request, counterRes.continuation!, undefined, counterRes.context!);
+      expect(counterRes.type).toBe("COMPLETED");
 
       // 4. Change Target は無効化され除去されたため、Kill のみステージに残り、対象は sa のまま維持
       expect((killReq.targets?.[0] as any)?.unitId).toBe("sa");

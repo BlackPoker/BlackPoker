@@ -16,6 +16,7 @@ import { RequestBufferProcessor } from "../../engine/rules/RequestBufferProcesso
 import { loadRegulationCatalog, getFormat, getRegulation } from "../../engine/regulation/RegulationLoader";
 import { RegulationValidator } from "../../engine/regulation/RegulationValidator";
 import { cleanupTransientBattleState } from "../../engine/rules/damageJudgeUtils";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 
 describe("BP-SIM-REG-5.0-E-PRO-TRUCE: Pro Action Truce (停戦) Specification & Implementation Contracts", () => {
   let rulePackage: RulePackage;
@@ -497,8 +498,14 @@ describe("BP-SIM-REG-5.0-E-PRO-TRUCE: Pro Action Truce (停戦) Specification & 
         logRecorder: logRecorder as any,
       };
 
-      // Resolve Truce from top of Stage
-      const result = registry.resolveRequest(truceReq, context);
+      // Resolve Truce from top of Stage -> 2枚キーカード同時墓地移動に伴う ZONE_TOP_SELECTION 待機
+      let result = registry.resolveRequest(truceReq, context);
+      expect(result.type).toBe("WAITING_FOR_DECISION");
+      expect(result.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(truceReq.status).toBe("resolving");
+
+      GraveTopCoordinator.applyGraveTopSelection(state, "p2", "c-d5", logRecorder as any);
+      result = registry.resumeRequest(truceReq, result.continuation!, undefined, result.context!);
       expect(result.type).toBe("COMPLETED");
 
       // Truce is resolved and moved to history
@@ -921,13 +928,20 @@ describe("BP-SIM-REG-5.0-E-PRO-TRUCE: Pro Action Truce (停戦) Specification & 
         components: proRulePackage.components,
       };
 
-      // Resolve Truce whose target is missing from stage
-      const result = registry.resolveRequest(truceReq, context);
+      // Resolve Truce whose target is missing from stage -> 2枚キーカード同時墓地移動に伴い ZONE_TOP_SELECTION 発生
+      let result = registry.resolveRequest(truceReq, context);
+      expect(result.type).toBe("WAITING_FOR_DECISION");
+      expect(result.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(truceReq.status).toBe("resolving");
+
+      GraveTopCoordinator.applyGraveTopSelection(state, "p2", "c-d1");
+      result = registry.resumeRequest(truceReq, result.continuation!, undefined, result.context!);
       expect(result.type).toBe("COMPLETED");
       expect(truceReq.status).toBe("resolved");
 
       // Truce key cards finalized to grave
       expect(state.players.p2.grave.map((c: any) => c.id)).toEqual(["c-d1", "c-d2"]);
+      expect(state.players.p2.graveTopCardId).toBe("c-d1");
 
       // Attacker battle was NOT cleaned by Truce (since effect skipped due to invalid target)
       expect(attackerUnit.battle).toBeDefined();
@@ -1126,6 +1140,18 @@ describe("BP-SIM-REG-5.0-E-PRO-TRUCE: Pro Action Truce (停戦) Specification & 
         decisionId: step.request.decisionId,
         stateVersion: step.request.stateVersion,
         selectedPatternRef: findPassIdx(step.request),
+      });
+
+      // Truce の 2枚キーカード同時墓地移動に伴う ZONE_TOP_SELECTION が発生し、完了まで stage.history 未確定
+      expect(step.type).toBe("WAITING_FOR_DECISION");
+      expect(step.request.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(step.request.playerId).toBe("p2");
+      expect(session.state.stage.history.some((r: any) => r.actionId === "action.truce")).toBe(false);
+
+      step = session.submitDecision({
+        decisionId: step.request.decisionId,
+        stateVersion: step.request.stateVersion,
+        selectedPatternRef: 0,
       });
 
       // Outcomes:

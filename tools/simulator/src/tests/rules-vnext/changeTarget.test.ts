@@ -15,6 +15,7 @@ import { RegulationValidator } from "../../engine/regulation/RegulationValidator
 import { TargetSelection, EffectSelection } from "../../domain/decision/DecisionCatalog";
 import { DecisionResponse } from "../../domain/decision/DecisionResponse";
 import { evaluateRequestTargetCondition } from "../../engine/rules/targetConditionUtils";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 
 describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hardened Generic Target Foundation", () => {
   let rulePackage: RulePackage;
@@ -1487,8 +1488,21 @@ describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hard
   // =========================================================================
   describe("9. Lifecycle & GameSession Integration", () => {
     function resolveStageTopWithPasses(sess: GameSession) {
+      let step: any = sess.advance();
+      const drainZoneTopSelections = (curStep: any): any => {
+        let s = curStep;
+        while (s?.type === "WAITING_FOR_DECISION" && s.request?.source?.type === "ZONE_TOP_SELECTION") {
+          s = sess.submitDecision({
+            decisionId: s.request.decisionId,
+            stateVersion: s.request.stateVersion,
+            selectedPatternRef: 0,
+          });
+        }
+        return s;
+      };
+
+      step = drainZoneTopSelections(step);
       for (let i = 0; i < 2; i++) {
-        const step = sess.advance();
         if (step.type !== "WAITING_FOR_DECISION") return step;
         if (step.request.source.type === "EFFECT_RESOLUTION") {
           return step;
@@ -1497,15 +1511,17 @@ describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hard
         if (passIdx === -1) {
           throw new Error(`PASS pattern not found for player ${step.request.playerId}`);
         }
-        const nextStep = sess.submitDecision({
+        step = sess.submitDecision({
           decisionId: step.request.decisionId,
           stateVersion: step.request.stateVersion,
           selectedPatternRef: passIdx,
         });
-        if (nextStep.type === "WAITING_FOR_DECISION" && nextStep.request.source.type === "EFFECT_RESOLUTION") {
-          return nextStep;
+        step = drainZoneTopSelections(step);
+        if (step.type === "WAITING_FOR_DECISION" && step.request.source.type === "EFFECT_RESOLUTION") {
+          return step;
         }
       }
+      return step;
     }
 
     it("9.1: Counter target changed to Change Target causes Counter to fizzle (Section 28-C E2E) (Section 54.4, 5)", () => {
@@ -1875,8 +1891,13 @@ describe("BP-SIM-REG-5.0-F-R1-PRO-CHANGE-TARGET: Pro Action Change Target & Hard
         components: rulePackage.components,
       };
 
-      const resolveRes = registry.resolveTopRequest(context);
-      expect(resolveRes?.type).toBe("COMPLETED");
+      let resolveRes = registry.resolveTopRequest(context)!;
+      expect(resolveRes.type).toBe("WAITING_FOR_DECISION");
+      expect(resolveRes.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(ctReq.status).toBe("resolving");
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "c-c1");
+      resolveRes = registry.resumeRequest(ctReq, resolveRes.continuation!, undefined, resolveRes.context!);
+      expect(resolveRes.type).toBe("COMPLETED");
       // Change Target effect was skipped due to TARGET_INVALID_AT_RESOLUTION
       expect(ctReq.status).toBe("resolved");
     });

@@ -898,7 +898,14 @@ describe("BP-SIM-REG-5.0-D-PRO-REUNION: Pro Action Reunion Implementation & Spec
       const res: any = interp.executeEffectsWithInterruption(reunionAction.effect!, context);
       expect(res.completed).toBe(true);
 
-      registry.resolveRequest(req, context);
+      let resolveRes = registry.resolveRequest(req, context);
+      expect(resolveRes.type).toBe("WAITING_FOR_DECISION");
+      expect(resolveRes.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(req.status).toBe("resolving");
+
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "p1-h3");
+      resolveRes = registry.resumeRequest(req, resolveRes.continuation!, undefined, resolveRes.context!);
+      expect(resolveRes.type).toBe("COMPLETED");
 
       // No cardRevealed event emitted
       expect(emittedEvents.some((e) => e.type === "cardRevealed")).toBe(false);

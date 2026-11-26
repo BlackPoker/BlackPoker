@@ -1,0 +1,77 @@
+{
+  "workId": "work6-common-key-card-grave-movement",
+  "issue": 551,
+  "branch": "BlackPoker/issue551-core-flow",
+  "baselineCommitSha": "b5714393b20e315b126ac08b801a34ad81374ade",
+  "recordedAtUtc": "2026-11-26T21:08:29Z",
+  "environment": "docker:bp-simulator:/src/tools/simulator",
+  "verification": {
+    "npmTest": {
+      "command": "npm test",
+      "exitCode": 0,
+      "testFilesPassed": 282,
+      "testFilesTotal": 282,
+      "testsPassed": 3913,
+      "testsFailed": 0,
+      "testsSkipped": 0,
+      "durationSeconds": 595.78,
+      "runnerTotalSeconds": 598.61
+    },
+    "npmRunBuild": {
+      "command": "npm run build",
+      "exitCode": 0,
+      "durationSeconds": 14.56,
+      "artifacts": [
+        "dist/index.html",
+        "dist/assets/index-BY51cbvz.css",
+        "dist/assets/index-Uwt_iwlA.js"
+      ]
+    },
+    "playableCheck": {
+      "command": "npm run playable:check",
+      "exitCode": 0
+    },
+    "compareRulesVnext": {
+      "command": "npm run compare:rules-vnext",
+      "exitCode": 0
+    },
+    "scenarioRulesVnext": {
+      "command": "npm run scenario:rules-vnext",
+      "exitCode": 0,
+      "scenariosPassed": 8,
+      "scenariosTotal": 8
+    }
+  },
+  "addedTests": {
+    "commonKeyCardGraveMovement": {
+      "path": "tools/simulator/src/tests/rules-vnext/commonKeyCardGraveMovement.test.ts",
+      "testIds": [
+        "KT-01",
+        "KT-02",
+        "KT-03",
+        "KT-04",
+        "KT-05",
+        "KT-06",
+        "KT-07",
+        "KT-08",
+        "KT-09",
+        "KT-10"
+      ],
+      "count": 10
+    },
+    "work6KeyCardGraveE2E": {
+      "path": "tools/simulator/src/tests/rules-vnext/work6KeyCardGraveE2E.test.ts",
+      "count": 15
+    }
+  },
+  "coreChangedFiles": [
+    "tools/simulator/src/engine/session/GameSession.ts",
+    "tools/simulator/src/engine/rules/CommandRegistry.ts",
+    "tools/simulator/src/engine/rules/cardUtils.ts",
+    "tools/simulator/src/cli/scenarioRunner.ts"
+  ],
+  "documentation": [
+    "tools/simulator/docs/work6_common_key_card_grave_movement_design.md"
+  ],
+  "historicalEvidenceUntouched": true
+}

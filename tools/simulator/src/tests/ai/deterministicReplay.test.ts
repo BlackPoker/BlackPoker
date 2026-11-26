@@ -241,14 +241,15 @@ describe("Deterministic Replay Gate (決定論的リプレイ検証)", () => {
     expect(res1.finalStateHash).toBe(res2.finalStateHash);
     expect(computeTraceDigest(res1)).toBe(computeTraceDigest(res2));
 
-    // 2. R3 Evidence の期待値検証
+    // 2. 作業6（共通2枚以上キーカード同時墓地移動に伴う ZONE_TOP_SELECTION）適用後の決定論的再現期待値
+    // （過去の R3 Evidence JSON ファイル自体は歴史的資料として改変しない）
     expect(res1.completed).toBe(true);
     expect(res1.winner).toBe("p2"); // Offspring #1 が p2 で勝利
-    expect(res1.totalDecisions).toBe(265);
+    expect(res1.totalDecisions).toBe(271);
     expect(res1.turnCount).toBe(17);
-    expect(res1.finalStateHash).toBe("sh2-006d8c3dcf63de08");
+    expect(res1.finalStateHash).toBe("sh2-d905476174bc5762");
     expect(computeTraceDigest(res1)).toBe(
-      "721802239d0b53c79f42f078fd4f22c0244b6a0efcc9eba2678de4afaddd6021"
+      "fae005fd98a1edaecd2296a6677d9bc8fd3c0847c69d2328c4e932394867513e"
     );
   });
 });

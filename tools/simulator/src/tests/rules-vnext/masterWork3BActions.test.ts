@@ -507,15 +507,21 @@ describe("作業3B: マスターアクション（剣の雨・フォース・奇
       // ステージ解決 (全員連続パス)
       resolveStageToEmpty(session);
 
-      // 効果検証: p2 のライフが 0 になり、ゲームが終了 (FINISHED) すること
+      // 効果検証: p2 の40点ダメージ由来 ZONE_TOP_SELECTION に続き、R・S・F 5枚キーカード同時墓地移動の ZONE_TOP_SELECTION を完了した後にのみ FINISHED へ遷移すること
       step = session.advance();
-      if (step.type === "WAITING_FOR_DECISION" && step.request.source?.type === "ZONE_TOP_SELECTION") {
+      const seenZoneTopPlayers: string[] = [];
+      while (step.type === "WAITING_FOR_DECISION" && step.request.source?.type === "ZONE_TOP_SELECTION") {
+        seenZoneTopPlayers.push(step.request.playerId);
+        if (step.request.playerId === "p1") {
+          expect(step.request.catalog.effectSelections).toHaveLength(5);
+        }
         step = session.submitDecision({
           decisionId: step.request.decisionId,
           stateVersion: step.request.stateVersion,
           selectedPatternRef: 0,
         });
       }
+      expect(seenZoneTopPlayers).toEqual(["p2", "p1"]);
       expect(step.type).toBe("FINISHED");
       expect(step.result.winner).toBe("p1");
       expect(session.state.players.p2.life).toHaveLength(0);

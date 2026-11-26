@@ -36,8 +36,8 @@ describe("Undo Rare Setup Reconstruction Regression Tests [BP-SIM-UNDO-RARE-SETU
     p2: [{ suit: "J" as const, rank: "Joker" as const, occurrence: 0 }],
   };
 
-  // 実機 Diagnostic (seed 1636917953, official:pro-rarePack) における seq 1〜25 の判断列
-  const DIAGNOSTIC_TRANSCRIPT_SEQ_1_TO_25: readonly ReplayDecisionEntryV1[] = [
+  // 作業6以前（2枚キーアクション解決時の ZONE_TOP_SELECTION 未実装時点）の実機 Diagnostic Transcript（互換性比較用）
+  const LEGACY_PRE_WORK6_TRANSCRIPT_SEQ_1_TO_25: readonly ReplayDecisionEntryV1[] = [
     { seq: 1, actor: "policy", playerId: "p2", response: { decisionId: "d-1", stateVersion: 2, selectedPatternRef: 47 } },
     { seq: 2, actor: "policy", playerId: "p2", response: { decisionId: "d-2", stateVersion: 3, selectedPatternRef: 18 } },
     { seq: 3, actor: "policy", playerId: "p2", response: { decisionId: "d-3", stateVersion: 4, selectedPatternRef: 0 } },
@@ -63,6 +63,38 @@ describe("Undo Rare Setup Reconstruction Regression Tests [BP-SIM-UNDO-RARE-SETU
     { seq: 23, actor: "policy", playerId: "p2", response: { decisionId: "d-23", stateVersion: 24, selectedPatternRef: 31 } },
     { seq: 24, actor: "human", playerId: "p1", response: { decisionId: "d-24", stateVersion: 25, selectedPatternRef: 2 } },
     { seq: 25, actor: "autoPass", playerId: "p1", response: { decisionId: "d-25", stateVersion: 26, selectedPatternRef: 309 } },
+  ];
+
+  // 作業6準拠（action.deathLance 解決完了時に2枚キーカード [p2-c-D5, p2-c-SJ] の ZONE_TOP_SELECTION を seq 15 に挿入）
+  // ※ 既存の seq 12 (action.deathLance) -> seq 13, 14 (PASS) 解決完了時に p2-c-SJ (ref 1) を墓地TOPに選択することで以降同一盤面を再現
+  // ※ 注意: 2枚以上キーカードアクションの解決を含む作業6以前の生 Transcript は ZONE_TOP_SELECTION 未記録のため非互換となる
+  const DIAGNOSTIC_TRANSCRIPT_SEQ_1_TO_26: readonly ReplayDecisionEntryV1[] = [
+    { seq: 1, actor: "policy", playerId: "p2", response: { decisionId: "d-1", stateVersion: 2, selectedPatternRef: 47 } },
+    { seq: 2, actor: "policy", playerId: "p2", response: { decisionId: "d-2", stateVersion: 3, selectedPatternRef: 18 } },
+    { seq: 3, actor: "policy", playerId: "p2", response: { decisionId: "d-3", stateVersion: 4, selectedPatternRef: 0 } },
+    { seq: 4, actor: "policy", playerId: "p2", response: { decisionId: "d-4", stateVersion: 5, selectedPatternRef: 105 } },
+    { seq: 5, actor: "human", playerId: "p1", response: { decisionId: "d-5", stateVersion: 6, selectedPatternRef: 126 } },
+    { seq: 6, actor: "policy", playerId: "p2", response: { decisionId: "d-6", stateVersion: 7, selectedPatternRef: 66 } },
+    { seq: 7, actor: "policy", playerId: "p2", response: { decisionId: "d-7", stateVersion: 8, selectedPatternRef: 103 } },
+    { seq: 8, actor: "human", playerId: "p1", response: { decisionId: "d-8", stateVersion: 9, selectedPatternRef: 167 } },
+    { seq: 9, actor: "policy", playerId: "p2", response: { decisionId: "d-9", stateVersion: 10, selectedPatternRef: 52 } },
+    { seq: 10, actor: "policy", playerId: "p2", response: { decisionId: "d-10", stateVersion: 11, selectedPatternRef: 82 } },
+    { seq: 11, actor: "human", playerId: "p1", response: { decisionId: "d-11", stateVersion: 12, selectedPatternRef: 208 } },
+    { seq: 12, actor: "policy", playerId: "p2", response: { decisionId: "d-12", stateVersion: 13, selectedPatternRef: 1 } },
+    { seq: 13, actor: "policy", playerId: "p2", response: { decisionId: "d-13", stateVersion: 14, selectedPatternRef: 32 } },
+    { seq: 14, actor: "human", playerId: "p1", response: { decisionId: "d-14", stateVersion: 15, selectedPatternRef: 208 } },
+    { seq: 15, actor: "policy", playerId: "p2", response: { decisionId: "d-15", stateVersion: 16, selectedPatternRef: 1 } },
+    { seq: 16, actor: "policy", playerId: "p2", response: { decisionId: "d-16", stateVersion: 17, selectedPatternRef: 0 } },
+    { seq: 17, actor: "policy", playerId: "p2", response: { decisionId: "d-17", stateVersion: 18, selectedPatternRef: 31 } },
+    { seq: 18, actor: "human", playerId: "p1", response: { decisionId: "d-18", stateVersion: 19, selectedPatternRef: 201 } },
+    { seq: 19, actor: "policy", playerId: "p2", response: { decisionId: "d-19", stateVersion: 20, selectedPatternRef: 0 } },
+    { seq: 20, actor: "policy", playerId: "p2", response: { decisionId: "d-20", stateVersion: 21, selectedPatternRef: 20 } },
+    { seq: 21, actor: "policy", playerId: "p2", response: { decisionId: "d-21", stateVersion: 22, selectedPatternRef: 31 } },
+    { seq: 22, actor: "human", playerId: "p1", response: { decisionId: "d-22", stateVersion: 23, selectedPatternRef: 201 } },
+    { seq: 23, actor: "human", playerId: "p1", response: { decisionId: "d-23", stateVersion: 24, selectedPatternRef: 201 } },
+    { seq: 24, actor: "policy", playerId: "p2", response: { decisionId: "d-24", stateVersion: 25, selectedPatternRef: 31 } },
+    { seq: 25, actor: "human", playerId: "p1", response: { decisionId: "d-25", stateVersion: 26, selectedPatternRef: 2 } },
+    { seq: 26, actor: "autoPass", playerId: "p1", response: { decisionId: "d-26", stateVersion: 27, selectedPatternRef: 309 } },
   ];
 
   describe("Test A: Explicit Rare Selection Reconstruction", () => {
@@ -131,16 +163,16 @@ describe("Undo Rare Setup Reconstruction Regression Tests [BP-SIM-UNDO-RARE-SETU
     });
   });
 
-  describe("Test B: Diagnostic Regression (seq 1〜25)", () => {
-    it("reproduces PATTERN_REF_OUT_OF_RANGE at seq 25 when rareCardSelections is omitted (pre-fix)", () => {
+  describe("Test B: Diagnostic Regression (seq 1〜26)", () => {
+    it("reproduces PATTERN_REF_OUT_OF_RANGE at seq 26 when rareCardSelections is omitted (pre-fix)", () => {
       // 修正前の挙動: rareCardSelections を渡さない場合、デフォルト選択（p1: Joker, p2: Joker）となり
-      // デッキ順が乖離して seq 25 で available patterns が 173 になり ref 309 でクラッシュする
+      // デッキ順が乖離して seq 26 で available patterns が 173 になり ref 309 でクラッシュする
       const reconOmitted = reconstructMatch({
         environmentId: RARE_PACK_ENV,
         seed: DIAGNOSTIC_SEED,
         rareCardSelections: undefined, // 省略
-        transcript: DIAGNOSTIC_TRANSCRIPT_SEQ_1_TO_25,
-        decisionCount: 25,
+        transcript: DIAGNOSTIC_TRANSCRIPT_SEQ_1_TO_26,
+        decisionCount: 26,
         catalog,
         fullRulePackage,
       });
@@ -148,33 +180,49 @@ describe("Undo Rare Setup Reconstruction Regression Tests [BP-SIM-UNDO-RARE-SETU
       expect(reconOmitted.status).toBe("DIVERGED");
       if (reconOmitted.status === "DIVERGED") {
         expect(reconOmitted.code).toBe("PATTERN_REF_OUT_OF_RANGE");
-        expect(reconOmitted.decisionSeq).toBe(25);
+        expect(reconOmitted.decisionSeq).toBe(26);
         expect(reconOmitted.message).toContain("selected 309, available patterns: 173");
       }
     });
 
-    it("successfully reconstructs all 25 decisions when rareCardSelections is preserved (post-fix)", () => {
-      // 修正後の挙動: 成立済み rareCardSelections を渡すことで、seq 25 で available patterns = 310 となり
-      // autoPass (ref 309) が合法に受理され、全 25 ステップが SUCCESS で完了する
+    it("successfully reconstructs all 26 decisions when rareCardSelections is preserved (post-fix)", () => {
+      // 修正後の挙動: 成立済み rareCardSelections を渡すことで、seq 26 で available patterns = 310 となり
+      // autoPass (ref 309) が合法に受理され、全 26 ステップが SUCCESS で完了する
       const reconPreserved = reconstructMatch({
         environmentId: RARE_PACK_ENV,
         seed: DIAGNOSTIC_SEED,
         rareCardSelections: RARE_SELECTIONS_LIVE,
-        transcript: DIAGNOSTIC_TRANSCRIPT_SEQ_1_TO_25,
-        decisionCount: 25,
+        transcript: DIAGNOSTIC_TRANSCRIPT_SEQ_1_TO_26,
+        decisionCount: 26,
         catalog,
         fullRulePackage,
       });
 
       expect(reconPreserved.status).toBe("SUCCESS");
       if (reconPreserved.status === "SUCCESS") {
-        expect(reconPreserved.executedDecisions).toBe(25);
-        expect(reconPreserved.replayedDecisions.length).toBe(25);
-        // seq 25 (autoPass) の DecisionRequest の合法手数が 310 であったことを実証
-        const lastExecuted = reconPreserved.replayedDecisions[24];
-        expect(lastExecuted.entry.seq).toBe(25);
+        expect(reconPreserved.executedDecisions).toBe(26);
+        expect(reconPreserved.replayedDecisions.length).toBe(26);
+        // seq 26 (autoPass) の DecisionRequest の合法手数が 310 であったことを実証
+        const lastExecuted = reconPreserved.replayedDecisions[25];
+        expect(lastExecuted.entry.seq).toBe(26);
         expect(lastExecuted.entry.response.selectedPatternRef).toBe(309);
         expect(lastExecuted.request.patterns.length).toBe(310);
+      }
+    });
+
+    it("documents that pre-Work-6 transcripts missing 2-key ZONE_TOP_SELECTION diverge cleanly at seq 15", () => {
+      const reconLegacy = reconstructMatch({
+        environmentId: RARE_PACK_ENV,
+        seed: DIAGNOSTIC_SEED,
+        rareCardSelections: RARE_SELECTIONS_LIVE,
+        transcript: LEGACY_PRE_WORK6_TRANSCRIPT_SEQ_1_TO_25,
+        decisionCount: 25,
+        catalog,
+        fullRulePackage,
+      });
+      expect(reconLegacy.status).toBe("DIVERGED");
+      if (reconLegacy.status === "DIVERGED") {
+        expect(reconLegacy.decisionSeq).toBeGreaterThanOrEqual(15);
       }
     });
   });
@@ -197,7 +245,7 @@ describe("Undo Rare Setup Reconstruction Regression Tests [BP-SIM-UNDO-RARE-SETU
 
       const params = buildUndoReconstructParams({
         activeMatch,
-        targetTranscript: DIAGNOSTIC_TRANSCRIPT_SEQ_1_TO_25.slice(0, 24),
+        targetTranscript: DIAGNOSTIC_TRANSCRIPT_SEQ_1_TO_26.slice(0, 25),
         catalog,
         fullRulePackage,
       });
@@ -206,8 +254,8 @@ describe("Undo Rare Setup Reconstruction Regression Tests [BP-SIM-UNDO-RARE-SETU
       expect(params.seed).toBe(DIAGNOSTIC_SEED);
       expect(params.rareCardSelections).toBe(activeMatch.rareCardSelections);
       expect(params.rareCardSelections).toEqual(RARE_SELECTIONS_LIVE);
-      expect(params.transcript.length).toBe(24);
-      expect(params.decisionCount).toBe(24);
+      expect(params.transcript.length).toBe(25);
+      expect(params.decisionCount).toBe(25);
       expect(params.catalog).toBe(catalog);
       expect(params.fullRulePackage).toBe(fullRulePackage);
       expect(params.expectedRulePackage).toEqual(activeMatch.rulePackage);
@@ -219,7 +267,7 @@ describe("Undo Rare Setup Reconstruction Regression Tests [BP-SIM-UNDO-RARE-SETU
       }
       expect(recon.status).toBe("SUCCESS");
       if (recon.status === "SUCCESS") {
-        expect(recon.executedDecisions).toBe(24);
+        expect(recon.executedDecisions).toBe(25);
       }
     });
 

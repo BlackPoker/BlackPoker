@@ -9,6 +9,7 @@ import { LegalPatternGenerator } from "../../engine/decision/LegalPatternGenerat
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
 import { CostPayment } from "../../domain/decision/DecisionCatalog";
 import { isCardInGameZones } from "../../engine/rules/cardUtils";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 
 function createCostPayment(partial: Partial<CostPayment> & { summary?: string }): CostPayment {
   return {
@@ -319,12 +320,21 @@ describe("Phase 21B.8.2.1: Counter Playtest Visibility and Target Condition Test
       selectedCostPayment: createCostPayment({ lifeCount: 0, discardedCardIds: ["cost-c"], summary: "$D" }),
     });
 
-    registry.resolveTopRequest({
+    let counterRes = registry.resolveTopRequest({
       state,
       playerKey: "p2",
       actions: playtestRulePackage.actions,
       components: playtestRulePackage.components,
-    });
+    })!;
+    expect(counterRes.type).toBe("WAITING_FOR_DECISION");
+    expect(counterRes.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+    expect(counterRes.decisionRequest?.playerId).toBe("p1");
+    expect(state.stage.history.some((r: any) => r.id === "req-rev" && r.status === "cancelled")).toBe(true);
+    expect(isCardInPlayerGrave(state.players.p2, "c-low-key")).toBe(false);
+
+    GraveTopCoordinator.applyGraveTopSelection(state, "p1", "k1");
+    counterRes = registry.resumeRequest(counterRes.request, counterRes.continuation!, undefined, counterRes.context!);
+    expect(counterRes.type).toBe("COMPLETED");
 
     expect(state.stage.requests.length).toBe(0);
     expect(state.stage.history.some((r: any) => r.id === "req-rev" && r.status === "cancelled")).toBe(true);

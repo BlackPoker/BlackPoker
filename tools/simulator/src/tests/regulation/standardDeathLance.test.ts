@@ -1620,10 +1620,31 @@ describe("Official Regulation Phase 3.0-D - Death Lance & Owner Card Order Resol
       selectedPatternRef: topPat,
     });
 
-    // 7. 墓地TOP選択後に解決完了契約が実行され、Stage から除去され、Key Cards が墓地へ送られる
+    // 7. 自傷ダメージの墓地TOP選択後、デスランス自身の2枚キーカード (k-s2, k-d1) の ZONE_TOP_SELECTION が別バッチで発生すること
+    expect(s5.type).toBe("WAITING_FOR_DECISION");
+    expect(s5.request.source.type).toBe("ZONE_TOP_SELECTION");
+    expect(s5.request.playerId).toBe("p1");
+    expect(session.state.pendingGraveTopSelections?.[0]?.candidateCardIds).toEqual(["k-s2", "k-d1"]);
+    expect(session.state.stage.requests.length).toBe(0);
+    expect(session.state.stage.history.length).toBe(0);
+
+    const keyTopPat = s5.request.patterns.findIndex(
+      (p: any) =>
+        p.effectSelectionRef !== undefined &&
+        s5.request.catalog.effectSelections[p.effectSelectionRef].selectedValues.includes("k-s2")
+    );
+    expect(keyTopPat).toBeGreaterThanOrEqual(0);
+    session.submitDecision({
+      decisionId: s5.request.decisionId,
+      stateVersion: s5.request.stateVersion,
+      selectedPatternRef: keyTopPat,
+    });
+
+    // 8. キーカード墓地TOP選択完了後に解決完了契約が実行され、history 登録・graveTopCardId 確定
     expect(session.state.stage.requests.length).toBe(0);
     expect(session.state.stage.history.length).toBe(1);
     expect(session.state.stage.history[0].status).toBe("resolved");
+    expect(session.state.players.p1.graveTopCardId).toBe("k-s2");
 
     const p1GraveAfter = session.state.players.p1.grave;
     const keyS2InGrave = p1GraveAfter.some((e: any) => e.id === "k-s2");

@@ -1650,11 +1650,21 @@ describe("action.search (サーチ) & Immediate Life Selection Tests [BP-SIM-REG
     });
     expect(chooseGraveIdx).toBeGreaterThanOrEqual(0);
 
-    session.submitDecision({
+    let step4: any = session.submitDecision({
       decisionId: step3.request.decisionId,
       stateVersion: step3.request.stateVersion,
       selectedPatternRef: chooseGraveIdx,
     });
+
+    // Reunion の2枚キーカード同時墓地移動に伴う ZONE_TOP_SELECTION を完了するまで Stage 解決継続
+    if (step4.type === "WAITING_FOR_DECISION" && step4.request.source?.type === "ZONE_TOP_SELECTION") {
+      expect(state.chancePlayer).toBe("system");
+      step4 = session.submitDecision({
+        decisionId: step4.request.decisionId,
+        stateVersion: step4.request.stateVersion,
+        selectedPatternRef: 0,
+      });
+    }
 
     // Verification:
     // 1. Request removed from Stage

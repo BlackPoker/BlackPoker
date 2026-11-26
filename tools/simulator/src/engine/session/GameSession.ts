@@ -29,6 +29,16 @@ export { PatternInstantiationError };
 export const TRIGGER_IMMEDIATE_FINALIZATION_STEP_ID = "triggerImmediateFinalization";
 
 /**
+ * 通常/即時リクエストの効果実行完了後、残存キーカード同時墓地移動に伴う墓地TOP選択待ちを表すステップID
+ */
+export const REQUEST_KEY_CARD_FINALIZATION_STEP_ID = "requestKeyCardFinalization";
+
+/**
+ * キャンセル済みリクエストの残存キーカード同時墓地移動に伴う墓地TOP選択待ちを表すステップID
+ */
+export const CANCELLED_REQUEST_KEY_CARD_FINALIZATION_STEP_ID = "cancelledRequestKeyCardFinalization";
+
+/**
  * 将来の効果解決中断・再開用コンティニュエーション型
  */
 export interface EffectContinuation {
@@ -36,6 +46,11 @@ export interface EffectContinuation {
   readonly effectPath: readonly number[];
   readonly effectStepId: string;
   readonly selectionId: string;
+  readonly finalizationOptions?: {
+    readonly effectExecuted: boolean;
+    readonly reason?: string;
+    readonly detail?: string;
+  };
 }
 
 /**

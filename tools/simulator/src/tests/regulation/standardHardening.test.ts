@@ -697,10 +697,11 @@ describe("Official Regulation Phase 3.0-H - Standard Hardening / Final Acceptanc
       // 自然終了（ライフ0）かつステップ上限未満で完了すること
       expect(result.completed).toBe(true);
       expect(result.totalDecisions).toBeLessThan(STEP_CAP);
-      // Issue #669（Fog同時墓地移動）適用に伴い、Turn 1 エンド時に2枚Fogカードからの墓地TOP選択（D-41）が発生し、
-      // AI乱数消費が分岐。同一ルール・同一Seed（42）において86手番で決定論的に決着する。
-      expect(result.totalDecisions).toBe(86);
-      expect(result.turnCount).toBe(4);
+      // Issue #669（Fog同時墓地移動）に加え、作業6（共通2枚以上キーカード同時墓地移動時のZONE_TOP_SELECTION）適用に伴い、
+      // 初回キーカード墓地TOP選択（stateVersion: 42）および後続の複数枚墓地移動でAI乱数消費が分岐。
+      // 同一ルール・同一Seed（42）において134手番・8ターンで決定論的に決着する。
+      expect(result.totalDecisions).toBe(134);
+      expect(result.turnCount).toBe(8);
       expect(result.winner).toBe("p2");
       expect(result.reason).toContain("ライフが0になりました");
       expect(session.state.players.p1.life.length).toBe(0);

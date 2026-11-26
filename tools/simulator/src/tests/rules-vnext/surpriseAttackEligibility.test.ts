@@ -83,6 +83,14 @@ describe("奇襲後の召喚酔い・速攻 アタッカー適格性回帰テス
       if (stageLen === 0 && req.source?.type === "ACTION_REQUEST" && req.playerId === "p1") {
         break;
       }
+      if (req.source?.type === "ZONE_TOP_SELECTION") {
+        step = session.submitDecision({
+          decisionId: req.decisionId,
+          stateVersion: req.stateVersion,
+          selectedPatternRef: 0,
+        });
+        continue;
+      }
       const passIdx = req.patterns.findIndex((p: any) => p.kind === "PASS");
       if (passIdx < 0) {
         break;

@@ -16,6 +16,7 @@ import { ActionCostEvaluator } from "../../engine/rules/ActionCostEvaluator";
 import { isLegalAttackerCandidate, resolveComponentForUnit } from "../../engine/rules/characterUtils";
 import { setUnitStateHandler } from "../../engine/rules/commandHandlers";
 import { ExpressionEvaluator } from "../../engine/rules/ExpressionEvaluator";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 
 describe("action.reverse (リバース) & Generic Character Transform Tests [BP-SIM-REG-5.0-G-R1-PRO-REVERSE]", () => {
   let rulePackage: RulePackage;
@@ -590,12 +591,17 @@ describe("action.reverse (リバース) & Generic Character Transform Tests [BP-
         const step1 = registry.resolveTopRequest(context)!;
         expect(step1.type).toBe("WAITING_FOR_DECISION");
 
-        const resumeResult = registry.resumeRequest(
+        let resumeResult = registry.resumeRequest(
           req,
           step1.continuation!,
           [tc.selected],
           step1.context!
         );
+
+        expect(resumeResult.type).toBe("WAITING_FOR_DECISION");
+        expect(resumeResult.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+        GraveTopCoordinator.applyGraveTopSelection(state, "p1", k1.id);
+        resumeResult = registry.resumeRequest(req, resumeResult.continuation!, undefined, resumeResult.context!);
 
         expect(resumeResult.type).toBe("COMPLETED");
         const transformedUnit = state.players.p1.field[0];
@@ -638,12 +644,17 @@ describe("action.reverse (リバース) & Generic Character Transform Tests [BP-
       const step1 = registry.resolveTopRequest(context)!;
       expect(step1.type).toBe("WAITING_FOR_DECISION");
 
-      const resumeResult = registry.resumeRequest(
+      let resumeResult = registry.resumeRequest(
         req,
         step1.continuation!,
         ["charge"],
         step1.context!
       );
+
+      expect(resumeResult.type).toBe("WAITING_FOR_DECISION");
+      expect(resumeResult.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", k1.id);
+      resumeResult = registry.resumeRequest(req, resumeResult.continuation!, undefined, resumeResult.context!);
 
       expect(resumeResult.type).toBe("COMPLETED");
       expect(state.players.p2.field[0].state).toBe("charge");
@@ -1738,9 +1749,15 @@ describe("action.reverse (リバース) & Generic Character Transform Tests [BP-
       // Now target is destroyed / leaves field before resolution
       state.players.p1.field = [];
 
-      const resolveResult = registry.resolveTopRequest(context);
+      let resolveResult = registry.resolveTopRequest(context);
       expect(resolveResult).toBeDefined();
-      expect(resolveResult!.type).toBe("COMPLETED");
+      expect(resolveResult!.type).toBe("WAITING_FOR_DECISION");
+      expect(resolveResult!.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(logRecorder.getEvents().find((e: any) => e.type === "request.resolved")).toBeUndefined();
+
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "k1", logRecorder);
+      resolveResult = registry.resumeRequest(req, resolveResult!.continuation!, undefined, resolveResult!.context!);
+      expect(resolveResult.type).toBe("COMPLETED");
 
       // Verify req in resolved log has effectSkipped: true and reason TARGET_INVALID_AT_RESOLUTION
       const resolvedEvent = logRecorder.getEvents().find((e: any) => e.type === "request.resolved") as any;
@@ -1817,9 +1834,20 @@ describe("action.reverse (リバース) & Generic Character Transform Tests [BP-
       const counterReq = registry.createRequest(counterAction, p2Context);
       expect(state.stage.requests).toHaveLength(2);
 
-      // 3. Resolve Counter (Stage TOP)
-      const resCounter = registry.resolveTopRequest(p2Context);
-      expect(resCounter?.type).toBe("COMPLETED");
+      // 3. Resolve Counter (Stage TOP) -> 被カウンター対象 Reverse の2枚キーカード同時墓地移動により p1 へ ZONE_TOP_SELECTION 発生
+      let resCounter = registry.resolveTopRequest(p2Context)!;
+      expect(resCounter.type).toBe("WAITING_FOR_DECISION");
+      expect(resCounter.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(resCounter.decisionRequest?.playerId).toBe("p1");
+      expect(revReq.status).toBe("cancelled");
+
+      // Counter 自身のキーカードは対象の墓地TOP選択完了後に処理されるため、まだ p2 墓地へ入っていない
+      expect(state.players.p2.grave.some((c: any) => c.id === "ck")).toBe(false);
+
+      GraveTopCoordinator.applyGraveTopSelection(state, "p1", "k1");
+      resCounter = registry.resumeRequest(counterReq, resCounter.continuation!, undefined, resCounter.context!);
+      expect(resCounter.type).toBe("COMPLETED");
+      expect(state.players.p2.grave.some((c: any) => c.id === "ck")).toBe(true);
 
       // Reverse request is now cancelled and removed from stage requests
       expect(revReq.status).toBe("cancelled");
@@ -2034,14 +2062,21 @@ describe("action.reverse (リバース) & Generic Character Transform Tests [BP-
       expect(revStep1.type).toBe("WAITING_FOR_DECISION");
       expect(revStep1.continuation?.selectionId).toBe("reverseState");
 
-      // P2 chooses "charge"
-      const revStep2 = registry.resumeRequest(
+      // P2 chooses "charge" -> 2枚キーカード同時墓地移動に伴い ZONE_TOP_SELECTION 発生
+      let revStep2 = registry.resumeRequest(
         revReq,
         revStep1.continuation!,
         ["charge"],
         revStep1.context!
       );
+      expect(revStep2.type).toBe("WAITING_FOR_DECISION");
+      expect(revStep2.decisionRequest?.source?.type).toBe("ZONE_TOP_SELECTION");
+      expect(revReq.status).toBe("resolving");
+
+      GraveTopCoordinator.applyGraveTopSelection(state, "p2", "rev-k1", logRecorder);
+      revStep2 = registry.resumeRequest(revReq, revStep2.continuation!, undefined, revStep2.context!);
       expect(revStep2.type).toBe("COMPLETED");
+      expect(revReq.status).toBe("resolved");
 
       // Verify: Armed Soldier has split into 2 Bulwarks!
       expect(state.players.p2.field).toHaveLength(2);

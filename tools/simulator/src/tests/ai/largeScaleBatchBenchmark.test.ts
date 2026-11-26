@@ -195,28 +195,38 @@ describe("LargeScaleBatchBenchmark Stage 1 Evidence Gate", () => {
         const replayedTraceDigest = computeTraceDigestFromSimulation(simRes);
 
         // 各試合の主要指標が Evidence の記録と完全一致することを検証
-        // ※ Issue #669 (Fog同時墓地移動) 適用に伴い、同ターン終了時に複数Fogカードを持つプレイヤーにおいて
-        // ZONE_TOP_SELECTION (reason: MULTI_CARD_GRAVE_MOVE) が発生し、RandomPolicy の乱数消費系列が決定論的に遷移。
-        // - Match 0: ターン1終了時 (idx=41) に Fog 同時移動が発生。決定数 156->212, ターン 10->14, 勝者 p2
-        // - Match 250: ターン1終了時 (idx=37) に Fog 同時移動が発生。決定数 210->269, ターン 15->21, 勝者 p1
-        // - Match 499: Fog 同時移動は発生せず、旧Evidence記録と100%完全一致。
+        // ※ Issue #669 (Fog同時墓地移動) および 作業6 (共通キーカード同時墓地移動) 適用に伴い、
+        // 複数枚同時墓地移動時に ZONE_TOP_SELECTION (reason: MULTI_CARD_GRAVE_MOVE) が発生し、
+        // RandomPolicy の乱数消費系列が決定論的に遷移する。
+        // - Match 0: 決定数 215, ターン 14, 勝者 p2
+        // - Match 250: 決定数 190, ターン 14, 勝者 p2
+        // - Match 499: 決定数 139->140, ターン 10, 勝者 p2
         if (idx === 0) {
           expect(simRes.completed).toBe(true);
           expect(simRes.winner).toBe("p2");
-          expect(simRes.totalDecisions).toBe(212);
+          expect(simRes.totalDecisions).toBe(215);
           expect(simRes.turnCount).toBe(14);
-          expect(simRes.finalStateHash).toBe("sh2-b0b58801b78c9aee");
+          expect(simRes.finalStateHash).toBe("sh2-1700ac0c69401b03");
           expect(replayedTraceDigest).toBe(
-            "fcfe454d00507241788ec4e7db7673555d0e71f33694b48a5aa5af3f78fc0b55"
+            "61211c210f076e01769e27430e1d01a44a25fc4712bc360718d88d591ef32b79"
           );
         } else if (idx === 250) {
           expect(simRes.completed).toBe(true);
-          expect(simRes.winner).toBe("p1");
-          expect(simRes.totalDecisions).toBe(269);
-          expect(simRes.turnCount).toBe(21);
-          expect(simRes.finalStateHash).toBe("sh2-43a4b95ace338821");
+          expect(simRes.winner).toBe("p2");
+          expect(simRes.totalDecisions).toBe(190);
+          expect(simRes.turnCount).toBe(14);
+          expect(simRes.finalStateHash).toBe("sh2-951a55cafca3b1af");
           expect(replayedTraceDigest).toBe(
-            "e50407ca2e61079df771020df702bea1a4b56fe7e92c0b00162b711fcf673df8"
+            "0330fb7213ab1367d1d3ea2e927823fba50ab28717d743e06aa37118d221dd6b"
+          );
+        } else if (idx === 499) {
+          expect(simRes.completed).toBe(true);
+          expect(simRes.winner).toBe("p2");
+          expect(simRes.totalDecisions).toBe(140);
+          expect(simRes.turnCount).toBe(10);
+          expect(simRes.finalStateHash).toBe("sh2-44be96ba7a9e958a");
+          expect(replayedTraceDigest).toBe(
+            "786ab017aba76045730e50d9b20f3655400592acd8b948a0ed1168b3edae390f"
           );
         } else {
           expect(simRes.completed).toBe(recordedMatch.completed);
@@ -361,28 +371,38 @@ describe("LargeScaleBatchBenchmark Stage 1 Evidence Gate", () => {
         const replayedTraceDigest = computeTraceDigestFromSimulation(simRes);
 
         // 各試合の主要指標が Evidence の記録と完全一致することを検証
-        // ※ Issue #669 (Fog同時墓地移動) 適用に伴い、同ターン終了時に複数Fogカードを持つプレイヤーにおいて
-        // ZONE_TOP_SELECTION (reason: MULTI_CARD_GRAVE_MOVE) が発生し、RandomPolicy の乱数消費系列が決定論的に遷移。
-        // - Match 0: ターン1終了時 (idx=41) に Fog 同時移動が発生。決定数 156->212, ターン 10->14, 勝者 p2
-        // - Match 500: Fog 同時移動は発生せず、旧Evidence記録と100%完全一致。
-        // - Match 999: ターン1終了時 (idx=40, 41) に Fog 同時移動が発生。決定数 235->276, ターン 17->19, 勝者 p2
+        // ※ Issue #669 (Fog同時墓地移動) および 作業6 (共通キーカード同時墓地移動) 適用に伴い、
+        // 複数枚同時墓地移動時に ZONE_TOP_SELECTION (reason: MULTI_CARD_GRAVE_MOVE) が発生し、
+        // RandomPolicy の乱数消費系列が決定論的に遷移する。
+        // - Match 0: 決定数 215, ターン 14, 勝者 p2
+        // - Match 500: 決定数 126, ターン 8, 勝者 p2
+        // - Match 999: 決定数 275, ターン 19, 勝者 p1
         if (idx === 0) {
           expect(simRes.completed).toBe(true);
           expect(simRes.winner).toBe("p2");
-          expect(simRes.totalDecisions).toBe(212);
+          expect(simRes.totalDecisions).toBe(215);
           expect(simRes.turnCount).toBe(14);
-          expect(simRes.finalStateHash).toBe("sh2-b0b58801b78c9aee");
+          expect(simRes.finalStateHash).toBe("sh2-1700ac0c69401b03");
           expect(replayedTraceDigest).toBe(
-            "fcfe454d00507241788ec4e7db7673555d0e71f33694b48a5aa5af3f78fc0b55"
+            "61211c210f076e01769e27430e1d01a44a25fc4712bc360718d88d591ef32b79"
+          );
+        } else if (idx === 500) {
+          expect(simRes.completed).toBe(true);
+          expect(simRes.winner).toBe("p2");
+          expect(simRes.totalDecisions).toBe(126);
+          expect(simRes.turnCount).toBe(8);
+          expect(simRes.finalStateHash).toBe("sh2-467392b328c016af");
+          expect(replayedTraceDigest).toBe(
+            "471c321fb745d06f18eea1f35f7f34b6d63c9a4fc92ca5ea4e135b1e1b2ccaec"
           );
         } else if (idx === 999) {
           expect(simRes.completed).toBe(true);
-          expect(simRes.winner).toBe("p2");
-          expect(simRes.totalDecisions).toBe(276);
+          expect(simRes.winner).toBe("p1");
+          expect(simRes.totalDecisions).toBe(275);
           expect(simRes.turnCount).toBe(19);
-          expect(simRes.finalStateHash).toBe("sh2-74a1852849c96617");
+          expect(simRes.finalStateHash).toBe("sh2-8a2b8cdaa4bccecc");
           expect(replayedTraceDigest).toBe(
-            "29ff1e93ae8a122b82078c0e838938c674b30e0b907d3e6ced072fe39ea8443e"
+            "b10f96135afa0e7a5871989b1b292ad3d2f8381bb6bae2e60498bf48eb90d0cc"
           );
         } else {
           expect(simRes.completed).toBe(recordedMatch.completed);
@@ -530,28 +550,38 @@ describe("LargeScaleBatchBenchmark Stage 1 Evidence Gate", () => {
         const replayedTraceDigest = computeTraceDigestFromSimulation(simRes);
 
         // 各試合の主要指標が Evidence の記録と完全一致することを検証
-        // ※ Issue #669 (Fog同時墓地移動) 適用に伴い、同ターン終了時に複数Fogカードを持つプレイヤーにおいて
-        // ZONE_TOP_SELECTION (reason: MULTI_CARD_GRAVE_MOVE) が発生し、RandomPolicy の乱数消費系列が決定論的に遷移。
-        // - Match 0: ターン1終了時 (idx=41) に Fog 同時移動が発生。決定数 156->212, ターン 10->14, 勝者 p2
-        // - Match 5000: Fog 同時移動は発生せず、旧Evidence記録と100%完全一致。
-        // - Match 9999: ターン1終了時 (idx=36) に Fog 同時移動が発生。決定数 271->235, ターン 20->18, 勝者 p2
+        // ※ Issue #669 (Fog同時墓地移動) および 作業6 (共通キーカード同時墓地移動) 適用に伴い、
+        // 複数枚同時墓地移動時に ZONE_TOP_SELECTION (reason: MULTI_CARD_GRAVE_MOVE) が発生し、
+        // RandomPolicy の乱数消費系列が決定論的に遷移する。
+        // - Match 0: 決定数 215, ターン 14, 勝者 p2
+        // - Match 5000: 決定数 143, ターン 9, 勝者 p2
+        // - Match 9999: 決定数 241, ターン 19, 勝者 p2
         if (idx === 0) {
           expect(simRes.completed).toBe(true);
           expect(simRes.winner).toBe("p2");
-          expect(simRes.totalDecisions).toBe(212);
+          expect(simRes.totalDecisions).toBe(215);
           expect(simRes.turnCount).toBe(14);
-          expect(simRes.finalStateHash).toBe("sh2-b0b58801b78c9aee");
+          expect(simRes.finalStateHash).toBe("sh2-1700ac0c69401b03");
           expect(replayedTraceDigest).toBe(
-            "fcfe454d00507241788ec4e7db7673555d0e71f33694b48a5aa5af3f78fc0b55"
+            "61211c210f076e01769e27430e1d01a44a25fc4712bc360718d88d591ef32b79"
+          );
+        } else if (idx === 5000) {
+          expect(simRes.completed).toBe(true);
+          expect(simRes.winner).toBe("p2");
+          expect(simRes.totalDecisions).toBe(143);
+          expect(simRes.turnCount).toBe(9);
+          expect(simRes.finalStateHash).toBe("sh2-5b6f6392d4b5fdb6");
+          expect(replayedTraceDigest).toBe(
+            "06eaee5a1544603ca4fd32d044a62f2032378f6c2bfc0c0e9b01bd42604048e5"
           );
         } else if (idx === 9999) {
           expect(simRes.completed).toBe(true);
           expect(simRes.winner).toBe("p2");
-          expect(simRes.totalDecisions).toBe(235);
-          expect(simRes.turnCount).toBe(18);
-          expect(simRes.finalStateHash).toBe("sh2-becaf8ec82fd731c");
+          expect(simRes.totalDecisions).toBe(241);
+          expect(simRes.turnCount).toBe(19);
+          expect(simRes.finalStateHash).toBe("sh2-22b9f91d57765032");
           expect(replayedTraceDigest).toBe(
-            "852ae47eac3c4b4068339925109de905bbbc4e3ce68fc1c202d0cfbf10d9b83d"
+            "6948dbc59a0b8a2cca7555185d12cdb0a2c4df27f2edc87301d797b0b401334d"
           );
         } else {
           expect(simRes.completed).toBe(recordedMatch.completed);

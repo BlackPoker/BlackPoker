@@ -267,11 +267,13 @@ describe("Genome Sensitivity & Policy Separability (BP-SIM-AI-GENOME-SENSITIVITY
       const dnaActive = GenomeSensitivityDNAFactory.createActiveBiasedDNA();
       const dnaPass = GenomeSensitivityDNAFactory.createPassBiasedDNA();
 
+      // 作業6 (複数キーカード墓地移動時の ZONE_TOP_SELECTION) により強制 effectSelection 比率が変動するため、
+      // 2席順ペア (計4試合) で偏りのない行動比率分離を評価する
       const result = GenomeSensitivityEvaluator.evaluatePolicySeparability({
         experimentId: "behavior-delta-test",
         environmentRef: "official:standard-pack",
         baseSeed: 42,
-        matchesPerSeat: 1,
+        matchesPerSeat: 2,
         dnaA: dnaActive,
         dnaB: dnaPass,
         sessionFactory: createStandardPackSessionFactory(),
@@ -280,7 +282,7 @@ describe("Genome Sensitivity & Policy Separability (BP-SIM-AI-GENOME-SENSITIVITY
       const mb = result.matchBehaviorSummary;
       expect(mb.behaviorSeparated).toBe(true);
 
-      // active-biased は pass-biased よりも Action 選択比率が高く、Pass 選択比率が低いはず
+      // active-biased は pass-biased よりも Action 選択比率が高く、Pass 選択比率が低いこと
       expect(mb.metricsA.actionSelectionRate).toBeGreaterThan(mb.metricsB.actionSelectionRate);
       expect(mb.metricsA.passSelectionRate).toBeLessThan(mb.metricsB.passSelectionRate);
     });

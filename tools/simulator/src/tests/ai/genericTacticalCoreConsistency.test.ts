@@ -8,6 +8,7 @@ import {
 import { ExpressionEvaluator } from "../../engine/rules/ExpressionEvaluator";
 import { AbilityEvaluator } from "../../engine/rules/AbilityEvaluator";
 import { CommandRegistry, CommandContext } from "../../engine/rules/CommandRegistry";
+import { GraveTopCoordinator } from "../../engine/rules/GraveTopCoordinator";
 import { RequestView } from "../../domain/decision/PlayerObservation";
 import { DecisionRequest } from "../../domain/decision/DecisionRequest";
 
@@ -591,7 +592,20 @@ describe("GenericTacticalEvaluator vs Core Independent Execution Comparison (Wor
       const execRes = commandRegistry
         .getEffectInterpreter()
         .executeEffectsWithInterruption(counterAction.effect!, coreContext);
-      expect("completed" in execRes && execRes.completed).toBe(true);
+      expect("interrupted" in execRes && execRes.interrupted).toBe(true);
+      if ("interrupted" in execRes && execRes.interrupted) {
+        expect(execRes.selectionType).toBe("zoneTop");
+        expect(execRes.decisionPlayerKey).toBe("p1");
+        GraveTopCoordinator.applyGraveTopSelection(coreState, "p1", "c-d1");
+        const resumed = commandRegistry
+          .getEffectInterpreter()
+          .executeEffectsWithInterruption(
+            counterAction.effect!,
+            coreContext,
+            execRes.effectPath ?? execRes.resumeNextIndex ?? 0
+          );
+        expect("completed" in resumed && resumed.completed).toBe(true);
+      }
 
       // Core 実行結果: stageTargetReq がキャンセルされたか
       const coreCancelled =
