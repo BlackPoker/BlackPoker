@@ -545,7 +545,7 @@ actList:
       actId: illusion
       actType: 誘発魔法
       actTrigger: 誘発
-      actSpeed: 通常
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
         自分の表切札に「ファントム」があり、かつ、自分がエンドアクションをリクエストした時に誘発する。
@@ -553,7 +553,9 @@ actList:
         1. 自分の場にいる兵士を好きな数だけ選び、チャージ状態の防壁にする。兵士の時に受けた効果、能力は無くなる。兵士が複数のカードから成る場合、1枚ずつ防壁にする。
         2. 自分の場にいる防壁の順番を任意の順番に並び替えてもよい。
       since: ex5.30.0
-      update: v8.2
+      update: v8.2, v9.2
+      devNote: |-
+        v9.2: エンドより先に解決するため、スピードを通常から即時に変更。
 
   - type: 切札♡8 救済
     acts:
@@ -851,14 +853,16 @@ actList:
       actId: satisfaction
       actType: 誘発魔法
       actTrigger: 誘発
-      actSpeed: 通常
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
         自分の表切札に「充足」があり、かつ、自分がエンドアクションをリクエストした時に誘発する。
       actEffect: |-
         自分の場にいる全てのキャラクターをチャージ状態にする。
       since: ex4.18.0
-      update: v8.2
+      update: v8.2, v9.2
+      devNote: |-
+        v9.2: エンドより先に解決するため、スピードを通常から即時に変更。
 
   - type: 切札♢J 策士
     acts:
@@ -1042,16 +1046,17 @@ actList:
       actId: handRefill
       actType: 誘発魔法
       actTrigger: 誘発
-      actSpeed: 通常
+      actSpeed: 即時
       actTime: クイック
       actTriggerCond: |-
         自分の表切札に「手札補充」があり、かつ、自分がエンドアクションをリクエストした時に誘発する。
       actEffect: |-
         ライフの一番上からカードを2枚引き、手札に加える。
       since: ex3.10.0
-      update: v8.2, v9.0
+      update: v8.2, v9.0, v9.2
       devNote: |-
         v9.0: 条件を緩和し、2枚固定ドローに変更。
+        v9.2: エンドより先に解決するため、スピードを通常から即時に変更。
 
   - type: 切札♣8 リセット
     acts:
