@@ -71,6 +71,19 @@ pwsh -File tools/dev/start-issue.ps1 `
 既存ブランチ・保存先・閉じたIssue・異なるremoteの場合は停止します。再実行で既存worktreeを再利用したり消したりしません。
 fetchによる共有Gitオブジェクトと専用refの追加以外、既存worktreeのHEAD・index・ファイルには触れません。
 
+### 複数の公式ルール修正を並行して進める
+
+開始したい既存Issueの番号をPowerShell 7で渡します。
+
+```powershell
+./tools/dev/start-issues.ps1 -Issue 123,124 -Agent codex -PlanOnly
+./tools/dev/start-issues.ps1 -Issue 123,124 -Agent codex
+```
+
+すべてのIssueを読み取り確認してから、既存の開始スクリプトでworktreeを1件ずつ準備します。作成段階で失敗したIssueは個別に報告されます。再実行する前に、対象のworktreeと作業記録を確認してください。
+
+出力されたworktreeを1件ずつ別のCodexチャットまたはAntigravityで開きます。Codexでは各チャットで `$bp-task Issue #123 を再開` のように対象のIssueを指定します。Antigravityでは各worktreeの `.ai-dlc/handoff.md` を渡します。同じ章やアクション定義を変更するIssueがあれば、変更箇所と取り込み順を計画に記録し、先行PRの取り込み後に後続の差分と検証結果を確認します。
+
 ### Codex / Antigravityとの相談からIssueを作成
 
 1. **作成時点**の `.github/ISSUE_TEMPLATE/` を読み、要望に合うテンプレートを選びます。
@@ -143,7 +156,7 @@ docker compose -p $tutorialProject -f tools/tutorial/compose.yaml run --rm app n
 ```
 
 ローカル画面確認が必要なら、既存サービスを止めず空きポートを個別指定します。
-文書用の既存 `/local-start` は固定コンテナ名・ポートを使うため、そのまま並列実行せず名前とポートを分けます。
+公式ルールのローカル確認は [ローカル起動手順](../.agents/workflows/local-start.md) を使います。対象worktreeごとにコンテナとHTML出力先が分かれ、Dockerが空きポートを割り当てます。
 
 ## 5. 確認サイトへの反映（PR作成前）
 
@@ -184,6 +197,7 @@ gh run list --repo $repo --workflow refresh_docs.yaml --branch $branch --event w
 `gh run view <run-id> --repo <repo> --json headSha,status,conclusion,url` で完了を確認します。
 失敗したら `gh run view <run-id> --repo <repo> --log-failed` で原因を確認し、失敗として報告します。
 同じSHAのrunが複数ある場合は起動時刻で区別します。
+Issueごとに対象ブランチのrunを確認します。`refresh_docs` の公開ジョブは同じ `gh-pages` を更新するため、公開待ちのrunがキャンセルされた場合は、その後の公開が終わってから対象ブランチを再実行します。
 
 公式ルールの確認先は `https://blackpoker.github.io/BlackPoker/<公開先>/` です。
 公開先の各階層をURLエンコードして提示します。公開先はこのルール用workflowで確認したものです。
@@ -210,7 +224,7 @@ PR URLを報告して終了します。merge、既存worktreeの削除、ブラ�
 ## 開始スクリプトの検証
 
 `pwsh -File tools/dev/tests/start-issue.tests.ps1` は一時Gitリポジトリとghのテスト用応答を使います。
-GitHubアクセス・push・実リポジトリの変更なしで、作成、基点の解決、衝突拒否、元の未コミット変更の保護を確認します。
+GitHubアクセス・push・実リポジトリの変更なしで、個別・一括作成、基点の解決、衝突拒否、元の未コミット変更の保護を確認します。
 
 ## 起票スクリプトの検証
 

@@ -131,6 +131,22 @@ try {
     $global:AiDlcFailFetch = $false
     Expect-Failure { & $global:AiDlcStartScript -Issue 43 -RepoPath $global:AiDlcSeed -WorktreeRoot (Join-Path $first 'nested') } '他の既存worktree内への作成を拒否'
     Assert-True (-not (Test-Path (Join-Path $global:AiDlcOutputRoot 'BlackPoker-issue-43'))) '失敗ケースは新規worktreeを残さない'
+    $startBatch = Join-Path $PSScriptRoot '../start-issues.ps1'
+    $batchOptions = @{ RepoPath = $global:AiDlcSeed; WorktreeRoot = $global:AiDlcOutputRoot }
+    $beforeBatchStatus = NativeGit -C $global:AiDlcSeed worktree list --porcelain
+    & $startBatch @batchOptions -Issue 45,46 -PlanOnly
+    Assert-True ((NativeGit -C $global:AiDlcSeed worktree list --porcelain) -eq $beforeBatchStatus) '一括のPlanOnlyはworktreeを作らない'
+    Expect-Failure { & $startBatch @batchOptions -Issue 45,45 } '一括準備は重複番号を拒否'
+    Expect-Failure { & $startBatch @batchOptions -Issue 45,41 } '一括の事前確認で作成済みIssueを拒否'
+    Assert-True ((NativeGit -C $global:AiDlcSeed worktree list --porcelain) -eq $beforeBatchStatus) '事前確認で1件でも失敗すると作成に進まない'
+    & $startBatch @batchOptions -Issue 45,46 -Agent antigravity -Base release-test
+    foreach ($number in 45,46) {
+        $batchPath = Join-Path $global:AiDlcOutputRoot "BlackPoker-issue-$number"
+        $batchContext = Get-Content (Join-Path $batchPath '.ai-dlc/context.json') -Raw | ConvertFrom-Json
+        Assert-True ($batchContext.issue -eq $number -and $batchContext.branch -eq "issue-$number" -and
+            $batchContext.baseCommit -eq $releaseSha -and $batchContext.agent -eq 'antigravity') "一括準備でIssue #$number の独立したworktreeと記録を作成"
+    }
+
     Assert-True ((NativeGit -C $global:AiDlcSeed symbolic-ref --short HEAD) -eq 'release-test') '元のブランチを維持'
     Assert-True ((NativeGit -C $global:AiDlcSeed status --porcelain=v1) -eq $beforeStatus) '未追跡・stage済み・未stageの状態を維持'
     Assert-True ((NativeGit -C $global:AiDlcSeed diff --cached) -eq $beforeIndex -and (NativeGit -C $global:AiDlcSeed diff) -eq $beforeDiff) '元のindexと作業差分の内容を維持'

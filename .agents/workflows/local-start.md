@@ -1,38 +1,17 @@
 ---
-description: Docker経由でsphinx-autobuildを起動し、ファイルの変更検知・ホットリロード付きでローカル閲覧可能にする
+description: worktreeごとにDockerで公式ルールのローカルプレビューを起動する
 ---
 
 # ドキュメントローカル起動ワークフロー (/local-start)
 
-プロジェクトルートで実行してください。
-Docker経由で **sphinx-autobuild** を起動し、ソースファイル（`.rst` や `.puml` など）の編集・保存時に自動で再ビルドとブラウザのホットリロード（自動更新）を行います。
+対象worktreeのルートをPowerShell 7で開き、起動します。
 
-## 1. ローカルWebサーバーの起動（sphinx-autobuild）
-
-Docker経由で `sphinx-autobuild` をポート `8000` でバックグラウンド起動します。
-
-```bash
-docker run --rm -d --name bp-docs-server -p 8000:8000 --user root -v "${PWD}:/work" -w /work blackpoker-doc:latest sphinx-autobuild --host 0.0.0.0 --port 8000 ./source ./build/_html
+```powershell
+./tools/dev/start-rule-preview.ps1
 ```
 
-起動後、ブラウザで次のURLにアクセスしてください：
-* トップページ: http://localhost:8000/
-* コアルール: http://localhost:8000/core/core.html
+起動には文書ビルド用のDockerイメージが必要です。既存の `blackpoker-doc:latest` を使うか、[環境設定](../../dev-notes/dev-setting.md) の手順で準備したイメージを `-Image` で指定します。
 
-※ファイル保存時に自動で差分検知・再ビルドが行われ、ブラウザ表示がリアルタイムに更新されます。
+スクリプトが表示したURLをブラウザで開きます。初回はSphinxのビルドが終わるまで待ちます。RSTや図の変更を保存すると、再ビルドとブラウザの再読み込みが行われます。ログの確認や停止には、起動時に表示されたコンテナID付きのコマンドを使います。
 
-## 2. ログ確認
-
-自動ビルドの状態やログを確認したい場合は次のコマンドを実行します。
-
-```bash
-docker logs -f bp-docs-server
-```
-
-## 3. サーバーの停止
-
-閲覧・作業が終了し、サーバーを停止する場合は次のコマンドを実行します。
-
-```bash
-docker stop bp-docs-server
-```
+アクション一覧やフレーム表を確認する場合は、初回と定義YAMLの変更後に、[Dockerビルド検証手順](docker-build.md) のMavenコマンドを対象worktreeで実行して生成データを更新します。
