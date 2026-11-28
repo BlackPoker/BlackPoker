@@ -399,9 +399,10 @@ actList:
         3. ♣Kを見つけた場合、切札の♠Kと♣Kを合わせて魔王としてチャージ状態で場に出す。
         4. ♣Kが無い場合、切札の♠Kを墓地に移す。
       since: ex3.10.0
-      update: v8.2
+      update: v8.2, v9.2
       devNote: |-
         v8.2: キーカードを廃止
+        v9.2: 探索対象が複数枚のユニットに含まれる場合の扱いを明確にするため、:ref:`extra-summon-card-extraction` に裁定を追記。
 
 
     - frame: |-
@@ -677,9 +678,10 @@ actList:
         3. ♢Kを見つけた場合、切札の♡Kと♢Kを合わせて巨人としてチャージ状態で場に出す。
         4. ♢Kが無い場合、切札の♡Kを墓地に移す。
       since: ex3.10.0
-      update: v8.2
+      update: v8.2, v9.2
       devNote: |-
         v8.2: キーカードを廃止
+        v9.2: 探索対象が複数枚のユニットに含まれる場合の扱いを明確にするため、:ref:`extra-summon-card-extraction` に裁定を追記。
 
   - type: 切札♢A 防壁追加
     acts:
